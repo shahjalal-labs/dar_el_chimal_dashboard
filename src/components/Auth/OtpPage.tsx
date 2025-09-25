@@ -71,7 +71,7 @@ export default function OtpPage() {
                     </h1>
                     <p className="text-center text-sm text-slate-600 ">
                         We have sent a verification code to your{" "}
-                        <span className="text-[#FF6B00] hover:underline cursor-pointer">{getEmail}</span>
+                        <span className="text-[#1E3A8A] hover:underline cursor-pointer">{getEmail}</span>
                     </p>
                 </div>
 
@@ -107,7 +107,7 @@ export default function OtpPage() {
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full bg-[#FF6B00] hover:bg-[#FF6B0080] text-white font-bold rounded-lg mt-2 flex justify-center items-center font-outfit text-[18px] py-[10px] cursor-pointer transition-colors duration-300 ease-in-out"
+                        className="w-full bg-[#1E3A8A] hover:bg-[#1E3A8A80] text-white font-bold rounded-lg mt-2 flex justify-center items-center font-outfit text-[18px] py-[10px] cursor-pointer transition-colors duration-300 ease-in-out"
                     >
                         {isLoading ? (
                             <div className="flex justify-center items-center gap-2">
@@ -123,7 +123,7 @@ export default function OtpPage() {
 
                     <div className="text-center">
                         <p className="text-xl text-slate-600">Don&apos;t receive the code?</p>
-                        <Link href={"/forgot-password"} className="text-[#FF6B00] hover:underline">
+                        <Link href={"/forgot-password"} className="text-[#1E3A8A] hover:underline">
                             Resent
                         </Link>
                     </div>

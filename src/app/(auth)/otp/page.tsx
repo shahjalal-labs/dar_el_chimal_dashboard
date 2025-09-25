@@ -4,7 +4,7 @@ import OtpPage from '@/components/Auth/OtpPage';
 const Page = () => {
     return (
         <div>
-            <OtpPage></OtpPage>
+            <OtpPage />
         </div>
     );
 };

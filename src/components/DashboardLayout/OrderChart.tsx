@@ -16,8 +16,8 @@ const CustomTooltip = ({ active, payload }: { active: any; payload: any; }) => {
         return (
             <div
                 style={{
-                    backgroundColor: '#FF6B00',
-                    border: '2px solid #FF6B00',
+                    backgroundColor: '#1E3A8A',
+                    border: '2px solid #1E3A8A',
                     borderRadius: '10px',
                     padding: '10px',
                     textAlign: 'center',
@@ -105,7 +105,7 @@ const OrderChart = () => {
                     <Tooltip content={CustomTooltip} cursor={{ fill: 'transparent' }} />
                     <Bar
                         dataKey="totalOrder"
-                        fill="#FF6B00"
+                        fill="#1E3A8A"
                         radius={[5, 5, 5, 5]}
                         barSize={10}
                     />

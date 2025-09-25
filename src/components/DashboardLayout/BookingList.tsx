@@ -12,8 +12,8 @@ const BookingList = ({ data }: { data: any }) => {
     if (!data) {
         return (
             <div className="flex justify-center items-center p-10 gap-4">
-                <span className="text-[#FF6B00] font-medium">Loading Bookings</span>
-                <SyncLoader color="#FF6B00" />
+                <span className="text-[#1E3A8A] font-medium">Loading Bookings</span>
+                <SyncLoader color="#1E3A8A" />
             </div>
         );
     }

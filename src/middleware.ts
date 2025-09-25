@@ -7,10 +7,10 @@ export function middleware(req: NextRequest) {
   // const category = req.cookies.get("category")?.value;
   const { pathname } = req.nextUrl;
 
-  if (!token) {
-    const destination = `/login?redirect=${encodeURIComponent(pathname)}`;
-    return NextResponse.redirect(new URL(destination, req.url));
-  }
+  // if (!token) {
+  //   const destination = `/login?redirect=${encodeURIComponent(pathname)}`;
+  //   return NextResponse.redirect(new URL(destination, req.url));
+  // }
 
   // const roleMap = {
   //   Leader: "/leader",

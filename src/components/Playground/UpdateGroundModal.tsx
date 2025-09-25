@@ -210,8 +210,8 @@ const UpdateGroundModal = ({ id }: { id: string }) => {
         return (
             <DialogContent className="p-10" showCloseButton>
                 <div className="flex justify-center items-center gap-4">
-                    <span className="text-[#FF6B00]">Data is Loading</span>
-                    <SyncLoader color='#FF6B00' />
+                    <span className="text-[#1E3A8A]">Data is Loading</span>
+                    <SyncLoader color='#1E3A8A' />
                 </div>
             </DialogContent>
         );
@@ -464,7 +464,7 @@ const UpdateGroundModal = ({ id }: { id: string }) => {
                 <div className="pt-4">
                     <Button
                         type="submit"
-                        className="w-full bg-[#FF6B00] hover:bg-[#FF6B00CC]"
+                        className="w-full bg-[#1E3A8A] hover:bg-[#1E3A8ACC]"
                     >
                         {
                             isUpdating ?

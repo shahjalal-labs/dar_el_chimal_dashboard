@@ -34,8 +34,8 @@ const UpdateSubCategory = ({ id }: { id: string }) => {
         return (
             <DialogContent className="p-10" showCloseButton>
                 <div className="flex justify-center items-center gap-4">
-                    <span className="text-[#FF6B00] font-medium">Data is Loading</span>
-                    <SyncLoader color="#FF6B00" />
+                    <span className="text-[#1E3A8A] font-medium">Data is Loading</span>
+                    <SyncLoader color="#1E3A8A" />
                 </div>
             </DialogContent>
         );
@@ -104,7 +104,7 @@ const UpdateSubCategory = ({ id }: { id: string }) => {
                 </div>
 
                 <div className="flex justify-end gap-3">
-                    <Button type="submit" disabled={isUpdating} className="w-fit bg-[#FF6B00] hover:bg-[#FF6B00CC]">
+                    <Button type="submit" disabled={isUpdating} className="w-fit bg-[#1E3A8A] hover:bg-[#1E3A8ACC]">
                         {isUpdating ? (
                             <div className="flex justify-center items-center gap-2">
                                 Updating...

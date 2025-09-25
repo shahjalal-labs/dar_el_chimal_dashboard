@@ -6,8 +6,8 @@ const TransactionList = ({ data }: { data: any }) => {
     if (!data) {
         return (
             <div className="flex justify-center items-center p-10 gap-4">
-                <span className="text-[#FF6B00] font-medium">Loading Transactions</span>
-                <SyncLoader color="#FF6B00" />
+                <span className="text-[#1E3A8A] font-medium">Loading Transactions</span>
+                <SyncLoader color="#1E3A8A" />
             </div>
         );
     }
@@ -39,10 +39,10 @@ const TransactionList = ({ data }: { data: any }) => {
                                 {tx.currency} {tx.amount}
                             </span>
                             <span className={`px-3 py-1 text-sm font-medium rounded-full ${tx.status === 'PAYOUT_SUCCESS'
-                                    ? 'bg-green-600 text-white'
-                                    : tx.status === 'PAYOUT_PROCESSING'
-                                        ? 'bg-orange-500 text-white'
-                                        : 'bg-gray-400 text-white'
+                                ? 'bg-green-600 text-white'
+                                : tx.status === 'PAYOUT_PROCESSING'
+                                    ? 'bg-orange-500 text-white'
+                                    : 'bg-gray-400 text-white'
                                 }`}>
                                 {tx.status.replace('_', ' ')}
                             </span>

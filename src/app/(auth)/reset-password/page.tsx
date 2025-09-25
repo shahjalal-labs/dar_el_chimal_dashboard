@@ -4,7 +4,7 @@ import ResetPassword from '@/components/Auth/ResetPassword';
 const Page = () => {
     return (
         <div>
-            <ResetPassword></ResetPassword>
+            <ResetPassword />
         </div>
     );
 };

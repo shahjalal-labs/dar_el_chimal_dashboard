@@ -110,7 +110,7 @@ const Notifications = () => {
                 </CardContent>
             </Card>
 
-            <Button onClick={handleSave} className="bg-[#FF6B00] hover:bg-[#FF6B0080] text-white px-8 mt-6">
+            <Button onClick={handleSave} className="bg-[#1E3A8A] hover:bg-[#1E3A8A80] text-white px-8 mt-6">
                 Save
             </Button>
         </div>

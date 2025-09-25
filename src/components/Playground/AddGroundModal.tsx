@@ -379,7 +379,7 @@ const AddGroundModal = () => {
                 <div className="pt-4">
                     <Button
                         type="submit"
-                        className="w-full bg-[#FF6B00] hover:bg-[#FF6B00CC]"
+                        className="w-full bg-[#1E3A8A] hover:bg-[#1E3A8ACC]"
                     >
                         {
                             isLoading ?

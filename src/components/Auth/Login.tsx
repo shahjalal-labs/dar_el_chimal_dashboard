@@ -6,9 +6,6 @@ import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import Image from "next/image";
-import logo from "@/assets/logo.svg";
 import { useLoginMutation } from "@/redux/api/authApi";
 import { Alert, Spin } from "antd";
 import { toast } from "sonner";
@@ -20,8 +17,8 @@ import { setUser, setUserToken } from "@/redux/features/authSlice";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { MdOutlineMail } from "react-icons/md";
-import { CiLock } from "react-icons/ci";
 import LeftSide from "./LeftSide";
+import { LuLockKeyhole } from "react-icons/lu";
 
 const customIcon = (
   <LoadingOutlined style={{ fontSize: 24, color: "#fff" }} spin />
@@ -87,32 +84,18 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex">
-      {/* Left Side - Ocean Background */}
       <LeftSide />
 
-      {/* Right Side - Login Form */}
       <div className="w-full lg:w-1/2 flex justify-center items-center bg-[#F9F9F9]">
         <div className="w-full max-w-sm">
-          {/* Logo and Brand */}
-          <div className="flex items-center justify-start mb-4 px-6 pt-6 xl:px-0">
-            <Image
-              src={logo}
-              height={200}
-              width={200}
-              alt="Logo"
-              className="w-44 h-44"
-              priority
-            />
-          </div>
 
           <div className="flex-grow"></div>
 
-          {/* Login Form */}
           <div className="lg:space-y-10 space-y-6 lg:px-0 px-4">
             <div className="text-start">
-              <h2 className="text-2xl font-semibold text-[#3F3D56]">Hey! Welcome back</h2>
-              <p className="mt-1 text-[#7C8091]">
-                {"Sign In to your account"}
+              <h2 className="text-3xl font-bold text-black">Welcome back, Admin!</h2>
+              <p className="mt-2 text-lg text-[#636F85]">
+                {"Please sign in using your provided credentials."}
               </p>
             </div>
 
@@ -140,7 +123,7 @@ export default function Login() {
                 <Label htmlFor="password" className="sr-only">
                   Password
                 </Label>
-                <CiLock className="text-[#718096] w-6 h-6" />
+                <LuLockKeyhole className="text-[#718096] w-6 h-6" />
                 <div className="">
                   <input
                     id="password"
@@ -184,16 +167,16 @@ export default function Login() {
               {/* Remember Me and Forgot Password */}
               <div className="flex items-center justify-between mt-2">
                 <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="remember-me"
+                  <input
+                    type="radio"
+                    name="rememberMe"
                     checked={rememberMe}
-                    onCheckedChange={(checked) =>
-                      setRememberMe(checked as boolean)
-                    }
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className={`${rememberMe ? "accent-[#1E3A8A]" : "accent-white"} h-5 w-5`}
                   />
                   <Label
                     htmlFor="remember-me"
-                    className="text-[#3F3D56] cursor-pointer text-xs"
+                    className="text-black cursor-pointer"
                   >
                     Remember me
                   </Label>
@@ -201,7 +184,7 @@ export default function Login() {
                 <Link href="/forgot-password">
                   <button
                     type="button"
-                    className="text-[#FF6B00] hover:underline font-medium text-sm"
+                    className="text-[#1E3A8A] hover:underline font-medium"
                   >
                     Forgot Password
                   </button>
@@ -211,31 +194,16 @@ export default function Login() {
               {/* Login Button */}
               <Button
                 type="submit"
-                className="w-full h-12 bg-[#FF6B00] hover:bg-[#FF6B0080] text-white font-bold rounded-lg transition-colors mt-4"
+                className="w-full h-12 bg-[#1E3A8A] hover:bg-[#1E3A8A80] text-white font-bold rounded-lg transition-colors mt-4"
               >
                 {isLoading ? (
                   <>
-                    Logging <Spin indicator={customIcon} />
+                    Logging... <Spin indicator={customIcon} />
                   </>
                 ) : (
                   "Login"
                 )}
               </Button>
-
-              {/* Register Link */}
-              <div className="text-center mt-4">
-                <span className="text-[#7C8091]">
-                  {"Don't have an account? "}
-                </span>
-                <Link href='/register'>
-                  <button
-                    type="button"
-                    className="text-[#FF6B00] hover:underline font-bold"
-                  >
-                    Register Here
-                  </button>
-                </Link>
-              </div>
             </form>
           </div>
         </div>

@@ -132,7 +132,7 @@ const DataTable = (
             <Dialog>
               <DialogTrigger asChild>
                 <button
-                  className="flex justify-center items-center rounded-lg gap-1 px-4 py-2 transition-colors ease-in-out duration-500 cursor-pointer bg-[#FF6B00] hover:bg-[#FF6B0080] text-white"
+                  className="flex justify-center items-center rounded-lg gap-1 px-4 py-2 transition-colors ease-in-out duration-500 cursor-pointer bg-[#1E3A8A] hover:bg-[#1E3A8A80] text-white"
                 >
                   {icon}
                   {buttonText}
@@ -155,7 +155,7 @@ const DataTable = (
             <Dialog>
               <DialogTrigger asChild>
                 <button
-                  className="flex justify-center items-center rounded-lg gap-1 px-4 py-2 transition-colors ease-in-out duration-500 cursor-pointer bg-[#FF6B00] hover:bg-[#FF6B0080] text-white mt-4 md:mt-0"
+                  className="flex justify-center items-center rounded-lg gap-1 px-4 py-2 transition-colors ease-in-out duration-500 cursor-pointer bg-[#1E3A8A] hover:bg-[#1E3A8A80] text-white mt-4 md:mt-0"
                 >
                   {iconTwo}
                   {buttonTextTwo}
@@ -188,12 +188,12 @@ const DataTable = (
       {
         !data ?
           <div className="flex justify-center items-center gap-4">
-            <span className="text-[#FF6B00]">Table Data is Loading</span>
-            <SyncLoader color='#FF6B00' />
+            <span className="text-[#1E3A8A]">Table Data is Loading</span>
+            <SyncLoader color='#1E3A8A' />
           </div> :
           <Table className='bg-white'>
             <TableHeader>
-              <TableRow className='bg-[#FF6B001A]'>
+              <TableRow className='bg-[#1E3A8A1A]'>
                 <TableHead className="text-[#4A4A4A] font-semibold text-sm">SL</TableHead>
                 {
                   data?.length > 0 &&
@@ -238,7 +238,7 @@ const DataTable = (
                       (<TableCell className='flex items-center gap-2'>
                         <Dialog>
                           <DialogTrigger asChild>
-                            <Button onClick={() => setSelectedId(singleData?.Id)} className="bg-[#FF6B0033] hover:bg-[#FF6B0026] text-[#FF6B00] transition-colors ease-in-out duration-200 cursor-pointer">
+                            <Button onClick={() => setSelectedId(singleData?.Id)} className="bg-[#1E3A8A33] hover:bg-[#1E3A8A26] text-[#1E3A8A] transition-colors ease-in-out duration-200 cursor-pointer">
                               <span className="sr-only">View details</span>
                               <Eye className="h-6 w-6" />
                             </Button>

@@ -132,7 +132,7 @@ const CreateTeamModal = () => {
                 </div>
 
                 <div className="flex justify-end">
-                    <Button type="submit" disabled={isLoading} className='w-fit bg-[#FF6B00] hover:bg-[#FF6B00CC]'>
+                    <Button type="submit" disabled={isLoading} className='w-fit bg-[#1E3A8A] hover:bg-[#1E3A8ACC]'>
                         {
                             isLoading ?
                                 <div className="flex justify-center items-center gap-2">

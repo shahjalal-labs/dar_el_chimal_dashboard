@@ -51,7 +51,7 @@ const ManageEvent = () => {
                     <Button
                         variant="default"
                         size="icon"
-                        className="h-8 w-8 rounded-none bg-[#FF6B001A] text-[#FF6B00] hover:bg-[#FF6B001A]"
+                        className="h-8 w-8 rounded-none bg-[#1E3A8A1A] text-[#1E3A8A] hover:bg-[#1E3A8A1A]"
                     >
                         {formattedData?.length}
                     </Button>

@@ -35,7 +35,7 @@ const ManageVendor = () => {
         "Role": entry.role,
         "Business Category": entry?.vendor?.businessCategory,
         "Doc Status": (
-            <button className={`${entry?.vendor?.docStatus === 'PENDING' ? 'bg-[#FF6B00]' : 'bg-green-700'} text-white px-3 py-1.5 rounded-2xl`}>
+            <button className={`${entry?.vendor?.docStatus === 'PENDING' ? 'bg-[#1E3A8A]' : 'bg-green-700'} text-white px-3 py-1.5 rounded-2xl`}>
                 {entry?.vendor?.docStatus === 'PENDING' ? 'PENDING' : 'APPROVED'}
             </button>
         ),
@@ -52,7 +52,7 @@ const ManageVendor = () => {
                     <Button
                         variant="default"
                         size="icon"
-                        className="h-8 w-8 rounded-none bg-[#FF6B001A] text-[#FF6B00] hover:bg-[#FF6B001A]"
+                        className="h-8 w-8 rounded-none bg-[#1E3A8A1A] text-[#1E3A8A] hover:bg-[#1E3A8A1A]"
                     >
                         {formattedData?.length}
                     </Button>

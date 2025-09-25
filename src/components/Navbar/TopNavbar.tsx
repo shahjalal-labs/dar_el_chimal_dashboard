@@ -26,33 +26,34 @@ const TopNavbar = () => {
     <>
       <div className="bg-white flex justify-between items-center gap-2 h-[100px] md:h-[90px] fixed z-20 top-0 left-[80px] lg:left-[250px] xl:left-[286px] right-0 w-[calc(100%-80px)] lg:w-[calc(100%-250px)] xl:w-[calc(100%-286px)] md:px-6">
         <div className="scale-75 md:scale-100">
-          <h1 className="md:text-lg text-[#7C8091] font-light">Welcome</h1>
-          <p className="text-[#FF6B00] font-semibold text-xl mt-1">{profileData?.result?.userInfo?.username}!</p>
+          <h1 className="md:text-2xl text-black font-bold">Overview</h1>
         </div>
 
         <div className="flex justify-end items-center gap-2 lg:gap-4 scale-75 md:scale-100">
           {/* Notification Icon */}
           <div
-            className="bg-[#F5F5F5] rounded-full px-2 py-1 h-full cursor-pointer"
+            className="bg-[#F5F3F6] rounded-full px-2 py-1 h-full cursor-pointer"
             onClick={() => setIsModalOpen(true)}
           >
             <Badge count={unreadCount} size="small">
-              <IoMdNotificationsOutline className="w-6 h-6 text-[#FF6B00]" />
+              <IoMdNotificationsOutline className="w-6 h-6 text-black" />
             </Badge>
           </div>
 
           {/* Profile */}
-          <Link href='/settings' className="flex justify-center items-center gap-3 text-[#636F85] font-medium bg-[#F5F5F5] rounded-3xl h-full cursor-pointer">
+          <Link href='/settings' className="flex justify-center items-center gap-3 text-[#636F85] font-medium rounded-3xl h-full cursor-pointer">
             <Image
               src={profileData?.result?.userInfo?.avatar || user}
               height={50}
               width={50}
               alt="avatar"
-              className="rounded-full w-9 h-9"
+              className="rounded-full w-10 h-10"
               priority
             />
-            {/* <p className="text-[#FF6B00]">{profileData?.result?.userInfo?.role}</p> */}
-            {/* <ChevronDown /> */}
+            <div>
+              <p className="text-black font-medium">{profileData?.result?.userInfo?.role || "Priscilla Lily"}</p>
+              <p className="text-[#79767B] text-sm">{profileData?.result?.userInfo?.role || "Admin"}</p>
+            </div>
           </Link>
         </div>
       </div>

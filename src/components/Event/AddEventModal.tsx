@@ -280,7 +280,7 @@ const AddEventModal = () => {
                     {/* Event Date */}
                     <div>
                         <Label className="mb-2">Event Date</Label>
-                        <DatePicker onChange={onChange} needConfirm className="border border-[#d9d0d0] bg-white rounded-md px-4 py-2.5 h-10 w-full mt-2 text-sm text-black"/>
+                        <DatePicker onChange={onChange} needConfirm className="border border-[#d9d0d0] bg-white rounded-md px-4 py-2.5 h-10 w-full mt-2 text-sm text-black" />
                     </div>
 
                     {/* Category */}
@@ -478,7 +478,7 @@ const AddEventModal = () => {
 
                 {/* Submit */}
                 <div className="pt-4">
-                    <Button type="submit" className="w-full bg-[#FF6B00] hover:bg-[#FF6B00CC]">
+                    <Button type="submit" className="w-full bg-[#1E3A8A] hover:bg-[#1E3A8ACC]">
                         {isLoading ? (
                             <div className="flex justify-center items-center gap-2">
                                 Adding...

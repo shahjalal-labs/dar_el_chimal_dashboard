@@ -155,7 +155,7 @@ export default function UploadMultipleFiles() {
                         <Button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full h-12 bg-[#FF6B00] hover:bg-[#FF6B0080] text-white font-bold rounded-lg transition-colors mt-4"
+                            className="w-full h-12 bg-[#1E3A8A] hover:bg-[#1E3A8A80] text-white font-bold rounded-lg transition-colors mt-4"
                         >
                             {isLoading ? (
                                 <div className="flex justify-center items-center gap-2">

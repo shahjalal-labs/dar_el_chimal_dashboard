@@ -36,8 +36,8 @@ const ViewParentCategory = ({ id }: { id: string }) => {
         return (
             <DialogContent className="p-10" showCloseButton>
                 <div className="flex justify-center items-center gap-4">
-                    <span className="text-[#FF6B00] font-medium">Data is Loading</span>
-                    <SyncLoader color="#FF6B00" />
+                    <span className="text-[#1E3A8A] font-medium">Data is Loading</span>
+                    <SyncLoader color="#1E3A8A" />
                 </div>
             </DialogContent>
         );
@@ -76,7 +76,7 @@ const ViewParentCategory = ({ id }: { id: string }) => {
                     <Dialog>
                         <DialogTrigger asChild>
                             <button
-                                className="flex justify-center items-center rounded-lg gap-1 px-4 py-2 transition-colors ease-in-out duration-500 cursor-pointer bg-[#FF6B00] hover:bg-[#FF6B0080] text-white"
+                                className="flex justify-center items-center rounded-lg gap-1 px-4 py-2 transition-colors ease-in-out duration-500 cursor-pointer bg-[#1E3A8A] hover:bg-[#1E3A8A80] text-white"
                             >
                                 <FaPlus />
                                 Add Sub Category

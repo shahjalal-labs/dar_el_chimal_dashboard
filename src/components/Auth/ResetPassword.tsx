@@ -9,6 +9,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { PiSpinner } from 'react-icons/pi';
+import LeftSide from './LeftSide';
 
 const resetPasswordSchema = z
     .object({
@@ -70,109 +71,113 @@ const ResetPassword = () => {
     };
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-white p-4">
-            <div className="w-full max-w-[500px] space-y-6 rounded-2xl bg-[#F8F8F8] p-6">
-                <div className="space-y-2 mt-6 mb-8 text-center">
-                    <h1 className="text-xl md:text-4xl font-outfit font-semibold">
-                        Reset Password!
-                    </h1>
-                    <p className="text-sm md:text-base font-normal font-inter text-slate-700">
-                        Enter a different password than the previous one
-                    </p>
-                </div>
+        <div className="flex min-h-screen">
+            <LeftSide />
 
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                    {/* New Password Field */}
-                    <div className="space-y-2">
-                        <label
-                            htmlFor="new-password"
-                            className="text-sm md:text-[18px] font-outfit text-gray-600"
-                        >
-                            New Password
-                        </label>
-                        <div className="relative">
-                            <input
-                                placeholder="********"
-                                type={showPassword ? "text" : "password"}
-                                {...register("newPassword")}
-                                required
-                                className={`w-full bg-white rounded-lg px-4 py-2 ${errors.newPassword ? "border-red-500" : "border-[#98A2B3]"
-                                    } pr-10`}
-                            />
-                            <button
-                                type="button"
-                                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                                onClick={() => setShowPassword(!showPassword)}
-                            >
-                                {showPassword ? (
-                                    <EyeOffIcon className="h-4 w-4 text-gray-400" />
-                                ) : (
-                                    <EyeIcon className="h-4 w-4 text-gray-400" />
-                                )}
-                            </button>
-                        </div>
-                        {errors?.newPassword && (
-                            <p className="text-red-500 text-sm">
-                                {errors.newPassword.message}
-                            </p>
-                        )}
+            <div className="w-full lg:w-1/2 bg-[#F9F9F9] flex justify-center items-center">
+                <div className="w-full max-w-sm m-auto">
+                    <div className="space-y-2 mt-6 mb-8 text-center">
+                        <h1 className="text-xl md:text-4xl font-outfit font-semibold">
+                            Reset Password!
+                        </h1>
+                        <p className="text-sm md:text-base font-normal font-inter text-slate-700">
+                            Enter a different password than the previous one
+                        </p>
                     </div>
 
-                    {/* Confirm Password Field */}
-                    <div className="space-y-2">
-                        <label
-                            htmlFor="confirm-password"
-                            className="text-sm md:text-[18px] font-outfit text-[#475467]"
-                        >
-                            Confirm Password
-                        </label>
-                        <div className="relative">
-                            <input
-                                placeholder="********"
-                                type={showConfirmPassword ? "text" : "password"}
-                                {...register("confirmPassword")}
-                                required
-                                className={`w-full bg-white rounded-lg px-4 py-2 ${errors.confirmPassword
-                                    ? "border-red-500"
-                                    : "border-[#98A2B3]"
-                                    } pr-10`}
-                            />
-                            <button
-                                type="button"
-                                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                        {/* New Password Field */}
+                        <div className="space-y-2">
+                            <label
+                                htmlFor="new-password"
+                                className="text-sm md:text-[18px] font-outfit text-gray-600"
                             >
-                                {showConfirmPassword ? (
-                                    <EyeOffIcon className="h-4 w-4 text-gray-400" />
-                                ) : (
-                                    <EyeIcon className="h-4 w-4 text-gray-400" />
-                                )}
-                            </button>
-                        </div>
-                        {errors.confirmPassword && (
-                            <p className="text-red-500 text-sm">
-                                {errors.confirmPassword.message}
-                            </p>
-                        )}
-                    </div>
-
-                    {/* Submit Button */}
-                    <button
-                        type="submit"
-                        className="w-full bg-[#FF6B00] hover:bg-[#FF6B0080] text-white font-bold rounded-lg mt-2 flex justify-center items-center font-outfit text-[18px] py-[10px] cursor-pointer transition-colors duration-300 ease-in-out"
-                    >
-                        {isLoading ? (
-                            <div className="flex justify-center items-center gap-2">
-                                Reseting...
-                                <div className="animate-spin">
-                                    <PiSpinner className="h-4 w-4" />
-                                </div>
+                                New Password
+                            </label>
+                            <div className="relative">
+                                <input
+                                    placeholder="********"
+                                    type={showPassword ? "text" : "password"}
+                                    {...register("newPassword")}
+                                    required
+                                    className={`w-full bg-white rounded-lg px-4 py-2 ${errors.newPassword ? "border-red-500" : "border-[#98A2B3]"
+                                        } pr-10`}
+                                />
+                                <button
+                                    type="button"
+                                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                >
+                                    {showPassword ? (
+                                        <EyeOffIcon className="h-4 w-4 text-gray-400" />
+                                    ) : (
+                                        <EyeIcon className="h-4 w-4 text-gray-400" />
+                                    )}
+                                </button>
                             </div>
-                        ) : (
-                            <span>Reset Password</span>
-                        )}
-                    </button>
-                </form>
+                            {errors?.newPassword && (
+                                <p className="text-red-500 text-sm">
+                                    {errors.newPassword.message}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Confirm Password Field */}
+                        <div className="space-y-2">
+                            <label
+                                htmlFor="confirm-password"
+                                className="text-sm md:text-[18px] font-outfit text-[#475467]"
+                            >
+                                Confirm Password
+                            </label>
+                            <div className="relative">
+                                <input
+                                    placeholder="********"
+                                    type={showConfirmPassword ? "text" : "password"}
+                                    {...register("confirmPassword")}
+                                    required
+                                    className={`w-full bg-white rounded-lg px-4 py-2 ${errors.confirmPassword
+                                        ? "border-red-500"
+                                        : "border-[#98A2B3]"
+                                        } pr-10`}
+                                />
+                                <button
+                                    type="button"
+                                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                >
+                                    {showConfirmPassword ? (
+                                        <EyeOffIcon className="h-4 w-4 text-gray-400" />
+                                    ) : (
+                                        <EyeIcon className="h-4 w-4 text-gray-400" />
+                                    )}
+                                </button>
+                            </div>
+                            {errors.confirmPassword && (
+                                <p className="text-red-500 text-sm">
+                                    {errors.confirmPassword.message}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Submit Button */}
+                        <button
+                            type="submit"
+                            className="w-full bg-[#1E3A8A] hover:bg-[#1E3A8A80] text-white font-bold rounded-lg mt-2 flex justify-center items-center font-outfit text-[18px] py-[10px] cursor-pointer transition-colors duration-300 ease-in-out"
+                        >
+                            {isLoading ? (
+                                <div className="flex justify-center items-center gap-2">
+                                    Reseting...
+                                    <div className="animate-spin">
+                                        <PiSpinner className="h-4 w-4" />
+                                    </div>
+                                </div>
+                            ) : (
+                                <span>Reset Password</span>
+                            )}
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     );

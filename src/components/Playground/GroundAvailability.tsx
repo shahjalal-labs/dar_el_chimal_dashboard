@@ -25,7 +25,7 @@ const GroundAvailability = () => {
 
     return (
         <div className=''>
-            <DataTable title="Ground Availability" data={formattedData} isButton={true} buttonText="Add Ground" currentPage={currentPage} icon={<GoPlus className='h-6 w-6 text-white'/>} />
+            <DataTable title="Ground Availability" data={formattedData} isButton={true} buttonText="Add Ground" currentPage={currentPage} icon={<GoPlus className='h-6 w-6 text-white' />} />
 
             <div className='flex flex-col md:flex-row justify-between items-center gap-6 mt-8'>
                 <div className='text-base text-[#4A4A4A] flex items-center justify-start gap-2'>
@@ -33,7 +33,7 @@ const GroundAvailability = () => {
                     <Button
                         variant="default"
                         size="icon"
-                        className="h-8 w-8 rounded-none bg-[#FF6B001A] text-[#FF6B00] hover:bg-[#FF6B001A]"
+                        className="h-8 w-8 rounded-none bg-[#1E3A8A1A] text-[#1E3A8A] hover:bg-[#1E3A8A1A]"
                     >
                         {formattedData?.length}
                     </Button>

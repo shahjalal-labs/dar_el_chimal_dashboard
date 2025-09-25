@@ -34,7 +34,7 @@ const ManageCustomers = () => {
         "Role": entry.role,
         "Country": getCountryName(entry.country),
         "Status": (
-            <button className={`${entry?.status === 'PENDING' ? 'bg-[#FF6B00]' : 'bg-green-700'} text-white px-3 py-1.5 rounded-2xl`}>
+            <button className={`${entry?.status === 'PENDING' ? 'bg-[#1E3A8A]' : 'bg-green-700'} text-white px-3 py-1.5 rounded-2xl`}>
                 {entry.status}
             </button>
         ),
@@ -50,7 +50,7 @@ const ManageCustomers = () => {
                     <Button
                         variant="default"
                         size="icon"
-                        className="h-8 w-8 rounded-none bg-[#FF6B001A] text-[#FF6B00] hover:bg-[#FF6B001A]"
+                        className="h-8 w-8 rounded-none bg-[#1E3A8A1A] text-[#1E3A8A] hover:bg-[#1E3A8A1A]"
                     >
                         {formattedData?.length}
                     </Button>

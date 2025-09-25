@@ -353,7 +353,7 @@ export default function Register() {
                             {/* Sign Up */}
                             <Button
                                 type="submit"
-                                className="w-full h-12 bg-[#FF6B00] hover:bg-[#FF6B0080] text-white font-bold rounded-lg transition-colors mt-4"
+                                className="w-full h-12 bg-[#1E3A8A] hover:bg-[#1E3A8A80] text-white font-bold rounded-lg transition-colors mt-4"
                             >
                                 {isLoading ? (
                                     <>
@@ -372,7 +372,7 @@ export default function Register() {
                                 <Link href="/login">
                                     <button
                                         type="button"
-                                        className="text-[#FF6B00] hover:underline font-bold"
+                                        className="text-[#1E3A8A] hover:underline font-bold"
                                     >
                                         Log In
                                     </button>

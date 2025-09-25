@@ -27,7 +27,7 @@ const ManageTransactions = () => {
         }),
         "Status": (
             <button
-                className={`${entry?.status === 'PAYOUT_PROCESSING' ? 'bg-[#FF6B00]' : 'bg-green-700'} text-white px-3 py-1.5 rounded-2xl`}
+                className={`${entry?.status === 'PAYOUT_PROCESSING' ? 'bg-[#1E3A8A]' : 'bg-green-700'} text-white px-3 py-1.5 rounded-2xl`}
             >
                 {entry.status}
             </button>

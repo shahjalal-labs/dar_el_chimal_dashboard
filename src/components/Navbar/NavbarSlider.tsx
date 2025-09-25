@@ -19,6 +19,11 @@ import { MdBorderColor, MdEventAvailable, MdOutlineBookmarkAdded, MdProductionQu
 import { GiSoccerField } from "react-icons/gi";
 import { BiStore } from "react-icons/bi";
 import { BsBank } from "react-icons/bs";
+import { PiBookOpenTextDuotone, PiStudentDuotone } from "react-icons/pi";
+import { FaSchool } from "react-icons/fa";
+import { LuSchool } from "react-icons/lu";
+import { LiaChalkboardTeacherSolid } from "react-icons/lia";
+
 interface SidebarProps {
   isOpen: boolean;
   toggleSidebar: () => void;
@@ -31,7 +36,7 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
   const authState = useSelector(useAuth);
 
   const navigation = [
-    { label: "Dashboard", route: "/", iconPath: <RxDashboard className="w-6 h-6" /> },
+    { label: "Overview", route: "/", iconPath: <RxDashboard className="w-6 h-6" /> },
 
     ...(authState.businessCategory === "PLAYGROUND"
       ? [
@@ -82,29 +87,24 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
           ] :
           [
             {
-              label: "Manage Customers",
+              label: "Book Management",
               route: "/admin/manage-customers",
-              iconPath: <CiUser className="w-6 h-6" />,
+              iconPath: <PiBookOpenTextDuotone className="w-6 h-6" />,
             },
             {
-              label: "Manage Vendors",
+              label: "Schools",
               route: "/admin/manage-vendor",
-              iconPath: <CiShop className="w-6 h-6" />,
+              iconPath: <LuSchool className="w-6 h-6" />,
             },
             {
-              label: "Sports Category",
+              label: "Teachers",
               route: "/admin/sports-category",
-              iconPath: <MdSportsHandball className="w-6 h-6" />,
+              iconPath: <LiaChalkboardTeacherSolid className="w-6 h-6" />,
             },
             {
-              label: "Manage Orders",
+              label: "Students",
               route: "/admin/manage-order",
-              iconPath: <MdBorderColor className="w-6 h-6" />,
-            },
-            {
-              label: "Manage Transactions",
-              route: "/admin/manage-transactions",
-              iconPath: <RiExchangeDollarLine className="w-6 h-6" />,
+              iconPath: <PiStudentDuotone className="w-6 h-6" />,
             },
           ]
     ),
@@ -136,15 +136,16 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
         <div className="flex flex-col h-full">
           {/* Logo */}
           {isOpen && (
-            <Link href="/" className="hidden lg:flex justify-start m-6 pb-6 border-b border-[#E2E8F0]">
+            <Link href="/" className="hidden lg:flex justify-center items-center gap-3 m-6 pb-6 border-b border-[#E2E8F0]">
               <Image
                 width={250}
                 height={100}
-                className="w-28"
+                className="w-10 h-10"
                 src={logo}
                 alt="logo_image"
                 priority
               />
+              <p className="text-xl font-bold text-[#1E3A8A]">Dar El Chimal</p>
             </Link>
           )}
 
@@ -155,11 +156,11 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
                 <li key={item.route}>
                   <Link
                     href={item.route}
-                    className={`flex items-center gap-2 mb-2 rounded-lg hover:bg-[#FF6B00] hover:text-white transition-colors duration-300 ease-in-out 
+                    className={`flex items-center gap-2 mb-2 rounded-lg hover:bg-[#1E3A8A] hover:text-white transition-colors duration-300 ease-in-out 
                       ${!isOpen ? 'justify-center py-2' : 'justify-start px-4 py-2'
                       }
                     ${path === item.route
-                        ? "bg-[#FF6B00] text-white"
+                        ? "bg-[#1E3A8A] text-white"
                         : "text-[#7C8091]"
                       }`}
                   >
@@ -178,7 +179,7 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
           <div className="mt-auto p-6">
             <button
               onClick={handleLogOut}
-              className="flex items-center justify-start gap-2 text-[#7C8091] hover:text-red-400 transition-colors rounded-md hover:bg-[#EF444433] w-full py-2 px-4"
+              className="flex items-center justify-start gap-2 text-red-400 transition-colors rounded-md bg-[#EF444433] w-full py-2 px-4"
             >
               <RiLogoutCircleRLine size={18} />
               {isOpen && <span className="text-lg">Log out</span>}
