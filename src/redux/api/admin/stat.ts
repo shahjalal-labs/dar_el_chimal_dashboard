@@ -4,14 +4,14 @@ export const statApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
         getAdminStat: builder.query({
             query: () => ({
-                url: `/admin-summery`,
+                url: `/users/admin-overview-statistics`,
                 method: 'GET'
             }),
             providesTags: ['admin']
         }),
-        getAdminRevenue: builder.query({
+        getAdminOverview: builder.query({
             query: (revenueYear) => ({
-                url: `/admin-summery/monthly-revenue?year=${revenueYear}`,
+                url: `/users/admin-overview?type=${revenueYear}`,
                 method: 'GET'
             }),
             providesTags: ['admin']
@@ -47,4 +47,4 @@ export const statApi = baseApi.injectEndpoints({
     })
 })
 
-export const { useGetAdminStatQuery, useGetAdminRevenueQuery, useGetTopVendorsQuery, useGetAdminOrderChartQuery, useGetTransactionListQuery, useGetBookingListQuery } = statApi;
+export const { useGetAdminStatQuery, useGetAdminOverviewQuery, useGetTopVendorsQuery, useGetAdminOrderChartQuery, useGetTransactionListQuery, useGetBookingListQuery } = statApi;

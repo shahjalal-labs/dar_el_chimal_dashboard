@@ -20,11 +20,11 @@ import {
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
-    const { name, revenue } = payload[0].payload;
+    const { label, value } = payload[0].payload;
     return (
-      <div className="bg-[#FF7F00] text-white text-sm rounded-md px-4 py-2 shadow">
-        <p className="font-semibold">{`${name}`}</p>
-        <p>{`Revenue : $${revenue.toLocaleString()}`}</p>
+      <div className="bg-[#1E3A8A] text-white text-sm rounded-md px-4 py-2 shadow">
+        <p className="font-semibold">{`${label}`}</p>
+        <p>{`Value : ${value.toLocaleString()}`}</p>
       </div>
     );
   }
@@ -34,17 +34,23 @@ const CustomTooltip = ({ active, payload }: any) => {
 const RevenueChart = ({ data, revenueYear, setRevenueYear }: { data: any, revenueYear: string, setRevenueYear: React.Dispatch<React.SetStateAction<string>>; }) => {
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
-  const chartData = Array.isArray(data)
-    ? data.map((info: { month: string, totalAmount: number }) => ({
-      name: info?.month,
-      revenue: info?.totalAmount,
+  const types = [
+    { name: "Daily", value: "daily" },
+    { name: "Weekly", value: "weekly" },
+    { name: "Monthly", value: "monthly" },
+    { name: "Yearly", value: "yearly" },
+  ]
+  const chartData = Array.isArray(data?.chartData)
+    ? data?.chartData?.map(({ label, value }: { label: string, value: number }) => ({
+      label: label,
+      value: value,
     }))
     : [];
 
   return (
     <div className="bg-white p-6 rounded-2xl w-full">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-lg font-bold">Total Revenue</h1>
+        <h1 className="text-lg font-bold">Student Overview</h1>
         <div className='bg-gray-100 px-4 py-2 rounded-lg'>
           <Select
             value={revenueYear}
@@ -52,12 +58,12 @@ const RevenueChart = ({ data, revenueYear, setRevenueYear }: { data: any, revenu
             required
           >
             <SelectTrigger className="w-full flex items-center gap-2 outline-none border-none">
-              <SelectValue placeholder="Select Year" />
+              <SelectValue placeholder="Select Type" />
             </SelectTrigger>
             <SelectContent>
-              {years.map((year) => (
-                <SelectItem key={year} value={String(year)}>
-                  {year}
+              {types?.map((type, idx) => (
+                <SelectItem key={idx} value={String(type.value)}>
+                  {type.name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -69,18 +75,18 @@ const RevenueChart = ({ data, revenueYear, setRevenueYear }: { data: any, revenu
         <AreaChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="orangeGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#FF7F00" stopOpacity={0.4} />
-              <stop offset="100%" stopColor="#FF7F00" stopOpacity={0} />
+              <stop offset="0%" stopColor="#1E3A8A" stopOpacity={0.4} />
+              <stop offset="100%" stopColor="#1E3A8A" stopOpacity={0} />
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" vertical={false} />
-          <XAxis dataKey="name" />
-          <YAxis tickFormatter={(val) => `$${val / 100}k`} />
+          <XAxis dataKey="label" />
+          <YAxis tickFormatter={(val) => `${val / 100}k`} />
           <Tooltip content={<CustomTooltip />} />
           <Area
             type="monotone"
-            dataKey="revenue"
-            stroke="#FF7F00"
+            dataKey="value"
+            stroke="#1E3A8A"
             fill="url(#orangeGradient)"
             strokeWidth={3}
             dot={{ r: 4 }}

@@ -7,9 +7,6 @@ import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { toast } from "sonner";
 import { useForgotPasswordMutation } from "@/redux/api/authApi";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/redux/store/store";
-import { setUserToken } from "@/redux/features/authSlice";
 import LeftSide from "./LeftSide";
 
 const ForgotPasswordSchema = z.object({
@@ -23,7 +20,6 @@ type ForgotPasswordData = z.infer<typeof ForgotPasswordSchema>;
 
 export default function ForgotPassword() {
     const router = useRouter();
-    const dispatch = useDispatch<AppDispatch>();
 
     const [forgotPas, { isLoading }] = useForgotPasswordMutation();
 
@@ -38,18 +34,15 @@ export default function ForgotPassword() {
 
     const onSubmit = async (data: ForgotPasswordData) => {
         const body = {
-            identifier: data?.email,
-            otpType: "PASSWORD_RESET",
-            type: "email"
+            email: data?.email,
         }
 
         try {
             const response = await forgotPas(body).unwrap();
             if (response?.success) {
                 localStorage.setItem("email", data?.email);
-                localStorage.setItem("otp", response?.result?.otpCode);
-                dispatch(setUserToken(response?.result?.verifyToken));
-                toast.success(response?.message + "!" + " Your OTP " + "(" + response?.result?.otpCode + ")");
+                localStorage.setItem("otp", response?.result);
+                toast.success(response?.message + "!" + " Your OTP " + "(" + response?.result + ")");
                 reset();
                 router.push("/otp");
             }
@@ -75,11 +68,11 @@ export default function ForgotPassword() {
             <LeftSide />
 
             <div className="w-full lg:w-1/2 bg-[#F9F9F9] flex justify-center items-center">
-                <div className="w-full max-w-sm m-auto">
+                <div className="w-full px-5 md:px-0 md:max-w-sm m-auto">
                     <div className="flex-grow"></div>
 
                     <div className="text-center">
-                        <h1 className="text-4xl text-[#1D2939] sm:text-3xl md:text-4xl font-sans font-bold">
+                        <h1 className="text-[#1D2939] text-3xl md:text-4xl font-sans font-bold">
                             Forgot Password!
                         </h1>
                         <p className="text-xs sm:text-sm md:text-base mt-4 font-outfit text-gray-500">

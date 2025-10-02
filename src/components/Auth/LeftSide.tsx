@@ -13,10 +13,10 @@ const LeftSide = () => {
                         height={80}
                         width={80}
                         alt="Fishing boat in blue ocean waters"
-                        className="object-cover h-20 w-20"
+                        className="object-cover h-16 xl:h-20 w-16 xl:w-20"
                         priority
                     />
-                    <h1 className="text-white text-6xl font-extrabold">Dar El Chimal</h1>
+                    <h1 className="text-white text-4xl xl:text-5xl 2xl:text-6xl font-extrabold">Dar El Chimal</h1>
                 </div>
                 <p className="text-white text-xl">
                     Your all-in-one hub for learning, teaching, growing together.

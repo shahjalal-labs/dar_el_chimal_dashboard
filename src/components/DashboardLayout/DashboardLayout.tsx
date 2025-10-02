@@ -12,10 +12,11 @@ import { useGetEventRevenueQuery } from "@/redux/api/eventOrganizer/stat";
 import { useGetAllPlayGroundBookingQuery } from "@/redux/api/playground/booking";
 import { useGetAllEventBookingsQuery } from "@/redux/api/eventOrganizer/booking";
 import { useGetEcommerceRevenueQuery } from "@/redux/api/ecommerce/stat";
-import { useGetAdminRevenueQuery, useGetTransactionListQuery } from "@/redux/api/admin/stat";
+import { useGetAdminOverviewQuery, useGetTransactionListQuery } from "@/redux/api/admin/stat";
 import OrderChart from "./OrderChart";
 import { useGetAllEcommerceBookingsQuery } from "@/redux/api/ecommerce/booking";
 import TransactionList from "./TransactionList";
+import TeacherRingChart from "./TeacherRingChart";
 
 const DashboardLayout = () => {
   const [revenueYear, setRevenueYear] = useState("");
@@ -24,7 +25,7 @@ const DashboardLayout = () => {
   const { data } = useGetGroundRevenueQuery(revenueYear);
   const { data: revenueData } = useGetEventRevenueQuery(revenueYear);
   const { data: ecommerceRevenueData } = useGetEcommerceRevenueQuery(revenueYear);
-  const { data: adminRevenueData } = useGetAdminRevenueQuery(revenueYear);
+  const { data: adminOverviewData } = useGetAdminOverviewQuery(revenueYear);
 
   const { data: groundBooking } = useGetAllPlayGroundBookingQuery(1);
   const { data: eventBooking } = useGetAllEventBookingsQuery(1);
@@ -35,35 +36,19 @@ const DashboardLayout = () => {
     <div>
       <DashboardStat />
       <div>
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mt-6">
-          <div className="col-span-1 xl:col-span-2 space-y-6">
+        <div className="flex gap-6 my-6">
+          <div className="w-2/3">
             <RevenueChart
-              data={authState.role === "ADMIN" ? adminRevenueData?.result : authState.businessCategory === "E_COMMERCE" ? ecommerceRevenueData?.result : authState.businessCategory === "EVENT" ? revenueData?.result : data?.result}
+              data={authState.role === "Admin" ? adminOverviewData?.result : authState.role === "Student" ? ecommerceRevenueData?.result : revenueData?.result}
               revenueYear={revenueYear}
               setRevenueYear={setRevenueYear}
             />
-            <TopCustomersTable />
           </div>
-          <div className="col-span-1 xl:col-span-1 space-y-6">
-            {
-              authState.role === "ADMIN" ?
-                <TransactionList
-                  data={transactionsList?.result?.data}
-                /> :
-                <BookingList
-                  data={authState.businessCategory === "E_COMMERCE" ? ecommerceBooking?.result?.bookings : authState.businessCategory === "EVENT" ? eventBooking?.result?.bookings : groundBooking?.result?.bookings}
-                />
-            }
-            <OrderChart />
+          <div className="w-1/3 h-full">
+            <TeacherRingChart />
           </div>
         </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-          <div className="col-span-2">
-          </div>
-          <div className="col-span-1">
-          </div>
-        </div>
+        <TopCustomersTable />
       </div>
     </div>
   );

@@ -1,28 +1,25 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { IoClose } from "react-icons/io5";
-import { RiExchangeDollarLine, RiLogoutCircleRLine } from "react-icons/ri";
+import { RiLogoutCircleRLine } from "react-icons/ri";
 import { FiMenu } from "react-icons/fi";
 import Cookies from "js-cookie";
 import logo from "@/assets/logo.svg";
 import { RxDashboard } from "react-icons/rx";
 import { useDispatch } from "react-redux";
 import { logout } from "@/redux/features/authSlice";
-import { CiShop, CiUser } from "react-icons/ci";
 import { IoSettingsOutline } from "react-icons/io5";
 import { useSelector } from 'react-redux';
-import { useAuth } from '@/redux/features/authSlice';
-import { MdBorderColor, MdEventAvailable, MdOutlineBookmarkAdded, MdProductionQuantityLimits, MdSportsHandball } from "react-icons/md";
-import { GiSoccerField } from "react-icons/gi";
-import { BiStore } from "react-icons/bi";
-import { BsBank } from "react-icons/bs";
+import { MdOutlineAssignment } from "react-icons/md";
 import { PiBookOpenTextDuotone, PiStudentDuotone } from "react-icons/pi";
-import { FaSchool } from "react-icons/fa";
-import { LuSchool } from "react-icons/lu";
+import { LuBookOpenText, LuSchool } from "react-icons/lu";
 import { LiaChalkboardTeacherSolid } from "react-icons/lia";
+import { TfiAnnouncement } from "react-icons/tfi";
+import { SiGoogleclassroom } from "react-icons/si";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -33,80 +30,69 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
   const path = usePathname();
   const router = useRouter();
   const dispatch = useDispatch();
-  const authState = useSelector(useAuth);
+  const authState = useSelector((state: any) => state.auth.role);
 
   const navigation = [
     { label: "Overview", route: "/", iconPath: <RxDashboard className="w-6 h-6" /> },
 
-    ...(authState.businessCategory === "PLAYGROUND"
+    ...(authState.role === "Student"
       ? [
         {
-          label: "Playground Booking",
-          route: "/vendor/playground/playground-booking",
-          iconPath: <MdOutlineBookmarkAdded className="w-6 h-6" />,
+          label: "Book",
+          route: "/student/book",
+          iconPath: <LuBookOpenText className="w-6 h-6" />,
         },
         {
-          label: "Ground Availability",
-          route: "/vendor/playground/ground-availability",
-          iconPath: <GiSoccerField className="w-6 h-6" />,
+          label: "Assignment",
+          route: "/student/assignment",
+          iconPath: <MdOutlineAssignment className="w-6 h-6" />,
         },
-        { label: "Bank Info", route: "/bank-info", iconPath: <BsBank className="w-6 h-6" /> },
+        {
+          label: "Announcements",
+          route: "/student/announcements",
+          iconPath: <TfiAnnouncement className="w-6 h-6" />,
+        }
       ] :
-      authState.businessCategory === "EVENT"
+      authState.role === "Teacher"
         ? [
           {
-            label: "Manage Event",
-            route: "/vendor/event/manage-event",
-            iconPath: <MdEventAvailable className="w-6 h-6" />,
+            label: "Classes",
+            route: "/teacher/classes",
+            iconPath: <SiGoogleclassroom className="w-6 h-6" />,
           },
           {
-            label: "Manage Booking",
-            route: "/vendor/event/manage-booking",
-            iconPath: <MdOutlineBookmarkAdded className="w-6 h-6" />,
+            label: "Book",
+            route: "/teacher/book",
+            iconPath: <LuBookOpenText className="w-6 h-6" />,
           },
-          { label: "Bank Info", route: "/bank-info", iconPath: <BsBank className="w-6 h-6" /> },
         ] :
-        authState.businessCategory === "E_COMMERCE"
-          ? [
-            {
-              label: "Order Management",
-              route: "/vendor/ecommerce/order-management",
-              iconPath: <MdOutlineBookmarkAdded className="w-6 h-6" />,
-            },
-            {
-              label: "Manage On-store",
-              route: "/vendor/ecommerce/manage-on-store",
-              iconPath: <BiStore className="w-6 h-6" />,
-            },
-            {
-              label: "Manage Product",
-              route: "/vendor/ecommerce/manage-product",
-              iconPath: <MdProductionQuantityLimits className="w-6 h-6" />,
-            },
-            { label: "Bank Info", route: "/bank-info", iconPath: <BsBank className="w-6 h-6" /> },
-          ] :
-          [
-            {
-              label: "Book Management",
-              route: "/admin/manage-customers",
-              iconPath: <PiBookOpenTextDuotone className="w-6 h-6" />,
-            },
-            {
-              label: "Schools",
-              route: "/admin/manage-vendor",
-              iconPath: <LuSchool className="w-6 h-6" />,
-            },
-            {
-              label: "Teachers",
-              route: "/admin/sports-category",
-              iconPath: <LiaChalkboardTeacherSolid className="w-6 h-6" />,
-            },
-            {
-              label: "Students",
-              route: "/admin/manage-order",
-              iconPath: <PiStudentDuotone className="w-6 h-6" />,
-            },
-          ]
+        [
+          {
+            label: "Book Management",
+            route: "/admin/manage-customers",
+            iconPath: <PiBookOpenTextDuotone className="w-6 h-6" />,
+          },
+          {
+            label: "Schools",
+            route: "/admin/manage-vendor",
+            iconPath: <LuSchool className="w-6 h-6" />,
+          },
+          {
+            label: "Teachers",
+            route: "/admin/sports-category",
+            iconPath: <LiaChalkboardTeacherSolid className="w-6 h-6" />,
+          },
+          {
+            label: "Students",
+            route: "/admin/manage-order",
+            iconPath: <PiStudentDuotone className="w-6 h-6" />,
+          },
+          {
+            label: "Announcements",
+            route: "/admin/announcements",
+            iconPath: <TfiAnnouncement className="w-6 h-6" />,
+          },
+        ]
     ),
     { label: "Settings", route: "/settings", iconPath: <IoSettingsOutline className="w-6 h-6" /> },
   ];
@@ -115,7 +101,7 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
   const handleLogOut = () => {
     dispatch(logout());
     Cookies.remove("token");
-    router.push("/login");
+    router.push("/select-role");
   };
 
   return (

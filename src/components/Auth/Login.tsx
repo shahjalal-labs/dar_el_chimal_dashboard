@@ -11,14 +11,14 @@ import { Alert, Spin } from "antd";
 import { toast } from "sonner";
 import { LoadingOutlined } from "@ant-design/icons";
 import Cookies from "js-cookie";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "@/redux/store/store";
 import { setUser, setUserToken } from "@/redux/features/authSlice";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { MdOutlineMail } from "react-icons/md";
 import LeftSide from "./LeftSide";
 import { LuLockKeyhole } from "react-icons/lu";
+import { FaRegUser } from "react-icons/fa";
 
 const customIcon = (
   <LoadingOutlined style={{ fontSize: 24, color: "#fff" }} spin />
@@ -26,25 +26,25 @@ const customIcon = (
 
 interface JWTPayload {
   role?: string;
-  businessCategory?: string;
   [key: string]: any;
 }
 
 export default function Login() {
-  const [email, setEmail] = useState("");
+  const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
   const route = useRouter();
   const dispatch = useDispatch<AppDispatch>();
+  const role = useSelector((state: any) => state.auth.role);
 
   const [login, { isLoading, error }] = useLoginMutation();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     const body = {
-      email: email,
+      userName: userName,
       password: password,
     };
 
@@ -60,16 +60,14 @@ export default function Login() {
       }
 
       if (response.success) {
-        toast.success(response.message);
-
-        Cookies.set("token", response?.result?.accessToken);
-        dispatch(setUser(decodedPayload));
-        dispatch(setUserToken(response?.result?.accessToken));
-
-        if (response?.result?.isBankInfo) {
+        if (role !== decodedPayload.role) {
+          toast.error("Please select the correct role!")
+        }
+        else {
+          toast.success(response.message);
+          Cookies.set("token", response?.result?.accessToken);
+          dispatch(setUserToken(response?.result?.accessToken));
           route.push("/");
-        } else {
-          route.push("/bank-info");
         }
       }
       else {
@@ -93,26 +91,26 @@ export default function Login() {
 
           <div className="lg:space-y-10 space-y-6 lg:px-0 px-4">
             <div className="text-start">
-              <h2 className="text-3xl font-bold text-black">Welcome back, Admin!</h2>
+              <h2 className="text-3xl font-bold text-black">Welcome back, {role}!</h2>
               <p className="mt-2 text-lg text-[#636F85]">
                 {"Please sign in using your provided credentials."}
               </p>
             </div>
 
             <form onSubmit={handleLogin} className="space-y-4">
-              {/* Email Field */}
+              {/* User Name Field */}
               <div className="border border-[#DCE4E8] rounded-3xl bg-[#FFFFFF] flex items-center gap-2 px-4 py-3">
-                <Label htmlFor="email" className="sr-only">
+                <Label htmlFor="userName" className="sr-only">
                   Email
                 </Label>
-                <MdOutlineMail className="text-[#718096] w-6 h-6" />
+                <FaRegUser className="text-[#718096] w-6 h-6" />
                 <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="Email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  id="userName"
+                  name="userName"
+                  type="text"
+                  placeholder="User name"
+                  value={userName}
+                  onChange={(e) => setUserName(e.target.value)}
                   className="outline-none"
                   required
                 />

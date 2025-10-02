@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { RootState } from "../store/store";
 
-const baseUrl = "https://api.riyaada.com/api/v1";
+const baseUrl = "https://api.darelchimalapp.com/api/v1";
 
 export const baseApi = createApi({
   reducerPath: "api",
@@ -11,7 +11,7 @@ export const baseApi = createApi({
       const state = getState() as RootState;
       const token = state?.auth?.token;
       
-      headers.set("x-api-key", 'AABBCCCDDDJJKKIIUU1234');
+      // headers.set("x-api-key", 'AABBCCCDDDJJKKIIUU1234');
 
       if (token) {
         headers.set("Authorization", `${token}`);

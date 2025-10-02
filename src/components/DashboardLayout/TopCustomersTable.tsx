@@ -21,13 +21,13 @@ const TopCustomersTable = () => {
     const { data: topVendors } = useGetTopVendorsQuery(undefined);
 
     useEffect(() => {
-        if (authState.businessCategory === 'PLAYGROUND' && groundCustomers?.result) {
+        if (authState.role === 'PLAYGROUND' && groundCustomers?.result) {
             setData(groundCustomers?.result)
         }
-        if (authState.businessCategory === 'EVENT' && eventCustomers?.result) {
+        if (authState.role === 'EVENT' && eventCustomers?.result) {
             setData(eventCustomers?.result)
         }
-        if (authState.businessCategory === 'E_COMMERCE' && ecommerceCustomers?.result) {
+        if (authState.role === 'E_COMMERCE' && ecommerceCustomers?.result) {
             setData(ecommerceCustomers?.result)
         }
     }, [groundCustomers, eventCustomers, ecommerceCustomers, authState])
@@ -78,12 +78,12 @@ const TopCustomersTable = () => {
         <div className='bg-white p-6 rounded-lg min-h-[320px]'>
             <h1 className='text-lg font-semibold'>
                 {
-                    authState.role === 'ADMIN' ?
-                        'Top Vendors' :
+                    authState.role === 'Admin' ?
+                        'Student List' :
                         'Top Customers'
                 }
             </h1>
-            <DataTable title="" data={authState.role === 'ADMIN' ? adminFormattedData : formattedData} isButton={false} buttonText="" currentPage={1} />
+            <DataTable title="" data={authState.role === 'Admin' ? adminFormattedData : formattedData} isButton={false} buttonText="" currentPage={1} />
         </div>
     );
 };

@@ -4,17 +4,13 @@ import { RootState } from "../store/store";
 
 interface AuthState {
     role: string | null;
-    businessCategory: string | null;
     token: string | null;
-    forgetToken: string | null;
     verifyToken: string | null;
 }
 
 const initialState: AuthState = {
     role: null,
-    businessCategory: null,
     token: null,
-    forgetToken: null,
     verifyToken: null,
 }
 
@@ -23,8 +19,7 @@ const authSlice = createSlice({
     initialState,
     reducers: {
         setUser: (state, action) => {
-            state.role = action.payload.role;
-            state.businessCategory = action.payload.businessCategory;
+            state.role = action.payload;
         },
         setUserToken: (state, action) => {
             state.token = action.payload;
@@ -36,6 +31,6 @@ const authSlice = createSlice({
     }
 });
 
-export const { setUser, setUserToken,logout } = authSlice.actions;
+export const { setUser, setUserToken, logout } = authSlice.actions;
 export default authSlice.reducer;
 export const useAuth = (state: RootState) => state.auth;

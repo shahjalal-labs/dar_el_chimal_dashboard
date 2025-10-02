@@ -46,9 +46,9 @@ const ResetPassword = () => {
             const body = {
                 newPassword: data?.newPassword,
             };
-            const response = await resetPass(body);
-            if (response?.data?.success) {
-                toast.success(response?.data?.message);
+            const response = await resetPass(body).unwrap();
+            if (response?.success) {
+                toast.success(response?.message);
                 localStorage.removeItem("email");
                 localStorage.removeItem("otp");
                 router.push("/login");
@@ -75,9 +75,9 @@ const ResetPassword = () => {
             <LeftSide />
 
             <div className="w-full lg:w-1/2 bg-[#F9F9F9] flex justify-center items-center">
-                <div className="w-full max-w-sm m-auto">
+                <div className="w-full px-5 md:px-0 md:max-w-sm m-auto">
                     <div className="space-y-2 mt-6 mb-8 text-center">
-                        <h1 className="text-xl md:text-4xl font-outfit font-semibold">
+                        <h1 className="text-3xl md:text-4xl font-outfit font-semibold">
                             Reset Password!
                         </h1>
                         <p className="text-sm md:text-base font-normal font-inter text-slate-700">
@@ -167,13 +167,13 @@ const ResetPassword = () => {
                         >
                             {isLoading ? (
                                 <div className="flex justify-center items-center gap-2">
-                                    Reseting...
+                                    Saving...
                                     <div className="animate-spin">
                                         <PiSpinner className="h-4 w-4" />
                                     </div>
                                 </div>
                             ) : (
-                                <span>Reset Password</span>
+                                <span>Save & Sign In</span>
                             )}
                         </button>
                     </form>

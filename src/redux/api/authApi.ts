@@ -3,16 +3,16 @@ import { baseApi } from "./baseApi";
 
 export const AuthApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    createUser: builder.mutation({
-      query: (body) => ({
-        url: `/users/vendor`,
-        method: "POST",
-        body: body,
-      }),
-    }),
+    // createUser: builder.mutation({
+    //   query: (body) => ({
+    //     url: `/users/vendor`,
+    //     method: "POST",
+    //     body: body,
+    //   }),
+    // }),
     login: builder.mutation({
       query: (body) => ({
-        url: `/auth/login-admin-or-vendor`,
+        url: `/auth/admin-login`,
         method: "POST",
         body: body,
       }),
@@ -70,7 +70,7 @@ export const AuthApi = baseApi.injectEndpoints({
 });
 
 export const {
-  useCreateUserMutation,
+  // useCreateUserMutation,
   useLoginMutation,
   useForgotPasswordMutation,
   useOtpUserMutation,
