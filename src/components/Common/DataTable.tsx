@@ -3,7 +3,7 @@
 
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-import { Eye } from 'lucide-react';
+import { Eye, Search } from 'lucide-react';
 import { Dialog, DialogTrigger } from '../ui/dialog';
 import { usePathname } from 'next/navigation';
 import { SyncLoader } from "react-spinners";
@@ -43,6 +43,7 @@ import { useDeleteProductMutation } from '@/redux/api/ecommerce/product';
 import { useDeleteStoreMutation } from '@/redux/api/ecommerce/store';
 import { useDeleteParentCategroyMutation } from '@/redux/api/admin/parentCategory';
 import ViewVendorDetailsModal from '../Admin/ViewVendorDetailsModal';
+import { Input } from '../ui/input';
 
 
 const DataTable = (
@@ -71,6 +72,7 @@ const DataTable = (
   }) => {
   const pathname = usePathname();
   const [selectedId, setSelectedId] = useState('');
+  const [searchQuery, setSearchQuery] = useState("")
 
   const [DeleteGround, { isLoading: isGroundDeleting }] = useDeleteGroundMutation();
   const [DeleteProductCategroy, { isLoading: isProductCategoryDeleting }] = useDeleteProductCategroyMutation();
@@ -117,14 +119,31 @@ const DataTable = (
     }
   }
 
+  const filteredData = data?.filter((item: any) => {
+    if (!searchQuery) return true
+
+    return Object.values(item).some((value) => String(value).toLowerCase().includes(searchQuery.toLowerCase()))
+  })
+
   return (
-    <div>
+    <div className='bg-white rounded-xl p-4'>
       <div className="md:flex justify-between items-center mb-6">
         {/* Left - Title */}
         <h1 className="text-xl md:text-2xl font-semibold">{title}</h1>
 
         {/* Right - Sort + Button */}
         <div className="md:flex items-center gap-3 ml-auto">
+          <div className="relative w-64 pb-2">
+            <Input
+              placeholder="Search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pr-8 bg-[#F9F9F9] border-none shadow-none"
+            />
+            <div className="absolute right-3 top-3 text-[#79767B] p-2 rounded-lg">
+              <Search className="h-4 w-4" />
+            </div>
+          </div>
           <div className='mt-4 md:mt-0'>
             {sort}
           </div>
@@ -191,7 +210,7 @@ const DataTable = (
             <span className="text-[#1E3A8A]">Table Data is Loading</span>
             <SyncLoader color='#1E3A8A' />
           </div> :
-          <Table className='bg-white'>
+          <Table className='bg-white border border-[#F5F5F5] rounded-xl'>
             <TableHeader>
               <TableRow className='bg-[#1E3A8A1A]'>
                 <TableHead className="text-[#4A4A4A] font-semibold text-sm">SL</TableHead>
@@ -217,7 +236,7 @@ const DataTable = (
             </TableHeader>
             <TableBody>
               {
-                data?.map((singleData: any, index: number) => (
+                filteredData?.map((singleData: any, index: number) => (
                   <TableRow
                     key={index}
                     className="hover:bg-gray-50 text-[#5C5C5C]"

@@ -10,7 +10,7 @@ export const baseApi = createApi({
     prepareHeaders: (headers, { getState }) => {
       const state = getState() as RootState;
       const token = state?.auth?.token;
-      
+
       // headers.set("x-api-key", 'AABBCCCDDDJJKKIIUU1234');
 
       if (token) {
@@ -22,6 +22,7 @@ export const baseApi = createApi({
   }),
   endpoints: () => ({}),
   tagTypes: [
+    "books",
     "users",
     "profile",
     "admin",

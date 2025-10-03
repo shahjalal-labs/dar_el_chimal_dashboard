@@ -9,7 +9,7 @@ import { useGetEventTopCustomersQuery } from '@/redux/api/eventOrganizer/stat';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store/store';
 import { useGetEcommerceTopCustomersQuery } from '@/redux/api/ecommerce/stat';
-import { useGetTopVendorsQuery } from '@/redux/api/admin/stat';
+import { useGetAllStudentsQuery } from '@/redux/api/admin/stat';
 
 const TopCustomersTable = () => {
     const authState = useSelector((state: RootState) => state.auth);
@@ -18,7 +18,7 @@ const TopCustomersTable = () => {
     const { data: eventCustomers } = useGetEventTopCustomersQuery(undefined);
     const { data: groundCustomers } = useGetTopCustomersQuery(undefined);
     const { data: ecommerceCustomers } = useGetEcommerceTopCustomersQuery(undefined);
-    const { data: topVendors } = useGetTopVendorsQuery(undefined);
+    const { data: allStudents } = useGetAllStudentsQuery(undefined);
 
     useEffect(() => {
         if (authState.role === 'PLAYGROUND' && groundCustomers?.result) {
@@ -59,19 +59,20 @@ const TopCustomersTable = () => {
             "Total Spents": entry.totalSpent,
         }));
 
-    const adminFormattedData = topVendors?.result?.map((entry:
+    const adminFormattedData = allStudents?.result?.result?.map((entry:
         {
-            vendorName: string,
+            fullName: string,
             businessCategory: string,
             address: string,
             totalOrders: number,
             totalRevenue: number,
         }) => ({
-            "Vendor Name": entry.vendorName,
-            "Business Category": entry.businessCategory,
-            "Address": entry.address,
-            "Total Orders": entry.totalOrders,
-            "Total Revenue": entry.totalRevenue,
+            "Name": entry.fullName,
+            "School": entry.businessCategory,
+            "Grade": entry.address,
+            "Books": entry.totalOrders,
+            "Active": entry.totalRevenue,
+            "Action": entry.totalRevenue,
         }));
 
     return (

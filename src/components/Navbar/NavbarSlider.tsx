@@ -18,8 +18,9 @@ import { MdOutlineAssignment } from "react-icons/md";
 import { PiBookOpenTextDuotone, PiStudentDuotone } from "react-icons/pi";
 import { LuBookOpenText, LuSchool } from "react-icons/lu";
 import { LiaChalkboardTeacherSolid } from "react-icons/lia";
-import { TfiAnnouncement } from "react-icons/tfi";
+import { TfiAngleDown, TfiAngleUp, TfiAnnouncement } from "react-icons/tfi";
 import { SiGoogleclassroom } from "react-icons/si";
+import { useState } from "react";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -27,6 +28,7 @@ interface SidebarProps {
 }
 
 const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
+  const [showDropdown, setShowDropdown] = useState(false);
   const path = usePathname();
   const router = useRouter();
   const dispatch = useDispatch();
@@ -69,7 +71,7 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
         [
           {
             label: "Book Management",
-            route: "/admin/manage-customers",
+            route: "",
             iconPath: <PiBookOpenTextDuotone className="w-6 h-6" />,
           },
           {
@@ -142,6 +144,7 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
                 <li key={item.route}>
                   <Link
                     href={item.route}
+                    onClick={() => { if (item.label === 'Book Management') setShowDropdown(!showDropdown); }}
                     className={`flex items-center gap-2 mb-2 rounded-lg hover:bg-[#1E3A8A] hover:text-white transition-colors duration-300 ease-in-out 
                       ${!isOpen ? 'justify-center py-2' : 'justify-start px-4 py-2'
                       }
@@ -152,7 +155,22 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
                   >
                     <div className="flex justify-center items-center">{item.iconPath}</div>
                     {isOpen && <p className="text-sm xl:text-base">{item.label}</p>}
+                    {
+                      item.label === 'Book Management' &&
+                      (
+                        showDropdown ?
+                          <TfiAngleUp /> :
+                          <TfiAngleDown />
+                      )
+                    }
                   </Link>
+                  {
+                    (showDropdown && item.label === 'Book Management') &&
+                    <div className="flex flex-col">
+                      <Link href="/admin/book-categories" className={`text-[#1E3A8A] font-medium p-3 pl-8 ml-8 ${path === '/admin/book-categories' ? 'border-l-2 border-[#1E3A8A]' : 'border-l border-[#F3EEF6]'}`}>Book Categories</Link>
+                      <Link href="/admin/books" className={`text-[#1E3A8A] font-medium p-3 pl-8 ml-8 ${path === '/admin/books' ? 'border-l-2 border-[#1E3A8A]' : 'border-l border-[#F3EEF6]'}`}>Books</Link>
+                    </div>
+                  }
                 </li>
               ))}
             </ul>

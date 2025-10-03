@@ -16,9 +16,9 @@ export const statApi = baseApi.injectEndpoints({
             }),
             providesTags: ['admin']
         }),
-        getTopVendors: builder.query({
+        getAllStudents: builder.query({
             query: () => ({
-                url: `/admin-summery/top-vendor`,
+                url: `/users/get-students`,
                 method: 'GET'
             }),
             providesTags: ['admin']
@@ -47,4 +47,4 @@ export const statApi = baseApi.injectEndpoints({
     })
 })
 
-export const { useGetAdminStatQuery, useGetAdminOverviewQuery, useGetTopVendorsQuery, useGetAdminOrderChartQuery, useGetTransactionListQuery, useGetBookingListQuery } = statApi;
+export const { useGetAdminStatQuery, useGetAdminOverviewQuery, useGetAllStudentsQuery, useGetAdminOrderChartQuery, useGetTransactionListQuery, useGetBookingListQuery } = statApi;
