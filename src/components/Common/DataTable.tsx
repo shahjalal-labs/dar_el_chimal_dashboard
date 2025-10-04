@@ -9,7 +9,7 @@ import { usePathname } from 'next/navigation';
 import { SyncLoader } from "react-spinners";
 import { RiDeleteBin6Line } from 'react-icons/ri';
 import { Button } from '../ui/button';
-import { FaEdit } from 'react-icons/fa';
+import { BiEditAlt } from "react-icons/bi";
 import ViewGroundModal from '../Playground/ViewGroundModal';
 import AddGroundModal from '../Playground/AddGroundModal';
 import UpdateGroundModal from '../Playground/UpdateGroundModal';
@@ -36,7 +36,17 @@ import ViewProductCategory from '../ProductCategory/ViewProductCategory';
 import AddProductCategory from '../ProductCategory/AddProductCategory';
 import ViewSingleProductCategory from '../ProductCategory/ViewSingleProductCategory';
 import UpdateProductCategory from '../ProductCategory/UpdateProductCategory';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
+} from '../ui/alert-dialog';
 import { PiSpinner } from 'react-icons/pi';
 import { useDeleteProductCategroyMutation } from '@/redux/api/ecommerce/productCategory';
 import { useDeleteProductMutation } from '@/redux/api/ecommerce/product';
@@ -44,6 +54,9 @@ import { useDeleteStoreMutation } from '@/redux/api/ecommerce/store';
 import { useDeleteParentCategroyMutation } from '@/redux/api/admin/parentCategory';
 import ViewVendorDetailsModal from '../Admin/ViewVendorDetailsModal';
 import { Input } from '../ui/input';
+import UpdateBookCategoryModal from '../Admin/BookCategories/UpdateBookCategoryModal';
+import ViewBookCategoryModal from '../Admin/BookCategories/ViewBookCategoryModal';
+import { useDeleteBookCategroyMutation } from '@/redux/api/admin/bookCategory';
 
 
 const DataTable = (
@@ -57,7 +70,8 @@ const DataTable = (
     currentPage,
     sort,
     icon,
-    iconTwo
+    iconTwo,
+    willSearch
   }: {
     title: string,
     data: any,
@@ -68,13 +82,14 @@ const DataTable = (
     currentPage?: number,
     sort?: React.ReactNode,
     icon?: React.ReactNode,
-    iconTwo?: React.ReactNode
+    iconTwo?: React.ReactNode,
+    willSearch?: boolean
   }) => {
   const pathname = usePathname();
   const [selectedId, setSelectedId] = useState('');
   const [searchQuery, setSearchQuery] = useState("")
 
-  const [DeleteGround, { isLoading: isGroundDeleting }] = useDeleteGroundMutation();
+  const [DeleteBookCategory, { isLoading: isBookCategoryDeleting }] = useDeleteBookCategroyMutation();
   const [DeleteProductCategroy, { isLoading: isProductCategoryDeleting }] = useDeleteProductCategroyMutation();
   const [DeleteProduct, { isLoading: isProductDeleting }] = useDeleteProductMutation();
   const [DeleteStore, { isLoading: isStoreDeleting }] = useDeleteStoreMutation();
@@ -82,8 +97,8 @@ const DataTable = (
 
   const handleDelete = async (id: string) => {
     try {
-      if (pathname === '/vendor/playground/ground-availability') {
-        const response = await DeleteGround(id).unwrap();
+      if (pathname === '/admin/book-categories') {
+        const response = await DeleteBookCategory(id).unwrap();
         if (response.success) {
           toast.success(response.message)
         }
@@ -133,17 +148,20 @@ const DataTable = (
 
         {/* Right - Sort + Button */}
         <div className="md:flex items-center gap-3 ml-auto">
-          <div className="relative w-64 pb-2">
-            <Input
-              placeholder="Search"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pr-8 bg-[#F9F9F9] border-none shadow-none"
-            />
-            <div className="absolute right-3 top-3 text-[#79767B] p-2 rounded-lg">
-              <Search className="h-4 w-4" />
+          {
+            willSearch &&
+            <div className="relative w-64 pb-2">
+              <Input
+                placeholder="Search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pr-8 bg-[#F9F9F9] border-none shadow-none"
+              />
+              <div className="absolute right-3 top-3 text-[#79767B] p-2 rounded-lg">
+                <Search className="h-4 w-4" />
+              </div>
             </div>
-          </div>
+          }
           <div className='mt-4 md:mt-0'>
             {sort}
           </div>
@@ -210,179 +228,183 @@ const DataTable = (
             <span className="text-[#1E3A8A]">Table Data is Loading</span>
             <SyncLoader color='#1E3A8A' />
           </div> :
-          <Table className='bg-white border border-[#F5F5F5] rounded-xl'>
-            <TableHeader>
-              <TableRow className='bg-[#1E3A8A1A]'>
-                <TableHead className="text-[#4A4A4A] font-semibold text-sm">SL</TableHead>
+          !filteredData.length ?
+            <div className="text-center text-[#D00E11] my-10 w-full mx-auto">
+              No match found!
+            </div> :
+            <Table className='bg-white border border-[#F5F5F5] rounded-xl'>
+              <TableHeader>
+                <TableRow className='bg-[#1E3A8A0D]'>
+                  <TableHead className="text-[#4A4A4A] font-semibold text-sm">Sl/No</TableHead>
+                  {
+                    data?.length > 0 &&
+                    Object.keys(data[0])?.map((key, index) => (
+                      <TableHead key={index} className="text-[#4A4A4A] font-semibold text-sm">
+                        {
+                          key !== 'Id' &&
+                          key.split('_').map((header, idx) => (
+                            <span key={idx}>{header} </span>
+                          ))
+                        }
+                      </TableHead>
+                    ))
+                  }
+                  {
+                    (pathname !== '/' && pathname !== '/vendor/event/manage-booking' && pathname !== '/vendor/ecommerce/order-management' && pathname !== '/admin/manage-customers' && pathname !== '/admin/manage-order' && pathname !== '/admin/manage-transactions') && (
+                      <TableHead className="text-[#4A4A4A] font-semibold text-sm">Action</TableHead>
+                    )
+                  }
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {
-                  data?.length > 0 &&
-                  Object.keys(data[0])?.map((key, index) => (
-                    <TableHead key={index} className="text-[#4A4A4A] font-semibold text-sm">
+                  filteredData?.map((singleData: any, index: number) => (
+                    <TableRow
+                      key={index}
+                      className="hover:bg-gray-50 text-[#5C5C5C]"
+                    >
+                      <TableCell className="text-sm">{(index + 1) + (((currentPage ?? 1) - 1) * 10)}</TableCell>
                       {
-                        key !== 'Id' &&
-                        key.split('_').map((header, idx) => (
-                          <span key={idx}>{header} </span>
+                        Object.entries(singleData).map(([key, value]: any, idx: number) => (
+                          <TableCell key={idx} className="text-sm">
+                            {
+                              key === 'Id' ?
+                                <></> : <span>{value}</span>
+                            }
+                          </TableCell>
                         ))
                       }
-                    </TableHead>
+                      {
+                        (pathname !== '/' && pathname !== '/vendor/event/manage-booking' && pathname !== '/vendor/ecommerce/order-management' && pathname !== '/admin/manage-customers' && pathname !== '/admin/manage-order' && pathname !== '/admin/manage-transactions') &&
+                        (<TableCell className='flex items-center gap-2'>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button onClick={() => setSelectedId(singleData?.Id)} className="bg-[#F4A64033] hover:bg-[#F4A64026] text-[#F4A640] transition-colors ease-in-out duration-200 cursor-pointer">
+                                <span className="sr-only">View details</span>
+                                <Eye className="h-6 w-6" />
+                              </Button>
+                            </DialogTrigger>
+                            {
+                              selectedId === singleData?.Id &&
+                              <>
+                                {
+                                  pathname === '/admin/book-categories' ?
+                                    <ViewBookCategoryModal id={singleData?.Id} /> :
+                                    pathname === '/vendor/playground/ground-availability' ?
+                                      <ViewGroundModal id={singleData?.Id} /> :
+                                      pathname === '/vendor/event/manage-event' ?
+                                        <>
+                                          {
+                                            buttonTextTwo === "Add Team" ?
+                                              <ViewSingleTeamModal id={singleData?.Id} /> :
+                                              <ViewEventModal id={singleData?.Id} />
+                                          }
+                                        </> :
+                                        pathname === '/vendor/ecommerce/manage-on-store' ?
+                                          <ViewStoreModal id={singleData?.Id} /> :
+                                          pathname === '/vendor/ecommerce/manage-product' ?
+                                            <>
+                                              {
+                                                buttonTextTwo === "Add Category" ?
+                                                  <ViewSingleProductCategory id={singleData?.Id} /> :
+                                                  <ViewProductModal id={singleData?.Id} />
+                                              }
+                                            </> :
+                                            pathname === '/admin/sports-category' ?
+                                              <ViewParentCategory id={singleData?.Id} /> :
+                                              pathname === '/admin/manage-vendor' ?
+                                                <ViewVendorDetailsModal id={singleData?.Id} /> :
+                                                <></>
+                                }
+                              </>
+                            }
+                          </Dialog>
+                          {
+                            (pathname === '/admin/book-categories' || pathname === '/admin/books' || pathname === '/vendor/ecommerce/manage-on-store' || pathname === '/vendor/ecommerce/manage-product' || pathname === '/admin/sports-category') &&
+                            (<>
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button onClick={() => setSelectedId(singleData?.Id)} className="bg-[#17A23533] hover:bg-[#17A23526] text-[#17A235] transition-colors ease-in-out duration-200 cursor-pointer">
+                                    <span className="sr-only">Update</span>
+                                    <BiEditAlt className="h-6 w-6" />
+                                  </Button>
+                                </DialogTrigger>
+                                {
+                                  selectedId === singleData?.Id &&
+                                  (
+                                    pathname === '/admin/book-categories' ?
+                                      <UpdateBookCategoryModal id={singleData?.Id} /> :
+                                      pathname === '/admin/books' ?
+                                        <>
+                                          {
+                                            buttonTextTwo === "Add Team" ?
+                                              <UpdateTeamModal id={singleData?.Id} /> :
+                                              <UpdateEventModal id={singleData?.Id} />
+                                          }
+                                        </> :
+                                        pathname === '/vendor/ecommerce/manage-on-store' ?
+                                          <UpdateStoreModal id={singleData?.Id} /> :
+                                          pathname === '/vendor/ecommerce/manage-product' ?
+                                            <>
+                                              {
+                                                buttonTextTwo === "Add Category" ?
+                                                  <UpdateProductCategory id={singleData?.Id} /> :
+                                                  <UpdateProductModal id={singleData?.Id} />
+                                              }
+                                            </> :
+                                            pathname === '/admin/sports-category' ?
+                                              <UpdateParentCategory id={singleData?.Id} /> :
+                                              <></>
+                                  )
+                                }
+                              </Dialog>
+                              {
+                                // pathname !== '' &&
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button
+                                      className="bg-[#FE4D4F33] hover:bg-[#FE4D4F26] text-[#FE4D4F] transition-colors ease-in-out duration-200 cursor-pointer">
+                                      <span className="sr-only">Delete</span>
+                                      {
+                                        ((isBookCategoryDeleting || isProductCategoryDeleting || isProductDeleting || isStoreDeleting || isParentCategroyDeleting) && selectedId === singleData?.Id) ?
+                                          <div className="animate-spin">
+                                            <PiSpinner className="h-4 w-4" />
+                                          </div> :
+                                          <RiDeleteBin6Line className='w-6 h-6' />
+                                      }
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        This action cannot be undone. This will permanently delete the {singleData.Name ?? 'item'}.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction
+                                        className="bg-red-600 text-white hover:bg-red-700"
+                                        onClick={() => {
+                                          setSelectedId(singleData?.Id)
+                                          handleDelete(singleData?.Id)
+                                        }}
+                                      >
+                                        Yes, Delete
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              }
+                            </>)
+                          }
+                        </TableCell>)
+                      }
+                    </TableRow>
                   ))
                 }
-                {
-                  (pathname !== '/' && pathname !== '/vendor/event/manage-booking' && pathname !== '/vendor/ecommerce/order-management' && pathname !== '/admin/manage-customers' && pathname !== '/admin/manage-order' && pathname !== '/admin/manage-transactions') && (
-                    <TableHead className="text-[#4A4A4A] font-semibold text-sm">Action</TableHead>
-                  )
-                }
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {
-                filteredData?.map((singleData: any, index: number) => (
-                  <TableRow
-                    key={index}
-                    className="hover:bg-gray-50 text-[#5C5C5C]"
-                  >
-                    <TableCell className="text-sm">{(index + 1) + (((currentPage ?? 1) - 1) * 10)}</TableCell>
-                    {
-                      Object.entries(singleData).map(([key, value]: any, idx: number) => (
-                        <TableCell key={idx} className="text-sm">
-                          {
-                            key === 'Id' ?
-                              <></> : <span>{value}</span>
-                          }
-                        </TableCell>
-                      ))
-                    }
-                    {
-                      (pathname !== '/' && pathname !== '/vendor/event/manage-booking' && pathname !== '/vendor/ecommerce/order-management' && pathname !== '/admin/manage-customers' && pathname !== '/admin/manage-order' && pathname !== '/admin/manage-transactions') &&
-                      (<TableCell className='flex items-center gap-2'>
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button onClick={() => setSelectedId(singleData?.Id)} className="bg-[#1E3A8A33] hover:bg-[#1E3A8A26] text-[#1E3A8A] transition-colors ease-in-out duration-200 cursor-pointer">
-                              <span className="sr-only">View details</span>
-                              <Eye className="h-6 w-6" />
-                            </Button>
-                          </DialogTrigger>
-                          {
-                            selectedId === singleData?.Id &&
-                            <>
-                              {
-                                pathname === '/vendor/playground/playground-booking' ?
-                                  <BookingModal id={singleData?.Id} /> :
-                                  pathname === '/vendor/playground/ground-availability' ?
-                                    <ViewGroundModal id={singleData?.Id} /> :
-                                    pathname === '/vendor/event/manage-event' ?
-                                      <>
-                                        {
-                                          buttonTextTwo === "Add Team" ?
-                                            <ViewSingleTeamModal id={singleData?.Id} /> :
-                                            <ViewEventModal id={singleData?.Id} />
-                                        }
-                                      </> :
-                                      pathname === '/vendor/ecommerce/manage-on-store' ?
-                                        <ViewStoreModal id={singleData?.Id} /> :
-                                        pathname === '/vendor/ecommerce/manage-product' ?
-                                          <>
-                                            {
-                                              buttonTextTwo === "Add Category" ?
-                                                <ViewSingleProductCategory id={singleData?.Id} /> :
-                                                <ViewProductModal id={singleData?.Id} />
-                                            }
-                                          </> :
-                                          pathname === '/admin/sports-category' ?
-                                            <ViewParentCategory id={singleData?.Id} /> :
-                                            pathname === '/admin/manage-vendor' ?
-                                              <ViewVendorDetailsModal id={singleData?.Id} /> :
-                                              <></>
-                              }
-                            </>
-                          }
-                        </Dialog>
-                        {
-                          (pathname === '/vendor/playground/ground-availability' || pathname === '/vendor/event/manage-event' || pathname === '/vendor/ecommerce/manage-on-store' || pathname === '/vendor/ecommerce/manage-product' || pathname === '/admin/sports-category') &&
-                          (<>
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <Button onClick={() => setSelectedId(singleData?.Id)} className="bg-[#0972DF33] hover:bg-[#0972DF26] text-[#0972DF] transition-colors ease-in-out duration-200 cursor-pointer">
-                                  <span className="sr-only">Update</span>
-                                  <FaEdit className="h-6 w-6" />
-                                </Button>
-                              </DialogTrigger>
-                              {
-                                selectedId === singleData?.Id &&
-                                (
-                                  pathname === '/vendor/playground/ground-availability' ?
-                                    <UpdateGroundModal id={singleData?.Id} /> :
-                                    pathname === '/vendor/event/manage-event' ?
-                                      <>
-                                        {
-                                          buttonTextTwo === "Add Team" ?
-                                            <UpdateTeamModal id={singleData?.Id} /> :
-                                            <UpdateEventModal id={singleData?.Id} />
-                                        }
-                                      </> :
-                                      pathname === '/vendor/ecommerce/manage-on-store' ?
-                                        <UpdateStoreModal id={singleData?.Id} /> :
-                                        pathname === '/vendor/ecommerce/manage-product' ?
-                                          <>
-                                            {
-                                              buttonTextTwo === "Add Category" ?
-                                                <UpdateProductCategory id={singleData?.Id} /> :
-                                                <UpdateProductModal id={singleData?.Id} />
-                                            }
-                                          </> :
-                                          pathname === '/admin/sports-category' ?
-                                            <UpdateParentCategory id={singleData?.Id} /> :
-                                            <></>
-                                )
-                              }
-                            </Dialog>
-                            {
-                              pathname !== '/vendor/event/manage-event' &&
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <Button
-                                    className="bg-[#FE4D4F33] hover:bg-[#FE4D4F26] text-[#FE4D4F] transition-colors ease-in-out duration-200 cursor-pointer">
-                                    <span className="sr-only">Delete</span>
-                                    {
-                                      ((isGroundDeleting || isProductCategoryDeleting || isProductDeleting || isStoreDeleting || isParentCategroyDeleting) && selectedId === singleData?.Id) ?
-                                        <div className="animate-spin">
-                                          <PiSpinner className="h-4 w-4" />
-                                        </div> :
-                                        <RiDeleteBin6Line className='w-6 h-6' />
-                                    }
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      This action cannot be undone. This will permanently delete the {singleData.Name ?? 'item'}.
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction
-                                      className="bg-red-600 text-white hover:bg-red-700"
-                                      onClick={() => {
-                                        setSelectedId(singleData?.Id)
-                                        handleDelete(singleData?.Id)
-                                      }}
-                                    >
-                                      Yes, Delete
-                                    </AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
-                            }
-                          </>)
-                        }
-                      </TableCell>)
-                    }
-                  </TableRow>
-                ))
-              }
-            </TableBody>
-          </Table>
+              </TableBody>
+            </Table>
       }
     </div>
   );

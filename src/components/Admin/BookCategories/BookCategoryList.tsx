@@ -2,9 +2,9 @@
 
 import React, { useState } from 'react';
 import DataTable from '@/components/Common/DataTable';
-import { useGetAllBookCategoriesQuery } from '@/redux/api/admin/books';
+import { useGetAllBookCategoriesQuery } from '@/redux/api/admin/bookCategory';
 import Image from 'next/image';
-import defaultImg from '@/assets/no-img.jpg'
+import defaultImg from '@/assets/no-img.jpg';
 import Pagination from '@/components/ui/pagination';
 import { Button } from '@/components/ui/button';
 import { FaPlus } from 'react-icons/fa';
@@ -28,7 +28,11 @@ const BookCategoryList = () => {
                 />
             ),
             "Category Name": entry.name,
-            "Description": entry.description,
+            "Description": (
+                entry.description.length > 30 ?
+                    entry.description.slice(0, 30) + "..." :
+                    entry.description
+            ),
             "Created At": new Date(entry.createdAt).toLocaleString('en-US', {
                 year: 'numeric',
                 month: 'short',
@@ -47,8 +51,8 @@ const BookCategoryList = () => {
 
     return (
         <div>
-            <div className='flex justify-between items-center mb-10'>
-                <div>
+            <div className='md:flex justify-between items-center mb-10'>
+                <div className='mb-6 md:mb-0'>
                     <h1 className='text-2xl font-bold mb-3'>Book Categories</h1>
                     <p className='font-medium'><span className='text-[#72727299]'>Book Management</span><span className='text-[#72727299] px-2'>/</span>Book Categories</p>
                 </div>
@@ -60,7 +64,7 @@ const BookCategoryList = () => {
                 </Link>
             </div>
 
-            <DataTable title="Book Category List" data={formattedData} currentPage={currentPage} />
+            <DataTable title="Book Category List" data={formattedData} currentPage={currentPage} willSearch={true} />
 
             <div className='flex flex-col md:flex-row justify-between items-center gap-6 mt-8'>
                 <div className='text-base text-[#4A4A4A] flex items-center justify-start gap-2'>

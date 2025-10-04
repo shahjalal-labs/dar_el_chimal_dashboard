@@ -15,12 +15,13 @@ import { logout } from "@/redux/features/authSlice";
 import { IoSettingsOutline } from "react-icons/io5";
 import { useSelector } from 'react-redux';
 import { MdOutlineAssignment } from "react-icons/md";
-import { PiBookOpenTextDuotone, PiStudentDuotone } from "react-icons/pi";
+import { PiBookBookmark, PiBookOpenTextDuotone, PiStudentDuotone } from "react-icons/pi";
 import { LuBookOpenText, LuSchool } from "react-icons/lu";
 import { LiaChalkboardTeacherSolid } from "react-icons/lia";
 import { TfiAngleDown, TfiAngleUp, TfiAnnouncement } from "react-icons/tfi";
 import { SiGoogleclassroom } from "react-icons/si";
 import { useState } from "react";
+import { TbCategoryPlus } from "react-icons/tb";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -35,24 +36,24 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
   const authState = useSelector((state: any) => state.auth.role);
 
   const navigation = [
-    { label: "Overview", route: "/", iconPath: <RxDashboard className="w-6 h-6" /> },
+    { label: "Overview", route: "/", iconPath: <RxDashboard className="w-5 lg:w-6 h-5 lg:h-6" /> },
 
     ...(authState.role === "Student"
       ? [
         {
           label: "Book",
           route: "/student/book",
-          iconPath: <LuBookOpenText className="w-6 h-6" />,
+          iconPath: <LuBookOpenText className="w-5 lg:w-6 h-5 lg:h-6" />,
         },
         {
           label: "Assignment",
           route: "/student/assignment",
-          iconPath: <MdOutlineAssignment className="w-6 h-6" />,
+          iconPath: <MdOutlineAssignment className="w-5 lg:w-6 h-5 lg:h-6" />,
         },
         {
           label: "Announcements",
           route: "/student/announcements",
-          iconPath: <TfiAnnouncement className="w-6 h-6" />,
+          iconPath: <TfiAnnouncement className="w-5 lg:w-6 h-5 lg:h-6" />,
         }
       ] :
       authState.role === "Teacher"
@@ -60,45 +61,44 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
           {
             label: "Classes",
             route: "/teacher/classes",
-            iconPath: <SiGoogleclassroom className="w-6 h-6" />,
+            iconPath: <SiGoogleclassroom className="w-5 lg:w-6 h-5 lg:h-6" />,
           },
           {
             label: "Book",
             route: "/teacher/book",
-            iconPath: <LuBookOpenText className="w-6 h-6" />,
+            iconPath: <LuBookOpenText className="w-5 lg:w-6 h-5 lg:h-6" />,
           },
         ] :
         [
           {
             label: "Book Management",
             route: "",
-            iconPath: <PiBookOpenTextDuotone className="w-6 h-6" />,
+            iconPath: <PiBookOpenTextDuotone className="w-5 lg:w-6 h-5 lg:h-6" />,
           },
           {
             label: "Schools",
             route: "/admin/manage-vendor",
-            iconPath: <LuSchool className="w-6 h-6" />,
+            iconPath: <LuSchool className="w-5 lg:w-6 h-5 lg:h-6" />,
           },
           {
             label: "Teachers",
             route: "/admin/sports-category",
-            iconPath: <LiaChalkboardTeacherSolid className="w-6 h-6" />,
+            iconPath: <LiaChalkboardTeacherSolid className="w-5 lg:w-6 h-5 lg:h-6" />,
           },
           {
             label: "Students",
             route: "/admin/manage-order",
-            iconPath: <PiStudentDuotone className="w-6 h-6" />,
+            iconPath: <PiStudentDuotone className="w-5 lg:w-6 h-5 lg:h-6" />,
           },
           {
             label: "Announcements",
             route: "/admin/announcements",
-            iconPath: <TfiAnnouncement className="w-6 h-6" />,
+            iconPath: <TfiAnnouncement className="w-5 lg:w-6 h-5 lg:h-6" />,
           },
         ]
     ),
-    { label: "Settings", route: "/settings", iconPath: <IoSettingsOutline className="w-6 h-6" /> },
+    { label: "Settings", route: "/settings", iconPath: <IoSettingsOutline className="w-5 lg:w-6 h-5 lg:h-6" /> },
   ];
-
 
   const handleLogOut = () => {
     dispatch(logout());
@@ -149,8 +149,10 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
                       ${!isOpen ? 'justify-center py-2' : 'justify-start px-4 py-2'
                       }
                     ${path === item.route
-                        ? "bg-[#1E3A8A] text-white"
-                        : "text-[#7C8091]"
+                        ? "bg-[#1E3A8A] text-white" :
+                        ((path === "/admin/books" || path === "/admin/book-categories" || path === "/admin/book-categories/new-book-category") && item.label === "Book Management")
+                          ? "bg-[#1E3A8A] text-white" :
+                          "text-[#7C8091]"
                       }`}
                   >
                     <div className="flex justify-center items-center">{item.iconPath}</div>
@@ -159,16 +161,28 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
                       item.label === 'Book Management' &&
                       (
                         showDropdown ?
-                          <TfiAngleUp /> :
-                          <TfiAngleDown />
+                          <TfiAngleUp className="w-2 lg:w-5 h-2 lg:h-5" /> :
+                          <TfiAngleDown className="w-2 lg:w-5 h-2 lg:h-5" />
                       )
                     }
                   </Link>
                   {
                     (showDropdown && item.label === 'Book Management') &&
                     <div className="flex flex-col">
-                      <Link href="/admin/book-categories" className={`text-[#1E3A8A] font-medium p-3 pl-8 ml-8 ${path === '/admin/book-categories' ? 'border-l-2 border-[#1E3A8A]' : 'border-l border-[#F3EEF6]'}`}>Book Categories</Link>
-                      <Link href="/admin/books" className={`text-[#1E3A8A] font-medium p-3 pl-8 ml-8 ${path === '/admin/books' ? 'border-l-2 border-[#1E3A8A]' : 'border-l border-[#F3EEF6]'}`}>Books</Link>
+                      <Link href="/admin/book-categories" className={`text-[#1E3A8A] font-medium p-3 ${isOpen && "pl-8 ml-8"} ${(path === '/admin/book-categories' || path === "/admin/book-categories/new-book-category") ? 'border-l-2 border-[#1E3A8A]' : 'border-l border-[#F3EEF6]'}`}>
+                        {
+                          !isOpen ?
+                            <TbCategoryPlus /> :
+                            "Book Categories"
+                        }
+                      </Link>
+                      <Link href="/admin/books" className={`text-[#1E3A8A] font-medium p-3 ${isOpen && "pl-8 ml-8"} ${path === '/admin/books' ? 'border-l-2 border-[#1E3A8A]' : 'border-l border-[#F3EEF6]'}`}>
+                        {
+                          !isOpen ?
+                            <PiBookBookmark /> :
+                            "Books"
+                        }
+                      </Link>
                     </div>
                   }
                 </li>

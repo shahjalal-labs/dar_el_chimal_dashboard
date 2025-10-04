@@ -24,9 +24,9 @@ const TopNavbar = () => {
 
   return (
     <>
-      <div className="bg-white flex justify-between items-center gap-2 h-[100px] md:h-[90px] fixed z-20 top-0 left-[80px] lg:left-[250px] xl:left-[286px] right-0 w-[calc(100%-80px)] lg:w-[calc(100%-250px)] xl:w-[calc(100%-286px)] md:px-6">
+      <div className="bg-white flex justify-between items-center gap-2 h-[80px] lg:h-[90px] fixed z-20 top-0 left-[80px] lg:left-[250px] xl:left-[286px] right-0 w-[calc(100%-80px)] lg:w-[calc(100%-250px)] xl:w-[calc(100%-286px)] md:px-6">
         <div className="scale-75 md:scale-100">
-          <h1 className="md:text-2xl text-black font-bold">Overview</h1>
+          <h1 className="text-xl md:text-2xl text-black font-bold">Overview</h1>
         </div>
 
         <div className="flex justify-end items-center gap-2 lg:gap-4 scale-75 md:scale-100">

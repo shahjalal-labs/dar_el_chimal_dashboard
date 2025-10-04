@@ -17,6 +17,7 @@ import {
   SelectContent,
   SelectItem,
 } from '@/components/ui/select';
+import { SyncLoader } from 'react-spinners';
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
@@ -70,30 +71,36 @@ const RevenueChart = ({ data, revenueYear, setRevenueYear }: { data: any, revenu
           </Select>
         </div>
       </div>
-
-      <ResponsiveContainer width="100%" height={300}>
-        <AreaChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-          <defs>
-            <linearGradient id="orangeGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#1E3A8A" stopOpacity={0.4} />
-              <stop offset="100%" stopColor="#1E3A8A" stopOpacity={0} />
-            </linearGradient>
-          </defs>
-          <CartesianGrid strokeDasharray="3 3" vertical={false} />
-          <XAxis dataKey="label" />
-          <YAxis tickFormatter={(val) => `${val / 100}k`} />
-          <Tooltip content={<CustomTooltip />} />
-          <Area
-            type="monotone"
-            dataKey="value"
-            stroke="#1E3A8A"
-            fill="url(#orangeGradient)"
-            strokeWidth={3}
-            dot={{ r: 4 }}
-            activeDot={{ r: 6 }}
-          />
-        </AreaChart>
-      </ResponsiveContainer>
+      {
+        !data ?
+          <div className="flex justify-center items-center gap-4">
+            <span className="text-[#1E3A8A]">Student Overview is Loading</span>
+            <SyncLoader color='#1E3A8A' />
+          </div> :
+          <ResponsiveContainer width="100%" height={300}>
+            <AreaChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id="orangeGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#1E3A8A" stopOpacity={0.4} />
+                  <stop offset="100%" stopColor="#1E3A8A" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="label" />
+              <YAxis tickFormatter={(val) => `${val / 100}k`} />
+              <Tooltip content={<CustomTooltip />} />
+              <Area
+                type="monotone"
+                dataKey="value"
+                stroke="#1E3A8A"
+                fill="url(#orangeGradient)"
+                strokeWidth={3}
+                dot={{ r: 4 }}
+                activeDot={{ r: 6 }}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+      }
     </div>
   )
 };

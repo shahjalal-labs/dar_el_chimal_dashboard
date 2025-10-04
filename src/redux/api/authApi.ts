@@ -3,13 +3,6 @@ import { baseApi } from "./baseApi";
 
 export const AuthApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // createUser: builder.mutation({
-    //   query: (body) => ({
-    //     url: `/users/vendor`,
-    //     method: "POST",
-    //     body: body,
-    //   }),
-    // }),
     login: builder.mutation({
       query: (body) => ({
         url: `/auth/admin-login`,
@@ -51,31 +44,13 @@ export const AuthApi = baseApi.injectEndpoints({
         body: body,
       }),
     }),
-    addVendorsDoc: builder.mutation({
-      query: (body) => ({
-        url: `/users/vendor-docs`,
-        method: "PATCH",
-        body: body,
-      }),
-    }),
-    addBankInfo: builder.mutation({
-      query: ({ body }) => ({
-        url: `/payment/vendor-bankInfo`,
-        method: "PATCH",
-        body: body,
-      }),
-      invalidatesTags: ['bank']
-    }),
   }),
 });
 
 export const {
-  // useCreateUserMutation,
   useLoginMutation,
   useForgotPasswordMutation,
   useOtpUserMutation,
   useResetPasswordMutation,
-  useChangePasswordMutation,
-  useAddVendorsDocMutation,
-  useAddBankInfoMutation
+  useChangePasswordMutation
 } = AuthApi;

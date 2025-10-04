@@ -13,7 +13,7 @@ import { LoadingOutlined } from "@ant-design/icons";
 import Cookies from "js-cookie";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "@/redux/store/store";
-import { setUser, setUserToken } from "@/redux/features/authSlice";
+import { setUserToken } from "@/redux/features/authSlice";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import LeftSide from "./LeftSide";

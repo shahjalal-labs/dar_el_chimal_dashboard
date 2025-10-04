@@ -5,14 +5,13 @@ import React, { useEffect, useState } from 'react';
 import uploadImg from '@/assets/uploadImg.svg';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { IoArrowUpCircleOutline } from 'react-icons/io5';
 import Image from 'next/image';
 import { RxCross1 } from 'react-icons/rx';
 import { PiSpinner } from 'react-icons/pi';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-// import { useCreateBookCategoryMutation } from '@/redux/api/bookCategoryApi'; // example
+import { useCreateBookCategoryMutation } from '@/redux/api/admin/bookCategory';
 
 interface FormDataType {
     categoryName: string;
@@ -28,8 +27,7 @@ const NewBookCategory = () => {
     });
 
     const route = useRouter();
-    // const [CreateCategory, { isLoading }] = useCreateBookCategoryMutation();
-    const [isLoading, setIsLoading] = useState(false);
+    const [CreateCategory, { isLoading }] = useCreateBookCategoryMutation();
 
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
@@ -49,34 +47,25 @@ const NewBookCategory = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!formData.uploadImage || !formData.categoryName || !formData.description) {
-            toast.warning("Please fill all fields and upload an image.");
-            return;
-        }
-
         const payload = {
-            categoryName: formData.categoryName,
+            name: formData.categoryName,
             description: formData.description,
         };
 
         const body = new FormData();
         body.append('bodyData', JSON.stringify(payload));
-        body.append('image', formData.uploadImage);
+        if (formData.uploadImage) {
+            body.append('file', formData.uploadImage);
+        }
 
         try {
-            setIsLoading(true);
-            // const response = await CreateCategory(body).unwrap();
-            // if (response.success) {
-            //   toast.success(response.message);
-            //   route.push('/book-categories');
-            // }
-            await new Promise(res => setTimeout(res, 1000)); // fake loading
-            toast.success("Book category created successfully!");
-            route.push('/book-categories');
+            const response = await CreateCategory(body).unwrap();
+            if (response.success) {
+                toast.success(response.message);
+                route.push('/admin/book-categories');
+            }
         } catch (error) {
             toast.warning((error as any)?.data?.message || "Something went wrong");
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -96,16 +85,16 @@ const NewBookCategory = () => {
             {/* Form */}
             <div className='text-[#F9FAFB] bg-white rounded-xl p-6'>
                 <form onSubmit={handleSubmit} className='space-y-6'>
-                    {/* Category Name */}
+                    {/* Book Category Name */}
                     <div>
-                        <Label className='text-[#30373D] font-medium mb-2.5'>Category Name</Label>
+                        <Label className='text-[#30373D] font-medium mb-2.5'>Book Category Name</Label>
                         <Input
                             id='categoryName'
                             type='text'
-                            placeholder='Category Name'
+                            placeholder=''
                             value={formData.categoryName}
                             onChange={(e) => updateChange('categoryName', e.target.value)}
-                            className='border border-[#CBD5E1] mb-4'
+                            className='border border-[#CBD5E1] text-black mb-4'
                             required
                         />
                     </div>
@@ -116,17 +105,17 @@ const NewBookCategory = () => {
                         <Input
                             id='description'
                             type='text'
-                            placeholder='Category Description'
+                            placeholder=''
                             value={formData.description}
                             onChange={(e) => updateChange('description', e.target.value)}
-                            className='border border-[#CBD5E1] mb-4'
+                            className='border border-[#CBD5E1] text-black mb-4'
                             required
                         />
                     </div>
 
                     {/* Upload Image */}
                     <div>
-                        <Label className='text-[#30373D] font-medium mb-2.5'>Upload Picture</Label>
+                        <Label className='text-[#30373D] font-medium mb-2.5'>Upload Picture<span className='text-red-600'>*</span></Label>
                         {!previewUrl ? (
                             <label htmlFor='uploadImage'>
                                 <div className='border border-dashed border-[#CBD5E1] rounded-lg px-6 py-8 w-full cursor-pointer'>
