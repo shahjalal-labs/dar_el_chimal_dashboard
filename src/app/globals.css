@@ -1,10 +1,9 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 /* @import "tw-animate-css"; */
 /* @import "tw-animate-css"; */
 
 @custom-variant dark (&:is(.dark *));
-
-
 
 /* for hide message chat scrollbar */
 .scrollbar-hide::-webkit-scrollbar {
@@ -14,9 +13,6 @@
   -ms-overflow-style: none;  
   scrollbar-width: none;   
 }
-
-
-
 
 @theme inline {
   --color-background: var(--background);
@@ -136,7 +132,6 @@
   }
 }
 
-
 /* .bg-black\/50 {
     background-color: color-mix(in srgb, #0000002d 5%, transparent) !important;
     @supports (color: color-mix(in lab, red, red)) {
@@ -145,6 +140,6 @@
   } */
 
   /* [data-state="open"] > .fixed.inset-0.bg-black\/10 {
-  
+
 } */
 

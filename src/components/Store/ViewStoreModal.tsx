@@ -6,7 +6,6 @@ import { useGetSingleStoreQuery } from '@/redux/api/ecommerce/store';
 import { DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';
 import { SyncLoader } from 'react-spinners';
 import Image from 'next/image';
-import { getCountryName } from '@/lib/utils';
 
 const ViewStoreModal = ({ id }: { id: string }) => {
     const { data, isLoading } = useGetSingleStoreQuery(id);
@@ -55,7 +54,7 @@ const ViewStoreModal = ({ id }: { id: string }) => {
 
             {/* Store Details */}
             <div className="mt-6 space-y-2">
-                <p><span className="font-semibold">Country:</span> {getCountryName(store.countryCode)}</p>
+                {/* <p><span className="font-semibold">Country:</span> {getCountryName(store.countryCode)}</p> */}
                 <p><span className="font-semibold">Delivery Charge:</span> ${store.deliveryCharge}</p>
                 <p><span className="font-semibold">VAT:</span> {store.vat * 100}%</p>
                 <p><span className="font-semibold">Created At:</span> {new Date(store.createdAt).toLocaleString()}</p>

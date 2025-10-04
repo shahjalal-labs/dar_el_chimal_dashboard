@@ -12,9 +12,9 @@ import { Button } from '../ui/button';
 import { BiEditAlt } from "react-icons/bi";
 import ViewGroundModal from '../Playground/ViewGroundModal';
 import AddGroundModal from '../Playground/AddGroundModal';
+import { toast } from 'sonner';
 import UpdateGroundModal from '../Playground/UpdateGroundModal';
 import { useDeleteGroundMutation } from '@/redux/api/playground/ground';
-import { toast } from 'sonner';
 import BookingModal from '../Playground/BookingModal';
 import AddEventModal from '../Event/AddEventModal';
 import ViewEventModal from '../Event/ViewEventModal';
@@ -57,6 +57,7 @@ import { Input } from '../ui/input';
 import UpdateBookCategoryModal from '../Admin/BookCategories/UpdateBookCategoryModal';
 import ViewBookCategoryModal from '../Admin/BookCategories/ViewBookCategoryModal';
 import { useDeleteBookCategroyMutation } from '@/redux/api/admin/bookCategory';
+import Link from 'next/link';
 
 
 const DataTable = (
@@ -277,48 +278,60 @@ const DataTable = (
                       {
                         (pathname !== '/' && pathname !== '/vendor/event/manage-booking' && pathname !== '/vendor/ecommerce/order-management' && pathname !== '/admin/manage-customers' && pathname !== '/admin/manage-order' && pathname !== '/admin/manage-transactions') &&
                         (<TableCell className='flex items-center gap-2'>
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button onClick={() => setSelectedId(singleData?.Id)} className="bg-[#F4A64033] hover:bg-[#F4A64026] text-[#F4A640] transition-colors ease-in-out duration-200 cursor-pointer">
+                          {
+                            pathname === "/admin/books" &&
+                            <Link href={`/admin/books/book-overview/${singleData?.Id}`}>
+                              <Button className="bg-[#F4A64033] hover:bg-[#F4A64026] text-[#F4A640] transition-colors ease-in-out duration-200 cursor-pointer">
                                 <span className="sr-only">View details</span>
                                 <Eye className="h-6 w-6" />
                               </Button>
-                            </DialogTrigger>
-                            {
-                              selectedId === singleData?.Id &&
-                              <>
-                                {
-                                  pathname === '/admin/book-categories' ?
-                                    <ViewBookCategoryModal id={singleData?.Id} /> :
-                                    pathname === '/vendor/playground/ground-availability' ?
-                                      <ViewGroundModal id={singleData?.Id} /> :
-                                      pathname === '/vendor/event/manage-event' ?
-                                        <>
-                                          {
-                                            buttonTextTwo === "Add Team" ?
-                                              <ViewSingleTeamModal id={singleData?.Id} /> :
-                                              <ViewEventModal id={singleData?.Id} />
-                                          }
-                                        </> :
-                                        pathname === '/vendor/ecommerce/manage-on-store' ?
-                                          <ViewStoreModal id={singleData?.Id} /> :
-                                          pathname === '/vendor/ecommerce/manage-product' ?
-                                            <>
-                                              {
-                                                buttonTextTwo === "Add Category" ?
-                                                  <ViewSingleProductCategory id={singleData?.Id} /> :
-                                                  <ViewProductModal id={singleData?.Id} />
-                                              }
-                                            </> :
-                                            pathname === '/admin/sports-category' ?
-                                              <ViewParentCategory id={singleData?.Id} /> :
-                                              pathname === '/admin/manage-vendor' ?
-                                                <ViewVendorDetailsModal id={singleData?.Id} /> :
-                                                <></>
-                                }
-                              </>
-                            }
-                          </Dialog>
+                            </Link>
+                          }
+                          {
+                            pathname !== "/admin/books" &&
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button onClick={() => setSelectedId(singleData?.Id)} className="bg-[#F4A64033] hover:bg-[#F4A64026] text-[#F4A640] transition-colors ease-in-out duration-200 cursor-pointer">
+                                  <span className="sr-only">View details</span>
+                                  <Eye className="h-6 w-6" />
+                                </Button>
+                              </DialogTrigger>
+                              {
+                                selectedId === singleData?.Id &&
+                                <>
+                                  {
+                                    pathname === '/admin/book-categories' ?
+                                      <ViewBookCategoryModal id={singleData?.Id} /> :
+                                      pathname === '/vendor/playground/ground-availability' ?
+                                        <ViewGroundModal id={singleData?.Id} /> :
+                                        pathname === '/vendor/event/manage-event' ?
+                                          <>
+                                            {
+                                              buttonTextTwo === "Add Team" ?
+                                                <ViewSingleTeamModal id={singleData?.Id} /> :
+                                                <ViewEventModal id={singleData?.Id} />
+                                            }
+                                          </> :
+                                          pathname === '/vendor/ecommerce/manage-on-store' ?
+                                            <ViewStoreModal id={singleData?.Id} /> :
+                                            pathname === '/vendor/ecommerce/manage-product' ?
+                                              <>
+                                                {
+                                                  buttonTextTwo === "Add Category" ?
+                                                    <ViewSingleProductCategory id={singleData?.Id} /> :
+                                                    <ViewProductModal id={singleData?.Id} />
+                                                }
+                                              </> :
+                                              pathname === '/admin/sports-category' ?
+                                                <ViewParentCategory id={singleData?.Id} /> :
+                                                pathname === '/admin/manage-vendor' ?
+                                                  <ViewVendorDetailsModal id={singleData?.Id} /> :
+                                                  <></>
+                                  }
+                                </>
+                              }
+                            </Dialog>
+                          }
                           {
                             (pathname === '/admin/book-categories' || pathname === '/admin/books' || pathname === '/vendor/ecommerce/manage-on-store' || pathname === '/vendor/ecommerce/manage-product' || pathname === '/admin/sports-category') &&
                             (<>

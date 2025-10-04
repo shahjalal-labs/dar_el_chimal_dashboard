@@ -9,7 +9,14 @@ export const bookApi = baseApi.injectEndpoints({
             }),
             providesTags: ["books"],
         }),
+        getSingleBook: builder.query({
+            query: (id) => ({
+                url: `/book/${id}`,
+                method: "GET",
+            }),
+            providesTags: ["books"],
+        }),
     }),
 });
 
-export const { useGetAllBooksQuery } = bookApi;
+export const { useGetAllBooksQuery, useGetSingleBookQuery } = bookApi;
