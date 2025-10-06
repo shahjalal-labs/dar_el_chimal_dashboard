@@ -42,4 +42,10 @@ export const bookCategoryApi = baseApi.injectEndpoints({
     }),
 });
 
-export const { useCreateBookCategoryMutation, useGetAllBookCategoriesQuery, useGetSingleBookCategoryQuery, useUpdateBookCategoryMutation, useDeleteBookCategroyMutation } = bookCategoryApi;
+export const {
+    useCreateBookCategoryMutation,
+    useGetAllBookCategoriesQuery,
+    useGetSingleBookCategoryQuery,
+    useUpdateBookCategoryMutation,
+    useDeleteBookCategroyMutation
+} = bookCategoryApi;

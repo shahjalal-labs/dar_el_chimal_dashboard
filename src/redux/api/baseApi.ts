@@ -23,19 +23,8 @@ export const baseApi = createApi({
   endpoints: () => ({}),
   tagTypes: [
     "books",
-    "users",
-    "profile",
     "admin",
-    "uploadFile",
     "notifications",
-    'booking',
-    'event',
-    'ground',
-    'team',
-    'ecommerce',
-    'store',
-    'product',
-    'category',
-    'bank'
+    "profile"
   ],
 });

@@ -8,6 +8,7 @@ import Image from 'next/image';
 import defaultImg from '@/assets/no-img.jpg'
 import { useGetAllBooksQuery } from '@/redux/api/admin/book';
 import { FaPlus } from 'react-icons/fa';
+import Link from 'next/link';
 
 const Books = () => {
     const [currentPage, setCurrentPage] = useState(1);
@@ -99,12 +100,12 @@ const Books = () => {
                     <h1 className='text-2xl font-bold mb-3'>Book List</h1>
                     <p className='font-medium'><span className='text-[#72727299]'>Book Management</span><span className='text-[#72727299] px-2'>/</span>Book List</p>
                 </div>
-                <div>
+                <Link href="/admin/books/add-new-book">
                     <Button className='bg-transparent text-[#1E3A8A] border border-[#1E3A8A] hover:bg-transparent cursor-pointer'>
                         <FaPlus />
                         Add New Book
                     </Button>
-                </div>
+                </Link>
             </div>
 
             <DataTable title="Book List" data={formattedData} currentPage={currentPage} willSearch={true} />

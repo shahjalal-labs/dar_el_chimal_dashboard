@@ -1,0 +1,160 @@
+"use client";
+
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { CgSoftwareUpload } from 'react-icons/cg';
+import { RxCross1 } from 'react-icons/rx';
+
+const Resource = () => {
+    const [resourceType, setResourceType] = useState<string>("video");
+    const [resourceTitle, setResourceTitle] = useState("");
+    const [resourceDescription, setResourceDescription] = useState("");
+    const [resourceFile, setResourceFile] = useState<File | null>(null);
+    const [resourceLink, setResourceLink] = useState("");
+    const [fileName, setFileName] = useState<string | null>(null);
+
+    const handleRemoveResourceFile = () => {
+        setResourceFile(null);
+        setFileName(null);
+    };
+
+    const handleResourceSubmit = () => {
+        console.log({
+            resourceType,
+            resourceTitle,
+            resourceDescription,
+            resourceFile,
+            resourceLink,
+        });
+    };
+
+    return (
+        <div className="space-y-5">
+            <h2 className="text-2xl font-bold">Upload New Resource</h2>
+
+            {/* Resource Type */}
+            <div>
+                <Label className="block text-lg font-medium mb-4">Resource Type</Label>
+                <div className="flex gap-6">
+                    {["audio", "video", "pdf"].map((type) => (
+                        <label key={type} className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={resourceType === type}
+                                onChange={() => setResourceType(type)}
+                                className="h-4 w-4 accent-[#1E3A8A] stroke-[#D8D8D8]"
+                            />
+                            <span className="capitalize text-[#4C4C4C]">{type}</span>
+                        </label>
+                    ))}
+                </div>
+            </div>
+
+            {/* Title */}
+            <div>
+                <Label>Title</Label>
+                <Input
+                    placeholder="Enter your resource title"
+                    value={resourceTitle}
+                    onChange={(e) => setResourceTitle(e.target.value)}
+                />
+            </div>
+
+            {/* Description */}
+            <div>
+                <Label>Description</Label>
+                <textarea
+                    placeholder="Enter your resource description"
+                    className="border border-[#CBD5E1] rounded-md p-2 w-full h-24 mt-2"
+                    value={resourceDescription}
+                    onChange={(e) => setResourceDescription(e.target.value)}
+                />
+            </div>
+
+            {/* File Upload */}
+            <div>
+                <Label>File Upload or Link</Label>
+                {!fileName ? (
+                    <label htmlFor="resourceFile">
+                        <div className="border border-dashed border-[#CBD5E1] rounded-lg px-6 py-8 w-full cursor-pointer mt-2">
+                            <input
+                                id="resourceFile"
+                                type="file"
+                                accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.mp4,.mp3"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0] ?? null;
+                                    if (file) {
+                                        setResourceFile(file);
+                                        setFileName(file.name);
+                                    }
+                                }}
+                                className="hidden"
+                            />
+                            <div className="flex flex-col items-center gap-2">
+                                <CgSoftwareUpload className="w-6 h-6" />
+                                <p className="text-[#4C4C4C] font-medium text-center">
+                                    Choose File
+                                    <br />
+                                    <span className="text-sm font-normal text-[#636F85]">
+                                        (Excel, words, pdf, images, links)
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </label>
+                ) : (
+                    <div className="relative flex flex-col items-center p-6 border border-[#CBD5E1] rounded-lg bg-gray-50">
+                        <button
+                            onClick={handleRemoveResourceFile}
+                            className="absolute top-2 right-2 bg-gray-300 rounded-full p-1 hover:bg-gray-400 transition"
+                        >
+                            <RxCross1 className="w-3 h-3" />
+                        </button>
+                        <p className="text-[#1E3A8A] font-medium text-center break-all">
+                            {fileName}
+                        </p>
+                    </div>
+                )}
+            </div>
+
+            {/* OR Link */}
+            <div className="text-center text-[#D8D8D8] my-2">────────── <span className="text-[#4C4C4C]">Or</span> ──────────</div>
+
+            <div>
+                <Input
+                    placeholder="Paste your link"
+                    value={resourceLink}
+                    onChange={(e) => setResourceLink(e.target.value)}
+                />
+            </div>
+
+            {/* Buttons */}
+            <div className="flex justify-center items-center gap-3 pt-3">
+                <Button
+                    variant="outline"
+                    className="px-6 border-[#636F85] text-[#636F85] font-medium"
+                    onClick={() => {
+                        setResourceFile(null);
+                        setFileName(null);
+                        setResourceTitle("");
+                        setResourceDescription("");
+                        setResourceLink("");
+                    }}
+                >
+                    Cancel
+                </Button>
+
+                <Button
+                    onClick={handleResourceSubmit}
+                    className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A] text-white font-medium px-6"
+                >
+                    Upload Resource
+                </Button>
+            </div>
+        </div>
+    );
+};
+
+export default Resource;

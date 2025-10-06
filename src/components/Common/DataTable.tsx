@@ -10,32 +10,7 @@ import { SyncLoader } from "react-spinners";
 import { RiDeleteBin6Line } from 'react-icons/ri';
 import { Button } from '../ui/button';
 import { BiEditAlt } from "react-icons/bi";
-import ViewGroundModal from '../Playground/ViewGroundModal';
-import AddGroundModal from '../Playground/AddGroundModal';
 import { toast } from 'sonner';
-import UpdateGroundModal from '../Playground/UpdateGroundModal';
-import { useDeleteGroundMutation } from '@/redux/api/playground/ground';
-import BookingModal from '../Playground/BookingModal';
-import AddEventModal from '../Event/AddEventModal';
-import ViewEventModal from '../Event/ViewEventModal';
-import UpdateEventModal from '../Event/UpdateEventModal';
-import ViewTeamsModal from '../Teams/ViewTeamsModal';
-import CreateTeamModal from '../Teams/CreateTeamModal';
-import ViewSingleTeamModal from '../Teams/ViewSingleTeamModal';
-import UpdateTeamModal from '../Teams/UpdateTeamModal';
-import ViewStoreModal from '../Store/ViewStoreModal';
-import AddStoreModal from '../Store/AddStoreModal';
-import UpdateStoreModal from '../Store/UpdateStoreModal';
-import ViewProductModal from '../Product/ViewProductModal';
-import AddProductModal from '../Product/AddProductModal';
-import UpdateProductModal from '../Product/UpdateProductModal';
-import AddParentCategory from '../ParentCategory/AddParentCategory';
-import ViewParentCategory from '../ParentCategory/ViewParentCategory';
-import UpdateParentCategory from '../ParentCategory/UpdateParentCategory';
-import ViewProductCategory from '../ProductCategory/ViewProductCategory';
-import AddProductCategory from '../ProductCategory/AddProductCategory';
-import ViewSingleProductCategory from '../ProductCategory/ViewSingleProductCategory';
-import UpdateProductCategory from '../ProductCategory/UpdateProductCategory';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -48,11 +23,6 @@ import {
   AlertDialogTrigger
 } from '../ui/alert-dialog';
 import { PiSpinner } from 'react-icons/pi';
-import { useDeleteProductCategroyMutation } from '@/redux/api/ecommerce/productCategory';
-import { useDeleteProductMutation } from '@/redux/api/ecommerce/product';
-import { useDeleteStoreMutation } from '@/redux/api/ecommerce/store';
-import { useDeleteParentCategroyMutation } from '@/redux/api/admin/parentCategory';
-import ViewVendorDetailsModal from '../Admin/ViewVendorDetailsModal';
 import { Input } from '../ui/input';
 import UpdateBookCategoryModal from '../Admin/BookCategories/UpdateBookCategoryModal';
 import ViewBookCategoryModal from '../Admin/BookCategories/ViewBookCategoryModal';
@@ -91,10 +61,6 @@ const DataTable = (
   const [searchQuery, setSearchQuery] = useState("")
 
   const [DeleteBookCategory, { isLoading: isBookCategoryDeleting }] = useDeleteBookCategroyMutation();
-  const [DeleteProductCategroy, { isLoading: isProductCategoryDeleting }] = useDeleteProductCategroyMutation();
-  const [DeleteProduct, { isLoading: isProductDeleting }] = useDeleteProductMutation();
-  const [DeleteStore, { isLoading: isStoreDeleting }] = useDeleteStoreMutation();
-  const [DeleteParentCategroy, { isLoading: isParentCategroyDeleting }] = useDeleteParentCategroyMutation();
 
   const handleDelete = async (id: string) => {
     try {
@@ -104,32 +70,32 @@ const DataTable = (
           toast.success(response.message)
         }
       }
-      if (pathname === '/vendor/ecommerce/manage-product') {
-        if (title === 'Manage Product Category') {
-          const response = await DeleteProductCategroy(id).unwrap();
-          if (response.success) {
-            toast.success(response.message)
-          }
-        }
-        else {
-          const response = await DeleteProduct(id).unwrap();
-          if (response.success) {
-            toast.success(response.message)
-          }
-        }
-      }
-      if (pathname === '/vendor/ecommerce/manage-on-store') {
-        const response = await DeleteStore(id).unwrap();
-        if (response.success) {
-          toast.success(response.message)
-        }
-      }
-      if (pathname === '/admin/sports-category') {
-        const response = await DeleteParentCategroy(id).unwrap();
-        if (response.success) {
-          toast.success(response.message)
-        }
-      }
+      // if (pathname === '/vendor/ecommerce/manage-product') {
+      //   if (title === 'Manage Product Category') {
+      //     const response = await DeleteProductCategroy(id).unwrap();
+      //     if (response.success) {
+      //       toast.success(response.message)
+      //     }
+      //   }
+      //   else {
+      //     const response = await DeleteProduct(id).unwrap();
+      //     if (response.success) {
+      //       toast.success(response.message)
+      //     }
+      //   }
+      // }
+      // if (pathname === '/vendor/ecommerce/manage-on-store') {
+      //   const response = await DeleteStore(id).unwrap();
+      //   if (response.success) {
+      //     toast.success(response.message)
+      //   }
+      // }
+      // if (pathname === '/admin/sports-category') {
+      //   const response = await DeleteParentCategroy(id).unwrap();
+      //   if (response.success) {
+      //     toast.success(response.message)
+      //   }
+      // }
     } catch (err) {
       toast.warning((err as any)?.data?.message || "Something went wrong");
     }
@@ -176,7 +142,7 @@ const DataTable = (
                   {buttonText}
                 </button>
               </DialogTrigger>
-              {
+              {/* {
                 pathname === '/vendor/event/manage-event' ?
                   <AddEventModal /> :
                   pathname === '/vendor/ecommerce/manage-on-store' ?
@@ -186,7 +152,7 @@ const DataTable = (
                       pathname === '/admin/sports-category' ?
                         <AddParentCategory /> :
                         <AddGroundModal />
-              }
+              } */}
             </Dialog>
           )}
           {isButtonTwo && (
@@ -199,7 +165,7 @@ const DataTable = (
                   {buttonTextTwo}
                 </button>
               </DialogTrigger>
-              {
+              {/* {
                 pathname === '/vendor/event/manage-event' ?
                   <>
                     {
@@ -217,7 +183,7 @@ const DataTable = (
                       }
                     </> :
                     <></>
-              }
+              } */}
             </Dialog>
           )}
         </div>
@@ -302,31 +268,7 @@ const DataTable = (
                                   {
                                     pathname === '/admin/book-categories' ?
                                       <ViewBookCategoryModal id={singleData?.Id} /> :
-                                      pathname === '/vendor/playground/ground-availability' ?
-                                        <ViewGroundModal id={singleData?.Id} /> :
-                                        pathname === '/vendor/event/manage-event' ?
-                                          <>
-                                            {
-                                              buttonTextTwo === "Add Team" ?
-                                                <ViewSingleTeamModal id={singleData?.Id} /> :
-                                                <ViewEventModal id={singleData?.Id} />
-                                            }
-                                          </> :
-                                          pathname === '/vendor/ecommerce/manage-on-store' ?
-                                            <ViewStoreModal id={singleData?.Id} /> :
-                                            pathname === '/vendor/ecommerce/manage-product' ?
-                                              <>
-                                                {
-                                                  buttonTextTwo === "Add Category" ?
-                                                    <ViewSingleProductCategory id={singleData?.Id} /> :
-                                                    <ViewProductModal id={singleData?.Id} />
-                                                }
-                                              </> :
-                                              pathname === '/admin/sports-category' ?
-                                                <ViewParentCategory id={singleData?.Id} /> :
-                                                pathname === '/admin/manage-vendor' ?
-                                                  <ViewVendorDetailsModal id={singleData?.Id} /> :
-                                                  <></>
+                                      <></>
                                   }
                                 </>
                               }
@@ -347,27 +289,7 @@ const DataTable = (
                                   (
                                     pathname === '/admin/book-categories' ?
                                       <UpdateBookCategoryModal id={singleData?.Id} /> :
-                                      pathname === '/admin/books' ?
-                                        <>
-                                          {
-                                            buttonTextTwo === "Add Team" ?
-                                              <UpdateTeamModal id={singleData?.Id} /> :
-                                              <UpdateEventModal id={singleData?.Id} />
-                                          }
-                                        </> :
-                                        pathname === '/vendor/ecommerce/manage-on-store' ?
-                                          <UpdateStoreModal id={singleData?.Id} /> :
-                                          pathname === '/vendor/ecommerce/manage-product' ?
-                                            <>
-                                              {
-                                                buttonTextTwo === "Add Category" ?
-                                                  <UpdateProductCategory id={singleData?.Id} /> :
-                                                  <UpdateProductModal id={singleData?.Id} />
-                                              }
-                                            </> :
-                                            pathname === '/admin/sports-category' ?
-                                              <UpdateParentCategory id={singleData?.Id} /> :
-                                              <></>
+                                      <></>
                                   )
                                 }
                               </Dialog>
@@ -379,7 +301,7 @@ const DataTable = (
                                       className="bg-[#FE4D4F33] hover:bg-[#FE4D4F26] text-[#FE4D4F] transition-colors ease-in-out duration-200 cursor-pointer">
                                       <span className="sr-only">Delete</span>
                                       {
-                                        ((isBookCategoryDeleting || isProductCategoryDeleting || isProductDeleting || isStoreDeleting || isParentCategroyDeleting) && selectedId === singleData?.Id) ?
+                                        ((isBookCategoryDeleting) && selectedId === singleData?.Id) ?
                                           <div className="animate-spin">
                                             <PiSpinner className="h-4 w-4" />
                                           </div> :

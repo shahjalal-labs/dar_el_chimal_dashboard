@@ -4,13 +4,12 @@ import type { NextRequest } from "next/server";
 export function middleware(req: NextRequest) {
   const token = req.cookies.get("token")?.value;
   // const role = req.cookies.get("role")?.value;
-  // const category = req.cookies.get("category")?.value;
   const { pathname } = req.nextUrl;
 
-  // if (!token) {
-  //   const destination = `/login?redirect=${encodeURIComponent(pathname)}`;
-  //   return NextResponse.redirect(new URL(destination, req.url));
-  // }
+  if (!token) {
+    const destination = `/select-role?redirect=${encodeURIComponent(pathname)}`;
+    return NextResponse.redirect(new URL(destination, req.url));
+  }
 
   // const roleMap = {
   //   Leader: "/leader",
@@ -31,25 +30,11 @@ export function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     "/",
-    "/admin/ecommerce-category",
-    "/admin/manage-customers",
-    "/admin/manage-finances",
-    "/admin/manage-order",
-    "/admin/manage-revenue",
-    "/admin/manage-transactions",
-    "/admin/manage-vendor",
-    "/admin/payment-management",
-    "/admin/sports-category",
-    "/vendor/ecommerce/manage-cashiers",
-    "/vendor/ecommerce/manage-on-store",
-    "/vendor/ecommerce/manage-product",
-    "/vendor/ecommerce/order-management",
-    "/vendor/event/manage-booking",
-    "/vendor/event/manage-event",
-    "/vendor/playground/ground-availability",
-    "/vendor/playground/ground-details",
-    "/vendor/playground/playground-booking",
-    "/bank-info",
+    "/admin/book-categories",
+    "/admin/book-categories/new-book-category",
+    "/admin/books",
+    "/admin/books/add-new-book",
+    "/admin/books/book-overview",
     "/settings",
   ],
 };

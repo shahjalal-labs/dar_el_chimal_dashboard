@@ -150,7 +150,7 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
                       }
                     ${path === item.route
                         ? "bg-[#1E3A8A] text-white" :
-                        ((path === "/admin/books" || path === "/admin/book-categories" || path === "/admin/book-categories/new-book-category") && item.label === "Book Management")
+                        ((path === "/admin/books" || path === "/admin/book-categories" || path === "/admin/book-categories/new-book-category" || path === "/admin/books/add-new-book") && item.label === "Book Management")
                           ? "bg-[#1E3A8A] text-white" :
                           "text-[#7C8091]"
                       }`}
@@ -176,7 +176,7 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
                             "Book Categories"
                         }
                       </Link>
-                      <Link href="/admin/books" className={`text-[#1E3A8A] font-medium p-3 ${isOpen && "pl-8 ml-8"} ${path === '/admin/books' ? 'border-l-2 border-[#1E3A8A]' : 'border-l border-[#F3EEF6]'}`}>
+                      <Link href="/admin/books" className={`text-[#1E3A8A] font-medium p-3 ${isOpen && "pl-8 ml-8"} ${(path === '/admin/books' || path === "/admin/books/add-new-book") ? 'border-l-2 border-[#1E3A8A]' : 'border-l border-[#F3EEF6]'}`}>
                         {
                           !isOpen ?
                             <PiBookBookmark /> :

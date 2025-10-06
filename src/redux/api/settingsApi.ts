@@ -7,7 +7,7 @@ export const settingsApi = baseApi.injectEndpoints({
                 url: `/auth/profile`,
                 method: 'GET',
             }),
-            providesTags: ['profile']
+            providesTags: ["profile"]
         }),
         updateMyProfile: builder.mutation({
             query: (body) => ({
@@ -15,7 +15,7 @@ export const settingsApi = baseApi.injectEndpoints({
                 method: 'PATCH',
                 body: body
             }),
-            invalidatesTags: ['profile']
+            invalidatesTags: ["profile"]
         }),
         updateMyProfileImg: builder.mutation({
             query: (body) => ({
@@ -23,9 +23,13 @@ export const settingsApi = baseApi.injectEndpoints({
                 method: 'PATCH',
                 body: body
             }),
-            invalidatesTags: ['profile']
+            invalidatesTags: ["profile"]
         })
     }),
 })
 
-export const { useGetMyProfileQuery, useUpdateMyProfileMutation, useUpdateMyProfileImgMutation } = settingsApi;
+export const {
+    useGetMyProfileQuery,
+    useUpdateMyProfileMutation,
+    useUpdateMyProfileImgMutation
+} = settingsApi;

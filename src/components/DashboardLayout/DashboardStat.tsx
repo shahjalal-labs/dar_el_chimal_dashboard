@@ -8,14 +8,10 @@ import one from '@/assets/adminStatOne.svg';
 import two from '@/assets/adminStatTwo.svg';
 import three from '@/assets/adminStatThree.svg';
 import four from '@/assets/adminStatFour.svg';
-import { useGetEventStatQuery } from "@/redux/api/eventOrganizer/stat";
-import { useGetEcommerceStatQuery } from "@/redux/api/ecommerce/stat";
 import { useGetAdminStatQuery } from "@/redux/api/admin/stat";
 
 const DashboardStat = () => {
   const authState = useSelector(useAuth);
-  const { data: eventStat } = useGetEventStatQuery(undefined);
-  const { data: ecommerceStat } = useGetEcommerceStatQuery(undefined);
   const { data: adminStat } = useGetAdminStatQuery(undefined);
 
   const stats =
@@ -28,16 +24,8 @@ const DashboardStat = () => {
       ] :
       authState.role === "Student" ?
         [
-          { metric: "Total Earnings", img: one, value: ecommerceStat?.result?.totalEarning, background: "#FFEFE7" },
-          { metric: "Complete Booking", img: two, value: ecommerceStat?.result?.totalCompleteBooking, background: "#FFEFE7" },
-          { metric: "Active Booking", img: three, value: ecommerceStat?.result?.totalActiveBooking, background: "#FFEFE7" },
-          { metric: "Pending Booking", img: four, value: ecommerceStat?.result?.totalPendingBooking, background: "#FFEFE7" },
         ] :
         [
-          { metric: "Total Earnings", img: one, value: eventStat?.result?.totalEarning, background: "#FFEFE7" },
-          { metric: "Complete Order", img: two, value: eventStat?.result?.totalCompleteBooking, background: "#FFEFE7" },
-          { metric: "Booking Order", img: three, value: eventStat?.result?.totalActiveBooking, background: "#FFEFE7" },
-          { metric: "Pending Order", img: four, value: eventStat?.result?.totalPendingBooking, background: "#FFEFE7" },
         ]
 
   return (
