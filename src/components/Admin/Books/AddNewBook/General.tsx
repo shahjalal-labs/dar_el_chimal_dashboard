@@ -1,85 +1,142 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import Image from 'next/image';
-import Link from 'next/link';
-import { RxCross1 } from 'react-icons/rx';
-import uploadImg from "@/assets/uploadImg.svg";
+"use client";
 
-interface FormDataType {
-    categoryName: string;
-    description: string;
-    uploadImage: File | null;
-    uploadPdf: File | null;
-}
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import Image from "next/image";
+import Link from "next/link";
+import { RxCross1 } from "react-icons/rx";
+import uploadImg from "@/assets/uploadImg.svg";
+import { setBookData } from "@/redux/features/bookSlice";
+import { setActiveBookTab } from "@/redux/features/uiSlice";
+import { RootState } from "@/redux/store/store";
 
 const General = () => {
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-    const [pdfName, setPdfName] = useState<string | null>(null);
-    const [formData, setFormData] = useState<FormDataType>({
-        categoryName: "",
-        description: "",
-        uploadImage: null,
-        uploadPdf: null,
-    });
+    const dispatch = useDispatch();
+    const { bookName, description, isbn, author, category, uploadImage, uploadPdf } =
+        useSelector((state: RootState) => state.book);
 
-    const updateChange = (field: keyof FormDataType, value: string | File | null) => {
-        setFormData((prev) => ({ ...prev, [field]: value }));
+    const [previewUrl, setPreviewUrl] = useState<string | null>(
+        uploadImage ? URL.createObjectURL(uploadImage) : null
+    );
+    const [pdfName, setPdfName] = useState<string | null>(uploadPdf ? uploadPdf.name : null);
 
-        if (field === "uploadImage" && value instanceof File) {
-            const imageUrl = URL.createObjectURL(value);
-            setPreviewUrl(imageUrl);
-        }
-
-        if (field === "uploadPdf" && value instanceof File) {
-            setPdfName(value.name);
+    // ✅ Handle Image Upload
+    const handleImageChange = (file: File | null) => {
+        if (file) {
+            setPreviewUrl(URL.createObjectURL(file));
+            dispatch(setBookData({ uploadImage: file }));
+        } else {
+            setPreviewUrl(null);
+            dispatch(setBookData({ uploadImage: null }));
         }
     };
 
-    const handleRemoveImage = () => {
-        setPreviewUrl(null);
-        updateChange("uploadImage", null);
+    // ✅ Handle PDF Upload
+    const handlePdfChange = (file: File | null) => {
+        if (file) {
+            setPdfName(file.name);
+            dispatch(setBookData({ uploadPdf: file }));
+        } else {
+            setPdfName(null);
+            dispatch(setBookData({ uploadPdf: null }));
+        }
     };
 
-    const handleRemovePdf = () => {
-        setPdfName(null);
-        updateChange("uploadPdf", null);
+    // ✅ Submit handler
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        dispatch(setActiveBookTab("resources"));
+        console.log("Saved to Redux:", {
+            bookName,
+            description,
+            isbn,
+            author,
+            category,
+            uploadImage,
+            uploadPdf,
+        });
     };
+
+    // ✅ Disable button if required fields are empty
+    const isButtonDisabled =
+        !bookName || !description || !isbn || !author || !category || !uploadImage || !uploadPdf;
 
     return (
-        <div className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Book Name */}
             <div>
                 <Label>Book Name</Label>
-                <Input 
-                type='text'
+                <Input
+                    type="text"
+                    placeholder="Enter book name"
+                    value={bookName}
+                    onChange={(e) => dispatch(setBookData({ bookName: e.target.value }))}
+                    className=""
+                    required
                 />
             </div>
 
+            {/* Description */}
             <div>
                 <Label>Description</Label>
-                <Input />
+                <Input
+                    type="text"
+                    placeholder="Enter description"
+                    value={description}
+                    onChange={(e) => dispatch(setBookData({ description: e.target.value }))}
+                    className=""
+                    required
+                />
             </div>
 
+            {/* ISBN & Author */}
             <div className="flex gap-6">
                 <div className="flex-1">
                     <Label>ISBN</Label>
-                    <Input />
+                    <Input
+                        type="text"
+                        placeholder="Enter ISBN"
+                        value={isbn}
+                        onChange={(e) => dispatch(setBookData({ isbn: e.target.value }))}
+                        className=""
+                        required
+                    />
                 </div>
                 <div className="flex-1">
                     <Label>Author</Label>
-                    <Input />
+                    <Input
+                        type="text"
+                        placeholder="Enter author name"
+                        value={author}
+                        onChange={(e) => dispatch(setBookData({ author: e.target.value }))}
+                        className=""
+                        required
+                    />
                 </div>
             </div>
 
+            {/* Category */}
             <div>
                 <Label>Book Category</Label>
-                <Input />
+                <Input
+                    type="text"
+                    placeholder="Enter category"
+                    value={category}
+                    onChange={(e) => dispatch(setBookData({ category: e.target.value }))}
+                    className=""
+                    required
+                />
             </div>
 
+            {/* File Uploads */}
             <div className="flex gap-6">
+                {/* Image Upload */}
                 <div className="flex-1">
-                    <Label className="text-[#30373D] font-medium mb-2.5">
+                    <Label className="font-medium mb-2.5">
                         Book Cover<span className="text-red-600">*</span>
                     </Label>
 
@@ -90,27 +147,14 @@ const General = () => {
                                     id="uploadImage"
                                     type="file"
                                     accept="image/*"
-                                    onChange={(e) => {
-                                        const file = e.target.files?.[0] ?? null;
-                                        updateChange("uploadImage", file);
-                                    }}
+                                    onChange={(e) => handleImageChange(e.target.files?.[0] ?? null)}
                                     className="hidden"
-                                    required
                                 />
                                 <div className="flex flex-col items-center gap-2">
-                                    <Image
-                                        src={uploadImg}
-                                        height={40}
-                                        width={40}
-                                        alt="Upload"
-                                        className="w-10 mx-auto"
-                                        priority
-                                    />
+                                    <Image src={uploadImg} height={40} width={40} alt="Upload" />
                                     <p className="text-[#636F85] text-center mt-1">
                                         Drag and drop or{" "}
-                                        <span className="text-[#2A66FF] underline">
-                                            browse
-                                        </span>
+                                        <span className="text-[#2A66FF] underline">browse</span>
                                     </p>
                                 </div>
                             </div>
@@ -118,8 +162,8 @@ const General = () => {
                     ) : (
                         <div className="flex justify-center relative w-fit mx-auto group">
                             <div
-                                onClick={handleRemoveImage}
-                                className="bg-[#bdbfc4]/60 rounded-full p-2 absolute z-20 top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
+                                onClick={() => handleImageChange(null)}
+                                className="bg-[#bdbfc4]/60 rounded-full p-2 absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                             >
                                 <RxCross1 className="h-3 w-3" />
                             </div>
@@ -127,16 +171,16 @@ const General = () => {
                                 src={previewUrl}
                                 height={200}
                                 width={300}
-                                alt="Image Preview"
+                                alt="Preview"
                                 className="w-full h-[200px] object-cover rounded-md"
-                                priority
                             />
                         </div>
                     )}
                 </div>
 
+                {/* PDF Upload */}
                 <div className="flex-1">
-                    <Label className="text-[#30373D] font-medium mb-2.5">
+                    <Label className="font-medium mb-2.5">
                         PDF File<span className="text-red-600">*</span>
                     </Label>
 
@@ -147,27 +191,14 @@ const General = () => {
                                     id="uploadPdf"
                                     type="file"
                                     accept="application/pdf"
-                                    onChange={(e) => {
-                                        const file = e.target.files?.[0] ?? null;
-                                        updateChange("uploadPdf", file);
-                                    }}
+                                    onChange={(e) => handlePdfChange(e.target.files?.[0] ?? null)}
                                     className="hidden"
-                                    required
                                 />
                                 <div className="flex flex-col items-center gap-2">
-                                    <Image
-                                        src={uploadImg}
-                                        height={40}
-                                        width={40}
-                                        alt="Upload PDF"
-                                        className="w-10 mx-auto"
-                                        priority
-                                    />
+                                    <Image src={uploadImg} height={40} width={40} alt="Upload" />
                                     <p className="text-[#636F85] text-center mt-1">
                                         Drag and drop or{" "}
-                                        <span className="text-[#2A66FF] underline">
-                                            browse
-                                        </span>
+                                        <span className="text-[#2A66FF] underline">browse</span>
                                     </p>
                                 </div>
                             </div>
@@ -175,8 +206,9 @@ const General = () => {
                     ) : (
                         <div className="relative flex flex-col items-center p-6 border border-[#CBD5E1] rounded-lg bg-gray-50">
                             <button
-                                onClick={handleRemovePdf}
-                                className="absolute top-2 right-2 bg-gray-300 rounded-full p-1 hover:bg-gray-400 transition"
+                                type="button"
+                                onClick={() => handlePdfChange(null)}
+                                className="absolute top-2 right-2 bg-gray-300 rounded-full p-1 hover:bg-gray-400"
                             >
                                 <RxCross1 className="w-3 h-3" />
                             </button>
@@ -189,21 +221,29 @@ const General = () => {
                 </div>
             </div>
 
-            <div className="flex justify-center items-center gap-3 pt-3">
+            {/* Buttons */}
+            <div className="flex justify-center gap-3 pt-3">
                 <Link href="/admin/books">
                     <Button
                         variant="outline"
-                        className="px-6 border-[#636F85] text-[#636F85] font-medium transition-all duration-500 ease-in-out cursor-pointer"
+                        className="px-6 border-[#636F85] text-[#636F85]"
                     >
                         Cancel
                     </Button>
                 </Link>
 
-                <Button className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A] text-white font-medium transition-all duration-500 ease-in-out cursor-pointer px-6">
+                <Button
+                    type="submit"
+                    disabled={isButtonDisabled}
+                    className={`px-6 text-white font-medium border border-[#1E3A8A] transition-all duration-300 ${isButtonDisabled
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-[#1E3A8A] hover:bg-[#1E3A8A]/80"
+                        }`}
+                >
                     Save & Continue
                 </Button>
             </div>
-        </div>
+        </form>
     );
 };
 
