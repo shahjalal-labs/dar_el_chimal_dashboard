@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,61 +9,54 @@ import Image from "next/image";
 import Link from "next/link";
 import { RxCross1 } from "react-icons/rx";
 import uploadImg from "@/assets/uploadImg.svg";
-import { setBookData } from "@/redux/features/bookSlice";
 import { setActiveBookTab } from "@/redux/features/uiSlice";
 import { RootState } from "@/redux/store/store";
+import { setAuthor, setBookName, setCategory, setDescription, setISBN, setPreviewImage, setPreviewPdf, setUploadImage, setUploadPdf } from "@/redux/features/bookSlice";
+import GetBookCategory from "@/components/Common/GetBookCategory";
 
 const General = () => {
     const dispatch = useDispatch();
-    const { bookName, description, isbn, author, category, uploadImage, uploadPdf } =
-        useSelector((state: RootState) => state.book);
+    const {
+        bookName,
+        description,
+        isbn,
+        author,
+        categoryName,
+        categoryImage,
+        uploadImage,
+        previewImage,
+        uploadPdf,
+        previewPdf
+    } = useSelector((state: RootState) => state.book);
 
-    const [previewUrl, setPreviewUrl] = useState<string | null>(
-        uploadImage ? URL.createObjectURL(uploadImage) : null
-    );
-    const [pdfName, setPdfName] = useState<string | null>(uploadPdf ? uploadPdf.name : null);
-
-    // ✅ Handle Image Upload
     const handleImageChange = (file: File | null) => {
         if (file) {
-            setPreviewUrl(URL.createObjectURL(file));
-            dispatch(setBookData({ uploadImage: file }));
+            const imgURL = URL.createObjectURL(file);
+            dispatch(setPreviewImage(imgURL));
+            dispatch(setUploadImage(file));
         } else {
-            setPreviewUrl(null);
-            dispatch(setBookData({ uploadImage: null }));
+            dispatch(setPreviewImage(''));
+            dispatch(setUploadImage(null));
         }
     };
 
-    // ✅ Handle PDF Upload
     const handlePdfChange = (file: File | null) => {
         if (file) {
-            setPdfName(file.name);
-            dispatch(setBookData({ uploadPdf: file }));
+            dispatch(setPreviewPdf(file.name));
+            dispatch(setUploadPdf(file));
         } else {
-            setPdfName(null);
-            dispatch(setBookData({ uploadPdf: null }));
+            dispatch(setPreviewPdf(''));
+            dispatch(setUploadPdf(null));
         }
     };
 
-    // ✅ Submit handler
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-
         dispatch(setActiveBookTab("resources"));
-        console.log("Saved to Redux:", {
-            bookName,
-            description,
-            isbn,
-            author,
-            category,
-            uploadImage,
-            uploadPdf,
-        });
     };
 
-    // ✅ Disable button if required fields are empty
     const isButtonDisabled =
-        !bookName || !description || !isbn || !author || !category || !uploadImage || !uploadPdf;
+        !bookName || !description || !isbn || !author || !categoryName || !uploadImage || !uploadPdf;
 
     return (
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -74,7 +67,7 @@ const General = () => {
                     type="text"
                     placeholder="Enter book name"
                     value={bookName}
-                    onChange={(e) => dispatch(setBookData({ bookName: e.target.value }))}
+                    onChange={(e) => dispatch(setBookName(e.target.value))}
                     className=""
                     required
                 />
@@ -87,7 +80,7 @@ const General = () => {
                     type="text"
                     placeholder="Enter description"
                     value={description}
-                    onChange={(e) => dispatch(setBookData({ description: e.target.value }))}
+                    onChange={(e) => dispatch(setDescription(e.target.value))}
                     className=""
                     required
                 />
@@ -101,7 +94,7 @@ const General = () => {
                         type="text"
                         placeholder="Enter ISBN"
                         value={isbn}
-                        onChange={(e) => dispatch(setBookData({ isbn: e.target.value }))}
+                        onChange={(e) => dispatch(setISBN(e.target.value))}
                         className=""
                         required
                     />
@@ -112,7 +105,7 @@ const General = () => {
                         type="text"
                         placeholder="Enter author name"
                         value={author}
-                        onChange={(e) => dispatch(setBookData({ author: e.target.value }))}
+                        onChange={(e) => dispatch(setAuthor(e.target.value))}
                         className=""
                         required
                     />
@@ -120,16 +113,24 @@ const General = () => {
             </div>
 
             {/* Category */}
-            <div>
+            <div className="relative">
                 <Label>Book Category</Label>
-                <Input
-                    type="text"
-                    placeholder="Enter category"
-                    value={category}
-                    onChange={(e) => dispatch(setBookData({ category: e.target.value }))}
-                    className=""
-                    required
+                <GetBookCategory
+                    onChange={(category) => {
+                        dispatch(setCategory(category))
+                    }}
                 />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }} className='absolute z-10 top-[50%] left-[15px]'>
+                    <Image
+                        src={categoryImage}
+                        height={50}
+                        width={50}
+                        alt={categoryName}
+                        style={{ width: 24, height: 24, borderRadius: '50%' }}
+                        priority
+                    />
+                    <span className=''>{categoryName}</span>
+                </div>
             </div>
 
             {/* File Uploads */}
@@ -140,7 +141,7 @@ const General = () => {
                         Book Cover<span className="text-red-600">*</span>
                     </Label>
 
-                    {!previewUrl ? (
+                    {!previewImage ? (
                         <label htmlFor="uploadImage">
                             <div className="border border-dashed border-[#CBD5E1] rounded-lg px-6 py-8 w-full cursor-pointer">
                                 <input
@@ -168,7 +169,7 @@ const General = () => {
                                 <RxCross1 className="h-3 w-3" />
                             </div>
                             <Image
-                                src={previewUrl}
+                                src={previewImage}
                                 height={200}
                                 width={300}
                                 alt="Preview"
@@ -184,7 +185,7 @@ const General = () => {
                         PDF File<span className="text-red-600">*</span>
                     </Label>
 
-                    {!pdfName ? (
+                    {!previewPdf ? (
                         <label htmlFor="uploadPdf">
                             <div className="border border-dashed border-[#CBD5E1] rounded-lg px-6 py-8 w-full cursor-pointer">
                                 <input
@@ -213,7 +214,7 @@ const General = () => {
                                 <RxCross1 className="w-3 h-3" />
                             </button>
                             <p className="text-[#1E3A8A] font-medium text-center break-all">
-                                {pdfName}
+                                {previewPdf}
                             </p>
                             <p className="text-xs text-gray-500 mt-1">(PDF File)</p>
                         </div>

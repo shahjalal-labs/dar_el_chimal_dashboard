@@ -23,6 +23,8 @@ export const baseApi = createApi({
   endpoints: () => ({}),
   tagTypes: [
     "books",
+    "school",
+    "grade",
     "admin",
     "notifications",
     "profile"

@@ -12,7 +12,7 @@ import Link from 'next/link';
 
 const BookCategoryList = () => {
     const [currentPage, setCurrentPage] = useState(1);
-    const { data } = useGetAllBookCategoriesQuery(currentPage);
+    const { data } = useGetAllBookCategoriesQuery({ currentPage, limit: 10 });
 
     const formattedData = data?.result?.result?.map(
         (entry: { id: string, image: string, name: string, description: string, createdAt: string, updatedAt: string }) => ({

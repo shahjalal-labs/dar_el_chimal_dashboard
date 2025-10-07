@@ -1,34 +1,37 @@
 "use client";
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { CgSoftwareUpload } from 'react-icons/cg';
 import { RxCross1 } from 'react-icons/rx';
+import { useDispatch, useSelector } from 'react-redux';
+import { setPreviewResourceFile, setResourceDescription, setResourceFile, setResourceLink, setResourceTitle, setResourceType } from "@/redux/features/bookSlice";
+import { RootState } from '@/redux/store/store';
+import { setActiveBookTab } from '@/redux/features/uiSlice';
 
 const Resource = () => {
-    const [resourceType, setResourceType] = useState<string>("video");
-    const [resourceTitle, setResourceTitle] = useState("");
-    const [resourceDescription, setResourceDescription] = useState("");
-    const [resourceFile, setResourceFile] = useState<File | null>(null);
-    const [resourceLink, setResourceLink] = useState("");
-    const [fileName, setFileName] = useState<string | null>(null);
+    const dispatch = useDispatch();
+    const {
+        resourceType,
+        resourceTitle,
+        resourceDescription,
+        previewResourceFile,
+        resourceLink,
+    } = useSelector((state: RootState) => state.book);
 
     const handleRemoveResourceFile = () => {
-        setResourceFile(null);
-        setFileName(null);
+        dispatch(setResourceFile(null));
+        dispatch(setPreviewResourceFile(''));
     };
 
     const handleResourceSubmit = () => {
-        console.log({
-            resourceType,
-            resourceTitle,
-            resourceDescription,
-            resourceFile,
-            resourceLink,
-        });
+        dispatch(setActiveBookTab("grade"));
     };
+
+    const isButtonDisabled =
+        !resourceType || !resourceTitle || !resourceDescription || !previewResourceFile || !resourceLink;
 
     return (
         <div className="space-y-5">
@@ -43,8 +46,9 @@ const Resource = () => {
                             <input
                                 type="checkbox"
                                 checked={resourceType === type}
-                                onChange={() => setResourceType(type)}
+                                onChange={() => dispatch(setResourceType(type))}
                                 className="h-4 w-4 accent-[#1E3A8A] stroke-[#D8D8D8]"
+                                required
                             />
                             <span className="capitalize text-[#4C4C4C]">{type}</span>
                         </label>
@@ -58,7 +62,8 @@ const Resource = () => {
                 <Input
                     placeholder="Enter your resource title"
                     value={resourceTitle}
-                    onChange={(e) => setResourceTitle(e.target.value)}
+                    onChange={(e) => dispatch(setResourceTitle(e.target.value))}
+                    required
                 />
             </div>
 
@@ -69,14 +74,14 @@ const Resource = () => {
                     placeholder="Enter your resource description"
                     className="border border-[#CBD5E1] rounded-md p-2 w-full h-24 mt-2"
                     value={resourceDescription}
-                    onChange={(e) => setResourceDescription(e.target.value)}
+                    onChange={(e) => dispatch(setResourceDescription(e.target.value))}
                 />
             </div>
 
             {/* File Upload */}
             <div>
                 <Label>File Upload or Link</Label>
-                {!fileName ? (
+                {!previewResourceFile ? (
                     <label htmlFor="resourceFile">
                         <div className="border border-dashed border-[#CBD5E1] rounded-lg px-6 py-8 w-full cursor-pointer mt-2">
                             <input
@@ -86,8 +91,8 @@ const Resource = () => {
                                 onChange={(e) => {
                                     const file = e.target.files?.[0] ?? null;
                                     if (file) {
-                                        setResourceFile(file);
-                                        setFileName(file.name);
+                                        dispatch(setResourceFile(file));
+                                        dispatch(setPreviewResourceFile(file.name));
                                     }
                                 }}
                                 className="hidden"
@@ -105,7 +110,7 @@ const Resource = () => {
                         </div>
                     </label>
                 ) : (
-                    <div className="relative flex flex-col items-center p-6 border border-[#CBD5E1] rounded-lg bg-gray-50">
+                    <div className="relative flex flex-col items-center p-6 border border-[#CBD5E1] rounded-lg bg-gray-50 mt-2">
                         <button
                             onClick={handleRemoveResourceFile}
                             className="absolute top-2 right-2 bg-gray-300 rounded-full p-1 hover:bg-gray-400 transition"
@@ -113,20 +118,21 @@ const Resource = () => {
                             <RxCross1 className="w-3 h-3" />
                         </button>
                         <p className="text-[#1E3A8A] font-medium text-center break-all">
-                            {fileName}
+                            {previewResourceFile}
                         </p>
                     </div>
                 )}
             </div>
 
             {/* OR Link */}
-            <div className="text-center text-[#D8D8D8] my-2">────────── <span className="text-[#4C4C4C]">Or</span> ──────────</div>
+            <div className="text-center text-[#D8D8D8]">────────── <span className="text-[#4C4C4C]">Or</span> ──────────</div>
 
             <div>
                 <Input
+                    type='url'
                     placeholder="Paste your link"
                     value={resourceLink}
-                    onChange={(e) => setResourceLink(e.target.value)}
+                    onChange={(e) => dispatch(setResourceLink(e.target.value))}
                 />
             </div>
 
@@ -136,11 +142,12 @@ const Resource = () => {
                     variant="outline"
                     className="px-6 border-[#636F85] text-[#636F85] font-medium"
                     onClick={() => {
-                        setResourceFile(null);
-                        setFileName(null);
-                        setResourceTitle("");
-                        setResourceDescription("");
-                        setResourceLink("");
+                        dispatch(setResourceType(''))
+                        dispatch(setResourceTitle(''))
+                        dispatch(setResourceDescription(''))
+                        dispatch(setResourceFile(null))
+                        dispatch(setPreviewResourceFile(''))
+                        dispatch(setResourceLink(''))
                     }}
                 >
                     Cancel
@@ -149,6 +156,7 @@ const Resource = () => {
                 <Button
                     onClick={handleResourceSubmit}
                     className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A] text-white font-medium px-6"
+                    disabled={isButtonDisabled}
                 >
                     Upload Resource
                 </Button>
