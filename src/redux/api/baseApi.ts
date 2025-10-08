@@ -24,6 +24,7 @@ export const baseApi = createApi({
   tagTypes: [
     "books",
     "school",
+    "teacher",
     "grade",
     "admin",
     "notifications",

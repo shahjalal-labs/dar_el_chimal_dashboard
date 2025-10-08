@@ -20,7 +20,7 @@ const persistConfig = {
     typeof window !== "undefined" && window.localStorage
       ? storage
       : noopStorage,
-  whitelist: ["auth", "book", "ui"],
+  whitelist: ["auth", "book", "school", "ui"],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

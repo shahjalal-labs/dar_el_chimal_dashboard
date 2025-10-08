@@ -77,12 +77,12 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
           },
           {
             label: "Schools",
-            route: "/admin/manage-vendor",
+            route: "/admin/schools",
             iconPath: <LuSchool className="w-5 lg:w-6 h-5 lg:h-6" />,
           },
           {
             label: "Teachers",
-            route: "/admin/sports-category",
+            route: "/admin/teachers",
             iconPath: <LiaChalkboardTeacherSolid className="w-5 lg:w-6 h-5 lg:h-6" />,
           },
           {

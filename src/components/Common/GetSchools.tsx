@@ -77,6 +77,11 @@ export const GetSchools: React.FC<GetSchoolProps> = ({ onChange }) => {
                     ...base,
                     outline: 'none',
                 }),
+                option: (base) => ({
+                    ...base,
+                    backgroundColor: '#1E3A8A',
+
+                })
             }}
         />
     );

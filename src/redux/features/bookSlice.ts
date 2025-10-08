@@ -21,6 +21,7 @@ interface BookFormState {
     schoolName: string;
     schoolId: string;
     image: string;
+    schoolGradeMappings: [];
 }
 
 const initialState: BookFormState = {
@@ -44,6 +45,7 @@ const initialState: BookFormState = {
     schoolName: '',
     schoolId: '',
     image: '',
+    schoolGradeMappings: [],
 };
 
 const bookSlice = createSlice({
@@ -102,8 +104,11 @@ const bookSlice = createSlice({
             state.schoolId = action.payload.schoolId;
             state.image = action.payload.image;
         },
+        setSchoolGradeMappings: (state, action) => {
+            state.schoolGradeMappings = action.payload;
+        },
     },
 });
 
-export const { setBookName, setDescription, setISBN, setAuthor, setCategory, setUploadImage, setPreviewImage, setUploadPdf, setPreviewPdf, setResourceType, setResourceTitle, setResourceDescription, setResourceFile, setPreviewResourceFile, setResourceLink, setSchool } = bookSlice.actions;
+export const { setBookName, setDescription, setISBN, setAuthor, setCategory, setUploadImage, setPreviewImage, setUploadPdf, setPreviewPdf, setResourceType, setResourceTitle, setResourceDescription, setResourceFile, setPreviewResourceFile, setResourceLink, setSchool, setSchoolGradeMappings } = bookSlice.actions;
 export default bookSlice.reducer;
