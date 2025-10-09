@@ -69,13 +69,13 @@ const Grade = () => {
     };
 
     // Filter schools so already selected ones can't be chosen again
-    const selectedSchoolIds = useMemo(
-        () =>
-            mappings
-                .filter((m) => m.school)
-                .map((m) => m.school.schoolId),
-        [mappings]
-    );
+    // const selectedSchoolIds = useMemo(
+    //     () =>
+    //         mappings
+    //             .filter((m) => m.school)
+    //             .map((m) => m.school.schoolId),
+    //     [mappings]
+    // );
 
     return (
         <div>
@@ -83,9 +83,9 @@ const Grade = () => {
                 const { school, grades } = mapping;
 
                 // Grades available only for the selected school
-                const filteredGradeOptions = school
-                    ? allGrades.filter((g) => g.schoolId === school.schoolId)
-                    : [];
+                // const filteredGradeOptions = school
+                //     ? allGrades.filter((g) => g.schoolId === school.schoolId)
+                //     : [];
 
                 return (
                     <div key={mapping.id} className="flex items-start gap-6 mb-6 relative">
@@ -96,14 +96,14 @@ const Grade = () => {
                                 onChange={(selectedSchool: any) =>
                                     handleSchoolChange(mapping.id, selectedSchool)
                                 }
-                                excludeIds={selectedSchoolIds}
+                                // excludeIds={selectedSchoolIds}
                             />
                             {/* KEEPING YOUR DIV EXACTLY AS REQUESTED */}
                             <div
                                 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
                                 className="absolute top-[50%] left-[15px]"
                             >
-                                {school?.image && (
+                                {/* {school?.image && (
                                     <Image
                                         src={school.image}
                                         height={50}
@@ -113,7 +113,7 @@ const Grade = () => {
                                         priority
                                     />
                                 )}
-                                <span className="">{school?.schoolName}</span>
+                                <span className="">{school?.schoolName}</span> */}
                             </div>
                         </div>
 
@@ -122,11 +122,12 @@ const Grade = () => {
                             <Label>Grade Section Mapping</Label>
                             <Select
                                 isMulti
-                                options={filteredGradeOptions}
+                                options={allGrades}
+                                // options={filteredGradeOptions}
                                 className="basic-multi-select"
                                 classNamePrefix="select"
-                                getOptionLabel={(option) => option.label}
-                                getOptionValue={(option) => option.id}
+                                // getOptionLabel={(option) => option.label}
+                                // getOptionValue={(option) => option.id}
                                 value={grades}
                                 onChange={(selectedOptions) =>
                                     handleGradeChange(mapping.id, selectedOptions)
