@@ -1,118 +1,66 @@
-import React, { useState } from 'react';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
-import { Info } from 'lucide-react';
-import { Card, CardContent } from '../ui/card';
-import { Label } from '../ui/label';
-import { Switch } from '../ui/switch';
-import { Button } from '../ui/button';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
 
-interface NotificationSettings {
-    productUpdates: boolean
-    comments: boolean
-    checkoutProduct: boolean
-}
+import React from "react";
+import { useGetMyNotificationsQuery } from "@/redux/api/notificationApi";
+import { TbClipboardText } from "react-icons/tb";
+import { formatDistanceToNow, format } from "date-fns";
 
 const Notifications = () => {
-    const [notifications, setNotifications] = useState<NotificationSettings>({
-        productUpdates: true,
-        comments: false,
-        checkoutProduct: true,
-    })
+    const { data, isLoading } = useGetMyNotificationsQuery(undefined);
 
-    const handleNotificationChange = (key: keyof NotificationSettings, value: boolean) => {
-        setNotifications((prev) => ({ ...prev, [key]: value }))
-    }
-
-    const handleSave = () => {
-        // Handle save functionality based on active section
-        // console.log("Saving settings for:", activeSection)
-        // Add your save logic here
+    if (isLoading) {
+        return (
+            <div className="flex justify-center items-center h-[60vh] text-gray-500">
+                Loading notifications...
+            </div>
+        );
     }
 
     return (
-        <div>
-            <div className="flex items-center gap-2 border-b border-[#F6F6F6] pb-6 mb-6">
-                <h1 className="text-lg font-medium text-[#30373D]">Notification</h1>
-                <Tooltip>
-                    <TooltipTrigger>
-                        <Info className="h-4 w-4 text-gray-400" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                        <p>Manage your notification preferences</p>
-                    </TooltipContent>
-                </Tooltip>
+        <div className="">
+            {/* Notifications Card */}
+            <div className="bg-white rounded-xl p-6">
+                {/* Title */}
+                <h1 className="text-[#1E1E1E] text-2xl font-semibold mb-6">
+                    Notifications
+                </h1>
+
+                {/* Notification List */}
+                <div className="space-y-4">
+                    {data?.result?.length > 0 ? (
+                        data.result.map((notification: any) => (
+                            <div
+                                key={notification.id}
+                                className="flex items-start gap-3 border-b border-gray-100 pb-3 last:border-0"
+                            >
+                                {/* Icon */}
+                                <div className="mt-1 flex-shrink-0">
+                                    <div className="bg-[#EEF2FF] p-2 rounded-md">
+                                        <TbClipboardText className="text-[#1E3A8A] text-xl" />
+                                    </div>
+                                </div>
+
+                                {/* Text */}
+                                <div className="flex-1">
+                                    <h2 className="text-[#262626] font-medium text-sm sm:text-base">
+                                        {notification.content}
+                                    </h2>
+                                    <p className="text-[#6B7280] text-xs sm:text-sm mt-1">
+                                        {formatDistanceToNow(new Date(notification.createdAt), {
+                                            addSuffix: true,
+                                        })}
+                                    </p>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="text-center text-gray-500 py-10">
+                            No notifications found!
+                        </div>
+                    )}
+                </div>
             </div>
-
-            <Card className='p-0'>
-                <CardContent className="space-y-6">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <Label htmlFor="product-updates" className="text-sm font-medium text-[#30373D]">
-                                Product updates
-                            </Label>
-                            <Tooltip>
-                                <TooltipTrigger>
-                                    <Info className="h-4 w-4 text-gray-400" />
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    <p>Get notified about new product features</p>
-                                </TooltipContent>
-                            </Tooltip>
-                        </div>
-                        <Switch
-                            id="product-updates"
-                            checked={notifications.productUpdates}
-                            onCheckedChange={(checked) => handleNotificationChange("productUpdates", checked)}
-                        />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <Label htmlFor="comments" className="text-sm font-medium text-[#30373D]">
-                                Comments
-                            </Label>
-                            <Tooltip>
-                                <TooltipTrigger>
-                                    <Info className="h-4 w-4 text-gray-400" />
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    <p>Get notified about new comments</p>
-                                </TooltipContent>
-                            </Tooltip>
-                        </div>
-                        <Switch
-                            id="comments"
-                            checked={notifications.comments}
-                            onCheckedChange={(checked) => handleNotificationChange("comments", checked)}
-                        />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <Label htmlFor="checkout-product" className="text-sm font-medium text-[#30373D]">
-                                Checkout Product
-                            </Label>
-                            <Tooltip>
-                                <TooltipTrigger>
-                                    <Info className="h-4 w-4 text-gray-400" />
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    <p>Get notified about checkout updates</p>
-                                </TooltipContent>
-                            </Tooltip>
-                        </div>
-                        <Switch
-                            id="checkout-product"
-                            checked={notifications.checkoutProduct}
-                            onCheckedChange={(checked) => handleNotificationChange("checkoutProduct", checked)}
-                        />
-                    </div>
-                </CardContent>
-            </Card>
-
-            <Button onClick={handleSave} className="bg-[#1E3A8A] hover:bg-[#1E3A8A80] text-white px-8 mt-6">
-                Save
-            </Button>
         </div>
     );
 };

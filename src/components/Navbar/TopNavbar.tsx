@@ -16,8 +16,6 @@ const TopNavbar = () => {
   const { data: profileData } = useGetMyProfileQuery(undefined);
   const { data: notificationsData } = useGetMyNotificationsQuery(undefined);
 
-  console.log(profileData);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const unreadCount = notificationsData?.result?.notifications?.filter((n: any) => !n.isRead).length;
@@ -31,19 +29,20 @@ const TopNavbar = () => {
 
         <div className="flex justify-end items-center gap-2 lg:gap-4 scale-75 md:scale-100">
           {/* Notification Icon */}
-          <div
+          <Link
+            href='/notifications'
             className="bg-[#F5F3F6] rounded-full px-2 py-1 h-full cursor-pointer"
-            onClick={() => setIsModalOpen(true)}
+            // onClick={() => setIsModalOpen(true)}
           >
             <Badge count={unreadCount} size="small">
               <IoMdNotificationsOutline className="w-6 h-6 text-black" />
             </Badge>
-          </div>
+          </Link>
 
           {/* Profile */}
           <Link href='/settings' className="flex justify-center items-center gap-3 text-[#636F85] font-medium rounded-3xl h-full cursor-pointer">
             <Image
-              src={profileData?.result?.userInfo?.avatar || user}
+              src={profileData?.result?.profileImage || user}
               height={50}
               width={50}
               alt="avatar"
@@ -51,8 +50,8 @@ const TopNavbar = () => {
               priority
             />
             <div>
-              <p className="text-black font-medium">{profileData?.result?.userInfo?.role || "Priscilla Lily"}</p>
-              <p className="text-[#79767B] text-sm">{profileData?.result?.userInfo?.role || "Admin"}</p>
+              <p className="text-black font-medium">{profileData?.result?.fullName || "Priscilla Lily"}</p>
+              <p className="text-[#79767B] text-sm">{profileData?.result?.loginUserName || "Admin"}</p>
             </div>
           </Link>
         </div>

@@ -60,7 +60,7 @@ const AccountSection = () => {
         else {
             try {
                 const body = {
-                    currentPassword: data?.oldPassword,
+                    oldPassword: data?.oldPassword,
                     newPassword: data?.newPassword,
                 };
 

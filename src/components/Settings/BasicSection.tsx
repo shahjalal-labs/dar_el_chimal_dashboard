@@ -29,7 +29,7 @@ interface ProfileData {
     phone: string,
     role: string,
     gender: string,
-    dateOfBirth: string,
+    DOB: string,
     userName: string,
     status: string,
 }
@@ -44,7 +44,7 @@ const BasicSection = () => {
         phone: "",
         role: "",
         gender: "",
-        dateOfBirth: "",
+        DOB: "",
         userName: "",
         status: "",
     })
@@ -62,7 +62,7 @@ const BasicSection = () => {
                 phone: data?.result?.phone || "",
                 role: data?.result?.role || "",
                 gender: data?.result?.gender || "",
-                dateOfBirth: data?.result?.DOB || "",
+                DOB: data?.result?.DOB || "",
                 userName: data?.result?.loginUserName || "",
                 status: data?.result?.status || "",
             })
@@ -79,12 +79,10 @@ const BasicSection = () => {
         try {
 
             const body = {
-                username: profile?.userName,
-                phoneNumber: profile?.phone,
-                gender: profile?.gender,
-                dateOfBirth: profile?.dateOfBirth || "2025-06-29T05:16:20.366Z",
-                // country: profile.language,
-                // bio: profile?.address,
+                fullName: profile?.fullName,
+                phone: profile?.phone,
+                // gender: profile?.gender,
+                // DOB: profile?.DOB,
             }
 
             const response = await updateMyProfile(body).unwrap();
@@ -221,7 +219,7 @@ const BasicSection = () => {
                                     </div>
 
                                     <div className="flex flex-col gap-2 w-full">
-                                        <Label htmlFor="dateOfBirth" className="px-1 text-sm font-medium text-[#30373D]">
+                                        <Label htmlFor="DOB" className="px-1 text-sm font-medium text-[#30373D]">
                                             Date of birth
                                         </Label>
                                         <Popover open={open} onOpenChange={setOpen}>
@@ -231,8 +229,8 @@ const BasicSection = () => {
                                                     id="date"
                                                     className="px-5 py-4 w-full justify-between text-left font-normal"
                                                 >
-                                                    {profile.dateOfBirth ? (
-                                                        format(new Date(profile.dateOfBirth), "PPP")
+                                                    {profile.DOB ? (
+                                                        format(new Date(profile.DOB), "PPP")
                                                     ) : (
                                                         <span>Select date</span>
                                                     )}
@@ -242,9 +240,9 @@ const BasicSection = () => {
                                             <PopoverContent className="w-auto overflow-hidden p-0" align="start">
                                                 <Calendar
                                                     mode="single"
-                                                    selected={profile.dateOfBirth ? new Date(profile.dateOfBirth) : undefined}
+                                                    selected={profile.DOB ? new Date(profile.DOB) : undefined}
                                                     onSelect={(date) => {
-                                                        handleProfileChange("dateOfBirth", date?.toISOString() || "");
+                                                        handleProfileChange("DOB", date?.toISOString() || "");
                                                         setOpen(false);
                                                     }}
                                                     captionLayout="dropdown"
