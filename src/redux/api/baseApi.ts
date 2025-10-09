@@ -25,6 +25,7 @@ export const baseApi = createApi({
     "books",
     "school",
     "teacher",
+    "student",
     "grade",
     "admin",
     "notifications",

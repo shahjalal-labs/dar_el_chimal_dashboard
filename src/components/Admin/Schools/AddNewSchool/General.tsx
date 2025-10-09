@@ -174,7 +174,7 @@ const General = () => {
 
             {/* Buttons */}
             <div className="flex justify-center gap-3 pt-3">
-                <Link href="/admin/books">
+                <Link href="/admin/schools">
                     <Button
                         variant="outline"
                         className="px-6 border-[#636F85] text-[#636F85]"

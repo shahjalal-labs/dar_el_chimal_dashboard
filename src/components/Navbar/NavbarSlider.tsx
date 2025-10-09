@@ -87,7 +87,7 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
           },
           {
             label: "Students",
-            route: "/admin/manage-order",
+            route: "/admin/students",
             iconPath: <PiStudentDuotone className="w-5 lg:w-6 h-5 lg:h-6" />,
           },
           {

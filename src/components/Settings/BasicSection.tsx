@@ -23,75 +23,48 @@ import { Calendar } from '../ui/calendar';
 import { format } from 'date-fns';
 
 interface ProfileData {
-    username: string,
+    profileImage: string,
+    fullName: string,
     email: string,
-    phoneNumber: string,
-    avatar: string,
+    phone: string,
     role: string,
     gender: string,
     dateOfBirth: string,
-    country: string,
-    createdAt: string,
-    updatedAt: string,
-    bio: string,
+    userName: string,
+    status: string,
 }
-
-const getCountryName = (code: string) => {
-    try {
-        if (!code || code.length !== 2) return code;
-        return new Intl.DisplayNames(['en'], { type: 'region' }).of(code.toUpperCase()) || code;
-    } catch {
-        return code;
-    }
-};
 
 const BasicSection = () => {
     const [open, setOpen] = React.useState(false)
     const [active, setActive] = React.useState(false)
     const [profile, setProfile] = useState<ProfileData>({
-        username: "",
+        profileImage: "",
+        fullName: "",
         email: "",
-        phoneNumber: "",
-        avatar: "",
+        phone: "",
         role: "",
         gender: "",
         dateOfBirth: "",
-        country: "",
-        createdAt: "",
-        updatedAt: "",
-        bio: "",
+        userName: "",
+        status: "",
     })
 
     const { data, isLoading } = useGetMyProfileQuery(undefined);
 
+    console.log(data?.result);
+
     useEffect(() => {
         if (data?.result) {
             setProfile({
-                username: data?.result?.userInfo?.username || "",
-                email: data?.result?.userInfo?.email || "",
-                phoneNumber: data?.result?.userInfo?.phoneNumber || "",
-                avatar: data?.result?.userInfo?.avatar || "",
-                role: data?.result?.userInfo?.role || "",
-                gender: data?.result?.userInfo?.gender || "",
-                dateOfBirth: data?.result?.userInfo?.dateOfBirth || "",
-                country: getCountryName(data?.result?.userInfo?.country) || "",
-                createdAt: new Date(data?.result?.userInfo?.createdAt).toLocaleString('en-US', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: false
-                }) || "",
-                updatedAt: new Date(data?.result?.userInfo?.updatedAt).toLocaleString('en-US', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: false
-                }) || "",
-                bio: data?.result?.userInfo?.bio || "",
+                profileImage: data?.result?.profileImage || "",
+                fullName: data?.result?.fullName || "",
+                email: data?.result?.email || "",
+                phone: data?.result?.phone || "",
+                role: data?.result?.role || "",
+                gender: data?.result?.gender || "",
+                dateOfBirth: data?.result?.DOB || "",
+                userName: data?.result?.loginUserName || "",
+                status: data?.result?.status || "",
             })
         }
     }, [data])
@@ -106,12 +79,12 @@ const BasicSection = () => {
         try {
 
             const body = {
-                username: profile?.username,
-                phoneNumber: profile?.phoneNumber,
+                username: profile?.userName,
+                phoneNumber: profile?.phone,
                 gender: profile?.gender,
                 dateOfBirth: profile?.dateOfBirth || "2025-06-29T05:16:20.366Z",
-                country: profile.country,
-                bio: profile?.bio,
+                // country: profile.language,
+                // bio: profile?.address,
             }
 
             const response = await updateMyProfile(body).unwrap();
@@ -152,10 +125,10 @@ const BasicSection = () => {
                                         <Label className="text-sm font-medium text-[#30373D] mb-3 block">Photo Profile</Label>
                                         <div className="relative w-24 h-24 border rounded-lg p-2">
                                             <Image
-                                                src={profile.avatar || user}
+                                                src={profile.profileImage || user}
                                                 height={500}
                                                 width={500}
-                                                alt={profile.username}
+                                                alt={profile.userName}
                                                 className='rounded-lg h-full w-full'
                                                 priority
                                             />
@@ -177,8 +150,8 @@ const BasicSection = () => {
                                     <Input
                                         id="full-name"
                                         type='text'
-                                        value={profile.username}
-                                        onChange={(e) => handleProfileChange("username", e.target.value)}
+                                        value={profile.fullName}
+                                        onChange={(e) => handleProfileChange("fullName", e.target.value)}
                                         className="mt-2 px-5 py-4"
                                     />
                                 </div>
@@ -200,14 +173,14 @@ const BasicSection = () => {
 
                                     {/* Phone Number */}
                                     <div className='w-full'>
-                                        <Label htmlFor="phoneNumber" className="text-sm font-medium text-[#30373D]">
+                                        <Label htmlFor="phone" className="text-sm font-medium text-[#30373D]">
                                             Phone Number
                                         </Label>
                                         <Input
-                                            id="phoneNumber"
+                                            id="phone"
                                             type='tel'
-                                            value={profile.phoneNumber}
-                                            onChange={(e) => handleProfileChange("phoneNumber", e.target.value)}
+                                            value={profile.phone}
+                                            onChange={(e) => handleProfileChange("phone", e.target.value)}
                                             className="mt-2 px-5 py-4"
                                         />
                                     </div>
@@ -282,61 +255,33 @@ const BasicSection = () => {
                                     </div>
                                 </div>
 
-                                {/* Country, Created At, Updated At  */}
-                                <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+                                {/* User Name, status  */}
+                                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                                     <div className='w-full'>
-                                        <Label htmlFor="country" className="text-sm font-medium text-[#30373D]">
-                                            Country
+                                        <Label htmlFor="userName" className="text-sm font-medium text-[#30373D]">
+                                            User Name
                                         </Label>
                                         <Input
-                                            id="country"
+                                            id="userName"
                                             type="text"
-                                            defaultValue={profile.country}
+                                            defaultValue={profile.userName}
                                             className="mt-2 px-5 py-4"
                                             readOnly
                                         />
                                     </div>
 
                                     <div className='w-full'>
-                                        <Label htmlFor="createdAt" className="text-sm font-medium text-[#30373D]">
-                                            Profile Created At
+                                        <Label htmlFor="status" className="text-sm font-medium text-[#30373D]">
+                                            Status
                                         </Label>
                                         <Input
-                                            id="createdAt"
+                                            id="status"
                                             type="text"
-                                            defaultValue={profile.createdAt}
+                                            defaultValue={profile.status}
                                             className="mt-2 px-5 py-4"
                                             readOnly
                                         />
                                     </div>
-
-                                    <div className='w-full'>
-                                        <Label htmlFor="updatedAt" className="text-sm font-medium text-[#30373D]">
-                                            Profile Last Updated At
-                                        </Label>
-                                        <Input
-                                            id="updatedAt"
-                                            type="text"
-                                            defaultValue={profile.updatedAt}
-                                            className="mt-2 px-5 py-4"
-                                            readOnly
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* bio */}
-                                <div>
-                                    <Label htmlFor="bio" className="text-sm font-medium text-[#30373D]">
-                                        Bio
-                                    </Label>
-                                    <Textarea
-                                        id="bio"
-                                        placeholder='Write about yourself...'
-                                        value={profile.bio}
-                                        onChange={(e) => handleProfileChange("bio", e.target.value)}
-                                        rows={4}
-                                        className="mt-2 min-h-[80px]"
-                                    />
                                 </div>
 
                                 {/* Submit */}

@@ -275,7 +275,7 @@ const DataTable = (
                             </Dialog>
                           }
                           {
-                            (pathname === '/admin/book-categories' || pathname === '/admin/books' || pathname === '/admin/schools' || pathname === '/admin/teachers' || pathname === '/admin/sports-category') &&
+                            (pathname === '/admin/book-categories' || pathname === '/admin/books' || pathname === '/admin/schools' || pathname === '/admin/teachers' || pathname === '/admin/students') &&
                             (<>
                               <Dialog>
                                 <DialogTrigger asChild>

@@ -16,18 +16,10 @@ export const statApi = baseApi.injectEndpoints({
             }),
             providesTags: ["admin"]
         }),
-        getAllStudents: builder.query({
-            query: () => ({
-                url: `/users/get-students`,
-                method: 'GET'
-            }),
-            providesTags: ["admin"]
-        }),
     })
 })
 
 export const {
     useGetAdminStatQuery,
-    useGetAdminOverviewQuery,
-    useGetAllStudentsQuery
+    useGetAdminOverviewQuery
 } = statApi;

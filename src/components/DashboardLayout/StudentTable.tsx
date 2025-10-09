@@ -2,12 +2,12 @@
 
 import React from 'react';
 import DataTable from '../Common/DataTable';
-import { useGetAllStudentsQuery } from '@/redux/api/admin/stat';
 import Image from 'next/image';
 import defaultImg from '@/assets/no-img.jpg';
+import { useGetAllStudentsQuery } from '@/redux/api/admin/student';
 
 const StudentTable = () => {
-    const { data: allStudents } = useGetAllStudentsQuery(undefined);
+    const { data: allStudents } = useGetAllStudentsQuery({ currentPage: 1, limit: 5 });
 
     const adminFormattedData = allStudents?.result?.result?.slice(0, 5).map((entry:
         {

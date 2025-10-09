@@ -56,7 +56,7 @@ const TeacherList = () => {
                     <h1 className='text-2xl font-bold mb-3'>Teachers</h1>
                     <p className='font-medium'><span className='text-[#72727299]'>Library</span><span className='text-[#72727299] px-2'>/</span>Teacher List</p>
                 </div>
-                <Link href="/admin/schools/add-new-school">
+                <Link href="/admin/teachers/add-new-teacher">
                     <Button className='bg-transparent text-[#1E3A8A] border border-[#1E3A8A] hover:bg-transparent cursor-pointer'>
                         <FaPlus />
                         Create New Teacher
