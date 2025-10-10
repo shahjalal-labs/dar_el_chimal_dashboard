@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface BookFormState {
+    bookId: string;
     bookName: string;
     description: string;
     isbn: string;
@@ -25,6 +26,7 @@ interface BookFormState {
 }
 
 const initialState: BookFormState = {
+    bookId: '',
     bookName: '',
     description: '',
     isbn: '',
@@ -52,6 +54,9 @@ const bookSlice = createSlice({
     name: 'book',
     initialState,
     reducers: {
+        setBookID: (state, action: PayloadAction<string>) => {
+            state.bookId = action.payload;
+        },
         setBookName: (state, action: PayloadAction<string>) => {
             state.bookName = action.payload;
         },
@@ -110,5 +115,5 @@ const bookSlice = createSlice({
     },
 });
 
-export const { setBookName, setDescription, setISBN, setAuthor, setCategory, setUploadImage, setPreviewImage, setUploadPdf, setPreviewPdf, setResourceType, setResourceTitle, setResourceDescription, setResourceFile, setPreviewResourceFile, setResourceLink, setSchool, setSchoolGradeMappings } = bookSlice.actions;
+export const { setBookID, setBookName, setDescription, setISBN, setAuthor, setCategory, setUploadImage, setPreviewImage, setUploadPdf, setPreviewPdf, setResourceType, setResourceTitle, setResourceDescription, setResourceFile, setPreviewResourceFile, setResourceLink, setSchool, setSchoolGradeMappings } = bookSlice.actions;
 export default bookSlice.reducer;

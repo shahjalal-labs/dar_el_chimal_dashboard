@@ -9,7 +9,6 @@ import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Button } from '../ui/button';
-import { Textarea } from '../ui/textarea';
 import Image from 'next/image';
 import { MdEdit } from 'react-icons/md';
 import { useGetMyProfileQuery, useUpdateMyProfileMutation } from '@/redux/api/settingsApi';

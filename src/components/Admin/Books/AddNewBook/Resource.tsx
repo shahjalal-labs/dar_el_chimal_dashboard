@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React from 'react';
@@ -10,45 +11,95 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setPreviewResourceFile, setResourceDescription, setResourceFile, setResourceLink, setResourceTitle, setResourceType } from "@/redux/features/bookSlice";
 import { RootState } from '@/redux/store/store';
 import { setActiveBookTab } from '@/redux/features/uiSlice';
+import { toast } from 'sonner';
+import { useUploadResourceMutation } from '@/redux/api/admin/book';
+import { PiSpinner } from 'react-icons/pi';
+import { usePathname } from 'next/navigation';
+import { useCreateResourceMutation } from '@/redux/api/admin/resource';
 
-const Resource = () => {
+const Resource = ({ bookId }: { bookId: any }) => {
+    const pathname = usePathname();
     const dispatch = useDispatch();
     const {
         resourceType,
         resourceTitle,
         resourceDescription,
         previewResourceFile,
+        resourceFile,
         resourceLink,
     } = useSelector((state: RootState) => state.book);
+
+    console.log(bookId);
+
+    const [UploadResource, { isLoading }] = useUploadResourceMutation();
+    const [CreateResource, { isLoading: isResourceLoading }] = useCreateResourceMutation();
 
     const handleRemoveResourceFile = () => {
         dispatch(setResourceFile(null));
         dispatch(setPreviewResourceFile(''));
     };
 
-    const handleResourceSubmit = () => {
-        dispatch(setActiveBookTab("grade"));
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        const body = {
+            title: resourceTitle,
+            description: resourceDescription,
+            Type: resourceType
+        }
+
+        const formData = new FormData();
+        if (pathname === '/admin/books/add-new-book') {
+            if (resourceFile) {
+                formData.append('file', resourceFile)
+            }
+            try {
+                const response = await UploadResource(formData).unwrap();
+                if (response.success) {
+                    toast.success(response.message);
+                    dispatch(setPreviewResourceFile(response?.result?.url));
+                    dispatch(setActiveBookTab("grade"));
+                }
+            } catch (error) {
+                toast.warning((error as any)?.data?.message || "Something went wrong");
+            }
+        }
+        else {
+            formData.append('bodyData', JSON.stringify(body));
+            if (resourceFile) {
+                formData.append('file', resourceFile)
+            }
+            try {
+                const response = await CreateResource({ bookId, formData }).unwrap();
+                if (response.success) {
+                    toast.success(response.message);
+                    window.location.reload();
+                }
+            } catch (error) {
+                toast.warning((error as any)?.data?.message || "Something went wrong");
+            }
+        }
     };
 
     const isButtonDisabled =
         !resourceType || !resourceTitle || !resourceDescription || !previewResourceFile || !resourceLink;
 
     return (
-        <div className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-5">
             <h2 className="text-2xl font-bold">Upload New Resource</h2>
 
             {/* Resource Type */}
             <div>
                 <Label className="block text-lg font-medium mb-4">Resource Type</Label>
                 <div className="flex gap-6">
-                    {["audio", "video", "pdf"].map((type) => (
+                    {["Audio", "Video", "Pdf"].map((type) => (
                         <label key={type} className="flex items-center gap-2 cursor-pointer">
                             <input
                                 type="checkbox"
                                 checked={resourceType === type}
                                 onChange={() => dispatch(setResourceType(type))}
                                 className="h-4 w-4 accent-[#1E3A8A] stroke-[#D8D8D8]"
-                                required
+                            // required
                             />
                             <span className="capitalize text-[#4C4C4C]">{type}</span>
                         </label>
@@ -154,14 +205,23 @@ const Resource = () => {
                 </Button>
 
                 <Button
-                    onClick={handleResourceSubmit}
+                    type='submit'
                     className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A] text-white font-medium px-6"
                     disabled={isButtonDisabled}
                 >
-                    Upload Resource
+                    {
+                        (isLoading || isResourceLoading) ?
+                            <div className="flex justify-center items-center gap-2">
+                                Uploading...
+                                <div className="animate-spin">
+                                    <PiSpinner className="h-4 w-4" />
+                                </div>
+                            </div> :
+                            "Upload Resource"
+                    }
                 </Button>
             </div>
-        </div>
+        </form>
     );
 };
 

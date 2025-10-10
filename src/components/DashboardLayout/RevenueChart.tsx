@@ -33,8 +33,8 @@ const CustomTooltip = ({ active, payload }: any) => {
 };
 
 const RevenueChart = ({ data, revenueYear, setRevenueYear }: { data: any, revenueYear: string, setRevenueYear: React.Dispatch<React.SetStateAction<string>>; }) => {
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
+  // const currentYear = new Date().getFullYear();
+  // const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
   const types = [
     { name: "Daily", value: "daily" },
     { name: "Weekly", value: "weekly" },

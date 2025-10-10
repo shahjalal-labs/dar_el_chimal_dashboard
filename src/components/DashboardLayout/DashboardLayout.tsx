@@ -13,6 +13,8 @@ const DashboardLayout = () => {
   const [revenueYear, setRevenueYear] = useState("");
   const authState = useSelector((state: RootState) => state.auth);
 
+  console.log(authState);
+
   const { data: adminOverviewData } = useGetAdminOverviewQuery(revenueYear);
 
   return (

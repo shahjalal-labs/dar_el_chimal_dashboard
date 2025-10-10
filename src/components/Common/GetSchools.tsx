@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import React from 'react';
@@ -11,36 +12,31 @@ export interface SchoolOption {
     readonly image: string;
 }
 
-interface GetSchoolProps {
-    onChange: (school: { schoolName: string; schoolId: string, image: string }) => void;
+export interface GetSchoolProps {
+    onChange: (school: SchoolOption) => void;
+    excludeIds?: string[]; // ✅ Added this prop so you can pass selected school IDs
 }
 
-export const GetSchools: React.FC<GetSchoolProps> = ({ onChange }) => {
+export const GetSchools: React.FC<GetSchoolProps> = ({ onChange, excludeIds = [] }) => {
     const { data } = useGetAllSchoolsQuery({ currentPage: 1, limit: 10000 });
 
+    // Map API response to our SchoolOption type
     const schoolOptions: readonly SchoolOption[] =
-        data?.result?.schools?.map((school: {
-            id: string;
-            name: string;
-            schoolLogo: string;
-        }) => ({
-            schoolName: school.name,
-            schoolId: school.id,
-            image: school.schoolLogo,
-        })) ?? [];
+        data?.result?.schools
+            ?.map((school: { id: string; name: string; schoolLogo: string }) => ({
+                schoolName: school.name,
+                schoolId: school.id,
+                image: school.schoolLogo,
+            }))
+            // ✅ Filter out already selected schools
+            ?.filter((school: any) => !excludeIds.includes(school.schoolId)) ?? [];
 
     return (
         <Select
             placeholder=""
             options={schoolOptions}
             onChange={(selectedOption) => {
-                if (selectedOption) {
-                    onChange({
-                        schoolName: selectedOption.schoolName,
-                        schoolId: selectedOption.schoolId,
-                        image: selectedOption.image,
-                    });
-                }
+                if (selectedOption) onChange(selectedOption as SchoolOption);
             }}
             getOptionLabel={(option) => option.schoolName}
             formatOptionLabel={(option) => (
@@ -53,7 +49,7 @@ export const GetSchools: React.FC<GetSchoolProps> = ({ onChange }) => {
                         style={{ width: 24, height: 24, borderRadius: '50%' }}
                         priority
                     />
-                    <span className='text-white'>{option.schoolName}</span>
+                    <span>{option.schoolName}</span>
                 </div>
             )}
             styles={{
@@ -68,20 +64,11 @@ export const GetSchools: React.FC<GetSchoolProps> = ({ onChange }) => {
                     boxShadow: 'none',
                     padding: '2px 4px',
                 }),
-                placeholder: (base) => ({
+                option: (base, state) => ({
                     ...base,
-                    color: '#909296',
-                    fontSize: '0.875rem',
+                    backgroundColor: state.isFocused ? '#2563EB' : '#1E3A8A',
+                    color: '#FFFFFF',
                 }),
-                input: (base) => ({
-                    ...base,
-                    outline: 'none',
-                }),
-                option: (base) => ({
-                    ...base,
-                    backgroundColor: '#1E3A8A',
-
-                })
             }}
         />
     );

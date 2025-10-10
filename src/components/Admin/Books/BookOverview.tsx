@@ -3,7 +3,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useGetSingleBookQuery } from '@/redux/api/admin/book';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -17,10 +17,11 @@ import audio from "@/assets/mp.svg";
 import video from "@/assets/link.svg";
 import pdf from "@/assets/docs.svg";
 import Link from 'next/link';
+import Resource from './AddNewBook/Resource';
 
 const BookOverview = () => {
     const { id } = useParams();
-    const router = useRouter();
+    const [isAddResource, setIsAddResource] = useState(false);
     const { data, isLoading } = useGetSingleBookQuery(id);
     const book = data?.result;
     const [tab, setTab] = useState('general');
@@ -157,46 +158,57 @@ const BookOverview = () => {
 
                     {/* Resources Tab */}
                     <TabsContent value="resources">
-                        <div className='md:flex justify-between items-center mb-6'>
-                            <h1 className='font-medium text-xl md:text-2xl'>Total Attachment: {book?.Resources?.length}</h1>
-                            <Button className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A] text-white font-medium px-6 mt-6 md:mt-0"><FaPlus />Add</Button>
-                        </div>
-                        {book.Resources?.length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {book.Resources.map((res: any) => (
-                                    <div
-                                        key={res.id}
-                                        className="border border-[#D8D8D880] bg-[#F7F9FFCC] rounded-lg p-4 flex justify-between items-center hover:bg-gray-50 transition"
-                                    >
-                                        <div className='flex items-center gap-4'>
-                                            <div className={`px-2 py-2.5 rounded-lg ${res.Type === "Pdf" ? 'bg-[#FF9A3E1A]' : res.Type === "Video" ? 'bg-[#56A5781A]' : 'bg-[#FF4A4A1A]'}`}>
-                                                <Image
-                                                    src={res.Type === "Pdf" ? pdf : res.Type === "Video" ? video : audio}
-                                                    height={100}
-                                                    width={100}
-                                                    alt=''
-                                                    className='w-8 h-8'
-                                                    priority
-                                                />
-                                            </div>
-                                            <div>
-                                                <h4 className="font-semibold md:text-lg">{res.title}</h4>
-                                                <p className="text-[#636F85] text-sm md:text-base">Type: {res.Type}</p>
-                                                <p className="text-xs text-gray-500 mt-1">{new Date(res.createdAt).toLocaleString('en-US')}</p>
-                                            </div>
-                                        </div>
+                        {
+                            isAddResource ?
+                                <><Resource bookId={id} /></> :
+                                <>
+                                    <div className='md:flex justify-between items-center mb-6'>
+                                        <h1 className='font-medium text-xl md:text-2xl'>Total Attachment: {book?.Resources?.length}</h1>
                                         <Button
-                                            onClick={() => window.open(res.file, '_blank')}
-                                            className="bg-transparent hover:bg-transparent text-black text-3xl"
-                                        >
-                                            <TfiAngleRight className='w-6 md:w-12 h-6 md:h-12' />
+                                            onClick={() => setIsAddResource(true)}
+                                            className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A] text-white font-medium px-6 mt-6 md:mt-0">
+                                            <FaPlus />Add
                                         </Button>
                                     </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <p className="text-gray-600 text-sm">No resources available.</p>
-                        )}
+                                    {book.Resources?.length > 0 ? (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            {book.Resources.map((res: any) => (
+                                                <Link
+                                                    key={res.id}
+                                                    href={`/admin/books/book-overview/${id}/${res?.id}`}
+                                                    className="border border-[#D8D8D880] bg-[#F7F9FFCC] rounded-lg p-4 flex justify-between items-center hover:bg-gray-50 transition"
+                                                >
+                                                    <div className='flex items-center gap-4'>
+                                                        <div className={`px-2 py-2.5 rounded-lg ${res.Type === "Pdf" ? 'bg-[#FF9A3E1A]' : res.Type === "Video" ? 'bg-[#56A5781A]' : 'bg-[#FF4A4A1A]'}`}>
+                                                            <Image
+                                                                src={res.Type === "Pdf" ? pdf : res.Type === "Video" ? video : audio}
+                                                                height={100}
+                                                                width={100}
+                                                                alt=''
+                                                                className='w-8 h-8'
+                                                                priority
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <h4 className="font-semibold md:text-lg">{res.title}</h4>
+                                                            <p className="text-[#636F85] text-sm md:text-base">Type: {res.Type}</p>
+                                                            <p className="text-xs text-gray-500 mt-1">{new Date(res.createdAt).toLocaleString('en-US')}</p>
+                                                        </div>
+                                                    </div>
+                                                    <Button
+                                                        onClick={() => window.open(res.file, '_blank')}
+                                                        className="bg-transparent hover:bg-transparent text-black text-3xl"
+                                                    >
+                                                        <TfiAngleRight className='w-6 md:w-12 h-6 md:h-12' />
+                                                    </Button>
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="text-gray-600 text-sm">No resources available.</p>
+                                    )}
+                                </>
+                        }
                     </TabsContent>
                 </Tabs>
             </div>

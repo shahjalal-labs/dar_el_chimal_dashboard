@@ -4,7 +4,7 @@
 import React from "react";
 import { useGetMyNotificationsQuery } from "@/redux/api/notificationApi";
 import { TbClipboardText } from "react-icons/tb";
-import { formatDistanceToNow, format } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 
 const Notifications = () => {
     const { data, isLoading } = useGetMyNotificationsQuery(undefined);

@@ -11,7 +11,6 @@ import { AlertDialogHeader } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import uploadImg from '@/assets/uploadImg.svg';
-import Link from "next/link";
 import { RxCross1 } from "react-icons/rx";
 import { useGetSingleBookCategoryQuery, useUpdateBookCategoryMutation } from "@/redux/api/admin/bookCategory";
 

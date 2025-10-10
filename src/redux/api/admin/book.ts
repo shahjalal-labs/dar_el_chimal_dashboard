@@ -2,6 +2,22 @@ import { baseApi } from "../baseApi";
 
 export const bookApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
+        createBook: builder.mutation({
+            query: (formData) => ({
+                url: `/book/create-book`,
+                method: "POST",
+                body: formData,
+            }),
+            invalidatesTags: ["books"]
+        }),
+        uploadResource: builder.mutation({
+            query: (formData) => ({
+                url: `/book/upload-file`,
+                method: "POST",
+                body: formData,
+            }),
+            invalidatesTags: ["books"]
+        }),
         getAllBooks: builder.query({
             query: (currentPage) => ({
                 url: `/book?page=${currentPage}&limit=10`,
@@ -19,4 +35,4 @@ export const bookApi = baseApi.injectEndpoints({
     }),
 });
 
-export const { useGetAllBooksQuery, useGetSingleBookQuery } = bookApi;
+export const { useCreateBookMutation, useUploadResourceMutation, useGetAllBooksQuery, useGetSingleBookQuery } = bookApi;

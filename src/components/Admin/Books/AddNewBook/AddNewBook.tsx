@@ -49,8 +49,8 @@ const AddNewBook = () => {
                         <TabsTrigger
                             value="general"
                             className={`px-4 py-2 rounded-md text-sm font-medium ${tab === "general"
-                                    ? "bg-[#F8F8F8] text-[#1E3A8A]"
-                                    : "bg-white text-black hover:bg-gray-200"
+                                ? "bg-[#F8F8F8] text-[#1E3A8A]"
+                                : "bg-white text-black hover:bg-gray-200"
                                 }`}
                         >
                             <MdOutlineDataset /> General
@@ -59,8 +59,8 @@ const AddNewBook = () => {
                         <TabsTrigger
                             value="resources"
                             className={`px-4 py-2 rounded-md text-sm font-medium ${tab === "resources"
-                                    ? "bg-[#F8F8F8] text-[#1E3A8A]"
-                                    : "bg-white text-black hover:bg-gray-200"
+                                ? "bg-[#F8F8F8] text-[#1E3A8A]"
+                                : "bg-white text-black hover:bg-gray-200"
                                 }`}
                         >
                             <GoLink /> Resources
@@ -69,8 +69,8 @@ const AddNewBook = () => {
                         <TabsTrigger
                             value="grade"
                             className={`px-4 py-2 rounded-md text-sm font-medium ${tab === "grade"
-                                    ? "bg-[#F8F8F8] text-[#1E3A8A]"
-                                    : "bg-white text-black hover:bg-gray-200"
+                                ? "bg-[#F8F8F8] text-[#1E3A8A]"
+                                : "bg-white text-black hover:bg-gray-200"
                                 }`}
                         >
                             <RiGraduationCapLine /> Grade Mapping
@@ -82,7 +82,7 @@ const AddNewBook = () => {
                         <General />
                     </TabsContent>
                     <TabsContent value="resources">
-                        <Resource />
+                        <Resource bookId='' />
                     </TabsContent>
                     <TabsContent value="grade">
                         <Grade />
