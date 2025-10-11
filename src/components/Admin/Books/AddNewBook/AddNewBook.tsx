@@ -79,10 +79,10 @@ const AddNewBook = () => {
 
                     {/* ---------- TAB CONTENTS ---------- */}
                     <TabsContent value="general">
-                        <General />
+                        <General id="" />
                     </TabsContent>
                     <TabsContent value="resources">
-                        <Resource bookId='' />
+                        <Resource bookId="" />
                     </TabsContent>
                     <TabsContent value="grade">
                         <Grade />

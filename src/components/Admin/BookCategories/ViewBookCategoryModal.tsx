@@ -3,7 +3,7 @@ import { SyncLoader } from "react-spinners";
 import Image from "next/image";
 import { DialogContent } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { useGetSingleBookCategoryQuery } from "@/redux/api/admin/bookCategory";
+import { useGetSingleBookCategoryQuery } from "@/redux/api/bookCategory";
 
 const ViewBookCategoryModal = ({ id }: { id: string }) => {
     const { data, isLoading } = useGetSingleBookCategoryQuery(id);

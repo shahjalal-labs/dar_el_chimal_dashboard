@@ -11,14 +11,13 @@ import GetSchools, { SchoolOption } from '@/components/Common/GetSchools';
 import { useDispatch, useSelector } from 'react-redux';
 import { setAuthor, setBookName, setCategory, setDescription, setISBN, setPreviewImage, setPreviewPdf, setPreviewResourceFile, setResourceDescription, setResourceFile, setResourceLink, setResourceTitle, setResourceType, setSchoolGradeMappings, setUploadImage, setUploadPdf } from '@/redux/features/bookSlice';
 import { RootState } from '@/redux/store/store';
-import { useGetAllGradesQuery } from '@/redux/api/admin/grade';
 import Image from 'next/image';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
-import { useCreateBookMutation } from '@/redux/api/admin/book';
 import { PiSpinner } from 'react-icons/pi';
+import { useGetAllGradesQuery } from '@/redux/api/grade';
+import { useCreateBookMutation } from '@/redux/api/book';
 
-// ------------------ TYPES ------------------
 interface GradeOption {
     id: string;
     label: string;
@@ -30,8 +29,6 @@ interface Mapping {
     school: SchoolOption | null;
     grades: GradeOption[];
 }
-
-// -------------------------------------------
 
 const Grade: React.FC = () => {
     const route = useRouter();
@@ -232,7 +229,7 @@ const Grade: React.FC = () => {
                         className="flex flex-col md:flex-row items-start gap-6 mb-6 relative"
                     >
                         {/* School Name */}
-                        <div className="flex-1 relative">
+                        <div className="flex-1 relative w-full">
                             <Label>School Name</Label>
                             <GetSchools
                                 onChange={(selectedSchool) =>
@@ -259,7 +256,7 @@ const Grade: React.FC = () => {
                         </div>
 
                         {/* Grade Section Mapping */}
-                        <div className="flex-1">
+                        <div className="flex-1 w-full">
                             <Label>Grade Section Mapping</Label>
                             <Select<GradeOption, true>
                                 isMulti

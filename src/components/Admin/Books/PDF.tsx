@@ -2,10 +2,10 @@
 
 import React from "react";
 import { useParams } from "next/navigation";
-import { useGetSingleBookQuery } from "@/redux/api/admin/book";
 import { SyncLoader } from "react-spinners";
 import { TfiAngleLeft } from "react-icons/tfi";
 import Link from "next/link";
+import { useGetSingleBookQuery } from "@/redux/api/book";
 
 const PDF = () => {
     const { id } = useParams();

@@ -12,10 +12,10 @@ import { setPreviewResourceFile, setResourceDescription, setResourceFile, setRes
 import { RootState } from '@/redux/store/store';
 import { setActiveBookTab } from '@/redux/features/uiSlice';
 import { toast } from 'sonner';
-import { useUploadResourceMutation } from '@/redux/api/admin/book';
 import { PiSpinner } from 'react-icons/pi';
+import { useUploadResourceMutation } from '@/redux/api/book';
+import { useCreateResourceMutation } from '@/redux/api/resource';
 import { usePathname } from 'next/navigation';
-import { useCreateResourceMutation } from '@/redux/api/admin/resource';
 
 const Resource = ({ bookId }: { bookId: any }) => {
     const pathname = usePathname();
@@ -28,8 +28,6 @@ const Resource = ({ bookId }: { bookId: any }) => {
         resourceFile,
         resourceLink,
     } = useSelector((state: RootState) => state.book);
-
-    console.log(bookId);
 
     const [UploadResource, { isLoading }] = useUploadResourceMutation();
     const [CreateResource, { isLoading: isResourceLoading }] = useCreateResourceMutation();

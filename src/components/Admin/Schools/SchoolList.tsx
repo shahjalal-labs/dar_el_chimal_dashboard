@@ -7,8 +7,8 @@ import { Button } from '@/components/ui/button';
 import { FaPlus } from 'react-icons/fa';
 import DataTable from '@/components/Common/DataTable';
 import Pagination from '@/components/ui/pagination';
-import { useGetAllSchoolsQuery } from '@/redux/api/admin/school';
 import defaultImg from '@/assets/no-img.jpg';
+import { useGetAllSchoolsQuery } from '@/redux/api/school';
 
 const SchoolList = () => {
     const [currentPage, setCurrentPage] = useState(1);

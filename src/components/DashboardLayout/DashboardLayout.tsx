@@ -5,7 +5,7 @@ import DashboardStat from "./DashboardStat";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store/store";
 import RevenueChart from "./RevenueChart";
-import { useGetAdminOverviewQuery } from "@/redux/api/admin/stat";
+import { useGetAdminOverviewQuery } from "@/redux/api/admin";
 import TeacherRingChart from "./TeacherRingChart";
 import StudentTable from "./StudentTable";
 

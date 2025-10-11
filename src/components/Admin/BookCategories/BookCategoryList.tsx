@@ -2,13 +2,13 @@
 
 import React, { useState } from 'react';
 import DataTable from '@/components/Common/DataTable';
-import { useGetAllBookCategoriesQuery } from '@/redux/api/admin/bookCategory';
 import Image from 'next/image';
 import defaultImg from '@/assets/no-img.jpg';
 import Pagination from '@/components/ui/pagination';
 import { Button } from '@/components/ui/button';
 import { FaPlus } from 'react-icons/fa';
 import Link from 'next/link';
+import { useGetAllBookCategoriesQuery } from '@/redux/api/bookCategory';
 
 const BookCategoryList = () => {
     const [currentPage, setCurrentPage] = useState(1);

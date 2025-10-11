@@ -11,7 +11,7 @@ import { PiSpinner } from 'react-icons/pi';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useCreateBookCategoryMutation } from '@/redux/api/admin/bookCategory';
+import { useCreateBookCategoryMutation } from '@/redux/api/bookCategory';
 
 interface FormDataType {
     categoryName: string;

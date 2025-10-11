@@ -1,4 +1,4 @@
-import { baseApi } from "../baseApi";
+import { baseApi } from "./baseApi";
 
 export const bookApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
@@ -30,9 +30,24 @@ export const bookApi = baseApi.injectEndpoints({
                 url: `/book/${id}`,
                 method: "GET",
             }),
-            providesTags: ["books"],
+            providesTags: ["books", "resource"],
+        }),
+        updateBook: builder.mutation({
+            query: ({ bookId, formData }) => ({
+                url: `/book/update-book/${bookId}`,
+                method: "PATCH",
+                body: formData,
+            }),
+            invalidatesTags: ["books"]
+        }),
+        deleteBook: builder.mutation({
+            query: (bookId) => ({
+                url: `/book/${bookId}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: ["books"]
         }),
     }),
 });
 
-export const { useCreateBookMutation, useUploadResourceMutation, useGetAllBooksQuery, useGetSingleBookQuery } = bookApi;
+export const { useCreateBookMutation, useUploadResourceMutation, useGetAllBooksQuery, useGetSingleBookQuery, useUpdateBookMutation, useDeleteBookMutation } = bookApi;

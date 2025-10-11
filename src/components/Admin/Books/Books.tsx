@@ -6,60 +6,13 @@ import { Button } from '@/components/ui/button';
 import Pagination from '@/components/ui/pagination';
 import Image from 'next/image';
 import defaultImg from '@/assets/no-img.jpg'
-import { useGetAllBooksQuery } from '@/redux/api/admin/book';
 import { FaPlus } from 'react-icons/fa';
 import Link from 'next/link';
+import { useGetAllBooksQuery } from '@/redux/api/book';
 
 const Books = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const { data } = useGetAllBooksQuery(currentPage);
-
-    //     {
-    //     "id": "68da5bf41aa3253fe874cc29",
-    //     "bookName": "the time machine",
-    //     "description": "A complete guide to learn programming from scratch.",
-    //     "ISBN": "978-3-16-148410-0",
-    //     "author": "John Doe",
-    //     "coverImg": "https://nyc3.digitaloceanspaces.com/smtech-space/electraican.jpeg",
-    //     "file": "https://nyc3.digitaloceanspaces.com/smtech-space/romeo-and-juliet.pdf",
-    //     "createdAt": "2025-09-29T10:14:12.826Z",
-    //     "updatedAt": "2025-09-29T10:14:12.826Z",
-    //     "categoryId": "68da2e45d2cf7e2a6c63fb76",
-    //     "category": {
-    //         "id": "68da2e45d2cf7e2a6c63fb76",
-    //         "name": "science Fiction",
-    //         "description": "Books that explore futuristic concepts, advanced technology, and space adventures.",
-    //         "image": "https://nyc3.digitaloceanspaces.com/smtech-space/APPICON.png",
-    //         "createdAt": "2025-09-29T06:59:17.310Z",
-    //         "updatedAt": "2025-09-29T06:59:17.310Z"
-    //     },
-    //     "Resources": [
-    //         {
-    //             "id": "68da5bf51aa3253fe874cc2a",
-    //             "title": "Chapter 1 PDF",
-    //             "description": "PDF for the first chapter",
-    //             "Type": "Pdf",
-    //             "file": "https://nyc3.digitaloceanspaces.com/smtech-space/application-summary.pdf",
-    //             "bookId": "68da5bf41aa3253fe874cc29",
-    //             "uplodedBy": "Admin",
-    //             "uploderName": "Admin",
-    //             "createdAt": "2025-09-29T10:14:13.367Z",
-    //             "updatedAt": "2025-09-29T10:14:13.367Z"
-    //         },
-    //         {
-    //             "id": "68da5bf51aa3253fe874cc2b",
-    //             "title": "Lecture Video",
-    //             "description": "Video lecture for chapter 1",
-    //             "Type": "Video",
-    //             "file": "https://www.youtube.com/watch?v=18d9RNwknkY&list=RD18d9RNwknkY&start_radio=1",
-    //             "bookId": "68da5bf41aa3253fe874cc29",
-    //             "uplodedBy": "Admin",
-    //             "uploderName": "Admin",
-    //             "createdAt": "2025-09-29T10:14:13.367Z",
-    //             "updatedAt": "2025-09-29T10:14:13.367Z"
-    //         }
-    //     ]
-    // },
 
     const formattedData = data?.result?.result?.map(
         (entry: { id: string, coverImg: string, bookName: string, description: string, createdAt: string, updatedAt: string, category: { name: string } }) => ({

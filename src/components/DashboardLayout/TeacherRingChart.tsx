@@ -1,4 +1,4 @@
-import { useGetAdminStatQuery } from "@/redux/api/admin/stat";
+import { useGetAdminStatQuery } from "@/redux/api/admin";
 import { SyncLoader } from "react-spinners";
 import { PieChart, Pie, Cell } from "recharts";
 

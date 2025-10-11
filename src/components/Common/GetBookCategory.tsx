@@ -3,7 +3,7 @@
 import React from 'react';
 import Select from 'react-select';
 import Image from 'next/image';
-import { useGetAllBookCategoriesQuery } from '@/redux/api/admin/bookCategory';
+import { useGetAllBookCategoriesQuery } from '@/redux/api/bookCategory';
 
 export interface CategoryOption {
     readonly categoryName: string;
@@ -12,7 +12,7 @@ export interface CategoryOption {
 }
 
 interface GetBookCategoryProps {
-    onChange: (category: { categoryName: string; categoryId: string, categoryImage: string }) => void;
+    onChange: (category: { name: string; categoryId: string, image: string }) => void;
 }
 
 export const GetBookCategory: React.FC<GetBookCategoryProps> = ({ onChange }) => {
@@ -36,9 +36,9 @@ export const GetBookCategory: React.FC<GetBookCategoryProps> = ({ onChange }) =>
             onChange={(selectedOption) => {
                 if (selectedOption) {
                     onChange({
-                        categoryName: selectedOption.categoryName,
+                        name: selectedOption.categoryName,
                         categoryId: selectedOption.categoryId,
-                        categoryImage: selectedOption.image,
+                        image: selectedOption.image,
                     });
                 }
             }}

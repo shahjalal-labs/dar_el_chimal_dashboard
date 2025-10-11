@@ -8,11 +8,11 @@ import Link from 'next/link';
 import { FaPlus } from 'react-icons/fa';
 import Image from 'next/image';
 import defaultImg from '@/assets/no-img.jpg';
-import { useGetAllTeachersQuery } from '@/redux/api/admin/teacher';
+import { useGetAllTeachersByAdminQuery } from '@/redux/api/admin';
 
 const TeacherList = () => {
     const [currentPage, setCurrentPage] = useState(1);
-    const { data } = useGetAllTeachersQuery({ currentPage, limit: 10 });
+    const { data } = useGetAllTeachersByAdminQuery({ currentPage, limit: 10 });
 
     const formattedData = data?.result?.result?.map(
         (entry: { id: string, profileImage: string, fullName: string, email: string, gender: string, DOB: string, phone: string, status: string, joinedAt: string, updatedAt: string }) => ({

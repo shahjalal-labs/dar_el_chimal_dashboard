@@ -29,7 +29,7 @@ const Notifications = () => {
                 {/* Notification List */}
                 <div className="space-y-4">
                     {data?.result?.length > 0 ? (
-                        data.result.map((notification: any) => (
+                        data?.result?.map((notification: any) => (
                             <div
                                 key={notification.id}
                                 className="flex items-start gap-3 border-b border-gray-100 pb-3 last:border-0"

@@ -4,10 +4,10 @@ import React from 'react';
 import DataTable from '../Common/DataTable';
 import Image from 'next/image';
 import defaultImg from '@/assets/no-img.jpg';
-import { useGetAllStudentsQuery } from '@/redux/api/admin/student';
+import { useGetAllStudentsByAdminQuery } from '@/redux/api/admin';
 
 const StudentTable = () => {
-    const { data: allStudents } = useGetAllStudentsQuery({ currentPage: 1, limit: 5 });
+    const { data: allStudents } = useGetAllStudentsByAdminQuery({ currentPage: 1, limit: 5 });
 
     const adminFormattedData = allStudents?.result?.result?.slice(0, 5).map((entry:
         {

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,8 +13,9 @@ import { setActiveBookTab } from "@/redux/features/uiSlice";
 import { RootState } from "@/redux/store/store";
 import { setAuthor, setBookName, setCategory, setDescription, setISBN, setPreviewImage, setPreviewPdf, setUploadImage, setUploadPdf } from "@/redux/features/bookSlice";
 import GetBookCategory from "@/components/Common/GetBookCategory";
+import { useGetSingleBookQuery } from "@/redux/api/book";
 
-const General = () => {
+const General = ({ id }: { id: string }) => {
     const dispatch = useDispatch();
     const {
         bookName,
@@ -23,11 +24,23 @@ const General = () => {
         author,
         categoryName,
         categoryImage,
-        uploadImage,
         previewImage,
-        uploadPdf,
         previewPdf
     } = useSelector((state: RootState) => state.book);
+    const { data } = useGetSingleBookQuery(id);
+
+    useEffect(() => {
+        if (data) {
+            dispatch(setBookName(data?.result?.bookName));
+            dispatch(setDescription(data?.result?.description));
+            dispatch(setISBN(data?.result?.ISBN));
+            dispatch(setAuthor(data?.result?.author));
+            dispatch(setCategory(data?.result?.category));
+            dispatch(setPreviewImage(data?.result?.coverImg));
+            dispatch(setPreviewPdf(data?.result?.file));
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [data])
 
     const handleImageChange = (file: File | null) => {
         if (file) {
@@ -42,7 +55,7 @@ const General = () => {
 
     const handlePdfChange = (file: File | null) => {
         if (file) {
-            dispatch(setPreviewPdf(file.name));
+            dispatch(setPreviewPdf(URL.createObjectURL(file)));
             dispatch(setUploadPdf(file));
         } else {
             dispatch(setPreviewPdf(''));
@@ -52,11 +65,11 @@ const General = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        dispatch(setActiveBookTab("resources"));
+        dispatch(setActiveBookTab("grade"));
     };
 
     const isButtonDisabled =
-        !bookName || !description || !isbn || !author || !categoryName || !uploadImage || !uploadPdf;
+        !bookName || !description || !isbn || !author || !categoryName || !previewImage || !previewPdf;
 
     return (
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -87,7 +100,7 @@ const General = () => {
             </div>
 
             {/* ISBN & Author */}
-            <div className="flex gap-6">
+            <div className="md:flex gap-6">
                 <div className="flex-1">
                     <Label>ISBN</Label>
                     <Input
@@ -99,7 +112,7 @@ const General = () => {
                         required
                     />
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 mt-5 md:mt-0">
                     <Label>Author</Label>
                     <Input
                         type="text"
@@ -134,7 +147,7 @@ const General = () => {
             </div>
 
             {/* File Uploads */}
-            <div className="flex gap-6">
+            <div className="md:flex gap-6">
                 {/* Image Upload */}
                 <div className="flex-1">
                     <Label className="font-medium mb-2.5">
@@ -164,7 +177,7 @@ const General = () => {
                         <div className="flex justify-center relative w-fit mx-auto group">
                             <div
                                 onClick={() => handleImageChange(null)}
-                                className="bg-[#bdbfc4]/60 rounded-full p-2 absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                                className="bg-[#bdbfc4]/60 rounded-full p-1 absolute top-2 right-2 opacity-100 transition-opacity cursor-pointer hover:bg-gray-400"
                             >
                                 <RxCross1 className="h-3 w-3" />
                             </div>
@@ -180,7 +193,7 @@ const General = () => {
                 </div>
 
                 {/* PDF Upload */}
-                <div className="flex-1">
+                <div className="flex-1 mt-5 md:mt-0">
                     <Label className="font-medium mb-2.5">
                         PDF File<span className="text-red-600">*</span>
                     </Label>
@@ -213,10 +226,15 @@ const General = () => {
                             >
                                 <RxCross1 className="w-3 h-3" />
                             </button>
-                            <p className="text-[#1E3A8A] font-medium text-center break-all">
+                            {/* <p className="text-[#1E3A8A] font-medium text-center break-all">
                                 {previewPdf}
                             </p>
-                            <p className="text-xs text-gray-500 mt-1">(PDF File)</p>
+                            <p className="text-xs text-gray-500 mt-1">(PDF File)</p> */}
+                            <iframe
+                                src={previewPdf}
+                                title="PDF Preview"
+                                className="w-full  border rounded-xl mt-2 shadow-lg"
+                            />
                         </div>
                     )}
                 </div>

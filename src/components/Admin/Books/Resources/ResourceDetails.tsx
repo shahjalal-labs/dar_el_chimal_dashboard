@@ -1,14 +1,21 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React from "react";
-import { useParams } from "next/navigation";
-import { useGetSingleResourceQuery } from "@/redux/api/admin/resource";
+import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { FaEdit, FaTrash, FaFilePdf, FaFileAlt } from "react-icons/fa";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import UpdateResource from "./UpdateResource";
+import { toast } from "sonner";
+import { PiSpinner } from "react-icons/pi";
+import { useDeleteResourceMutation, useGetSingleResourceQuery } from "@/redux/api/resource";
 
 const ResourceDetails: React.FC = () => {
-    const { resourceId } = useParams();
+    const { id, resourceId } = useParams();
+    const route = useRouter();
     const { data, isLoading, isError } = useGetSingleResourceQuery(resourceId);
+    const [DeleteResource, { isLoading: isDeleting }] = useDeleteResourceMutation();
 
     if (isLoading) {
         return <p className="text-center mt-10 text-gray-500">Loading resource...</p>;
@@ -19,13 +26,25 @@ const ResourceDetails: React.FC = () => {
     }
 
     const resource = data.result;
-    const { id, title, description, Type, file, uploderName, createdAt } = resource;
+    const { title, description, Type, file, uploderName, createdAt } = resource;
 
     const formattedDate = new Date(createdAt).toLocaleDateString("en-US", {
         year: "numeric",
         month: "long",
         day: "numeric",
     });
+
+    const handleRemove = async () => {
+        try {
+            const response = await DeleteResource(resourceId).unwrap();
+            if (response.success) {
+                toast.success(response.message);
+                route.push(`/admin/books/book-overview/${id}`)
+            }
+        } catch (error) {
+            toast.warning((error as any)?.data?.message || "Something went wrong");
+        }
+    }
 
     return (
         <div className="bg-white rounded-xl p-6">
@@ -57,13 +76,17 @@ const ResourceDetails: React.FC = () => {
 
             {/* Action Buttons */}
             <div className="flex flex-wrap justify-center gap-3">
-                <Button
-                    variant="outline"
-                    className="flex items-center gap-2 border-gray-300 text-[#1E3A8A] bg-[#F7F9FF] cursor-pointer"
-                    onClick={() => console.log("Edit resource", id)}
-                >
-                    <FaEdit /> Edit
-                </Button>
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <Button
+                            variant="outline"
+                            className="flex items-center gap-2 border-gray-300 text-[#1E3A8A] bg-[#F7F9FF] cursor-pointer"
+                        >
+                            <FaEdit /> Edit
+                        </Button>
+                    </DialogTrigger>
+                    <UpdateResource resourceId={String(resourceId)} />
+                </Dialog>
 
                 <Button
                     variant="outline"
@@ -76,9 +99,20 @@ const ResourceDetails: React.FC = () => {
                 <Button
                     variant="destructive"
                     className="flex items-center gap-2 bg-red-100 text-red-600 hover:bg-red-200 cursor-pointer"
-                    onClick={() => console.log("Remove resource", id)}
+                    onClick={() => handleRemove()}
                 >
-                    <FaTrash /> Remove
+                    {
+                        isDeleting ?
+                            <div className="flex justify-center items-center gap-2">
+                                Removing...
+                                <div className="animate-spin">
+                                    <PiSpinner className="h-4 w-4" />
+                                </div>
+                            </div> :
+                            <div className="flex items-center gap-2">
+                                <FaTrash /> Remove
+                            </div>
+                    }
                 </Button>
             </div>
         </div>

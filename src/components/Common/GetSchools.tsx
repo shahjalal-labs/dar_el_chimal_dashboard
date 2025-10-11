@@ -4,7 +4,7 @@
 import React from 'react';
 import Select from 'react-select';
 import Image from 'next/image';
-import { useGetAllSchoolsQuery } from '@/redux/api/admin/school';
+import { useGetAllSchoolsQuery } from '@/redux/api/school';
 
 export interface SchoolOption {
     readonly schoolName: string;

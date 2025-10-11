@@ -8,7 +8,7 @@ import one from '@/assets/adminStatOne.svg';
 import two from '@/assets/adminStatTwo.svg';
 import three from '@/assets/adminStatThree.svg';
 import four from '@/assets/adminStatFour.svg';
-import { useGetAdminStatQuery } from "@/redux/api/admin/stat";
+import { useGetAdminStatQuery } from "@/redux/api/admin";
 
 const DashboardStat = () => {
   const authState = useSelector(useAuth);

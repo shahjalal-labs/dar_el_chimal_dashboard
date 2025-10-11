@@ -4,7 +4,6 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
-import { useGetSingleBookQuery } from '@/redux/api/admin/book';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -18,6 +17,7 @@ import video from "@/assets/link.svg";
 import pdf from "@/assets/docs.svg";
 import Link from 'next/link';
 import Resource from './AddNewBook/Resource';
+import { useGetSingleBookQuery } from '@/redux/api/book';
 
 const BookOverview = () => {
     const { id } = useParams();

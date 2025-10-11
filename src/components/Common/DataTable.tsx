@@ -26,8 +26,9 @@ import { PiSpinner } from 'react-icons/pi';
 import { Input } from '../ui/input';
 import UpdateBookCategoryModal from '../Admin/BookCategories/UpdateBookCategoryModal';
 import ViewBookCategoryModal from '../Admin/BookCategories/ViewBookCategoryModal';
-import { useDeleteBookCategroyMutation } from '@/redux/api/admin/bookCategory';
 import Link from 'next/link';
+import UpdateBookModal from '../Admin/Books/UpdateBookModal';
+import { useDeleteBookCategroyMutation } from '@/redux/api/bookCategory';
 
 
 const DataTable = (
@@ -289,7 +290,9 @@ const DataTable = (
                                   (
                                     pathname === '/admin/book-categories' ?
                                       <UpdateBookCategoryModal id={singleData?.Id} /> :
-                                      <></>
+                                      pathname === '/admin/books' ?
+                                        <UpdateBookModal id={singleData?.Id}/> :
+                                        <></>
                                   )
                                 }
                               </Dialog>
