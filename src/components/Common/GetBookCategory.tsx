@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useGetAllBookCategoriesQuery } from '@/redux/api/bookCategory';
 
 export interface CategoryOption {
-    readonly categoryName: string;
+    readonly name: string;
     readonly categoryId: string;
     readonly image: string;
 }
@@ -24,7 +24,7 @@ export const GetBookCategory: React.FC<GetBookCategoryProps> = ({ onChange }) =>
             name: string;
             image: string;
         }) => ({
-            categoryName: category.name,
+            name: category.name,
             categoryId: category.id,
             image: category.image,
         })) ?? [];
@@ -36,24 +36,24 @@ export const GetBookCategory: React.FC<GetBookCategoryProps> = ({ onChange }) =>
             onChange={(selectedOption) => {
                 if (selectedOption) {
                     onChange({
-                        name: selectedOption.categoryName,
+                        name: selectedOption.name,
                         categoryId: selectedOption.categoryId,
                         image: selectedOption.image,
                     });
                 }
             }}
-            getOptionLabel={(option) => option.categoryName}
+            getOptionLabel={(option) => option.name}
             formatOptionLabel={(option) => (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <Image
                         src={option.image}
                         height={50}
                         width={50}
-                        alt={option.categoryName}
+                        alt={option.name}
                         style={{ width: 24, height: 24, borderRadius: '50%' }}
                         priority
                     />
-                    <span className='text-white'>{option.categoryName}</span>
+                    <span className='text-white'>{option.name}</span>
                 </div>
             )}
             styles={{

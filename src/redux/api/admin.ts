@@ -30,6 +30,13 @@ export const adminApi = baseApi.injectEndpoints({
             }),
             providesTags: ["student"],
         }),
+        getAllSchoolsByAdmin: builder.query({
+            query: ({ currentPage, limit }) => ({
+                url: `/school?page=${currentPage}&limit=${limit}`,
+                method: "GET",
+            }),
+            providesTags: ["school"],
+        }),
     })
 })
 
@@ -37,5 +44,6 @@ export const {
     useGetAdminStatQuery,
     useGetAdminOverviewQuery,
     useGetAllTeachersByAdminQuery,
-    useGetAllStudentsByAdminQuery
+    useGetAllStudentsByAdminQuery,
+    useGetAllSchoolsByAdminQuery
 } = adminApi;

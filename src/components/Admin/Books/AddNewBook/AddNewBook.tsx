@@ -85,7 +85,7 @@ const AddNewBook = () => {
                         <Resource bookId="" />
                     </TabsContent>
                     <TabsContent value="grade">
-                        <Grade />
+                        <Grade id="" />
                     </TabsContent>
                 </Tabs>
             </div>

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useEffect } from "react";
@@ -13,24 +14,32 @@ import { setActiveBookTab } from "@/redux/features/uiSlice";
 import { RootState } from "@/redux/store/store";
 import { setAuthor, setBookName, setCategory, setDescription, setISBN, setPreviewImage, setPreviewPdf, setUploadImage, setUploadPdf } from "@/redux/features/bookSlice";
 import GetBookCategory from "@/components/Common/GetBookCategory";
-import { useGetSingleBookQuery } from "@/redux/api/book";
+import { useGetSingleBookQuery, useUpdateBookMutation } from "@/redux/api/book";
+import { usePathname } from "next/navigation";
+import { toast } from "sonner";
+import { PiSpinner } from "react-icons/pi";
 
 const General = ({ id }: { id: string }) => {
+    const pathname = usePathname();
     const dispatch = useDispatch();
     const {
         bookName,
         description,
         isbn,
         author,
+        categoryId,
         categoryName,
         categoryImage,
         previewImage,
-        previewPdf
+        previewPdf,
+        uploadImage,
+        uploadPdf
     } = useSelector((state: RootState) => state.book);
     const { data } = useGetSingleBookQuery(id);
+    const [UpdateBook, { isLoading }] = useUpdateBookMutation();
 
     useEffect(() => {
-        if (data) {
+        if (pathname === '/admin/books' && data?.result) {
             dispatch(setBookName(data?.result?.bookName));
             dispatch(setDescription(data?.result?.description));
             dispatch(setISBN(data?.result?.ISBN));
@@ -65,7 +74,51 @@ const General = ({ id }: { id: string }) => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        dispatch(setActiveBookTab("grade"));
+
+        if (pathname === '/admin/books') {
+            const body = {
+                BookData: {
+                    bookName: bookName,
+                    author: author,
+                    description: description,
+                    ISBN: isbn,
+                    categoryId: categoryId
+                },
+            }
+
+            const formData = new FormData();
+            formData.append('bodyData', JSON.stringify(body))
+
+            if (uploadImage) {
+                formData.append('coverImage', uploadImage)
+            }
+
+            if (uploadPdf) {
+                formData.append('bookPdf', uploadPdf)
+            }
+
+            try {
+                const response = await UpdateBook({ bookId: id, formData }).unwrap();
+                if (response.success) {
+                    toast.success(response.message);
+                    dispatch(setBookName(''))
+                    dispatch(setDescription(''))
+                    dispatch(setAuthor(''))
+                    dispatch(setISBN(''))
+                    dispatch(setCategory(''))
+                    dispatch(setPreviewImage(''))
+                    dispatch(setUploadImage(null))
+                    dispatch(setPreviewPdf(''))
+                    dispatch(setUploadPdf(null))
+                    dispatch(setActiveBookTab("grade"));
+                }
+            } catch (error) {
+                toast.warning((error as any)?.data?.message || "Something went wrong");
+            }
+        }
+        else {
+            dispatch(setActiveBookTab("resources"));
+        }
     };
 
     const isButtonDisabled =
@@ -259,7 +312,16 @@ const General = ({ id }: { id: string }) => {
                         : "bg-[#1E3A8A] hover:bg-[#1E3A8A]/80"
                         }`}
                 >
-                    Save & Continue
+                    {
+                        (isLoading && pathname === '/admin/books') ?
+                            <div className="flex justify-center items-center gap-2">
+                                Saving...
+                                <div className="animate-spin">
+                                    <PiSpinner className="h-4 w-4" />
+                                </div>
+                            </div> :
+                            "Save & Continue"
+                    }
                 </Button>
             </div>
         </form>

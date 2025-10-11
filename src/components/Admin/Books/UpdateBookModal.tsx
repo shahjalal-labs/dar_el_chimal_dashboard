@@ -75,7 +75,7 @@ const UpdateBookModal = ({ id }: { id: string }) => {
                         <General id={id} />
                     </TabsContent>
                     <TabsContent value="grade">
-                        <Grade />
+                        <Grade id={id} />
                     </TabsContent>
                 </Tabs>
             </div>

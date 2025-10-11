@@ -8,11 +8,11 @@ import { FaPlus } from 'react-icons/fa';
 import DataTable from '@/components/Common/DataTable';
 import Pagination from '@/components/ui/pagination';
 import defaultImg from '@/assets/no-img.jpg';
-import { useGetAllSchoolsQuery } from '@/redux/api/school';
+import { useGetAllSchoolsByAdminQuery } from '@/redux/api/admin';
 
 const SchoolList = () => {
     const [currentPage, setCurrentPage] = useState(1);
-    const { data } = useGetAllSchoolsQuery({ currentPage, limit: 10 });
+    const { data } = useGetAllSchoolsByAdminQuery({ currentPage, limit: 10 });
 
     const formattedData = data?.result?.schools?.map(
         (entry: { id: string, schoolLogo: string, name: string, location: string, teacherCount: number, studentsCount: number, createdAt: string, updatedAt: string }) => ({

@@ -4,31 +4,29 @@
 import React from 'react';
 import Select from 'react-select';
 import Image from 'next/image';
-import { useGetAllSchoolsQuery } from '@/redux/api/school';
+import { useGetAllSchoolsByAdminQuery } from '@/redux/api/admin';
 
 export interface SchoolOption {
-    readonly schoolName: string;
     readonly schoolId: string;
+    readonly schoolName: string;
     readonly image: string;
 }
 
 export interface GetSchoolProps {
     onChange: (school: SchoolOption) => void;
-    excludeIds?: string[]; // ✅ Added this prop so you can pass selected school IDs
+    excludeIds?: string[];
 }
 
 export const GetSchools: React.FC<GetSchoolProps> = ({ onChange, excludeIds = [] }) => {
-    const { data } = useGetAllSchoolsQuery({ currentPage: 1, limit: 10000 });
+    const { data } = useGetAllSchoolsByAdminQuery({ currentPage: 1, limit: 10000 });
 
-    // Map API response to our SchoolOption type
     const schoolOptions: readonly SchoolOption[] =
         data?.result?.schools
             ?.map((school: { id: string; name: string; schoolLogo: string }) => ({
-                schoolName: school.name,
                 schoolId: school.id,
+                schoolName: school.name,
                 image: school.schoolLogo,
             }))
-            // ✅ Filter out already selected schools
             ?.filter((school: any) => !excludeIds.includes(school.schoolId)) ?? [];
 
     return (

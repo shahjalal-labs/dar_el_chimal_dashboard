@@ -314,21 +314,21 @@ const DataTable = (
                                   </AlertDialogTrigger>
                                   <AlertDialogContent>
                                     <AlertDialogHeader>
-                                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        This action cannot be undone. This will permanently delete the {singleData.Name ?? 'item'}.
+                                      <AlertDialogTitle className='text-[#30373D] text-3xl font-bold text-center'>Are you sure?</AlertDialogTitle>
+                                      <AlertDialogDescription className='text-[#636F85] text-center text-base mt-4'>
+                                        This action cannot be undone. This will permanently delete the {singleData?.name ?? 'item'}.
                                       </AlertDialogDescription>
                                     </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogFooter className='flex justify-center items-center gap-4'>
+                                        <AlertDialogCancel className='flex-1 font-bold text-[#636F85] cursor-pointer transition-all duration-500 ease-in-out'>No</AlertDialogCancel>
                                       <AlertDialogAction
-                                        className="bg-red-600 text-white hover:bg-red-700"
+                                        className="bg-[#1E3A8A] text-white hover:bg-[#1E3A8A80] flex-1 cursor-pointer transition-all duration-500 ease-in-out"
                                         onClick={() => {
                                           setSelectedId(singleData?.Id)
                                           handleDelete(singleData?.Id)
                                         }}
                                       >
-                                        Yes, Delete
+                                        Yes
                                       </AlertDialogAction>
                                     </AlertDialogFooter>
                                   </AlertDialogContent>

@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { PiSpinner } from 'react-icons/pi';
 import { useGetAllGradesQuery } from '@/redux/api/grade';
-import { useCreateBookMutation } from '@/redux/api/book';
+import { useCreateBookMutation, useGetSingleBookQuery } from '@/redux/api/book';
 
 interface GradeOption {
     id: string;
@@ -30,7 +30,7 @@ interface Mapping {
     grades: GradeOption[];
 }
 
-const Grade: React.FC = () => {
+const Grade = ({ id }: { id: string }) => {
     const route = useRouter();
     const dispatch = useDispatch();
     const {
@@ -48,6 +48,7 @@ const Grade: React.FC = () => {
         schoolGradeMappings
     } = useSelector((state: RootState) => state.book);
 
+    const { data } = useGetSingleBookQuery(id);
     const { data: gradesData, isLoading, isError } = useGetAllGradesQuery({
         currentPage: 1,
         limit: 1000,
@@ -66,6 +67,20 @@ const Grade: React.FC = () => {
             label: singleGrade.grade,
             schoolId: singleGrade.schoolId,
         })) ?? [];
+
+    useEffect(() => {
+        if (data?.result) {
+            const payload = data?.result?.grades?.map((m: any) => ({
+                schoolId: m?.schoolId,
+                schoolName: m?.schoolName || '',
+                image: m?.image || '',
+                grade: m?.gradesinthisSchool?.map((g: any) => g.id),
+            }));
+
+            dispatch(setSchoolGradeMappings(payload));
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [data])
 
     // 🧩 Preload existing Redux data into mappings
     useEffect(() => {
@@ -93,7 +108,6 @@ const Grade: React.FC = () => {
                     };
                 }
             );
-
             setMappings(preloadedMappings);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -136,15 +150,17 @@ const Grade: React.FC = () => {
         [mappings]
     );
 
+
+
     // Save handler — transforms data to backend format
     const handleSave = async () => {
         const payload = mappings
             .filter((m) => m.school)
             .map((m) => ({
                 schoolId: m.school!.schoolId,
-                grade: m.grades.map((g) => g.id),
                 schoolName: m.school!.schoolName,
                 image: m.school!.image,
+                grade: m.grades.map((g) => g.id),
             }));
 
         dispatch(setSchoolGradeMappings(payload));
