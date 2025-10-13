@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,9 +13,14 @@ import uploadImg from '@/assets/uploadImg.svg';
 import { RootState } from '@/redux/store/store';
 import { setActiveStudents, setActiveTeachers, setAddress, setPreviewSchoolPhoto, setSchoolName, setSchoolPhoto, setStudentCount, setTeacherCount } from '@/redux/features/schoolSlice';
 import { setActiveBookTab } from '@/redux/features/uiSlice';
+import { useGetSingleSchoolQuery, useUpdateSchoolMutation } from '@/redux/api/school';
+import { usePathname } from 'next/navigation';
+import { PiSpinner } from 'react-icons/pi';
+import { toast } from 'sonner';
 
-const General = () => {
+const General = ({ id }: { id: string }) => {
     const dispatch = useDispatch();
+    const pathname = usePathname();
     const {
         schoolName,
         address,
@@ -22,8 +28,25 @@ const General = () => {
         activeTeachers,
         studentCount,
         activeStudents,
-        previewSchoolPhoto
+        previewSchoolPhoto,
+        schoolPhoto
     } = useSelector((state: RootState) => state.school);
+
+    const { data, isLoading } = useGetSingleSchoolQuery(id);
+    const [UpdateSchool, { isLoading: isUpdating }] = useUpdateSchoolMutation();
+
+    useEffect(() => {
+        if (pathname === '/admin/schools' && data?.result) {
+            dispatch(setSchoolName(data?.result?.name));
+            dispatch(setAddress(data?.result?.location));
+            dispatch(setTeacherCount(data?.result?.teacherCount));
+            dispatch(setActiveTeachers(data?.result?.activeTeachers));
+            dispatch(setStudentCount(data?.result?.studentsCount));
+            dispatch(setActiveStudents(data?.result?.activeStudents));
+            dispatch(setPreviewSchoolPhoto(data?.result?.schoolLogo));
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [data])
 
     const handleImageChange = (file: File | null) => {
         if (file) {
@@ -36,9 +59,50 @@ const General = () => {
         }
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        dispatch(setActiveBookTab("grade"));
+        console.log(pathname);
+
+        if (pathname === '/admin/schools') {
+            const body =
+            {
+                schoolData: {
+                    name: schoolName,
+                    location: address,
+                    teacherCount: Number(teacherCount),
+                    studentsCount: Number(studentCount),
+                    activeStudents: Number(activeStudents),
+                    activeTeachers: Number(activeTeachers),
+                }
+            }
+
+            const formData = new FormData();
+            formData.append('bodyData', JSON.stringify(body))
+
+            if (schoolPhoto) {
+                formData.append('schoolLogo', schoolPhoto)
+            }
+
+            try {
+                const response = await UpdateSchool({ id, formData }).unwrap();
+                if (response.success) {
+                    toast.success(response.message);
+                    dispatch(setSchoolName(''))
+                    dispatch(setAddress(''))
+                    dispatch(setTeacherCount(0))
+                    dispatch(setActiveTeachers(0))
+                    dispatch(setStudentCount(0))
+                    dispatch(setActiveStudents(0))
+                    dispatch(setPreviewSchoolPhoto(''))
+                    dispatch(setActiveBookTab("grade"));
+                }
+            } catch (error) {
+                toast.warning((error as any)?.data?.message || "Something went wrong");
+            }
+        }
+        else {
+            dispatch(setActiveBookTab("grade"));
+        }
     };
 
     const isButtonDisabled =
@@ -191,7 +255,16 @@ const General = () => {
                         : "bg-[#1E3A8A] hover:bg-[#1E3A8A]/80"
                         }`}
                 >
-                    Save & Continue
+                    {
+                        (isLoading && pathname === '/admin/schools') || isUpdating ?
+                            <div className="flex justify-center items-center gap-2">
+                                Saving...
+                                <div className="animate-spin">
+                                    <PiSpinner className="h-4 w-4" />
+                                </div>
+                            </div> :
+                            "Save & Continue"
+                    }
                 </Button>
             </div>
         </form>

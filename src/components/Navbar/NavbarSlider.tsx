@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { IoClose } from "react-icons/io5";
 import { RiLogoutCircleRLine } from "react-icons/ri";
 import { FiMenu } from "react-icons/fi";
@@ -31,6 +31,7 @@ interface SidebarProps {
 const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const path = usePathname();
+  const { id, resourceId } = useParams();
   const router = useRouter();
   const dispatch = useDispatch();
   const authState = useSelector((state: any) => state.auth.role);
@@ -150,7 +151,7 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
                       }
                     ${path === item.route
                         ? "bg-[#1E3A8A] text-white" :
-                        ((path === "/admin/books" || path === "/admin/book-categories" || path === "/admin/book-categories/new-book-category" || path === "/admin/books/add-new-book") && item.label === "Book Management")
+                        ((path === "/admin/books" || path === "/admin/book-categories" || path === "/admin/book-categories/new-book-category" || path === "/admin/books/add-new-book" || path === `/admin/books/book-overview/${id}` || path === `/admin/books/book-overview/${id}/${resourceId}`) && item.label === "Book Management")
                           ? "bg-[#1E3A8A] text-white" :
                           "text-[#7C8091]"
                       }`}
@@ -176,7 +177,7 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
                             "Book Categories"
                         }
                       </Link>
-                      <Link href="/admin/books" className={`text-[#1E3A8A] font-medium p-3 ${isOpen && "pl-8 ml-8"} ${(path === '/admin/books' || path === "/admin/books/add-new-book") ? 'border-l-2 border-[#1E3A8A]' : 'border-l border-[#F3EEF6]'}`}>
+                      <Link href="/admin/books" className={`text-[#1E3A8A] font-medium p-3 ${isOpen && "pl-8 ml-8"} ${(path === '/admin/books' || path === "/admin/books/add-new-book" || path === `/admin/books/book-overview/${id}` || path === `/admin/books/book-overview/${id}/${resourceId}`) ? 'border-l-2 border-[#1E3A8A]' : 'border-l border-[#F3EEF6]'}`}>
                         {
                           !isOpen ?
                             <PiBookBookmark /> :
@@ -204,8 +205,8 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
             </button>
           </div>
         </div>
-      </aside>
-    </div>
+      </aside >
+    </div >
   );
 };
 

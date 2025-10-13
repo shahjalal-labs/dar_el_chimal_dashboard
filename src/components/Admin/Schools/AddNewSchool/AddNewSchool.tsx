@@ -57,10 +57,10 @@ const AddNewSchool = () => {
 
                     {/* ---------- TAB CONTENTS ---------- */}
                     <TabsContent value="general">
-                        <General />
+                        <General id='' />
                     </TabsContent>
                     <TabsContent value="grade">
-                        <Grade />
+                        <Grade id='' />
                     </TabsContent>
                 </Tabs>
             </div>

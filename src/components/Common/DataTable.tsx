@@ -29,6 +29,8 @@ import ViewBookCategoryModal from '../Admin/BookCategories/ViewBookCategoryModal
 import Link from 'next/link';
 import UpdateBookModal from '../Admin/Books/UpdateBookModal';
 import { useDeleteBookCategroyMutation } from '@/redux/api/bookCategory';
+import ViewSchoolModal from '../Admin/Schools/ViewSchoolModal';
+import UpdateSchoolModal from '../Admin/Schools/UpdateSchoolModal';
 
 
 const DataTable = (
@@ -269,7 +271,9 @@ const DataTable = (
                                   {
                                     pathname === '/admin/book-categories' ?
                                       <ViewBookCategoryModal id={singleData?.Id} /> :
-                                      <></>
+                                      pathname === '/admin/schools' ?
+                                        <ViewSchoolModal id={singleData?.Id} /> :
+                                        <></>
                                   }
                                 </>
                               }
@@ -291,8 +295,10 @@ const DataTable = (
                                     pathname === '/admin/book-categories' ?
                                       <UpdateBookCategoryModal id={singleData?.Id} /> :
                                       pathname === '/admin/books' ?
-                                        <UpdateBookModal id={singleData?.Id}/> :
-                                        <></>
+                                        <UpdateBookModal id={singleData?.Id} /> :
+                                        pathname === '/admin/schools' ?
+                                          <UpdateSchoolModal id={singleData?.Id} /> :
+                                          <></>
                                   )
                                 }
                               </Dialog>
@@ -320,7 +326,7 @@ const DataTable = (
                                       </AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter className='flex justify-center items-center gap-4'>
-                                        <AlertDialogCancel className='flex-1 font-bold text-[#636F85] cursor-pointer transition-all duration-500 ease-in-out'>No</AlertDialogCancel>
+                                      <AlertDialogCancel className='flex-1 font-bold text-[#636F85] cursor-pointer transition-all duration-500 ease-in-out'>No</AlertDialogCancel>
                                       <AlertDialogAction
                                         className="bg-[#1E3A8A] text-white hover:bg-[#1E3A8A80] flex-1 cursor-pointer transition-all duration-500 ease-in-out"
                                         onClick={() => {

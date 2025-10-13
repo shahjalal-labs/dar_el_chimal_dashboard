@@ -13,10 +13,10 @@ import { setAuthor, setBookName, setCategory, setDescription, setISBN, setPrevie
 import { RootState } from '@/redux/store/store';
 import Image from 'next/image';
 import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { PiSpinner } from 'react-icons/pi';
 import { useGetAllGradesQuery } from '@/redux/api/grade';
-import { useCreateBookMutation, useGetSingleBookQuery } from '@/redux/api/book';
+import { useCreateBookMutation, useGetSingleBookQuery, useUpdateBookMutation } from '@/redux/api/book';
 
 interface GradeOption {
     id: string;
@@ -32,6 +32,7 @@ interface Mapping {
 
 const Grade = ({ id }: { id: string }) => {
     const route = useRouter();
+    const pathname = usePathname();
     const dispatch = useDispatch();
     const {
         bookName,
@@ -46,26 +47,28 @@ const Grade = ({ id }: { id: string }) => {
         resourceType,
         previewResourceFile,
         schoolGradeMappings
-    } = useSelector((state: RootState) => state.book);
+    } = useSelector((state: RootState) => state?.book);
 
     const { data } = useGetSingleBookQuery(id);
     const { data: gradesData, isLoading, isError } = useGetAllGradesQuery({
         currentPage: 1,
         limit: 1000,
     });
+    console?.log(data);
 
     const [CreateBook, { isLoading: isBookLoading }] = useCreateBookMutation();
+    const [UpdateBook, { isLoading: isUpdating }] = useUpdateBookMutation();
 
     const [mappings, setMappings] = useState<Mapping[]>([
-        { id: Date.now().toString(), school: null, grades: [] },
+        { id: Date?.now()?.toString(), school: null, grades: [] },
     ]);
 
     // Prepare grade options from API
     const allGrades: GradeOption[] =
         gradesData?.result?.map((singleGrade: any) => ({
-            id: singleGrade.id,
-            label: singleGrade.grade,
-            schoolId: singleGrade.schoolId,
+            id: singleGrade?.id,
+            label: singleGrade?.grade,
+            schoolId: singleGrade?.schoolId,
         })) ?? [];
 
     useEffect(() => {
@@ -73,8 +76,8 @@ const Grade = ({ id }: { id: string }) => {
             const payload = data?.result?.grades?.map((m: any) => ({
                 schoolId: m?.schoolId,
                 schoolName: m?.schoolName || '',
-                image: m?.image || '',
-                grade: m?.gradesinthisSchool?.map((g: any) => g.id),
+                image: m?.schoolLogo || '',
+                grade: m?.gradesinthisSchool?.map((g: any) => g?.id),
             }));
 
             dispatch(setSchoolGradeMappings(payload));
@@ -84,25 +87,25 @@ const Grade = ({ id }: { id: string }) => {
 
     // 🧩 Preload existing Redux data into mappings
     useEffect(() => {
-        if (gradesData && schoolGradeMappings && schoolGradeMappings.length > 0) {
-            const preloadedMappings: Mapping[] = schoolGradeMappings.map(
+        if (gradesData && schoolGradeMappings && schoolGradeMappings?.length > 0) {
+            const preloadedMappings: Mapping[] = schoolGradeMappings?.map(
                 (entry: any) => {
-                    const school: SchoolOption | null = entry.school
-                        ? entry.school
+                    const school: SchoolOption | null = entry?.school
+                        ? entry?.school
                         : {
-                            schoolId: entry.schoolId,
-                            schoolName: entry.schoolName || '',
-                            image: entry.image || '',
+                            schoolId: entry?.schoolId,
+                            schoolName: entry?.schoolName || '',
+                            image: entry?.image || '',
                         };
 
-                    const grades: GradeOption[] = entry.grade
-                        .map((gradeId: string) =>
-                            allGrades.find((g) => g.id === gradeId)
+                    const grades: GradeOption[] = entry?.grade
+                        ?.map((gradeId: string) =>
+                            allGrades?.find((g) => g?.id === gradeId)
                         )
-                        .filter(Boolean) as GradeOption[];
+                        ?.filter(Boolean) as GradeOption[];
 
                     return {
-                        id: Math.random().toString(),
+                        id: Math?.random()?.toString(),
                         school,
                         grades,
                     };
@@ -117,20 +120,20 @@ const Grade = ({ id }: { id: string }) => {
     const handleAddMapping = () => {
         setMappings((prev) => [
             ...prev,
-            { id: Date.now().toString(), school: null, grades: [] },
+            { id: Date?.now()?.toString(), school: null, grades: [] },
         ]);
     };
 
     // Remove mapping
     const handleRemoveMapping = (id: string) => {
-        setMappings((prev) => prev.filter((item) => item.id !== id));
+        setMappings((prev) => prev?.filter((item) => item?.id !== id));
     };
 
     // School selection
     const handleSchoolChange = (id: string, school: SchoolOption) => {
         setMappings((prev) =>
-            prev.map((item) =>
-                item.id === id ? { ...item, school, grades: [] } : item
+            prev?.map((item) =>
+                item?.id === id ? { ...item, school, grades: [] } : item
             )
         );
     };
@@ -138,15 +141,15 @@ const Grade = ({ id }: { id: string }) => {
     // Grade selection
     const handleGradeChange = (id: string, selectedGrades: readonly GradeOption[]) => {
         setMappings((prev) =>
-            prev.map((item) =>
-                item.id === id ? { ...item, grades: [...selectedGrades] } : item
+            prev?.map((item) =>
+                item?.id === id ? { ...item, grades: [...selectedGrades] } : item
             )
         );
     };
 
     // Extract selected school IDs to prevent duplicates
     const selectedSchoolIds = useMemo(
-        () => mappings.filter((m) => m.school).map((m) => m.school!.schoolId),
+        () => mappings?.filter((m) => m?.school)?.map((m) => m?.school!.schoolId),
         [mappings]
     );
 
@@ -155,93 +158,116 @@ const Grade = ({ id }: { id: string }) => {
     // Save handler — transforms data to backend format
     const handleSave = async () => {
         const payload = mappings
-            .filter((m) => m.school)
-            .map((m) => ({
-                schoolId: m.school!.schoolId,
-                schoolName: m.school!.schoolName,
-                image: m.school!.image,
-                grade: m.grades.map((g) => g.id),
+            ?.filter((m) => m?.school)
+            ?.map((m) => ({
+                schoolId: m?.school!.schoolId,
+                schoolName: m?.school!.schoolName,
+                image: m?.school!.image,
+                grade: m?.grades?.map((g) => g?.id),
             }));
 
         dispatch(setSchoolGradeMappings(payload));
 
-        const body = {
-            BookData: {
-                bookName: bookName,
-                author: author,
-                description: description,
-                ISBN: isbn,
-                categoryId: categoryId
-            },
-            Resources: [
-                {
-                    title: resourceTitle,
-                    description: resourceDescription,
-                    file: previewResourceFile,
-                    type: resourceType
-                }
-            ],
-            Grades: schoolGradeMappings.map((mapping: { schoolId: string, grade: string[] }) => ({
-                schoolId: mapping.schoolId,
-                grade: mapping.grade,
-            })),
-        }
-
-        const formData = new FormData();
-        formData.append('bodyData', JSON.stringify(body))
-
-        if (uploadImage) {
-            formData.append('coverImage', uploadImage)
-        }
-
-        if (uploadPdf) {
-            formData.append('bookPdf', uploadPdf)
-        }
-
-        try {
-            const response = await CreateBook(formData).unwrap();
-            if (response.success) {
-                toast.success(response.message);
-                dispatch(setBookName(''))
-                dispatch(setDescription(''))
-                dispatch(setAuthor(''))
-                dispatch(setISBN(''))
-                dispatch(setCategory(''))
-                dispatch(setPreviewImage(''))
-                dispatch(setUploadImage(null))
-                dispatch(setPreviewPdf(''))
-                dispatch(setUploadPdf(null))
-                dispatch(setResourceType(''))
-                dispatch(setResourceTitle(''))
-                dispatch(setResourceDescription(''))
-                dispatch(setResourceFile(null))
-                dispatch(setPreviewResourceFile(''))
-                dispatch(setResourceLink(''))
-                route.push('/admin/books');
+        if (pathname === '/admin/books') {
+            console?.log(schoolGradeMappings);
+            const body = {
+                NewGradesAssign: schoolGradeMappings?.map((mapping: { schoolId: string, grade: string[] }) => ({
+                    schoolId: mapping?.schoolId,
+                    grade: mapping?.grade,
+                })),
             }
-        } catch (error) {
-            toast.warning((error as any)?.data?.message || "Something went wrong");
+
+            const formData = new FormData();
+            formData?.append('bodyData', JSON?.stringify(body))
+
+            try {
+                const response = await UpdateBook({ bookId: id, formData })?.unwrap();
+                if (response?.success) {
+                    toast?.success(response?.message);
+                }
+            } catch (error) {
+                toast?.warning((error as any)?.data?.message || "Something went wrong");
+            }
+        }
+        else {
+            const body = {
+                BookData: {
+                    bookName: bookName,
+                    author: author,
+                    description: description,
+                    ISBN: isbn,
+                    categoryId: categoryId
+                },
+                Resources: [
+                    {
+                        title: resourceTitle,
+                        description: resourceDescription,
+                        file: previewResourceFile,
+                        type: resourceType
+                    }
+                ],
+                Grades: schoolGradeMappings?.map((mapping: { schoolId: string, grade: string[] }) => ({
+                    schoolId: mapping?.schoolId,
+                    grade: mapping?.grade,
+                })),
+            }
+
+            const formData = new FormData();
+            formData?.append('bodyData', JSON?.stringify(body))
+
+            if (uploadImage) {
+                formData?.append('coverImage', uploadImage)
+            }
+
+            if (uploadPdf) {
+                formData?.append('bookPdf', uploadPdf)
+            }
+
+            try {
+                const response = await CreateBook(formData)?.unwrap();
+                if (response?.success) {
+                    toast?.success(response?.message);
+                    dispatch(setBookName(''))
+                    dispatch(setDescription(''))
+                    dispatch(setAuthor(''))
+                    dispatch(setISBN(''))
+                    dispatch(setCategory(''))
+                    dispatch(setPreviewImage(''))
+                    dispatch(setUploadImage(null))
+                    dispatch(setPreviewPdf(''))
+                    dispatch(setUploadPdf(null))
+                    dispatch(setResourceType(''))
+                    dispatch(setResourceTitle(''))
+                    dispatch(setResourceDescription(''))
+                    dispatch(setResourceFile(null))
+                    dispatch(setPreviewResourceFile(''))
+                    dispatch(setResourceLink(''))
+                    route?.push('/admin/books');
+                }
+            } catch (error) {
+                toast?.warning((error as any)?.data?.message || "Something went wrong");
+            }
         }
     };
 
     if (isLoading) return <p>Loading grades...</p>;
-    if (isError) return <p>Failed to load grades.</p>;
+    if (isError) return <p>Failed to load grades?</p>;
 
     return (
         <div>
-            {mappings.map((mapping) => {
+            {mappings?.map((mapping) => {
                 const { school, grades } = mapping;
 
                 // Filter grades for the selected school
                 const filteredGradeOptions = school
-                    ? allGrades.filter(
-                        (g) => String(g.schoolId) === String(school.schoolId)
+                    ? allGrades?.filter(
+                        (g) => String(g?.schoolId) === String(school?.schoolId)
                     )
                     : [];
 
                 return (
                     <div
-                        key={mapping.id}
+                        key={mapping?.id}
                         className="flex flex-col md:flex-row items-start gap-6 mb-6 relative"
                     >
                         {/* School Name */}
@@ -249,7 +275,7 @@ const Grade = ({ id }: { id: string }) => {
                             <Label>School Name</Label>
                             <GetSchools
                                 onChange={(selectedSchool) =>
-                                    handleSchoolChange(mapping.id, selectedSchool)
+                                    handleSchoolChange(mapping?.id, selectedSchool)
                                 }
                                 excludeIds={selectedSchoolIds}
                             />
@@ -257,16 +283,16 @@ const Grade = ({ id }: { id: string }) => {
                             {/* Display selected school */}
                             {school && (
                                 <div className="flex items-center gap-2 mt-2 absolute top-[35%] left-4">
-                                    {school.image && (
+                                    {school?.image && (
                                         <Image
-                                            src={school.image}
+                                            src={school?.image}
                                             height={32}
                                             width={24}
-                                            alt={school.schoolName}
+                                            alt={school?.schoolName}
                                             className="rounded-xl"
                                         />
                                     )}
-                                    <span>{school.schoolName}</span>
+                                    <span>{school?.schoolName}</span>
                                 </div>
                             )}
                         </div>
@@ -279,17 +305,17 @@ const Grade = ({ id }: { id: string }) => {
                                 options={filteredGradeOptions}
                                 className="basic-multi-select mt-2"
                                 classNamePrefix="select"
-                                getOptionLabel={(option) => option.label}
-                                getOptionValue={(option) => option.id}
+                                getOptionLabel={(option) => option?.label}
+                                getOptionValue={(option) => option?.id}
                                 value={grades}
                                 onChange={(selectedOptions) =>
-                                    handleGradeChange(mapping.id, selectedOptions)
+                                    handleGradeChange(mapping?.id, selectedOptions)
                                 }
                                 styles={{
                                     control: (base) => ({
                                         ...base,
                                         borderColor: '#CBD5E1',
-                                        borderRadius: '0.5rem',
+                                        borderRadius: '0?.5rem',
                                         boxShadow: 'none',
                                         padding: '2px 4px',
                                     }),
@@ -298,11 +324,11 @@ const Grade = ({ id }: { id: string }) => {
                         </div>
 
                         {/* Remove Button */}
-                        {mappings.length > 1 && (
+                        {mappings?.length > 1 && (
                             <Button
                                 variant="ghost"
                                 className="absolute -top-2 right-0 text-red-500 hover:text-red-700 hover:bg-transparent cursor-pointer"
-                                onClick={() => handleRemoveMapping(mapping.id)}
+                                onClick={() => handleRemoveMapping(mapping?.id)}
                             >
                                 <FaTrash />
                             </Button>
@@ -314,7 +340,7 @@ const Grade = ({ id }: { id: string }) => {
             {/* Add More Button */}
             <Button
                 onClick={handleAddMapping}
-                className="font-semibold bg-[#1E3A8A1A] hover:bg-[#1E3A8A] text-[#1E3A8A] hover:text-white rounded-xl px-6 py-2.5 transition-all duration-500 ease-in-out cursor-pointer mt-4"
+                className="font-semibold bg-[#1E3A8A1A] hover:bg-[#1E3A8A] text-[#1E3A8A] hover:text-white rounded-xl px-6 py-2?.5 transition-all duration-500 ease-in-out cursor-pointer mt-4"
             >
                 <FaPlus className="mr-2" /> Add More
             </Button>
@@ -335,7 +361,7 @@ const Grade = ({ id }: { id: string }) => {
                     className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A] text-white font-medium px-6"
                 >
                     {
-                        isBookLoading ?
+                        (isBookLoading || isUpdating) ?
                             <div className="flex justify-center items-center gap-2">
                                 Saving...
                                 <div className="animate-spin">
