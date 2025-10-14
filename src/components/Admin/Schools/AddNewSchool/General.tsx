@@ -61,7 +61,6 @@ const General = ({ id }: { id: string }) => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log(pathname);
 
         if (pathname === '/admin/schools') {
             const body =

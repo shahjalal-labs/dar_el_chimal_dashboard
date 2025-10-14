@@ -1,9 +1,31 @@
 import { baseApi } from "./baseApi";
 
-export const schoolApi = baseApi.injectEndpoints({
+export const teacherApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
-
+        createTeacher: builder.mutation({
+            query: (formData) => ({
+                url: `/users/create-single-teacher`,
+                method: "POST",
+                body: formData,
+            }),
+            invalidatesTags: ["teacher"]
+        }),
+        createBulkTeacher: builder.mutation({
+            query: (formData) => ({
+                url: `/users/bulk-upload-teacher`,
+                method: "POST",
+                body: formData,
+            }),
+            invalidatesTags: ["teacher"]
+        }),
+        getTeacherDetails: builder.query({
+            query: (id) => ({
+                url: `/users/single-user/${id}`,
+                method: "GET",
+            }),
+            providesTags: ["teacher"]
+        }),
     }),
 });
 
-export const { } = schoolApi;
+export const { useCreateTeacherMutation, useCreateBulkTeacherMutation, useGetTeacherDetailsQuery } = teacherApi;

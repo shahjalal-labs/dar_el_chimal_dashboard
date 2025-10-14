@@ -54,7 +54,6 @@ const Grade = ({ id }: { id: string }) => {
         currentPage: 1,
         limit: 1000,
     });
-    console?.log(data);
 
     const [CreateBook, { isLoading: isBookLoading }] = useCreateBookMutation();
     const [UpdateBook, { isLoading: isUpdating }] = useUpdateBookMutation();
@@ -152,8 +151,6 @@ const Grade = ({ id }: { id: string }) => {
         () => mappings?.filter((m) => m?.school)?.map((m) => m?.school!.schoolId),
         [mappings]
     );
-
-
 
     // Save handler — transforms data to backend format
     const handleSave = async () => {
@@ -315,7 +312,7 @@ const Grade = ({ id }: { id: string }) => {
                                     control: (base) => ({
                                         ...base,
                                         borderColor: '#CBD5E1',
-                                        borderRadius: '0?.5rem',
+                                        borderRadius: '0.5rem',
                                         boxShadow: 'none',
                                         padding: '2px 4px',
                                     }),

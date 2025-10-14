@@ -31,6 +31,7 @@ import UpdateBookModal from '../Admin/Books/UpdateBookModal';
 import { useDeleteBookCategroyMutation } from '@/redux/api/bookCategory';
 import ViewSchoolModal from '../Admin/Schools/ViewSchoolModal';
 import UpdateSchoolModal from '../Admin/Schools/UpdateSchoolModal';
+import ViewTeacherModal from '../Admin/Teachers/ViewTeacherModal';
 
 
 const DataTable = (
@@ -273,7 +274,9 @@ const DataTable = (
                                       <ViewBookCategoryModal id={singleData?.Id} /> :
                                       pathname === '/admin/schools' ?
                                         <ViewSchoolModal id={singleData?.Id} /> :
-                                        <></>
+                                        pathname === '/admin/teachers' ?
+                                          <ViewTeacherModal id={singleData?.Id} /> :
+                                          <></>
                                   }
                                 </>
                               }

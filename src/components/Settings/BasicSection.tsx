@@ -195,6 +195,7 @@ const BasicSection = () => {
                                         >
                                             <SelectTrigger className="mt-2 px-5 py-4 w-full text-black">
                                                 <SelectValue placeholder="Select gender..." />
+                                                <ChevronDownIcon />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="MALE">Male</SelectItem>

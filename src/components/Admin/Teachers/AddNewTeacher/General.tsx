@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState } from 'react';
@@ -11,18 +12,20 @@ import { RxCross1 } from 'react-icons/rx';
 import { useDispatch, useSelector } from 'react-redux';
 import uploadImg from '@/assets/uploadImg.svg';
 import { setActiveBookTab } from '@/redux/features/uiSlice';
-import { setEmail, setPassword, setPreviewTeacherPhoto, setTeacherName, setTeacherPhoto, setTeacherSchoolName, setUserName } from '@/redux/features/teacherSlice';
+import { setEmail, setPassword, setPreviewTeacherPhoto, setTeacherName, setTeacherPhoto, setUserName } from '@/redux/features/teacherSlice';
 import { Eye, EyeOff } from 'lucide-react';
+import { toast } from 'sonner';
+import { usePathname } from 'next/navigation';
 
 const General = () => {
     const [showPassword, setShowPassword] = useState(false);
+    const pathname = usePathname();
     const dispatch = useDispatch();
     const {
         teacherName,
         userName,
         password,
         email,
-        teacherSchoolName,
         previewTeacherPhoto
     } = useSelector((state: RootState) => state.teacher);
 
@@ -37,13 +40,53 @@ const General = () => {
         }
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        dispatch(setActiveBookTab("grade"));
+
+        if (pathname === '/admin/schools') {
+            // const body =
+            // {
+            //     schoolData: {
+            //         name: schoolName,
+            //         location: address,
+            //         teacherCount: Number(teacherCount),
+            //         studentsCount: Number(studentCount),
+            //         activeStudents: Number(activeStudents),
+            //         activeTeachers: Number(activeTeachers),
+            //     }
+            // }
+
+            // const formData = new FormData();
+            // formData.append('bodyData', JSON.stringify(body))
+
+            // if (schoolPhoto) {
+            //     formData.append('schoolLogo', schoolPhoto)
+            // }
+
+            // try {
+            //     const response = await UpdateSchool({ id, formData }).unwrap();
+            //     if (response.success) {
+            //         toast.success(response.message);
+            //         dispatch(setSchoolName(''))
+            //         dispatch(setAddress(''))
+            //         dispatch(setTeacherCount(0))
+            //         dispatch(setActiveTeachers(0))
+            //         dispatch(setStudentCount(0))
+            //         dispatch(setActiveStudents(0))
+            //         dispatch(setPreviewSchoolPhoto(''))
+            //         dispatch(setActiveBookTab("grade"));
+            //     }
+            // } catch (error) {
+            //     toast.warning((error as any)?.data?.message || "Something went wrong");
+            // }
+        }
+        else {
+            dispatch(setActiveBookTab("grade"));
+        }
     };
 
     const isButtonDisabled =
-        !teacherName || !userName || !password || !email || !teacherSchoolName || !previewTeacherPhoto;
+        !teacherName || !userName || !password || !email || !previewTeacherPhoto;
 
     return (
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -102,19 +145,6 @@ const General = () => {
                     placeholder="Enter email"
                     value={email}
                     onChange={(e) => dispatch(setEmail(e.target.value))}
-                    className=""
-                    required
-                />
-            </div>
-
-            {/* School */}
-            <div>
-                <Label>School</Label>
-                <Input
-                    type="text"
-                    placeholder="Enter school name"
-                    value={teacherSchoolName}
-                    onChange={(e) => dispatch(setTeacherSchoolName(e.target.value))}
                     className=""
                     required
                 />

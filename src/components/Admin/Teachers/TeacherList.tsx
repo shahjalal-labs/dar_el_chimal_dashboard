@@ -9,9 +9,15 @@ import { FaPlus } from 'react-icons/fa';
 import Image from 'next/image';
 import defaultImg from '@/assets/no-img.jpg';
 import { useGetAllTeachersByAdminQuery } from '@/redux/api/admin';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useRouter } from 'next/navigation';
+import { Dialog } from '@/components/ui/dialog';
+import CreateTeacherModal from './AddNewTeacher/CreateTeacherModal';
 
 const TeacherList = () => {
+    const [open, setOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
+    const route = useRouter();
     const { data } = useGetAllTeachersByAdminQuery({ currentPage, limit: 10 });
 
     const formattedData = data?.result?.result?.map(
@@ -49,6 +55,15 @@ const TeacherList = () => {
             }),
         }));
 
+    const handleRoute = (value: string) => {
+        if (value === 'manual') {
+            route.push('/admin/teachers/add-new-teacher')
+        }
+        else {
+            setOpen(true);
+        }
+    }
+
     return (
         <div>
             <div className='md:flex justify-between items-center mb-10'>
@@ -56,12 +71,27 @@ const TeacherList = () => {
                     <h1 className='text-2xl font-bold mb-3'>Teachers</h1>
                     <p className='font-medium'><span className='text-[#72727299]'>Library</span><span className='text-[#72727299] px-2'>/</span>Teacher List</p>
                 </div>
-                <Link href="/admin/teachers/add-new-teacher">
-                    <Button className='bg-transparent text-[#1E3A8A] border border-[#1E3A8A] hover:bg-transparent cursor-pointer'>
-                        <FaPlus />
-                        Create New Teacher
-                    </Button>
-                </Link>
+                <Select
+                    onValueChange={(value) => handleRoute(value)}
+                >
+                    <SelectTrigger
+                        className="w-fit border border-[#1E3A8A] text-[#1E3A8A] bg-transparent hover:bg-transparent cursor-pointer flex items-center gap-2 px-3 py-2 rounded-md data-[placeholder]:text-[#1E3A8A]"
+                    >
+                        <FaPlus className="text-[#1E3A8A]" />
+                        <SelectValue placeholder="Create New Teacher" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="manual">
+                            <Link href="/admin/teachers/add-new-teacher">
+                                Manually Create
+                            </Link>
+                        </SelectItem>
+                        <SelectItem value="automatic">Automatically Create</SelectItem>
+                    </SelectContent>
+                </Select>
+                <Dialog open={open} onOpenChange={setOpen}>
+                    <CreateTeacherModal />
+                </Dialog>
             </div>
 
             <DataTable title="Teacher List" data={formattedData} currentPage={currentPage} willSearch={true} />

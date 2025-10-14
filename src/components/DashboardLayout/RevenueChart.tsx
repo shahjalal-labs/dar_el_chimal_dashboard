@@ -18,6 +18,7 @@ import {
   SelectItem,
 } from '@/components/ui/select';
 import { SyncLoader } from 'react-spinners';
+import { ChevronDownIcon } from 'lucide-react';
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
@@ -60,6 +61,7 @@ const RevenueChart = ({ data, revenueYear, setRevenueYear }: { data: any, revenu
           >
             <SelectTrigger className="w-full flex items-center gap-2 outline-none border-none">
               <SelectValue placeholder="Select Type" />
+              <ChevronDownIcon />
             </SelectTrigger>
             <SelectContent>
               {types?.map((type, idx) => (

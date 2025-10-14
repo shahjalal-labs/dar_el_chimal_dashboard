@@ -51,13 +51,17 @@ const Grade = ({ id }: { id: string }) => {
                 __isNew__: true
             }));
             dispatch(setGradeOptions(grades));
+            setSelectedOptions(grades);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data])
 
     const handleChange = (newValue: any) => {
+        const newOptions = newValue.filter(
+            (v: any) => !data.result.grades.some((g: any) => g.grade === v.value)
+        );
         setSelectedOptions(newValue);
-        dispatch(setGradeOptions(newValue));
+        dispatch(setGradeOptions(newOptions));
     };
 
     const handleRemoveClick = (option: Option) => {
