@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { useGetSingleSchoolQuery } from "@/redux/api/school";
 
 const ViewSchoolModal = ({ id }: { id: string }) => {
-    const { data, isLoading } = useGetSingleSchoolQuery(id);
+    const { data, isLoading } = useGetSingleSchoolQuery({ id });
     const school = data?.result;
 
     if (isLoading) {

@@ -17,7 +17,7 @@ const UpdateSchoolModal = ({ id }: { id: string }) => {
     const closeRef = useRef<HTMLButtonElement>(null);
     const dispatch = useDispatch();
     const tab = useSelector((state: RootState) => state.ui.activeBookTab);
-    const { data, isLoading } = useGetSingleSchoolQuery(id);
+    const { data, isLoading } = useGetSingleSchoolQuery({ id });
 
     const handleTabChange = (value: string) => {
         dispatch(setActiveBookTab(value as "general" | "resources" | "grade"));

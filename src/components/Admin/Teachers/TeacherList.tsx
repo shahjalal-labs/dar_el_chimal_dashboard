@@ -28,7 +28,7 @@ const TeacherList = () => {
                     src={entry.profileImage || defaultImg}
                     height={50}
                     width={50}
-                    alt={entry.fullName}
+                    alt={entry.fullName || "Full Name"}
                     className="w-8 h-8 rounded-full object-cover"
                     priority
                 />

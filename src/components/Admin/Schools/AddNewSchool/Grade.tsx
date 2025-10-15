@@ -39,7 +39,7 @@ const Grade = ({ id }: { id: string }) => {
     const [optionToRemove, setOptionToRemove] = useState<Option | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const { data } = useGetSingleSchoolQuery(id);
+    const { data } = useGetSingleSchoolQuery({ id });
     const [CreateSchool, { isLoading: isCreating }] = useCreateSchoolMutation();
     const [UpdateSchool, { isLoading: isUpdating }] = useUpdateSchoolMutation();
 

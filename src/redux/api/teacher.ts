@@ -25,7 +25,15 @@ export const teacherApi = baseApi.injectEndpoints({
             }),
             providesTags: ["teacher"]
         }),
+        updateTeacher: builder.mutation({
+            query: ({ id, formData }) => ({
+                url: `/users/update-user/${id}`,
+                method: "PATCH",
+                body: formData,
+            }),
+            invalidatesTags: ["teacher"]
+        }),
     }),
 });
 
-export const { useCreateTeacherMutation, useCreateBulkTeacherMutation, useGetTeacherDetailsQuery } = teacherApi;
+export const { useCreateTeacherMutation, useCreateBulkTeacherMutation, useGetTeacherDetailsQuery, useUpdateTeacherMutation } = teacherApi;

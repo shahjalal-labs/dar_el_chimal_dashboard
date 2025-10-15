@@ -32,6 +32,7 @@ import { useDeleteBookCategroyMutation } from '@/redux/api/bookCategory';
 import ViewSchoolModal from '../Admin/Schools/ViewSchoolModal';
 import UpdateSchoolModal from '../Admin/Schools/UpdateSchoolModal';
 import ViewTeacherModal from '../Admin/Teachers/ViewTeacherModal';
+import UpdateTeacherModal from '../Admin/Teachers/UpdateTeacherModal';
 
 
 const DataTable = (
@@ -301,7 +302,9 @@ const DataTable = (
                                         <UpdateBookModal id={singleData?.Id} /> :
                                         pathname === '/admin/schools' ?
                                           <UpdateSchoolModal id={singleData?.Id} /> :
-                                          <></>
+                                          pathname === '/admin/teachers' ?
+                                            <UpdateTeacherModal id={singleData?.Id} /> :
+                                            <></>
                                   )
                                 }
                               </Dialog>

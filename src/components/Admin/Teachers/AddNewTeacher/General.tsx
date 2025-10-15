@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,8 +16,10 @@ import { setEmail, setPassword, setPreviewTeacherPhoto, setTeacherName, setTeach
 import { Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePathname } from 'next/navigation';
+import { useGetTeacherDetailsQuery, useUpdateTeacherMutation } from '@/redux/api/teacher';
+import { PiSpinner } from 'react-icons/pi';
 
-const General = () => {
+const General = ({ id }: { id: string }) => {
     const [showPassword, setShowPassword] = useState(false);
     const pathname = usePathname();
     const dispatch = useDispatch();
@@ -26,8 +28,22 @@ const General = () => {
         userName,
         password,
         email,
-        previewTeacherPhoto
+        previewTeacherPhoto,
+        teacherPhoto
     } = useSelector((state: RootState) => state.teacher);
+
+    const { data } = useGetTeacherDetailsQuery(id);
+    const [UpdateTeacher, { isLoading: isUpdating }] = useUpdateTeacherMutation();
+
+    useEffect(() => {
+        if (pathname === '/admin/teachers' && data?.result) {
+            dispatch(setTeacherName(data?.result?.fullName));
+            dispatch(setUserName(data?.result?.loginUserName));
+            dispatch(setEmail(data?.result?.email));
+            dispatch(setPreviewTeacherPhoto(data?.result?.profileImage));
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [data])
 
     const handleImageChange = (file: File | null) => {
         if (file) {
@@ -42,51 +58,44 @@ const General = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (pathname === '/admin/teachers') {
+            const body = {
+                userData:
+                {
+                    loginUserName: userName,
+                    fullName: teacherName,
+                    email: email,
+                },
+                gradeData: {}
+            }
 
-        if (pathname === '/admin/schools') {
-            // const body =
-            // {
-            //     schoolData: {
-            //         name: schoolName,
-            //         location: address,
-            //         teacherCount: Number(teacherCount),
-            //         studentsCount: Number(studentCount),
-            //         activeStudents: Number(activeStudents),
-            //         activeTeachers: Number(activeTeachers),
-            //     }
-            // }
+            const formData = new FormData();
+            formData.append('bodyData', JSON.stringify(body))
+            if (teacherPhoto) {
+                formData.append('profileImage', teacherPhoto)
+            }
 
-            // const formData = new FormData();
-            // formData.append('bodyData', JSON.stringify(body))
-
-            // if (schoolPhoto) {
-            //     formData.append('schoolLogo', schoolPhoto)
-            // }
-
-            // try {
-            //     const response = await UpdateSchool({ id, formData }).unwrap();
-            //     if (response.success) {
-            //         toast.success(response.message);
-            //         dispatch(setSchoolName(''))
-            //         dispatch(setAddress(''))
-            //         dispatch(setTeacherCount(0))
-            //         dispatch(setActiveTeachers(0))
-            //         dispatch(setStudentCount(0))
-            //         dispatch(setActiveStudents(0))
-            //         dispatch(setPreviewSchoolPhoto(''))
-            //         dispatch(setActiveBookTab("grade"));
-            //     }
-            // } catch (error) {
-            //     toast.warning((error as any)?.data?.message || "Something went wrong");
-            // }
+            try {
+                const response = await UpdateTeacher({ id, formData }).unwrap();
+                if (response.success) {
+                    toast.success(response.message);
+                    dispatch(setTeacherName(''))
+                    dispatch(setUserName(''))
+                    dispatch(setEmail(''))
+                    dispatch(setActiveBookTab("grade"));
+                }
+            }
+            catch (error) {
+                toast.warning((error as any)?.data?.message || "Something went wrong");
+            }
         }
         else {
             dispatch(setActiveBookTab("grade"));
         }
     };
 
-    const isButtonDisabled =
-        !teacherName || !userName || !password || !email || !previewTeacherPhoto;
+    // const isButtonDisabled =
+    //     !teacherName || !userName || !email || !previewTeacherPhoto;
 
     return (
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -116,24 +125,27 @@ const General = () => {
                         required
                     />
                 </div>
-                <div className="flex-1 relative">
-                    <Label>Password</Label>
-                    <Input
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Enter password"
-                        value={password}
-                        onChange={(e) => dispatch(setPassword(e.target.value))}
-                        className="pr-10" // gives space for the icon
-                        required
-                    />
-                    <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-11 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                    >
-                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                </div>
+                {
+                    pathname === '/admin/teachers/add-new-teacher' &&
+                    <div className="flex-1 relative">
+                        <Label>Password</Label>
+                        <Input
+                            type={showPassword ? "text" : "password"}
+                            placeholder="Enter password"
+                            value={password}
+                            onChange={(e) => dispatch(setPassword(e.target.value))}
+                            className="pr-10" // gives space for the icon
+                            required
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-11 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        >
+                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                    </div>
+                }
 
             </div>
 
@@ -207,16 +219,23 @@ const General = () => {
 
                 <Button
                     type="submit"
-                    disabled={isButtonDisabled}
-                    className={`px-6 text-white font-medium border border-[#1E3A8A] transition-all duration-300 ${isButtonDisabled
-                        ? "bg-gray-400 cursor-not-allowed"
-                        : "bg-[#1E3A8A] hover:bg-[#1E3A8A]/80"
-                        }`}
+                    // disabled={isButtonDisabled}
+                    className={`px-6 text-white font-medium border border-[#1E3A8A] transition-all duration-300 bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 `}
+                    // ${isButtonDisabled ? "bg-gray-400 cursor-not-allowed" : "bg-[#1E3A8A] hover:bg-[#1E3A8A]/80"}
                 >
-                    Save & Continue
+                    {
+                        isUpdating ?
+                            <div className="flex justify-center items-center gap-2">
+                                Saving...
+                                <div className="animate-spin">
+                                    <PiSpinner className="h-4 w-4" />
+                                </div>
+                            </div> :
+                            "Save & Continue"
+                    }
                 </Button>
             </div>
-        </form>
+        </form >
     );
 };
 

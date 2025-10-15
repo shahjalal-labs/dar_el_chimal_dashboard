@@ -32,7 +32,7 @@ const General = ({ id }: { id: string }) => {
         schoolPhoto
     } = useSelector((state: RootState) => state.school);
 
-    const { data, isLoading } = useGetSingleSchoolQuery(id);
+    const { data, isLoading } = useGetSingleSchoolQuery({ id });
     const [UpdateSchool, { isLoading: isUpdating }] = useUpdateSchoolMutation();
 
     useEffect(() => {

@@ -11,7 +11,7 @@ export const schoolApi = baseApi.injectEndpoints({
             invalidatesTags: ["school"]
         }),
         getSingleSchool: builder.query({
-            query: (id) => ({
+            query: ({ id }) => ({
                 url: `/school/${id}`,
                 method: "GET",
             }),
