@@ -1,27 +1,29 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
-import { useParams, usePathname, useRouter } from "next/navigation";
-import { IoClose } from "react-icons/io5";
-import { RiLogoutCircleRLine } from "react-icons/ri";
-import { FiMenu } from "react-icons/fi";
-import Cookies from "js-cookie";
 import logo from "@/assets/logo.svg";
-import { RxDashboard } from "react-icons/rx";
-import { useDispatch } from "react-redux";
 import { logout } from "@/redux/features/authSlice";
-import { IoSettingsOutline } from "react-icons/io5";
-import { useSelector } from 'react-redux';
-import { MdOutlineAssignment } from "react-icons/md";
-import { PiBookBookmark, PiBookOpenTextDuotone, PiStudentDuotone } from "react-icons/pi";
-import { LuBookOpenText, LuSchool } from "react-icons/lu";
-import { LiaChalkboardTeacherSolid } from "react-icons/lia";
-import { TfiAngleDown, TfiAngleUp, TfiAnnouncement } from "react-icons/tfi";
-import { SiGoogleclassroom } from "react-icons/si";
+import Cookies from "js-cookie";
+import Image from "next/image";
+import Link from "next/link";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { FiMenu } from "react-icons/fi";
+import { IoClose, IoSettingsOutline } from "react-icons/io5";
+import { LiaChalkboardTeacherSolid } from "react-icons/lia";
+import { LuBookOpenText, LuSchool } from "react-icons/lu";
+import { MdOutlineAssignment } from "react-icons/md";
+import {
+  PiBookBookmark,
+  PiBookOpenTextDuotone,
+  PiStudentDuotone,
+} from "react-icons/pi";
+import { RiLogoutCircleRLine } from "react-icons/ri";
+import { RxDashboard } from "react-icons/rx";
+import { SiGoogleclassroom } from "react-icons/si";
 import { TbCategoryPlus } from "react-icons/tb";
+import { TfiAngleDown, TfiAngleUp, TfiAnnouncement } from "react-icons/tfi";
+import { useDispatch, useSelector } from "react-redux";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -35,30 +37,40 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
   const router = useRouter();
   const dispatch = useDispatch();
   const authState = useSelector((state: any) => state.auth.role);
+  console.log("authState", authState);
 
   const navigation = [
-    { label: "Overview", route: "/", iconPath: <RxDashboard className="w-5 lg:w-6 h-5 lg:h-6" /> },
+    {
+      label: "Overview",
+      route: "/",
+      iconPath: <RxDashboard className="w-5 lg:w-6 h-5 lg:h-6" />,
+    },
 
-    ...(authState.role === "Student"
+    ...(authState === "Student"
       ? [
-        {
-          label: "Book",
-          route: "/student/book",
-          iconPath: <LuBookOpenText className="w-5 lg:w-6 h-5 lg:h-6" />,
-        },
-        {
-          label: "Assignment",
-          route: "/student/assignment",
-          iconPath: <MdOutlineAssignment className="w-5 lg:w-6 h-5 lg:h-6" />,
-        },
-        {
-          label: "Announcements",
-          route: "/student/announcements",
-          iconPath: <TfiAnnouncement className="w-5 lg:w-6 h-5 lg:h-6" />,
-        }
-      ] :
-      authState.role === "Teacher"
-        ? [
+          {
+            label: "Overview",
+            route: "/student/overview",
+            iconPath: <RxDashboard className="w-5 lg:w-6 h-5 lg:h-6" />,
+          },
+          {
+            label: "Book",
+            route: "/student/book",
+            iconPath: <LuBookOpenText className="w-5 lg:w-6 h-5 lg:h-6" />,
+          },
+          {
+            label: "Assignment",
+            route: "/student/assignment",
+            iconPath: <MdOutlineAssignment className="w-5 lg:w-6 h-5 lg:h-6" />,
+          },
+          {
+            label: "Announcements",
+            route: "/student/announcements",
+            iconPath: <TfiAnnouncement className="w-5 lg:w-6 h-5 lg:h-6" />,
+          },
+        ]
+      : authState === "Teacher"
+      ? [
           {
             label: "Classes",
             route: "/teacher/classes",
@@ -69,12 +81,14 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
             route: "/teacher/book",
             iconPath: <LuBookOpenText className="w-5 lg:w-6 h-5 lg:h-6" />,
           },
-        ] :
-        [
+        ]
+      : [
           {
             label: "Book Management",
             route: "",
-            iconPath: <PiBookOpenTextDuotone className="w-5 lg:w-6 h-5 lg:h-6" />,
+            iconPath: (
+              <PiBookOpenTextDuotone className="w-5 lg:w-6 h-5 lg:h-6" />
+            ),
           },
           {
             label: "Schools",
@@ -84,7 +98,9 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
           {
             label: "Teachers",
             route: "/admin/teachers",
-            iconPath: <LiaChalkboardTeacherSolid className="w-5 lg:w-6 h-5 lg:h-6" />,
+            iconPath: (
+              <LiaChalkboardTeacherSolid className="w-5 lg:w-6 h-5 lg:h-6" />
+            ),
           },
           {
             label: "Students",
@@ -96,9 +112,12 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
             route: "/admin/announcements",
             iconPath: <TfiAnnouncement className="w-5 lg:w-6 h-5 lg:h-6" />,
           },
-        ]
-    ),
-    { label: "Settings", route: "/settings", iconPath: <IoSettingsOutline className="w-5 lg:w-6 h-5 lg:h-6" /> },
+        ]),
+    {
+      label: "Settings",
+      route: "/settings",
+      iconPath: <IoSettingsOutline className="w-5 lg:w-6 h-5 lg:h-6" />,
+    },
   ];
 
   const handleLogOut = () => {
@@ -119,13 +138,17 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
 
       {/* Sidebar Content */}
       <aside
-        className={`duration-300 flex flex-col justify-between h-[calc(100%-80px)] font-inter ${isOpen ? "w-[250px] xl:w-[286px]" : "w-[80px]"
-          }`}
+        className={`duration-300 flex flex-col justify-between h-[calc(100%-80px)] font-inter ${
+          isOpen ? "w-[250px] xl:w-[286px]" : "w-[80px]"
+        }`}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
           {isOpen && (
-            <Link href="/" className="hidden lg:flex justify-center items-center gap-3 m-6 pb-6 border-b border-[#E2E8F0]">
+            <Link
+              href="/"
+              className="hidden lg:flex justify-center items-center gap-3 m-6 pb-6 border-b border-[#E2E8F0]"
+            >
               <Image
                 width={250}
                 height={100}
@@ -145,47 +168,78 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
                 <li key={item.route}>
                   <Link
                     href={item.route}
-                    onClick={() => { if (item.label === 'Book Management') setShowDropdown(!showDropdown); }}
+                    onClick={() => {
+                      if (item.label === "Book Management")
+                        setShowDropdown(!showDropdown);
+                    }}
                     className={`flex items-center gap-2 mb-2 rounded-lg hover:bg-[#1E3A8A] hover:text-white transition-colors duration-300 ease-in-out 
-                      ${!isOpen ? 'justify-center py-2' : 'justify-start px-4 py-2'
+                      ${
+                        !isOpen
+                          ? "justify-center py-2"
+                          : "justify-start px-4 py-2"
                       }
-                    ${path === item.route
-                        ? "bg-[#1E3A8A] text-white" :
-                        ((path === "/admin/books" || path === "/admin/book-categories" || path === "/admin/book-categories/new-book-category" || path === "/admin/books/add-new-book" || path === `/admin/books/book-overview/${id}` || path === `/admin/books/book-overview/${id}/${resourceId}`) && item.label === "Book Management")
-                          ? "bg-[#1E3A8A] text-white" :
-                          "text-[#7C8091]"
-                      }`}
+                    ${
+                      path === item.route
+                        ? "bg-[#1E3A8A] text-white"
+                        : (path === "/admin/books" ||
+                            path === "/admin/book-categories" ||
+                            path ===
+                              "/admin/book-categories/new-book-category" ||
+                            path === "/admin/books/add-new-book" ||
+                            path === `/admin/books/book-overview/${id}` ||
+                            path ===
+                              `/admin/books/book-overview/${id}/${resourceId}`) &&
+                          item.label === "Book Management"
+                        ? "bg-[#1E3A8A] text-white"
+                        : "text-[#7C8091]"
+                    }`}
                   >
-                    <div className="flex justify-center items-center">{item.iconPath}</div>
-                    {isOpen && <p className="text-sm xl:text-base">{item.label}</p>}
-                    {
-                      item.label === 'Book Management' &&
-                      (
-                        showDropdown ?
-                          <TfiAngleUp className="w-2 lg:w-5 h-2 lg:h-5" /> :
-                          <TfiAngleDown className="w-2 lg:w-5 h-2 lg:h-5" />
-                      )
-                    }
+                    <div className="flex justify-center items-center">
+                      {item.iconPath}
+                    </div>
+                    {isOpen && (
+                      <p className="text-sm xl:text-base">{item.label}</p>
+                    )}
+                    {item.label === "Book Management" &&
+                      (showDropdown ? (
+                        <TfiAngleUp className="w-2 lg:w-5 h-2 lg:h-5" />
+                      ) : (
+                        <TfiAngleDown className="w-2 lg:w-5 h-2 lg:h-5" />
+                      ))}
                   </Link>
-                  {
-                    (showDropdown && item.label === 'Book Management') &&
+                  {showDropdown && item.label === "Book Management" && (
                     <div className="flex flex-col">
-                      <Link href="/admin/book-categories" className={`text-[#1E3A8A] font-medium p-3 ${isOpen && "pl-8 ml-8"} ${(path === '/admin/book-categories' || path === "/admin/book-categories/new-book-category") ? 'border-l-2 border-[#1E3A8A]' : 'border-l border-[#F3EEF6]'}`}>
-                        {
-                          !isOpen ?
-                            <TbCategoryPlus /> :
-                            "Book Categories"
-                        }
+                      <Link
+                        href="/admin/book-categories"
+                        className={`text-[#1E3A8A] font-medium p-3 ${
+                          isOpen && "pl-8 ml-8"
+                        } ${
+                          path === "/admin/book-categories" ||
+                          path === "/admin/book-categories/new-book-category"
+                            ? "border-l-2 border-[#1E3A8A]"
+                            : "border-l border-[#F3EEF6]"
+                        }`}
+                      >
+                        {!isOpen ? <TbCategoryPlus /> : "Book Categories"}
                       </Link>
-                      <Link href="/admin/books" className={`text-[#1E3A8A] font-medium p-3 ${isOpen && "pl-8 ml-8"} ${(path === '/admin/books' || path === "/admin/books/add-new-book" || path === `/admin/books/book-overview/${id}` || path === `/admin/books/book-overview/${id}/${resourceId}`) ? 'border-l-2 border-[#1E3A8A]' : 'border-l border-[#F3EEF6]'}`}>
-                        {
-                          !isOpen ?
-                            <PiBookBookmark /> :
-                            "Books"
-                        }
+                      <Link
+                        href="/admin/books"
+                        className={`text-[#1E3A8A] font-medium p-3 ${
+                          isOpen && "pl-8 ml-8"
+                        } ${
+                          path === "/admin/books" ||
+                          path === "/admin/books/add-new-book" ||
+                          path === `/admin/books/book-overview/${id}` ||
+                          path ===
+                            `/admin/books/book-overview/${id}/${resourceId}`
+                            ? "border-l-2 border-[#1E3A8A]"
+                            : "border-l border-[#F3EEF6]"
+                        }`}
+                      >
+                        {!isOpen ? <PiBookBookmark /> : "Books"}
                       </Link>
                     </div>
-                  }
+                  )}
                 </li>
               ))}
             </ul>
@@ -205,8 +259,8 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
             </button>
           </div>
         </div>
-      </aside >
-    </div >
+      </aside>
+    </div>
   );
 };
 
