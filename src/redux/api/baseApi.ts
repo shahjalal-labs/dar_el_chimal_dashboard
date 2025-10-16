@@ -28,6 +28,7 @@ export const baseApi = createApi({
     "teacher",
     "student",
     "grade",
+    "announcement",
     "resource",
     "admin",
     "notifications",
