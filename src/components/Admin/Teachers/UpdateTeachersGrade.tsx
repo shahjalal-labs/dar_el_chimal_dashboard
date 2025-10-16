@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Select from 'react-select';
 import GetSchools, { SchoolOption } from '@/components/Common/GetSchools';
 import { Label } from '@/components/ui/label';
 import Image from 'next/image';
 import { useGetAllGradesQuery } from '@/redux/api/grade';
+import { useGetTeacherDetailsQuery } from '@/redux/api/teacher';
 
 interface GradeOption {
     id: string;
@@ -25,10 +26,38 @@ const UpdateTeachersGrade = ({ id }: { id: string }) => {
         { id: Date?.now()?.toString(), school: null, grades: [] },
     ]);
 
+    const { data } = useGetTeacherDetailsQuery(id);
     const { data: gradesData } = useGetAllGradesQuery({
         currentPage: 1,
         limit: 1000,
     });
+
+    console.log(data);
+
+    useEffect(() => {
+        if (data?.result?.Teacher?.length) {
+            const schoolData = data.result.Teacher[0].grade.school;
+            const school: SchoolOption = {
+                schoolId: schoolData.id,
+                schoolName: schoolData.name,
+                image: schoolData.schoolLogo,
+            };
+
+            const selectedGrades: GradeOption[] = data.result.Teacher.map((teacherEntry: any) => ({
+                id: teacherEntry.grade.id,
+                grade: teacherEntry.grade.grade,
+            }));
+
+            setMappings((prev) =>
+                prev?.map((item) => ({
+                    ...item,
+                    school,
+                    grades: selectedGrades,
+                }))
+            );
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [data]);
 
     const allGrades: GradeOption[] =
         gradesData?.result?.map((singleGrade: any) => ({
