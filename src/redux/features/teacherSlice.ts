@@ -14,6 +14,11 @@ interface TeacherFormState {
         password: string
     }[]
     options: { value: string; label: string }[]
+    selectedGrades: {
+        id: string;
+        label: string;
+        schoolId: string;
+    }[]
 }
 
 const initialState: TeacherFormState = {
@@ -27,6 +32,7 @@ const initialState: TeacherFormState = {
     teacherList: [],
     teacherPhoto: null,
     options: [],
+    selectedGrades: []
 };
 
 const teacherSlice = createSlice({
@@ -60,6 +66,9 @@ const teacherSlice = createSlice({
         setGradeOptions: (state, action: PayloadAction<{ value: string; label: string }[]>) => {
             state.options = action.payload;
         },
+        setSelectedGrades: (state, action: PayloadAction<{ id: string; label: string; schoolId: string; }[]>) => {
+            state.selectedGrades = action.payload;
+        },
         clearGradeOptions: (state) => {
             state.options = [];
         },
@@ -69,5 +78,5 @@ const teacherSlice = createSlice({
     },
 });
 
-export const { setTeacherName, setUserName, setPassword, setEmail, setTeacherSchoolName, setNumberOfTeacher, setTeacherPhoto, setPreviewTeacherPhoto, setTeachersList, setGradeOptions, clearGradeOptions } = teacherSlice.actions;
+export const { setTeacherName, setUserName, setPassword, setEmail, setTeacherSchoolName, setNumberOfTeacher, setTeacherPhoto, setPreviewTeacherPhoto, setTeachersList, setGradeOptions, setSelectedGrades, clearGradeOptions } = teacherSlice.actions;
 export default teacherSlice.reducer;
