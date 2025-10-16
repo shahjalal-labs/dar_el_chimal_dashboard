@@ -178,7 +178,7 @@ export default function Login() {
         toast.success(response.message);
         Cookies.set("token", token);
         dispatch(setUserToken(token));
-        route.push("/student/overview");
+        route.push("/");
       } else {
         toast.error(response?.data?.message || "Login failed!");
       }
