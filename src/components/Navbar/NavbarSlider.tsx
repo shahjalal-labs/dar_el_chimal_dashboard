@@ -55,7 +55,7 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
           },
           {
             label: "Book",
-            route: "/student/book",
+            route: "/student/books",
             iconPath: <LuBookOpenText className="w-5 lg:w-6 h-5 lg:h-6" />,
           },
           {

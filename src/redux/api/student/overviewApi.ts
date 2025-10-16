@@ -10,7 +10,14 @@ export const AuthApi = baseApi.injectEndpoints({
         method: "GET",
       }),
     }),
+
+    getStudentDetails: builder.query({
+      query: (queryField) => ({
+        url: `/student/grade-details?queryField=${queryField}`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
-export const { useGetStudentOverviewQuery } = AuthApi;
+export const { useGetStudentOverviewQuery, useGetStudentDetailsQuery } = AuthApi;
