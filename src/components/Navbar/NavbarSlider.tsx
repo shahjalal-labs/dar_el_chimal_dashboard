@@ -48,29 +48,29 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
 
     ...(authState === "Student"
       ? [
-          {
-            label: "Overview",
-            route: "/student/overview",
-            iconPath: <RxDashboard className="w-5 lg:w-6 h-5 lg:h-6" />,
-          },
-          {
-            label: "Book",
-            route: "/student/book",
-            iconPath: <LuBookOpenText className="w-5 lg:w-6 h-5 lg:h-6" />,
-          },
-          {
-            label: "Assignment",
-            route: "/student/assignment",
-            iconPath: <MdOutlineAssignment className="w-5 lg:w-6 h-5 lg:h-6" />,
-          },
-          {
-            label: "Announcements",
-            route: "/student/announcements",
-            iconPath: <TfiAnnouncement className="w-5 lg:w-6 h-5 lg:h-6" />,
-          },
-        ]
+        {
+          label: "Overview",
+          route: "/student/overview",
+          iconPath: <RxDashboard className="w-5 lg:w-6 h-5 lg:h-6" />,
+        },
+        {
+          label: "Book",
+          route: "/student/book",
+          iconPath: <LuBookOpenText className="w-5 lg:w-6 h-5 lg:h-6" />,
+        },
+        {
+          label: "Assignment",
+          route: "/student/assignment",
+          iconPath: <MdOutlineAssignment className="w-5 lg:w-6 h-5 lg:h-6" />,
+        },
+        {
+          label: "Announcements",
+          route: "/student/announcements",
+          iconPath: <TfiAnnouncement className="w-5 lg:w-6 h-5 lg:h-6" />,
+        },
+      ]
       : authState === "Teacher"
-      ? [
+        ? [
           {
             label: "Classes",
             route: "/teacher/classes",
@@ -82,7 +82,7 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
             iconPath: <LuBookOpenText className="w-5 lg:w-6 h-5 lg:h-6" />,
           },
         ]
-      : [
+        : [
           {
             label: "Book Management",
             route: "",
@@ -137,11 +137,7 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
       </button>
 
       {/* Sidebar Content */}
-      <aside
-        className={`duration-300 flex flex-col justify-between h-[calc(100%-80px)] font-inter ${
-          isOpen ? "w-[250px] xl:w-[286px]" : "w-[80px]"
-        }`}
-      >
+      <aside className={`duration-300 flex flex-col justify-between h-[calc(100%-80px)] font-inter ${isOpen ? "w-[250px] xl:w-[286px]" : "w-[80px]"}`}>
         <div className="flex flex-col h-full">
           {/* Logo */}
           {isOpen && (
@@ -169,77 +165,114 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
                   <Link
                     href={item.route}
                     onClick={() => {
-                      if (item.label === "Book Management")
+                      if (item.label === "Book Management" || item.label === "Classes")
                         setShowDropdown(!showDropdown);
                     }}
-                    className={`flex items-center gap-2 mb-2 rounded-lg hover:bg-[#1E3A8A] hover:text-white transition-colors duration-300 ease-in-out 
-                      ${
-                        !isOpen
-                          ? "justify-center py-2"
-                          : "justify-start px-4 py-2"
-                      }
-                    ${
-                      path === item.route
-                        ? "bg-[#1E3A8A] text-white"
-                        : (path === "/admin/books" ||
-                            path === "/admin/book-categories" ||
-                            path ===
-                              "/admin/book-categories/new-book-category" ||
-                            path === "/admin/books/add-new-book" ||
-                            path === `/admin/books/book-overview/${id}` ||
-                            path ===
-                              `/admin/books/book-overview/${id}/${resourceId}`) &&
-                          item.label === "Book Management"
-                        ? "bg-[#1E3A8A] text-white"
-                        : "text-[#7C8091]"
-                    }`}
+                    className={`flex items-center gap-2 mb-2 rounded-lg hover:bg-[#1E3A8A] hover:text-white transition-colors duration-300 ease-in-out ${!isOpen ? "justify-center py-2" : "justify-start px-4 py-2"}
+                    ${path === item.route ?
+                        "bg-[#1E3A8A] text-white" :
+                        (
+                          path === "/admin/books" ||
+                          path === "/admin/book-categories" ||
+                          path === "/admin/book-categories/new-book-category" ||
+                          path === "/admin/books/add-new-book" ||
+                          path === `/admin/books/book-overview/${id}` ||
+                          path === `/admin/books/book-overview/${id}/${resourceId}`
+                        ) && item.label === "Book Management" ?
+                          "bg-[#1E3A8A] text-white" :
+                          "text-[#7C8091]"
+                      }`}
                   >
-                    <div className="flex justify-center items-center">
-                      {item.iconPath}
-                    </div>
-                    {isOpen && (
-                      <p className="text-sm xl:text-base">{item.label}</p>
-                    )}
-                    {item.label === "Book Management" &&
+                    <div className="flex justify-center items-center">{item.iconPath}</div>
+                    {isOpen && (<p className="text-sm xl:text-base">{item.label}</p>)}
+                    {item.label === "Book Management" ?
                       (showDropdown ? (
                         <TfiAngleUp className="w-2 lg:w-5 h-2 lg:h-5" />
                       ) : (
                         <TfiAngleDown className="w-2 lg:w-5 h-2 lg:h-5" />
-                      ))}
+                      )) :
+                      item.label === "Classes" ?
+                        (showDropdown ? (
+                          <TfiAngleUp className="w-2 lg:w-5 h-2 lg:h-5" />
+                        ) : (
+                          <TfiAngleDown className="w-2 lg:w-5 h-2 lg:h-5" />
+                        )) :
+                        <></>
+                    }
                   </Link>
-                  {showDropdown && item.label === "Book Management" && (
+                  {(showDropdown && item.label === "Book Management") ? (
                     <div className="flex flex-col">
                       <Link
                         href="/admin/book-categories"
-                        className={`text-[#1E3A8A] font-medium p-3 ${
-                          isOpen && "pl-8 ml-8"
-                        } ${
-                          path === "/admin/book-categories" ||
-                          path === "/admin/book-categories/new-book-category"
+                        className={`text-[#1E3A8A] font-medium p-3 ${isOpen && "pl-8 ml-8"
+                          } ${path === "/admin/book-categories" ||
+                            path === "/admin/book-categories/new-book-category"
                             ? "border-l-2 border-[#1E3A8A]"
                             : "border-l border-[#F3EEF6]"
-                        }`}
+                          }`}
                       >
                         {!isOpen ? <TbCategoryPlus /> : "Book Categories"}
                       </Link>
                       <Link
                         href="/admin/books"
-                        className={`text-[#1E3A8A] font-medium p-3 ${
-                          isOpen && "pl-8 ml-8"
-                        } ${
-                          path === "/admin/books" ||
-                          path === "/admin/books/add-new-book" ||
-                          path === `/admin/books/book-overview/${id}` ||
-                          path ===
+                        className={`text-[#1E3A8A] font-medium p-3 ${isOpen && "pl-8 ml-8"
+                          } ${path === "/admin/books" ||
+                            path === "/admin/books/add-new-book" ||
+                            path === `/admin/books/book-overview/${id}` ||
+                            path ===
                             `/admin/books/book-overview/${id}/${resourceId}`
                             ? "border-l-2 border-[#1E3A8A]"
                             : "border-l border-[#F3EEF6]"
-                        }`}
+                          }`}
                       >
                         {!isOpen ? <PiBookBookmark /> : "Books"}
                       </Link>
                     </div>
-                  )}
+                  ) :
+                    (showDropdown && item.label === "Classes") ?
+                      (<div className="flex flex-col">
+                        <Link
+                          href="/teacher/student"
+                          className={`text-[#1E3A8A] font-medium p-3 ${isOpen && "pl-8 ml-8"
+                            } ${path === "/admin/book-categories" ||
+                              path === "/admin/book-categories/new-book-category"
+                              ? "border-l-2 border-[#1E3A8A]"
+                              : "border-l border-[#F3EEF6]"
+                            }`}
+                        >
+                          {!isOpen ? <TbCategoryPlus /> : "Student"}
+                        </Link>
+                        <Link
+                          href="/teacher/assignment"
+                          className={`text-[#1E3A8A] font-medium p-3 ${isOpen && "pl-8 ml-8"
+                            } ${path === "/admin/books" ||
+                              path === "/admin/books/add-new-book" ||
+                              path === `/admin/books/book-overview/${id}` ||
+                              path ===
+                              `/admin/books/book-overview/${id}/${resourceId}`
+                              ? "border-l-2 border-[#1E3A8A]"
+                              : "border-l border-[#F3EEF6]"
+                            }`}
+                        >
+                          {!isOpen ? <PiBookBookmark /> : "Assignment"}
+                        </Link>
+                        <Link
+                          href="/teacher/announcements"
+                          className={`text-[#1E3A8A] font-medium p-3 ${isOpen && "pl-8 ml-8"
+                            } ${path === "/admin/books" ||
+                              path === "/admin/books/add-new-book" ||
+                              path === `/admin/books/book-overview/${id}` ||
+                              path ===
+                              `/admin/books/book-overview/${id}/${resourceId}`
+                              ? "border-l-2 border-[#1E3A8A]"
+                              : "border-l border-[#F3EEF6]"
+                            }`}
+                        >
+                          {!isOpen ? <PiBookBookmark /> : "Announcements"}
+                        </Link>
+                      </div>) :
+                      <></>
+                  }
                 </li>
               ))}
             </ul>
