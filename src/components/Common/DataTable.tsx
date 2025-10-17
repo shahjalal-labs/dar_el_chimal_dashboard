@@ -4,7 +4,7 @@
 import { useDeleteBookCategroyMutation } from "@/redux/api/bookCategory";
 import { Eye, Search } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import React, { useState } from "react";
 import { BiEditAlt } from "react-icons/bi";
 import { PiSpinner } from "react-icons/pi";
@@ -40,6 +40,7 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+import ViewStudentDetailsModal from "../Teacher/ViewStudentDetailsModal";
 
 const DataTable = ({
   title,
@@ -66,6 +67,7 @@ const DataTable = ({
   iconTwo?: React.ReactNode;
   willSearch?: boolean;
 }) => {
+  const { id } = useParams();
   const pathname = usePathname();
   const [selectedId, setSelectedId] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -81,32 +83,6 @@ const DataTable = ({
           toast.success(response.message);
         }
       }
-      // if (pathname === '/vendor/ecommerce/manage-product') {
-      //   if (title === 'Manage Product Category') {
-      //     const response = await DeleteProductCategroy(id).unwrap();
-      //     if (response.success) {
-      //       toast.success(response.message)
-      //     }
-      //   }
-      //   else {
-      //     const response = await DeleteProduct(id).unwrap();
-      //     if (response.success) {
-      //       toast.success(response.message)
-      //     }
-      //   }
-      // }
-      // if (pathname === '/vendor/ecommerce/manage-on-store') {
-      //   const response = await DeleteStore(id).unwrap();
-      //   if (response.success) {
-      //     toast.success(response.message)
-      //   }
-      // }
-      // if (pathname === '/admin/sports-category') {
-      //   const response = await DeleteParentCategroy(id).unwrap();
-      //   if (response.success) {
-      //     toast.success(response.message)
-      //   }
-      // }
     } catch (err) {
       toast.warning((err as any)?.data?.message || "Something went wrong");
     }
@@ -150,17 +126,6 @@ const DataTable = ({
                   {buttonText}
                 </button>
               </DialogTrigger>
-              {/* {
-                pathname === '/vendor/event/manage-event' ?
-                  <AddEventModal /> :
-                  pathname === '/vendor/ecommerce/manage-on-store' ?
-                    <AddStoreModal /> :
-                    pathname === '/vendor/ecommerce/manage-product' ?
-                      <AddProductModal /> :
-                      pathname === '/admin/sports-category' ?
-                        <AddParentCategory /> :
-                        <AddGroundModal />
-              } */}
             </Dialog>
           )}
           {isButtonTwo && (
@@ -171,25 +136,6 @@ const DataTable = ({
                   {buttonTextTwo}
                 </button>
               </DialogTrigger>
-              {/* {
-                pathname === '/vendor/event/manage-event' ?
-                  <>
-                    {
-                      buttonTextTwo === "Add Team" ?
-                        <CreateTeamModal /> :
-                        <ViewTeamsModal />
-                    }
-                  </> :
-                  pathname === '/vendor/ecommerce/manage-product' ?
-                    <>
-                      {
-                        buttonTextTwo === "Add Category" ?
-                          <AddProductCategory /> :
-                          <ViewProductCategory />
-                      }
-                    </> :
-                    <></>
-              } */}
             </Dialog>
           )}
         </div>
@@ -223,12 +169,8 @@ const DataTable = ({
                         .map((header, idx) => <span key={idx}>{header} </span>)}
                   </TableHead>
                 ))}
-              {pathname !== "/" &&
-                pathname !== "/vendor/event/manage-booking" &&
-                pathname !== "/vendor/ecommerce/order-management" &&
-                pathname !== "/admin/manage-customers" &&
-                pathname !== "/admin/manage-order" &&
-                pathname !== "/admin/manage-transactions" && (
+              {
+                pathname !== "/" && (
                   <TableHead className="text-[#4A4A4A] font-semibold text-sm">
                     Action
                   </TableHead>
@@ -248,33 +190,27 @@ const DataTable = ({
                     </TableCell>
                   )
                 )}
-                {pathname !== "/" &&
-                  pathname !== "/vendor/event/manage-booking" &&
-                  pathname !== "/vendor/ecommerce/order-management" &&
-                  pathname !== "/admin/manage-customers" &&
-                  pathname !== "/admin/manage-order" &&
-                  pathname !== "/admin/manage-transactions" && (
+                {
+                  pathname !== "/" && (
                     <TableCell className="flex items-center gap-2">
-                      {pathname === "/admin/books" && (
-                        <Link
-                          href={`/admin/books/bookDetails/${singleData?.Id}`}
-                        >
-                          <Button className="bg-[#F4A64033] hover:bg-[#F4A64026] text-[#F4A640] transition-colors ease-in-out duration-200 cursor-pointer">
-                            <span className="sr-only">View details</span>
-                            <Eye className="h-6 w-6" />
-                          </Button>
-                        </Link>
-                      )}
-                      {pathname === "/student/books" && (
-                        <Link
-                          href={`/student/books/book-overview/${singleData?.Id}`}
-                        >
-                          <Button className="bg-[#F4A64033] hover:bg-[#F4A64026] text-[#F4A640] transition-colors ease-in-out duration-200 cursor-pointer">
-                            <span className="sr-only">View details</span>
-                            <Eye className="h-6 w-6" />
-                          </Button>
-                        </Link>
-                      )}
+                      {/* VIEW  */}
+                      {(
+                        pathname === "/admin/books" ||
+                        pathname === "/student/books") && (
+                          <Link
+                            href={`
+                              ${pathname === "/admin/books" ?
+                                `/admin/books/bookDetails/${singleData?.Id}` :
+                                pathname === "/student/books" ?
+                                  `/student/books/book-overview/${singleData?.Id}` :
+                                  ``} `}
+                          >
+                            <Button className="bg-[#F4A64033] hover:bg-[#F4A64026] text-[#F4A640] transition-colors ease-in-out duration-200 cursor-pointer">
+                              <span className="sr-only">View details</span>
+                              <Eye className="h-6 w-6" />
+                            </Button>
+                          </Link>
+                        )}
                       {pathname !== "/admin/books" && (
                         <Dialog>
                           <DialogTrigger asChild>
@@ -294,6 +230,8 @@ const DataTable = ({
                                 <ViewSchoolModal id={singleData?.Id} />
                               ) : pathname === "/admin/teachers" ? (
                                 <ViewTeacherModal id={singleData?.Id} />
+                              ) : pathname === `/teacher/classes/${id}/student` ? (
+                                <ViewStudentDetailsModal id={singleData?.Id} />
                               ) : (
                                 <></>
                               )}
@@ -301,81 +239,84 @@ const DataTable = ({
                           )}
                         </Dialog>
                       )}
-                      {(pathname === "/admin/book-categories" ||
+
+                      {/* UPDATE & DELETE  */}
+                      {(
+                        pathname === "/admin/book-categories" ||
                         pathname === "/admin/books" ||
                         pathname === "/admin/schools" ||
                         pathname === "/admin/teachers" ||
                         pathname === "/admin/students") && (
-                        <>
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button
-                                onClick={() => setSelectedId(singleData?.Id)}
-                                className="bg-[#17A23533] hover:bg-[#17A23526] text-[#17A235] transition-colors ease-in-out duration-200 cursor-pointer"
-                              >
-                                <span className="sr-only">Update</span>
-                                <BiEditAlt className="h-6 w-6" />
-                              </Button>
-                            </DialogTrigger>
-                            {selectedId === singleData?.Id &&
-                              (pathname === "/admin/book-categories" ? (
-                                <UpdateBookCategoryModal id={singleData?.Id} />
-                              ) : pathname === "/admin/books" ? (
-                                <UpdateBookModal id={singleData?.Id} />
-                              ) : pathname === "/admin/schools" ? (
-                                <UpdateSchoolModal id={singleData?.Id} />
-                              ) : pathname === "/admin/teachers" ? (
-                                <UpdateTeacherModal id={singleData?.Id} />
-                              ) : (
-                                <></>
-                              ))}
-                          </Dialog>
-                          {
-                            // pathname !== '' &&
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button className="bg-[#FE4D4F33] hover:bg-[#FE4D4F26] text-[#FE4D4F] transition-colors ease-in-out duration-200 cursor-pointer">
-                                  <span className="sr-only">Delete</span>
-                                  {isBookCategoryDeleting &&
-                                  selectedId === singleData?.Id ? (
-                                    <div className="animate-spin">
-                                      <PiSpinner className="h-4 w-4" />
-                                    </div>
-                                  ) : (
-                                    <RiDeleteBin6Line className="w-6 h-6" />
-                                  )}
+                          <>
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button
+                                  onClick={() => setSelectedId(singleData?.Id)}
+                                  className="bg-[#17A23533] hover:bg-[#17A23526] text-[#17A235] transition-colors ease-in-out duration-200 cursor-pointer"
+                                >
+                                  <span className="sr-only">Update</span>
+                                  <BiEditAlt className="h-6 w-6" />
                                 </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle className="text-[#30373D] text-3xl font-bold text-center">
-                                    Are you sure?
-                                  </AlertDialogTitle>
-                                  <AlertDialogDescription className="text-[#636F85] text-center text-base mt-4">
-                                    This action cannot be undone. This will
-                                    permanently delete the{" "}
-                                    {singleData?.name ?? "item"}.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter className="flex justify-center items-center gap-4">
-                                  <AlertDialogCancel className="flex-1 font-bold text-[#636F85] cursor-pointer transition-all duration-500 ease-in-out">
-                                    No
-                                  </AlertDialogCancel>
-                                  <AlertDialogAction
-                                    className="bg-[#1E3A8A] text-white hover:bg-[#1E3A8A80] flex-1 cursor-pointer transition-all duration-500 ease-in-out"
-                                    onClick={() => {
-                                      setSelectedId(singleData?.Id);
-                                      handleDelete(singleData?.Id);
-                                    }}
-                                  >
-                                    Yes
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          }
-                        </>
-                      )}
+                              </DialogTrigger>
+                              {selectedId === singleData?.Id &&
+                                (pathname === "/admin/book-categories" ? (
+                                  <UpdateBookCategoryModal id={singleData?.Id} />
+                                ) : pathname === "/admin/books" ? (
+                                  <UpdateBookModal id={singleData?.Id} />
+                                ) : pathname === "/admin/schools" ? (
+                                  <UpdateSchoolModal id={singleData?.Id} />
+                                ) : pathname === "/admin/teachers" ? (
+                                  <UpdateTeacherModal id={singleData?.Id} />
+                                ) : (
+                                  <></>
+                                ))}
+                            </Dialog>
+                            {
+                              // pathname !== '' &&
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button className="bg-[#FE4D4F33] hover:bg-[#FE4D4F26] text-[#FE4D4F] transition-colors ease-in-out duration-200 cursor-pointer">
+                                    <span className="sr-only">Delete</span>
+                                    {isBookCategoryDeleting &&
+                                      selectedId === singleData?.Id ? (
+                                      <div className="animate-spin">
+                                        <PiSpinner className="h-4 w-4" />
+                                      </div>
+                                    ) : (
+                                      <RiDeleteBin6Line className="w-6 h-6" />
+                                    )}
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle className="text-[#30373D] text-3xl font-bold text-center">
+                                      Are you sure?
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription className="text-[#636F85] text-center text-base mt-4">
+                                      This action cannot be undone. This will
+                                      permanently delete the{" "}
+                                      {singleData?.name ?? "item"}.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter className="flex justify-center items-center gap-4">
+                                    <AlertDialogCancel className="flex-1 font-bold text-[#636F85] cursor-pointer transition-all duration-500 ease-in-out">
+                                      No
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction
+                                      className="bg-[#1E3A8A] text-white hover:bg-[#1E3A8A80] flex-1 cursor-pointer transition-all duration-500 ease-in-out"
+                                      onClick={() => {
+                                        setSelectedId(singleData?.Id);
+                                        handleDelete(singleData?.Id);
+                                      }}
+                                    >
+                                      Yes
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            }
+                          </>
+                        )}
                     </TableCell>
                   )}
               </TableRow>

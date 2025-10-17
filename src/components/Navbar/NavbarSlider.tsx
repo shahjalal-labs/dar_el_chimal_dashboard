@@ -48,27 +48,27 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
 
     ...(authState === "Student"
       ? [
-          {
-            label: "Overview",
-            route: "/student/overview",
-            iconPath: <RxDashboard className="w-5 lg:w-6 h-5 lg:h-6" />,
-          },
-          {
-            label: "Book",
-            route: "/student/books",
-            iconPath: <LuBookOpenText className="w-5 lg:w-6 h-5 lg:h-6" />,
-          },
-          {
-            label: "Assignment",
-            route: "/student/assignment",
-            iconPath: <MdOutlineAssignment className="w-5 lg:w-6 h-5 lg:h-6" />,
-          },
-          {
-            label: "Announcements",
-            route: "/student/announcements",
-            iconPath: <TfiAnnouncement className="w-5 lg:w-6 h-5 lg:h-6" />,
-          },
-        ]
+        {
+          label: "Overview",
+          route: "/student/overview",
+          iconPath: <RxDashboard className="w-5 lg:w-6 h-5 lg:h-6" />,
+        },
+        {
+          label: "Book",
+          route: "/student/books",
+          iconPath: <LuBookOpenText className="w-5 lg:w-6 h-5 lg:h-6" />,
+        },
+        {
+          label: "Assignment",
+          route: "/student/assignment",
+          iconPath: <MdOutlineAssignment className="w-5 lg:w-6 h-5 lg:h-6" />,
+        },
+        {
+          label: "Announcements",
+          route: "/student/announcements",
+          iconPath: <TfiAnnouncement className="w-5 lg:w-6 h-5 lg:h-6" />,
+        },
+      ]
       : authState === "Teacher"
         ? [
           {
@@ -204,9 +204,10 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
                     <div className="flex flex-col">
                       <Link
                         href="/admin/book-categories"
-                        className={`text-[#1E3A8A] font-medium p-3 ${isOpen && "pl-8 ml-8"
-                          } ${path === "/admin/book-categories" ||
-                            path === "/admin/book-categories/new-book-category"
+                        className={`text-[#1E3A8A] font-medium p-3 ${isOpen && "pl-8 ml-8"} 
+                        ${(
+                            path === "/admin/book-categories" ||
+                            path === "/admin/book-categories/new-book-category")
                             ? "border-l-2 border-[#1E3A8A]"
                             : "border-l border-[#F3EEF6]"
                           }`}
@@ -215,12 +216,12 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
                       </Link>
                       <Link
                         href="/admin/books"
-                        className={`text-[#1E3A8A] font-medium p-3 ${isOpen && "pl-8 ml-8"
-                          } ${path === "/admin/books" ||
+                        className={`text-[#1E3A8A] font-medium p-3 ${isOpen && "pl-8 ml-8"} 
+                        ${(
+                            path === "/admin/books" ||
                             path === "/admin/books/add-new-book" ||
                             path === `/admin/books/book-overview/${id}` ||
-                            path ===
-                            `/admin/books/book-overview/${id}/${resourceId}`
+                            path === `/admin/books/book-overview/${id}/${resourceId}`)
                             ? "border-l-2 border-[#1E3A8A]"
                             : "border-l border-[#F3EEF6]"
                           }`}
@@ -233,9 +234,10 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
                       (<div className="flex flex-col">
                         <Link
                           href="/teacher/student"
-                          className={`text-[#1E3A8A] font-medium p-3 ${isOpen && "pl-8 ml-8"
-                            } ${path === "/admin/book-categories" ||
-                              path === "/admin/book-categories/new-book-category"
+                          className={`text-[#1E3A8A] font-medium p-3 ${isOpen && "pl-8 ml-8"} 
+                          ${(
+                              path === "/teacher/student" ||
+                              path === "/admin/book-categories/new-book-category")
                               ? "border-l-2 border-[#1E3A8A]"
                               : "border-l border-[#F3EEF6]"
                             }`}
@@ -243,13 +245,13 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
                           {!isOpen ? <TbCategoryPlus /> : "Student"}
                         </Link>
                         <Link
-                          href="/teacher/assignment"
-                          className={`text-[#1E3A8A] font-medium p-3 ${isOpen && "pl-8 ml-8"
-                            } ${path === "/admin/books" ||
+                          href=""
+                          className={`text-[#1E3A8A] font-medium p-3 ${isOpen && "pl-8 ml-8"} 
+                          ${(
+                              path === "" ||
                               path === "/admin/books/add-new-book" ||
                               path === `/admin/books/book-overview/${id}` ||
-                              path ===
-                              `/admin/books/book-overview/${id}/${resourceId}`
+                              path === `/admin/books/book-overview/${id}/${resourceId}`)
                               ? "border-l-2 border-[#1E3A8A]"
                               : "border-l border-[#F3EEF6]"
                             }`}
@@ -258,12 +260,12 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
                         </Link>
                         <Link
                           href="/teacher/announcements"
-                          className={`text-[#1E3A8A] font-medium p-3 ${isOpen && "pl-8 ml-8"
-                            } ${path === "/admin/books" ||
+                          className={`text-[#1E3A8A] font-medium p-3 ${isOpen && "pl-8 ml-8"} 
+                          ${(
+                              path === "/teacher/announcements" ||
                               path === "/admin/books/add-new-book" ||
                               path === `/admin/books/book-overview/${id}` ||
-                              path ===
-                              `/admin/books/book-overview/${id}/${resourceId}`
+                              path === `/admin/books/book-overview/${id}/${resourceId}`)
                               ? "border-l-2 border-[#1E3A8A]"
                               : "border-l border-[#F3EEF6]"
                             }`}

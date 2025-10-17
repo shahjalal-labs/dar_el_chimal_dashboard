@@ -13,6 +13,7 @@ import totalStudents from "@/assets/totalStudents.svg";
 import Image from "next/image";
 import { BiBookReader } from "react-icons/bi";
 import { SlCalender } from "react-icons/sl";
+import Link from "next/link";
 
 const ClassDetails = () => {
     const { id } = useParams();
@@ -63,7 +64,7 @@ const ClassDetails = () => {
             {/* Stats Grid Section */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Total Students */}
-                <div className="bg-[#63D27C1A] sm:col-span-1 px-6 py-4 rounded-lg flex items-center justify-between">
+                <Link href={`/teacher/classes/${id}/student`} className="bg-[#63D27C1A] sm:col-span-1 px-6 py-4 rounded-lg flex items-center justify-between">
                     <div>
                         <p className="text-lg text-[#636F85]">Total Students</p>
                         <h3 className="text-[56px] font-bold text-black">{totalStudent}</h3>
@@ -78,7 +79,7 @@ const ClassDetails = () => {
                             priority
                         />
                     </div>
-                </div>
+                </Link>
 
                 {/* Total Books */}
                 <div className="bg-[#F1E7FF] sm:col-span-1 px-6 py-4 rounded-lg flex items-center justify-between">
@@ -117,7 +118,7 @@ const ClassDetails = () => {
                 </div>
 
                 {/* Total Assignments */}
-                <div className="bg-[#FFEFE7] sm:col-span-1 px-6 py-4 rounded-lg flex items-center justify-between">
+                <Link href={`/teacher/classes/${id}/assignment`} className="bg-[#FFEFE7] sm:col-span-1 px-6 py-4 rounded-lg flex items-center justify-between">
                     <div>
                         <p className="text-lg text-[#636F85]">Total Assignments</p>
                         <h3 className="text-[56px] font-bold text-black">{totalAssignment}</h3>
@@ -132,7 +133,7 @@ const ClassDetails = () => {
                             priority
                         />
                     </div>
-                </div>
+                </Link>
 
                 {/* Announcements */}
                 <div className="bg-[#E5F5FF] sm:col-span-1 px-6 py-4 rounded-lg flex items-center justify-between">

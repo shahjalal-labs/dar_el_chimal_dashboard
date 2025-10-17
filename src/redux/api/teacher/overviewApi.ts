@@ -16,7 +16,59 @@ export const overviewApi = baseApi.injectEndpoints({
             }),
             providesTags: ["teacher"]
         }),
+        getAllStudentsByTeacher: builder.query({
+            query: (id) => ({
+                url: `/teacher/grade-details/${id}?queryField=students`,
+                method: "GET",
+            }),
+            providesTags: ["teacher", "student"]
+        }),
+        getStudentDetailsByTeacher: builder.query({
+            query: (id) => ({
+                url: `/users/single-user/${id}`,
+                method: "GET",
+            }),
+            providesTags: ["teacher", "student"]
+        }),
+        getAllAssignmentsByTeacher: builder.query({
+            query: (id) => ({
+                url: `/teacher/grade-details/${id}?queryField=assignments`,
+                method: "GET",
+            }),
+            providesTags: ["teacher", "assignment"]
+        }),
+        getSingleAssignmentByTeacher: builder.query({
+            query: (assignmentId) => ({
+                url: `/assignment/${assignmentId}`,
+                method: "GET",
+            }),
+            providesTags: ["teacher", "assignment"]
+        }),
+        getStudentAssignmentDetailsByTeacher: builder.query({
+            query: (assignmentProgressId) => ({
+                url: `/assignment/teacher/${assignmentProgressId}`,
+                method: "GET",
+            }),
+            providesTags: ["teacher", "assignment"]
+        }),
+        gradeAssignment: builder.mutation({
+            query: ({ assignmentProgressId, body }) => ({
+                url: `/assignment/graded/${assignmentProgressId}`,
+                method: "PUT",
+                body: body
+            }),
+            invalidatesTags: ["teacher", "assignment"]
+        }),
     }),
 });
 
-export const { useGetTeacherOverviewQuery, useGetTeacherGradeDetailsQuery } = overviewApi;
+export const {
+    useGetTeacherOverviewQuery,
+    useGetTeacherGradeDetailsQuery,
+    useGetAllStudentsByTeacherQuery,
+    useGetStudentDetailsByTeacherQuery,
+    useGetAllAssignmentsByTeacherQuery,
+    useGetSingleAssignmentByTeacherQuery,
+    useGetStudentAssignmentDetailsByTeacherQuery,
+    useGradeAssignmentMutation
+} = overviewApi;
