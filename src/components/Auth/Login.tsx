@@ -131,91 +131,88 @@ export default function Login() {
     toast.info("You will not get notify for any notification");
   };
 
+  console.log("fcm token", fcmToken);
 
-    console.log("fcm token",fcmToken)
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const body = {
+      userName: userName,
+      password: password,
+    };
 
+    try {
+      // ✅ If role is "Student", use the studentLoginFn API
+      if (role === "Student") {
+        const studentBody = {
+          userName: userName, // assuming userName is the student's email
+          password: password,
+          fcmToken: fcmToken || "", // include FCM token
+        };
 
- const handleLogin = async (e: React.FormEvent) => {
-  e.preventDefault();
-  const body = {
-    userName: userName,
-    password: password,
+        const response = await studentLoginFn(studentBody).unwrap();
+        const token = response?.result?.accessToken;
+
+        if (response.success) {
+          toast.success(response.message);
+          Cookies.set("token", token);
+          dispatch(setUserToken(token));
+          route.push("/student/overview");
+        } else {
+          toast.error(response?.data?.message || "Login failed!");
+        }
+        return; // ✅ stop execution here for student login
+      }
+      if (role === "Teacher") {
+        const studentBody = {
+          userName: userName, // assuming userName is the student's email
+          password: password,
+          fcmToken: fcmToken || "", // include FCM token
+        };
+
+        const response = await studentLoginFn(studentBody).unwrap();
+        const token = response?.result?.accessToken;
+
+      if (response.success) {
+        toast.success(response.message);
+        Cookies.set("token", token);
+        dispatch(setUserToken(token));
+        route.push("/");
+      } else {
+        toast.error(response?.data?.message || "Login failed!");
+      }
+      return; // ✅ stop execution here for student login
+    }
+
+      // ✅ Default login for non-students
+      const response = await login(body).unwrap();
+      const token = response?.result?.accessToken;
+      let decodedPayload: JWTPayload = {};
+
+      if (token) {
+        const base64Url = token.split(".")[1];
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        decodedPayload = JSON.parse(atob(base64));
+      }
+
+      if (response.success) {
+        if (role !== decodedPayload.role) {
+          toast.error("Please select the correct role!");
+        } else {
+          toast.success(response.message);
+          Cookies.set("token", token);
+          dispatch(setUserToken(token));
+          route.push("/");
+        }
+      } else {
+        toast.error(response?.data?.message || "Login failed!");
+      }
+    } catch (error) {
+      console.error("An error occurred:", error);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      console.log("Execution completed.");
+    }
   };
-
-  try {
-    // ✅ If role is "Student", use the studentLoginFn API
-    if (role === "Student") {
-      const studentBody = {
-        userName: userName, // assuming userName is the student's email
-        password: password,
-        fcmToken: fcmToken || "", // include FCM token
-      };
-
-      const response = await studentLoginFn(studentBody).unwrap();
-      const token = response?.result?.accessToken;
-
-      if (response.success) {
-        toast.success(response.message);
-        Cookies.set("token", token);
-        dispatch(setUserToken(token));
-        route.push("/student/overview");
-      } else {
-        toast.error(response?.data?.message || "Login failed!");
-      }
-      return; // ✅ stop execution here for student login
-    }
-    if (role === "Teacher") {
-      const studentBody = {
-        userName: userName, // assuming userName is the student's email
-        password: password,
-        fcmToken: fcmToken || "", // include FCM token
-      };
-
-      const response = await studentLoginFn(studentBody).unwrap();
-      const token = response?.result?.accessToken;
-
-      if (response.success) {
-        toast.success(response.message);
-        Cookies.set("token", token);
-        dispatch(setUserToken(token));
-        route.push("/");
-      } else {
-        toast.error(response?.data?.message || "Login failed!");
-      }
-      return; // ✅ stop execution here for student login
-    }
-
-    // ✅ Default login for non-students
-    const response = await login(body).unwrap();
-    const token = response?.result?.accessToken;
-    let decodedPayload: JWTPayload = {};
-
-    if (token) {
-      const base64Url = token.split(".")[1];
-      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-      decodedPayload = JSON.parse(atob(base64));
-    }
-
-    if (response.success) {
-      if (role !== decodedPayload.role) {
-        toast.error("Please select the correct role!");
-      } else {
-        toast.success(response.message);
-        Cookies.set("token", token);
-        dispatch(setUserToken(token));
-        route.push("/");
-      }
-    } else {
-      toast.error(response?.data?.message || "Login failed!");
-    }
-  } catch (error) {
-    console.error("An error occurred:", error);
-    toast.error("Something went wrong. Please try again.");
-  } finally {
-    console.log("Execution completed.");
-  }
-};
-
 
   return (
     <div className="min-h-screen flex">

@@ -1,4 +1,5 @@
 import Image, { StaticImageData } from "next/image";
+import Link from "next/link";
 
 interface StatCardProps {
   label: string;
@@ -6,6 +7,7 @@ interface StatCardProps {
   bgColor: string;
   iconBgColor: string;
   icon: StaticImageData;
+  params?: string;
 }
 
 export default function StatCard({
@@ -14,11 +16,10 @@ export default function StatCard({
   bgColor,
   iconBgColor,
   icon,
+  params,
 }: StatCardProps) {
-  return (
-    <div
-      className={`${bgColor} rounded-2xl p-6 md:p-8 flex  justify-between  transition-transform hover:scale-105`}
-    >
+  const cardContent = (
+    <div className="flex justify-between">
       <div>
         <p className="text-gray-600 text-sm md:text-base font-medium mb-2">
           {label}
@@ -28,7 +29,6 @@ export default function StatCard({
         </h2>
       </div>
 
-      {/* Icon Circle */}
       <div className="flex">
         <div
           className={`${iconBgColor} rounded-full w-16 h-16 md:w-20 md:h-20 flex items-center justify-center`}
@@ -37,5 +37,21 @@ export default function StatCard({
         </div>
       </div>
     </div>
+  );
+
+  // If params exist => clickable link, else static
+  if (params) {
+    return (
+      <Link
+        href={`/student/${params}`}
+        className={`${bgColor} rounded-2xl p-6 md:p-8 transition-transform hover:scale-105`}
+      >
+        {cardContent}
+      </Link>
+    );
+  }
+
+  return (
+    <div className={`${bgColor} rounded-2xl p-6 md:p-8`}>{cardContent}</div>
   );
 }
