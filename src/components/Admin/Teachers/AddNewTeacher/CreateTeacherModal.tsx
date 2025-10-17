@@ -34,7 +34,7 @@ const CreateTeacherModal = () => {
     const closeRef = useRef<HTMLButtonElement>(null);
     const dispatch = useDispatch();
     const [showBulkModal, setShowBulkModal] = useState(false);
-    const { teacherSchoolName, numberOfTeacher } = useSelector((state: RootState) => state.teacher);
+    const {  numberOfTeacher } = useSelector((state: RootState) => state.teacher);
     const [mappings, setMappings] = useState<Mapping[]>([
         { id: Date?.now()?.toString(), school: null, grades: [] },
     ]);

@@ -99,6 +99,8 @@ const UpdateTeachersGrade = ({ id }: { id: string }) => {
             schoolId: singleGrade?.schoolId,
         })) ?? [];
 
+    console.log(allGrades);
+
     const handleSchoolChange = (school: SchoolOption) => {
         dispatch(setTeacherSchoolName(school?.schoolName));
         setMappings((prev) =>

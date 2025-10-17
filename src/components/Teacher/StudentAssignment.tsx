@@ -12,7 +12,7 @@ const StudentAssignment = () => {
     const { data, isLoading } = useGetStudentAssignmentDetailsByTeacherQuery(assignmentProgressId);
     const result = data?.result;
 
-    const [grade, setGrade] = useState(result?.assignmentGrade || "");
+    // const [grade, setGrade] = useState(result?.assignmentGrade || "");
     const [feedback, setFeedback] = useState(result?.FeedBack || "");
 
     if (isLoading) {
@@ -116,9 +116,9 @@ const StudentAssignment = () => {
                         Back
                     </button>
                     <button
-                        onClick={() =>
-                            alert(`Assignment graded with ${grade} and feedback: ${feedback}`)
-                        }
+                        // onClick={() =>
+                        //     alert(`Assignment graded with ${grade} and feedback: ${feedback}`)
+                        // }
                         className="px-6 py-2 bg-[#1E3A8A] hover:bg-blue-800 text-white rounded-md text-sm font-medium cursor-pointer"
                     >
                         Grade Assignment

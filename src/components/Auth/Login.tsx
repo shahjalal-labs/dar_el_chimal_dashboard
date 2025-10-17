@@ -66,7 +66,7 @@ export default function Login() {
   const route = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const role = useSelector((state: any) => state.auth.role);
-  console.log("login role", role);
+  console.log("login role", role, notificationEnabled, notificationStatus);
 
   const [login, { isLoading, error }] = useLoginMutation();
   const [studentLoginFn] = useStudentLoginMutation();
@@ -172,16 +172,16 @@ export default function Login() {
         const response = await studentLoginFn(studentBody).unwrap();
         const token = response?.result?.accessToken;
 
-      if (response.success) {
-        toast.success(response.message);
-        Cookies.set("token", token);
-        dispatch(setUserToken(token));
-        route.push("/");
-      } else {
-        toast.error(response?.data?.message || "Login failed!");
+        if (response.success) {
+          toast.success(response.message);
+          Cookies.set("token", token);
+          dispatch(setUserToken(token));
+          route.push("/");
+        } else {
+          toast.error(response?.data?.message || "Login failed!");
+        }
+        return; // ✅ stop execution here for student login
       }
-      return; // ✅ stop execution here for student login
-    }
 
       // ✅ Default login for non-students
       const response = await login(body).unwrap();
@@ -357,9 +357,8 @@ export default function Login() {
                     name="rememberMe"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className={`${
-                      rememberMe ? "accent-[#1E3A8A]" : "accent-white"
-                    } h-5 w-5`}
+                    className={`${rememberMe ? "accent-[#1E3A8A]" : "accent-white"
+                      } h-5 w-5`}
                   />
                   <Label
                     htmlFor="remember-me"

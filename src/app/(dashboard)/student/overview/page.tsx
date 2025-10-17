@@ -22,7 +22,7 @@ export default function Home() {
       <div className="mx-auto">
         {/* Header */}
         <h1 className="text-3xl md:text-[32px] font-bold text-black mb-8 md:mb-12 text-balance">
-          Let's see what's on your learning list today
+          Let&apos;s see what&apos;s on your learning list today
         </h1>
 
         {/* Stats Grid */}
@@ -49,7 +49,7 @@ export default function Home() {
             bgColor="bg-[#E7EFFF]"
             iconBgColor="bg-[#3471EB1A]"
             icon={link}
-            // No params => static card
+          // No params => static card
           />
           <StatCard
             label="Total Assignment"
