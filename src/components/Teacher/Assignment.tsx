@@ -21,7 +21,7 @@ const Assignment = () => {
                 <div className='mb-6 md:mb-0'>
                     <h1 className='text-2xl font-bold mb-3'>Assignment List</h1>
                 </div>
-                <Link href="/admin/schools/add-new-school">
+                <Link href={`/teacher/classes/${id}/add-new-assignment`}>
                     <Button className='bg-transparent text-[#1E3A8A] border border-[#1E3A8A] hover:bg-transparent cursor-pointer'>
                         <FaPlus />
                         Add New Assignment

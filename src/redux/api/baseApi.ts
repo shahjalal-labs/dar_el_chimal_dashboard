@@ -30,6 +30,7 @@ export const baseApi = createApi({
     "assignment",
     "grade",
     "announcement",
+    "announcements",
     "resource",
     "admin",
     "notifications",

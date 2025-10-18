@@ -1,19 +1,17 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useGetStudentAssignmentDetailsByTeacherQuery } from "@/redux/api/teacher/overviewApi";
 import { SyncLoader } from "react-spinners";
 import { Input } from "../ui/input";
 
 const StudentAssignment = () => {
-    const { assignmentProgressId } = useParams();
     const router = useRouter();
+    const { assignmentProgressId } = useParams();
     const { data, isLoading } = useGetStudentAssignmentDetailsByTeacherQuery(assignmentProgressId);
-    const result = data?.result;
 
-    // const [grade, setGrade] = useState(result?.assignmentGrade || "");
-    const [feedback, setFeedback] = useState(result?.FeedBack || "");
+    const result = data?.result;
 
     if (isLoading) {
         return (
@@ -32,19 +30,12 @@ const StudentAssignment = () => {
         );
     }
 
-    const {
-        studentAnswer,
-        studentAttachement,
-        assignmentGrade,
-        submittedAt,
-    } = result;
-
     return (
         <div className="">
             {/* Assignment Header */}
             <div className="bg-white p-6 rounded-lg mb-6">
-                <h2 className="text-2xl font-bold mb-3">Summarize Photosynthesis</h2>
-                <p className="text-[#4C4C4C] mb-6">Read this page and write a short summary of how photosynthesis works.</p>
+                <h2 className="text-2xl font-bold mb-3">{data?.result?.assignment?.title}</h2>
+                <p className="text-[#4C4C4C] mb-6">{data?.result?.assignment?.instruction}</p>
 
                 <div className="flex items-center gap-6">
                     <div className="">
@@ -53,13 +44,26 @@ const StudentAssignment = () => {
                         <span className="font-medium">Submitted On:</span>
                     </div>
                     <div className="">
-                        <span className="text-[#4C4C4C]">{result?.user?.fullName ? result?.user?.fullName : 'N/A'}</span><br />
-                        {assignmentGrade ? (
-                            <><span className="text-[#4C4C4C]">{assignmentGrade}</span><br /></>
+                        <span className="text-[#4C4C4C]">{data?.result?.user?.fullName ? data?.result?.user?.fullName : 'N/A'}</span><br />
+                        {data?.result?.assignmentGrade ? (
+                            <><span className="text-[#4C4C4C]">
+                                {
+                                    data?.result?.assignmentGrade === "A_plus" ? 'A+' :
+                                        data?.result?.assignmentGrade === "A" ? 'A' :
+                                            data?.result?.assignmentGrade === "A_minus" ? 'A-' :
+                                                data?.result?.assignmentGrade === "B_plus" ? 'B+' :
+                                                    data?.result?.assignmentGrade === "B" ? 'B' :
+                                                        data?.result?.assignmentGrade === "B_minus" ? 'B-' :
+                                                            data?.result?.assignmentGrade === "C_plus" ? 'C+' :
+                                                                data?.result?.assignmentGrade === "C" ? 'C' :
+                                                                    data?.result?.assignmentGrade === "C_minus" ? 'C-' :
+                                                                        data?.result?.assignmentGrade === "D" ? 'D' : 'F'
+                                }
+                            </span><br /></>
                         ) : (
                             <><span className="text-[#4C4C4C]">Not Graded</span><br /></>
                         )}
-                        <span className="text-[#4C4C4C]">{new Date(submittedAt).toLocaleDateString("en-US", {
+                        <span className="text-[#4C4C4C]">{new Date(data?.result?.submittedAt).toLocaleDateString("en-US", {
                             day: "2-digit",
                             month: "long",
                         })}</span>
@@ -70,14 +74,14 @@ const StudentAssignment = () => {
             {/* Answer Section */}
             <div className="">
                 <h3 className="font-semibold mb-4">Answer</h3>
-                <p className="text-[#4C4C4C] leading-relaxed mb-4">{studentAnswer ?? "No answer provided by the student."}</p>
+                <p className="text-[#4C4C4C] leading-relaxed mb-4">{data?.result?.studentAnswer ?? "No answer provided by the student."}</p>
 
-                {studentAttachement && (
+                {data?.result?.studentAttachement && (
                     <>
-                        <p className="font-semibold mb-2">Attachment: <span className="ml-1">{studentAttachement.split("/").pop()}</span></p>
+                        <p className="font-semibold mb-2">Attachment: <span className="ml-1">{data?.result?.studentAttachement.split("/").pop()}</span></p>
                         <div className="rounded-lg overflow-hidden border w-full md:w-[60%] mx-auto my-6">
                             <iframe
-                                src={studentAttachement}
+                                src={data?.result?.studentAttachement}
                                 className="w-full h-[400px]"
                                 title="Student Attachment"
                             />
@@ -92,17 +96,30 @@ const StudentAssignment = () => {
                     {/* Grade Select */}
                     <div>
                         <label className="font-semibold mb-1.5">Grade</label>
-                        <Input value={assignmentGrade} readOnly />
+                        <Input
+                            value={
+                                data?.result?.assignmentGrade === "A_plus" ? 'A+' :
+                                    data?.result?.assignmentGrade === "A" ? 'A' :
+                                        data?.result?.assignmentGrade === "A_minus" ? 'A-' :
+                                            data?.result?.assignmentGrade === "B_plus" ? 'B+' :
+                                                data?.result?.assignmentGrade === "B" ? 'B' :
+                                                    data?.result?.assignmentGrade === "B_minus" ? 'B-' :
+                                                        data?.result?.assignmentGrade === "C_plus" ? 'C+' :
+                                                            data?.result?.assignmentGrade === "C" ? 'C' :
+                                                                data?.result?.assignmentGrade === "C_minus" ? 'C-' :
+                                                                    data?.result?.assignmentGrade === "D" ? 'D' : 'F'
+                            }
+                            readOnly />
                     </div>
 
                     {/* Feedback Input */}
                     <div>
                         <label className="font-semibold mb-1.5">Feedback</label>
                         <textarea
-                            value={feedback}
-                            onChange={(e) => setFeedback(e.target.value)}
+                            value={data?.result?.FeedBack}
                             placeholder="Enter your feedback..."
                             className="w-full border rounded-md px-3 py-2 text-sm resize-none h-24 focus:outline-none bg-white mt-2"
+                            readOnly
                         />
                     </div>
                 </div>
@@ -115,12 +132,7 @@ const StudentAssignment = () => {
                     >
                         Back
                     </button>
-                    <button
-                        // onClick={() =>
-                        //     alert(`Assignment graded with ${grade} and feedback: ${feedback}`)
-                        // }
-                        className="px-6 py-2 bg-[#1E3A8A] hover:bg-blue-800 text-white rounded-md text-sm font-medium cursor-pointer"
-                    >
+                    <button className="px-6 py-2 bg-[#1E3A8A] hover:bg-blue-800 text-white rounded-md text-sm font-medium cursor-pointer">
                         Grade Assignment
                     </button>
                 </div>

@@ -59,6 +59,51 @@ export const overviewApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: ["teacher", "assignment"]
         }),
+        createAssignment: builder.mutation({
+            query: (payload) => ({
+                url: `/assignment`,
+                method: "POST",
+                body: payload
+            }),
+            invalidatesTags: ["teacher", "assignment"]
+        }),
+        getAllBooksForForm: builder.query({
+            query: () => ({
+                url: `/book/books-for-forms`,
+                method: "GET",
+            }),
+            providesTags: ["books"]
+        }),
+        getAllAnnouncementsByTeacher: builder.query({
+            query: (id) => ({
+                url: `/teacher/grade-details/${id}?queryField=announcments`,
+                method: "GET",
+            }),
+            providesTags: ["teacher", "announcements"]
+        }),
+        createAnnouncement: builder.mutation({
+            query: ({ id, body }) => ({
+                url: `/announcement/${id}`,
+                method: "POST",
+                body: body
+            }),
+            invalidatesTags: ["teacher", "announcements"]
+        }),
+        getSingleAnnouncementByTeacher: builder.query({
+            query: (announcmentId) => ({
+                url: `/announcement/${announcmentId}`,
+                method: "GET",
+            }),
+            providesTags: ["announcements"],
+        }),
+        updateAnnouncementByTeacher: builder.mutation({
+            query: ({ announcmentId, body }) => ({
+                url: `/announcement/${announcmentId}`,
+                method: "PATCH",
+                body: body,
+            }),
+            invalidatesTags: ["announcements"]
+        }),
     }),
 });
 
@@ -70,5 +115,11 @@ export const {
     useGetAllAssignmentsByTeacherQuery,
     useGetSingleAssignmentByTeacherQuery,
     useGetStudentAssignmentDetailsByTeacherQuery,
-    useGradeAssignmentMutation
+    useGradeAssignmentMutation,
+    useCreateAssignmentMutation,
+    useGetAllBooksForFormQuery,
+    useGetAllAnnouncementsByTeacherQuery,
+    useCreateAnnouncementMutation,
+    useGetSingleAnnouncementByTeacherQuery,
+    useUpdateAnnouncementByTeacherMutation
 } = overviewApi;
