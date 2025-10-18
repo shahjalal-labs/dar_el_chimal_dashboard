@@ -76,10 +76,33 @@ export const overviewApi = baseApi.injectEndpoints({
         }),
         getAllAnnouncementsByTeacher: builder.query({
             query: (id) => ({
-                url: `/teacher/grade-details/${id}?queryField=announcements`,
+                url: `/teacher/grade-details/${id}?queryField=announcments`,
                 method: "GET",
             }),
             providesTags: ["teacher", "announcements"]
+        }),
+        createAnnouncement: builder.mutation({
+            query: ({ id, body }) => ({
+                url: `/announcement/${id}`,
+                method: "POST",
+                body: body
+            }),
+            invalidatesTags: ["teacher", "announcements"]
+        }),
+        getSingleAnnouncementByTeacher: builder.query({
+            query: (announcmentId) => ({
+                url: `/announcement/${announcmentId}`,
+                method: "GET",
+            }),
+            providesTags: ["announcements"],
+        }),
+        updateAnnouncementByTeacher: builder.mutation({
+            query: ({ announcmentId, body }) => ({
+                url: `/announcement/${announcmentId}`,
+                method: "PATCH",
+                body: body,
+            }),
+            invalidatesTags: ["announcements"]
         }),
     }),
 });
@@ -95,5 +118,8 @@ export const {
     useGradeAssignmentMutation,
     useCreateAssignmentMutation,
     useGetAllBooksForFormQuery,
-    useGetAllAnnouncementsByTeacherQuery
+    useGetAllAnnouncementsByTeacherQuery,
+    useCreateAnnouncementMutation,
+    useGetSingleAnnouncementByTeacherQuery,
+    useUpdateAnnouncementByTeacherMutation
 } = overviewApi;
