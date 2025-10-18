@@ -11,28 +11,24 @@ import { toast } from "sonner";
 import { PiSpinner } from "react-icons/pi";
 
 interface GradeStudentAssignmentModalProps {
-    id: string;
+    assignmentProgressId: string;
     onClose: () => void;
 }
 
-const GradeStudentAssignmentModal = ({ id, onClose, }: GradeStudentAssignmentModalProps) => {
-    const assignmentProgressId = id;
+const GradeStudentAssignmentModal = ({ assignmentProgressId, onClose, }: GradeStudentAssignmentModalProps) => {
+    const [grade, setGrade] = useState("");
+    const [feedback, setFeedback] = useState("");
 
     const { data, isLoading } = useGetStudentAssignmentDetailsByTeacherQuery(assignmentProgressId);
 
     const [GradeAssignment, { isLoading: isGrading }] = useGradeAssignmentMutation();
 
-    const [feedback, setFeedback] = useState("");
-    const [grade, setGrade] = useState("");
-
     useEffect(() => {
         if (data?.result) {
-            setFeedback(data.result.FeedBack || "");
-            setGrade(data.result.assignmentGrade || "");
+            setFeedback(data?.result?.FeedBack || "");
+            setGrade(data?.result?.assignmentGrade || "");
         }
     }, [data]);
-
-    const result = data?.result;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -49,9 +45,7 @@ const GradeStudentAssignmentModal = ({ id, onClose, }: GradeStudentAssignmentMod
                 onClose();
             }
         } catch (error: any) {
-            toast.error(
-                error?.data?.message || "Something went wrong while grading assignment."
-            );
+            toast.error(error?.data?.message || "Something went wrong while grading assignment.");
         }
     };
 
@@ -65,30 +59,29 @@ const GradeStudentAssignmentModal = ({ id, onClose, }: GradeStudentAssignmentMod
 
     return (
         <DialogContent className="min-w-[50%] h-[70%] overflow-y-auto">
+            <h1 className="text-2xl font-bold px-6 mt-6">Edit Grade</h1>
             {/* Assignment Header */}
-            <div className="bg-white p-6 rounded-lg mb-6 border">
-                <h2 className="text-2xl font-bold mb-3">Summarize Photosynthesis</h2>
-                <p className="text-[#4C4C4C] mb-6">
-                    Read this page and write a short summary of how photosynthesis works.
-                </p>
+            <div className="bg-white p-6 mb-6">
+                <h2 className="text-2xl font-bold mb-3">{data?.result?.assignment?.title}</h2>
+                <p className="text-[#4C4C4C] mb-6">{data?.result?.assignment?.instruction}</p>
 
-                <div className="flex items-start gap-6 text-sm">
-                    <div className="font-medium text-gray-800 space-y-2">
-                        <p>Name:</p>
-                        <p>Status:</p>
-                        <p>Submitted On:</p>
+                <div className="flex items-center gap-6">
+                    <div className="">
+                        <span className="font-medium">Name:</span><br />
+                        <span className="font-medium">Status:</span><br />
+                        <span className="font-medium">Submitted On:</span>
                     </div>
-                    <div className="text-gray-600 space-y-2">
-                        <p>{result?.user?.fullName || "N/A"}</p>
-                        <p>{result?.assignmentGrade || "Not Graded"}</p>
-                        <p>
-                            {result?.submittedAt
-                                ? new Date(result.submittedAt).toLocaleDateString("en-US", {
-                                    day: "2-digit",
-                                    month: "long",
-                                })
-                                : "N/A"}
-                        </p>
+                    <div className="">
+                        <span className="text-[#4C4C4C]">{data?.result?.user?.fullName ? data?.result?.user?.fullName : 'N/A'}</span><br />
+                        {data?.result?.assignmentGrade ? (
+                            <><span className="text-[#4C4C4C]">{data?.result?.assignmentGrade}</span><br /></>
+                        ) : (
+                            <><span className="text-[#4C4C4C]">Not Graded</span><br /></>
+                        )}
+                        <span className="text-[#4C4C4C]">{new Date(data?.result?.submittedAt).toLocaleDateString("en-US", {
+                            day: "2-digit",
+                            month: "long",
+                        })}</span>
                     </div>
                 </div>
             </div>
@@ -96,21 +89,14 @@ const GradeStudentAssignmentModal = ({ id, onClose, }: GradeStudentAssignmentMod
             {/* Answer Section */}
             <div className="px-6">
                 <h3 className="font-semibold mb-4">Answer</h3>
-                <p className="text-[#4C4C4C] leading-relaxed mb-4">
-                    {result?.studentAnswer ?? "No answer provided by the student."}
-                </p>
+                <p className="text-[#4C4C4C] leading-relaxed mb-4">{data?.result?.studentAnswer ?? "No answer provided by the student."}</p>
 
-                {result?.studentAttachement && (
+                {data?.result?.studentAttachement && (
                     <>
-                        <p className="font-semibold mb-2">
-                            Attachment:
-                            <span className="ml-1 text-[#4C4C4C]">
-                                {result.studentAttachement.split("/").pop()}
-                            </span>
-                        </p>
-                        <div className="rounded-lg overflow-hidden border w-full md:w-[80%] mx-auto my-6">
+                        <p className="font-semibold mb-2">Attachment: <span className="ml-1">{data?.result?.studentAttachement.split("/").pop()}</span></p>
+                        <div className="rounded-lg overflow-hidden border w-full md:w-[60%] mx-auto my-6">
                             <iframe
-                                src={result.studentAttachement}
+                                src={data?.result?.studentAttachement}
                                 className="w-full h-[400px]"
                                 title="Student Attachment"
                             />
@@ -128,8 +114,8 @@ const GradeStudentAssignmentModal = ({ id, onClose, }: GradeStudentAssignmentMod
                         <select
                             value={grade}
                             onChange={(e) => setGrade(e.target.value)}
-                            required
                             className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none bg-white"
+                            required
                         >
                             <option value="">Select Grade</option>
                             <option value="A_plus">A+</option>

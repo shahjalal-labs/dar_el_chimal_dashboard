@@ -136,7 +136,7 @@ const AssignmentDetails = () => {
                                                     <CiEdit size={24} />
                                                 </button>
                                             </DialogTrigger>
-                                            {open && <GradeStudentAssignmentModal id={String(assignmentId)} onClose={() => setOpen(false)} />}
+                                            {open && <GradeStudentAssignmentModal assignmentProgressId={String(student?.assignmentProgressId)} onClose={() => setOpen(false)} />}
                                         </Dialog>
                                     </td>
                                 </tr>

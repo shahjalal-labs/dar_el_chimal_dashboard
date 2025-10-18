@@ -136,7 +136,7 @@ const ClassDetails = () => {
                 </Link>
 
                 {/* Announcements */}
-                <div className="bg-[#E5F5FF] sm:col-span-1 px-6 py-4 rounded-lg flex items-center justify-between">
+                <Link href={`/teacher/classes/${id}/announcement`} className="bg-[#E5F5FF] sm:col-span-1 px-6 py-4 rounded-lg flex items-center justify-between">
                     <div>
                         <p className="text-lg text-[#636F85]">Announcements</p>
                         <h3 className="text-[56px] font-bold text-black">{totalAnnouncment}</h3>
@@ -151,7 +151,7 @@ const ClassDetails = () => {
                             priority
                         />
                     </div>
-                </div>
+                </Link>
             </div>
         </div>
     );
