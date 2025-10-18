@@ -5,6 +5,8 @@ import { useGetStudentDetailsQuery } from "@/redux/api/student/overviewApi";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
+import { AssignmentDetailView } from "./AssignmentDetailView";
+import { AssignmentModal } from "./AssignmentModal";
 
 interface Assignment {
   id: string;
@@ -17,11 +19,14 @@ interface Assignment {
 export default function Assignment() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null)
+  const [showModal, setShowModal] = useState(false)
+  const [showDetailView, setShowDetailView] = useState(false)
 
   const pathname = usePathname();
   const queryField = pathname.split("/").pop();
 
-  const { data: getAssignment } = useGetStudentDetailsQuery(queryField);
+  const { data: getAssignment, refetch } = useGetStudentDetailsQuery(queryField);
   const assignmentData: Assignment[] = getAssignment?.result?.assignments ?? [];
 
   const ITEMS_PER_PAGE = 7;
@@ -105,6 +110,50 @@ export default function Assignment() {
     return pages;
   };
 
+
+   const handleAssignmentClick = (assignments: Assignment) => {
+    setSelectedAssignment(assignments)
+    if (assignments.status === "Pending" || assignments.status === "Missed") {
+      setShowModal(true)
+    } else {
+      setShowDetailView(true)
+    }
+  }
+
+  const handleCloseModal = () => {
+    setShowModal(false)
+    setSelectedAssignment(null)
+  }
+
+  const handleCloseDetailView = () => {
+    setShowDetailView(false)
+    setSelectedAssignment(null)
+  }
+
+
+  if (showDetailView && selectedAssignment) {
+    return (
+      <AssignmentDetailView
+        assignments={{
+          id: selectedAssignment.id,
+          title: selectedAssignment.title,
+          description: "Read this page and write a short summary of how photosynthesis works.",
+          status: selectedAssignment.status as "Submitted" | "Graded",
+          grade: selectedAssignment.status === "Graded" ? "B+" : undefined,
+          feedback:
+            selectedAssignment.status === "Graded"
+              ? "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+              : undefined,
+          answer:
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+          attachmentName: "Photosynthesis Drawing.jpeg",
+          attachmentUrl: "/photosynthesis-diagram.png",
+        }}
+        onBack={handleCloseDetailView}
+      />
+    )
+  }
+
   return (
     <main className="bg-white rounded-2xl p-5">
       <div className="mx-auto px-4">
@@ -132,6 +181,7 @@ export default function Assignment() {
               <div
                 key={assignment.id}
                 className="flex items-center justify-between rounded-lg border border-gray-200 bg-[#F7F9FF] p-4 sm:p-6 hover:bg-gray-50 transition-colors"
+                  onClick={() => handleAssignmentClick(assignment)}
               >
                 <div className="flex-1">
                   <h3 className="font-semibold text-gray-900">
@@ -206,6 +256,22 @@ export default function Assignment() {
           </div>
         )}
       </div>
+
+
+
+       {selectedAssignment && (
+        <AssignmentModal
+          isOpen={showModal}
+          onClose={handleCloseModal}
+          refetch={refetch}
+          assignments={{
+            id: selectedAssignment.id,
+            title: selectedAssignment.title,
+            description: "Read this page and write a short summary of how photosynthesis works.",
+            status: selectedAssignment.status as "Pending" | "Missed",
+          }}
+        />
+      )}
     </main>
   );
 }
