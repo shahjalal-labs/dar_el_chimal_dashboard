@@ -18,6 +18,7 @@ import UpdateSchoolModal from "../Admin/Schools/UpdateSchoolModal";
 import ViewSchoolModal from "../Admin/Schools/ViewSchoolModal";
 import UpdateTeacherModal from "../Admin/Teachers/UpdateTeacherModal";
 import ViewTeacherModal from "../Admin/Teachers/ViewTeacherModal";
+import ViewStudentDetailsModal from "../Teacher/ViewStudentDetailsModal";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,7 +41,6 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-import ViewStudentDetailsModal from "../Teacher/ViewStudentDetailsModal";
 
 const DataTable = ({
   title,
@@ -169,12 +169,11 @@ const DataTable = ({
                         .map((header, idx) => <span key={idx}>{header} </span>)}
                   </TableHead>
                 ))}
-              {
-                pathname !== "/" && (
-                  <TableHead className="text-[#4A4A4A] font-semibold text-sm">
-                    Action
-                  </TableHead>
-                )}
+              {pathname !== "/" && (
+                <TableHead className="text-[#4A4A4A] font-semibold text-sm">
+                  Action
+                </TableHead>
+              )}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -190,135 +189,139 @@ const DataTable = ({
                     </TableCell>
                   )
                 )}
-                {
-                  pathname !== "/" && (
-                    <TableCell className="flex items-center gap-2">
-                      {/* VIEW  */}
-                      {(
-                        pathname === "/admin/books" ||
-                        pathname === "/student/books") && (
-                          <Link
-                            href={`
-                              ${pathname === "/admin/books" ?
-                                `/admin/books/bookDetails/${singleData?.Id}` :
-                                pathname === "/student/books" ?
-                                  `/student/books/book-overview/${singleData?.Id}` :
-                                  ``} `}
+                {pathname !== "/" && (
+                  <TableCell className="flex items-center gap-2">
+                    {/* VIEW  */}
+                  
+
+                    {pathname === "/admin/books" && (
+                      <Link href={`/admin/books/book-overview/${singleData?.Id}`}>
+                        <Button className="bg-[#F4A64033] hover:bg-[#F4A64026] text-[#F4A640] transition-colors ease-in-out duration-200 cursor-pointer">
+                          <span className="sr-only">View details</span>
+                          <Eye className="h-6 w-6" />
+                        </Button>
+                      </Link>
+                    )}
+
+                    {pathname === "/student/books" && (
+                      <Link
+                        href={`/student/books/bookDetails/${singleData?.Id}`}
+                      >
+                        <Button className="bg-[#F4A64033] hover:bg-[#F4A64026] text-[#F4A640] transition-colors ease-in-out duration-200 cursor-pointer">
+                          <span className="sr-only">View details</span>
+                          <Eye className="h-6 w-6" />
+                        </Button>
+                      </Link>
+                    )}
+
+                    {pathname !== "/admin/books" && (
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button
+                            onClick={() => setSelectedId(singleData?.Id)}
+                            className="bg-[#F4A64033] hover:bg-[#F4A64026] text-[#F4A640] transition-colors ease-in-out duration-200 cursor-pointer"
                           >
-                            <Button className="bg-[#F4A64033] hover:bg-[#F4A64026] text-[#F4A640] transition-colors ease-in-out duration-200 cursor-pointer">
-                              <span className="sr-only">View details</span>
-                              <Eye className="h-6 w-6" />
-                            </Button>
-                          </Link>
+                            <span className="sr-only">View details</span>
+                            <Eye className="h-6 w-6" />
+                          </Button>
+                        </DialogTrigger>
+                        {selectedId === singleData?.Id && (
+                          <>
+                            {pathname === "/admin/book-categories" ? (
+                              <ViewBookCategoryModal id={singleData?.Id} />
+                            ) : pathname === "/admin/schools" ? (
+                              <ViewSchoolModal id={singleData?.Id} />
+                            ) : pathname === "/admin/teachers" ? (
+                              <ViewTeacherModal id={singleData?.Id} />
+                            ) : pathname ===
+                              `/teacher/classes/${id}/student` ? (
+                              <ViewStudentDetailsModal id={singleData?.Id} />
+                            ) : (
+                              <></>
+                            )}
+                          </>
                         )}
-                      {pathname !== "/admin/books" && (
+                      </Dialog>
+                    )}
+
+                    {/* UPDATE & DELETE  */}
+                    {(pathname === "/admin/book-categories" ||
+                      pathname === "/admin/books" ||
+                      pathname === "/admin/schools" ||
+                      pathname === "/admin/teachers" ||
+                      pathname === "/admin/students") && (
+                      <>
                         <Dialog>
                           <DialogTrigger asChild>
                             <Button
                               onClick={() => setSelectedId(singleData?.Id)}
-                              className="bg-[#F4A64033] hover:bg-[#F4A64026] text-[#F4A640] transition-colors ease-in-out duration-200 cursor-pointer"
+                              className="bg-[#17A23533] hover:bg-[#17A23526] text-[#17A235] transition-colors ease-in-out duration-200 cursor-pointer"
                             >
-                              <span className="sr-only">View details</span>
-                              <Eye className="h-6 w-6" />
+                              <span className="sr-only">Update</span>
+                              <BiEditAlt className="h-6 w-6" />
                             </Button>
                           </DialogTrigger>
-                          {selectedId === singleData?.Id && (
-                            <>
-                              {pathname === "/admin/book-categories" ? (
-                                <ViewBookCategoryModal id={singleData?.Id} />
-                              ) : pathname === "/admin/schools" ? (
-                                <ViewSchoolModal id={singleData?.Id} />
-                              ) : pathname === "/admin/teachers" ? (
-                                <ViewTeacherModal id={singleData?.Id} />
-                              ) : pathname === `/teacher/classes/${id}/student` ? (
-                                <ViewStudentDetailsModal id={singleData?.Id} />
-                              ) : (
-                                <></>
-                              )}
-                            </>
-                          )}
+                          {selectedId === singleData?.Id &&
+                            (pathname === "/admin/book-categories" ? (
+                              <UpdateBookCategoryModal id={singleData?.Id} />
+                            ) : pathname === "/admin/books" ? (
+                              <UpdateBookModal id={singleData?.Id} />
+                            ) : pathname === "/admin/schools" ? (
+                              <UpdateSchoolModal id={singleData?.Id} />
+                            ) : pathname === "/admin/teachers" ? (
+                              <UpdateTeacherModal id={singleData?.Id} />
+                            ) : (
+                              <></>
+                            ))}
                         </Dialog>
-                      )}
-
-                      {/* UPDATE & DELETE  */}
-                      {(
-                        pathname === "/admin/book-categories" ||
-                        pathname === "/admin/books" ||
-                        pathname === "/admin/schools" ||
-                        pathname === "/admin/teachers" ||
-                        pathname === "/admin/students") && (
-                          <>
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <Button
-                                  onClick={() => setSelectedId(singleData?.Id)}
-                                  className="bg-[#17A23533] hover:bg-[#17A23526] text-[#17A235] transition-colors ease-in-out duration-200 cursor-pointer"
-                                >
-                                  <span className="sr-only">Update</span>
-                                  <BiEditAlt className="h-6 w-6" />
-                                </Button>
-                              </DialogTrigger>
-                              {selectedId === singleData?.Id &&
-                                (pathname === "/admin/book-categories" ? (
-                                  <UpdateBookCategoryModal id={singleData?.Id} />
-                                ) : pathname === "/admin/books" ? (
-                                  <UpdateBookModal id={singleData?.Id} />
-                                ) : pathname === "/admin/schools" ? (
-                                  <UpdateSchoolModal id={singleData?.Id} />
-                                ) : pathname === "/admin/teachers" ? (
-                                  <UpdateTeacherModal id={singleData?.Id} />
+                        {
+                          // pathname !== '' &&
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button className="bg-[#FE4D4F33] hover:bg-[#FE4D4F26] text-[#FE4D4F] transition-colors ease-in-out duration-200 cursor-pointer">
+                                <span className="sr-only">Delete</span>
+                                {isBookCategoryDeleting &&
+                                selectedId === singleData?.Id ? (
+                                  <div className="animate-spin">
+                                    <PiSpinner className="h-4 w-4" />
+                                  </div>
                                 ) : (
-                                  <></>
-                                ))}
-                            </Dialog>
-                            {
-                              // pathname !== '' &&
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <Button className="bg-[#FE4D4F33] hover:bg-[#FE4D4F26] text-[#FE4D4F] transition-colors ease-in-out duration-200 cursor-pointer">
-                                    <span className="sr-only">Delete</span>
-                                    {isBookCategoryDeleting &&
-                                      selectedId === singleData?.Id ? (
-                                      <div className="animate-spin">
-                                        <PiSpinner className="h-4 w-4" />
-                                      </div>
-                                    ) : (
-                                      <RiDeleteBin6Line className="w-6 h-6" />
-                                    )}
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle className="text-[#30373D] text-3xl font-bold text-center">
-                                      Are you sure?
-                                    </AlertDialogTitle>
-                                    <AlertDialogDescription className="text-[#636F85] text-center text-base mt-4">
-                                      This action cannot be undone. This will
-                                      permanently delete the{" "}
-                                      {singleData?.name ?? "item"}.
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter className="flex justify-center items-center gap-4">
-                                    <AlertDialogCancel className="flex-1 font-bold text-[#636F85] cursor-pointer transition-all duration-500 ease-in-out">
-                                      No
-                                    </AlertDialogCancel>
-                                    <AlertDialogAction
-                                      className="bg-[#1E3A8A] text-white hover:bg-[#1E3A8A80] flex-1 cursor-pointer transition-all duration-500 ease-in-out"
-                                      onClick={() => {
-                                        setSelectedId(singleData?.Id);
-                                        handleDelete(singleData?.Id);
-                                      }}
-                                    >
-                                      Yes
-                                    </AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
-                            }
-                          </>
-                        )}
-                    </TableCell>
-                  )}
+                                  <RiDeleteBin6Line className="w-6 h-6" />
+                                )}
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle className="text-[#30373D] text-3xl font-bold text-center">
+                                  Are you sure?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription className="text-[#636F85] text-center text-base mt-4">
+                                  This action cannot be undone. This will
+                                  permanently delete the{" "}
+                                  {singleData?.name ?? "item"}.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter className="flex justify-center items-center gap-4">
+                                <AlertDialogCancel className="flex-1 font-bold text-[#636F85] cursor-pointer transition-all duration-500 ease-in-out">
+                                  No
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                  className="bg-[#1E3A8A] text-white hover:bg-[#1E3A8A80] flex-1 cursor-pointer transition-all duration-500 ease-in-out"
+                                  onClick={() => {
+                                    setSelectedId(singleData?.Id);
+                                    handleDelete(singleData?.Id);
+                                  }}
+                                >
+                                  Yes
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        }
+                      </>
+                    )}
+                  </TableCell>
+                )}
               </TableRow>
             ))}
           </TableBody>

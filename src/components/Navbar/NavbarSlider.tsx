@@ -60,7 +60,7 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
         },
         {
           label: "Assignment",
-          route: "/student/assignment",
+          route: "/student/assignments",
           iconPath: <MdOutlineAssignment className="w-5 lg:w-6 h-5 lg:h-6" />,
         },
         {
