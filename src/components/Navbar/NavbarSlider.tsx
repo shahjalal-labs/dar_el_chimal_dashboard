@@ -64,8 +64,8 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
           iconPath: <MdOutlineAssignment className="w-5 lg:w-6 h-5 lg:h-6" />,
         },
         {
-          label: "Announcements",
-          route: "/student/announcements",
+          label: "Announcments",
+          route: "/student/announcments",
           iconPath: <TfiAnnouncement className="w-5 lg:w-6 h-5 lg:h-6" />,
         },
       ]
