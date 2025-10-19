@@ -9,7 +9,7 @@ interface AnnouncementDetailProps {
 
 export function AnnouncementDetail({ title, date, seenCount, content }: AnnouncementDetailProps) {
   return (
-    <div className="w-full bg-card rounded-lg p-6 sm:p-8 lg:p-10">
+    <div className="w-full px-4">
       <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4 text-balance">{title}</h1>
 
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 mb-6 pb-6 border-b border-border">

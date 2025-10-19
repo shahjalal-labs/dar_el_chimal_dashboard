@@ -1,14 +1,13 @@
-
-import Link from "next/link"
-import { ChevronLeft } from "lucide-react"
-import { AnnouncementDetail } from "@/components/Student/Announcments/AnnouncementDetail"
+import { AnnouncementDetail } from "@/components/Student/Announcments/AnnouncementDetail";
+import { ChevronLeft } from "lucide-react";
+import Link from "next/link";
 
 interface Announcement {
-  id: string
-  date: string
-  title: string
-  seenCount: number
-  content: string
+  id: string;
+  date: string;
+  title: string;
+  seenCount: number;
+  content: string;
 }
 
 const announcements: Announcement[] = [
@@ -41,31 +40,44 @@ const announcements: Announcement[] = [
     date: "June 15, 2025",
     title: "Reminder: Quiz on Monday!",
     seenCount: 15,
-    content: "Another quiz is coming up on Monday. Make sure to review chapters 5-8 before class.",
+    content:
+      "Another quiz is coming up on Monday. Make sure to review chapters 5-8 before class.",
   },
-]
+];
 
-export default function AnnouncementDetailPage({ params }: { params: { id: string } }) {
-  const announcement = announcements.find((a) => a.id === params.id)
+export default function AnnouncementDetailPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const announcement = announcements.find((a) => a.id === params.id);
 
   if (!announcement) {
     return (
-      <main className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
-        <div className="max-w-2xl mx-auto">
-          <Link href="/student/announcments" className="inline-flex items-center gap-2 text-primary hover:underline mb-6">
+      <main className=" p-4 ">
+        <div className="">
+          <Link
+            href="/student/announcments"
+            className="inline-flex items-center gap-2 text-primary hover:underline mb-6"
+          >
             <ChevronLeft className="w-4 h-4" />
             Back to Announcements
           </Link>
-          <p className="text-foreground">Announcement not found</p>
+          <p className="max-w-2xl mx-auto font-bold text-center mt-10 text-red-500">
+            Announcement not found
+          </p>
         </div>
       </main>
-    )
+    );
   }
 
   return (
-    <main className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
-      <div className="max-w-2xl mx-auto">
-        <Link href="/student/announcments" className="inline-flex items-center gap-2 text-primary hover:underline mb-6">
+    <main className=" p-4 sm:p-6 lg:p-8">
+      <div className="">
+        <Link
+          href="/student/announcments"
+          className="inline-flex items-center gap-2 text-primary hover:underline mb-6"
+        >
           <ChevronLeft className="w-4 h-4" />
           Back to Announcements
         </Link>
@@ -77,5 +89,5 @@ export default function AnnouncementDetailPage({ params }: { params: { id: strin
         />
       </div>
     </main>
-  )
+  );
 }
