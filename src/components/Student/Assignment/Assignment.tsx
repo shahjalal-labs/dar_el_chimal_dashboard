@@ -155,8 +155,8 @@ export default function Assignment() {
   }
 
   return (
-    <main className="bg-white rounded-2xl p-5">
-      <div className="mx-auto px-4">
+    <main className="mx-auto px-4">
+      <div className=" bg-white rounded-2xl p-5">
         {/* Header */}
         <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
           <h1 className="text-3xl font-bold text-gray-900">Assignment List</h1>
@@ -212,9 +212,13 @@ export default function Assignment() {
           )}
         </div>
 
-        {/* Pagination */}
+       
+      </div>
+
+
+ {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-end gap-2">
+          <div className="flex items-center justify-end gap-2 mt-6">
             <Button
               variant="outline"
               size="icon"
@@ -232,7 +236,7 @@ export default function Assignment() {
                 disabled={page === "..."}
                 className={`h-10 w-10 rounded-lg font-medium transition-colors ${
                   page === currentPage
-                    ? "bg-blue-600 text-white"
+                    ? "bg-[#1E3A8A] text-white"
                     : page === "..."
                     ? "cursor-default text-gray-600"
                     : "border border-gray-300 text-gray-700 hover:bg-gray-50"
@@ -255,9 +259,6 @@ export default function Assignment() {
             </Button>
           </div>
         )}
-      </div>
-
-
 
        {selectedAssignment && (
         <AssignmentModal
