@@ -1,4 +1,6 @@
 // types/react-pageflip.d.ts
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 declare module 'react-pageflip' {
   import { Component, Ref } from 'react';
 

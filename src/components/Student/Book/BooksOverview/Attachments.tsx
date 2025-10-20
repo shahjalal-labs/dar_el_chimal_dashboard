@@ -2,6 +2,7 @@
 
 import { useGetBookDetailsQuery } from "@/redux/api/student/booksApi";
 import { ChevronRight, FileText, Link2, Music, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ReactNextPlayer } from "reactnextplayer";
 
@@ -105,10 +106,12 @@ export default function Attachments({
     setSelectedType(null);
   };
 
+  const router = useRouter();
   const handleViewResource = (resource: Resource) => {
     if (resource.Type === "Pdf") {
       // Open PDF in new tab
-      window.open(resource.file, "_blank");
+      // window.open(resource.file, "_blank");
+      router.push(`/student/books/read/${bookId}`);
     } else {
       // Open Audio/Video in modal
       setSelectedResource(resource);
