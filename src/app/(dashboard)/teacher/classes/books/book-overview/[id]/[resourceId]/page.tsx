@@ -1,10 +1,10 @@
 import React from 'react';
-import Class from '@/components/Teacher/Class';
+import ResourceDetails from '@/components/Admin/Books/Resources/ResourceDetails';
 
 const Page = () => {
     return (
         <div>
-            <Class />
+            <ResourceDetails />
         </div>
     );
 };

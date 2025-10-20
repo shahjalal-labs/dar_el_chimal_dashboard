@@ -104,6 +104,13 @@ export const overviewApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: ["announcements"]
         }),
+        getAllBooksByTeacher: builder.query({
+            query: (id) => ({
+                url: `/teacher/grade-details/${id}?queryField=books`,
+                method: "GET",
+            }),
+            providesTags: ["teacher", "books"]
+        }),
     }),
 });
 
@@ -121,5 +128,6 @@ export const {
     useGetAllAnnouncementsByTeacherQuery,
     useCreateAnnouncementMutation,
     useGetSingleAnnouncementByTeacherQuery,
-    useUpdateAnnouncementByTeacherMutation
+    useUpdateAnnouncementByTeacherMutation,
+    useGetAllBooksByTeacherQuery
 } = overviewApi;

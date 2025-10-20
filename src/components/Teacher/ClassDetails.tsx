@@ -82,7 +82,7 @@ const ClassDetails = () => {
                 </Link>
 
                 {/* Total Books */}
-                <div className="bg-[#F1E7FF] sm:col-span-1 px-6 py-4 rounded-lg flex items-center justify-between">
+                <Link href={`/teacher/classes/books/${id}`} className="bg-[#F1E7FF] sm:col-span-1 px-6 py-4 rounded-lg flex items-center justify-between">
                     <div>
                         <p className="text-lg text-[#636F85]">Total Books</p>
                         <h3 className="text-[56px] font-bold text-black">{assignBook}</h3>
@@ -97,7 +97,7 @@ const ClassDetails = () => {
                             priority
                         />
                     </div>
-                </div>
+                </Link>
 
                 {/* Total Resources */}
                 <div className="bg-[#E7EFFF] sm:col-span-1 px-6 py-4 rounded-lg flex items-center justify-between">
