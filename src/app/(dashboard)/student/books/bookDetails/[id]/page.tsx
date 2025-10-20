@@ -50,9 +50,7 @@ export default function BackToSchoolPage() {
 
         {activeTab === "general" && <GeneralOverview bookId={id} />}
 
-        {activeTab === "resources" && (
-          <Attachments/>
-        )}
+        {activeTab === "resources" && <Attachments bookId={id} />}
       </div>
     </main>
   );

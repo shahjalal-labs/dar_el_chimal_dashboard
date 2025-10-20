@@ -15,7 +15,17 @@ export const AuthApi = baseApi.injectEndpoints({
         method: "GET",
       }),
     }),
+    getAnnouncementDetails: builder.query({
+      query: (id) => ({
+        url: `announcement/${id}`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
-export const { useGetStudentOverviewQuery, useGetStudentDetailsQuery } = AuthApi;
+export const {
+  useGetStudentOverviewQuery,
+  useGetStudentDetailsQuery,
+  useGetAnnouncementDetailsQuery,
+} = AuthApi;

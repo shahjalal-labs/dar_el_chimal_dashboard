@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { useGetBookDetailsQuery } from "@/redux/api/student/booksApi";
 import Image from "next/image";
 import { useState } from "react";
-import PDFViewer from "./PDFViewer";
+
 
 // Define the type for grade items
 interface GradeItem {
@@ -36,7 +36,7 @@ interface GeneralOverviewProps {
 }
 
 function GeneralOverview({ bookId }: GeneralOverviewProps) {
-  const [showPDFViewer, setShowPDFViewer] = useState(false);
+  const [showPdfReader, setShowPdfReader] = useState(false);
 
   const { data: getBooksOverview } = useGetBookDetailsQuery(bookId);
   console.log("data", getBooksOverview);
@@ -126,22 +126,26 @@ function GeneralOverview({ bookId }: GeneralOverviewProps) {
           >
             Back
           </Button>
+          {/* <Link href={`/student/books/read/${bookId}`}>
+           
+          </Link> */}
           <Button
+            onClick={() => setShowPdfReader(true)}
             className="bg-[#1E3A8A] text-white hover:bg-[#1E3A8A]/90"
-            onClick={() => setShowPDFViewer(true)}
           >
             Open Book
           </Button>
         </div>
       </div>
 
-      {showPDFViewer && (
-        <PDFViewer
-          pdfUrl={bookOverviewData?.file || ""}
-          bookName={bookOverviewData?.bookName}
-          onClose={() => setShowPDFViewer(false)}
+      {/* PDF Reader Modal */}
+      {/* {showPdfReader && (
+        <PdfReader
+          // bookFile={bookOverviewData?.file || ""}
+          // bookName={bookOverviewData?.bookName}
+          // onClose={() => setShowPdfReader(false)}
         />
-      )}
+      )} */}
     </section>
   );
 }
