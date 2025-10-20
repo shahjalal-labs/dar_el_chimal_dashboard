@@ -1,10 +1,10 @@
 import React from 'react';
-import Assignment from '@/components/Teacher/Assignment';
+import ResourceDetails from '@/components/Teacher/ResourceDetails';
 
 const Page = () => {
     return (
         <div>
-            <Assignment />
+            <ResourceDetails />
         </div>
     );
 };

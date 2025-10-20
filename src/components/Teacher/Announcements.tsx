@@ -3,19 +3,22 @@
 
 import React from 'react';
 import { useGetAllAnnouncementsByTeacherQuery } from '@/redux/api/teacher/overviewApi';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '../ui/button';
 import { FaPlus } from 'react-icons/fa';
-import { TfiAngleRight } from 'react-icons/tfi';
+import { TfiAngleLeft, TfiAngleRight } from 'react-icons/tfi';
 import { SlCalender } from 'react-icons/sl';
 
 const Announcements = () => {
+    const route = useRouter();
     const { id } = useParams();
     const { data } = useGetAllAnnouncementsByTeacherQuery(id)
 
     return (
         <div>
+            <Button onClick={() => route.back()} className='mb-6 bg-white/80 text-black cursor-pointer'><TfiAngleLeft />Back</Button>
+
             <div className='md:flex justify-between items-center mb-10'>
                 <div className='mb-6 md:mb-0'>
                     <h1 className='text-2xl font-bold mb-3'>Announcement List</h1>
@@ -33,7 +36,7 @@ const Announcements = () => {
                     !data?.result?.announcments?.length ?
                         <div className='text-center'>No announcements yet!</div> :
                         data?.result?.announcments?.map((announce: any, idx: number) => (
-                            <Link href={`/teacher/classes/${id}/announcement/${announce?.id}`} key={idx} className='bg-[#F7F9FF] border border-[#D8D8D8] rounded-2xl flex justify-between items-center p-5'>
+                            <Link href={`/teacher/classes/${id}/announcements/${announce?.id}`} key={idx} className='bg-[#F7F9FF] border border-[#D8D8D8] rounded-2xl flex justify-between items-center p-5'>
                                 <div>
                                     <div className='flex items-center gap-2'>
                                         <SlCalender className='w-4 h-4' />

@@ -17,6 +17,7 @@ import {
   PiBookBookmark,
   PiBookOpenTextDuotone,
   PiStudentDuotone,
+  PiUsersThree,
 } from "react-icons/pi";
 import { RiLogoutCircleRLine } from "react-icons/ri";
 import { RxDashboard } from "react-icons/rx";
@@ -31,13 +32,12 @@ interface SidebarProps {
 }
 
 const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
-  const [showDropdown, setShowDropdown] = useState(false);
-  const path = usePathname();
-  const { id, resourceId } = useParams();
   const router = useRouter();
+  const path = usePathname();
   const dispatch = useDispatch();
+  const [showDropdown, setShowDropdown] = useState(false);
+  const { id, assignmentId, assignmentProgressId, announcmentId, bookId, resourceId } = useParams();
   const authState = useSelector((state: any) => state.auth.role);
-  console.log("authState", authState);
 
   const navigation = [
     {
@@ -73,12 +73,12 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
         ? [
           {
             label: "Classes",
-            route: "/teacher/classes",
+            route: "",
             iconPath: <SiGoogleclassroom className="w-5 lg:w-6 h-5 lg:h-6" />,
           },
           {
             label: "Book",
-            route: "/teacher/book",
+            route: "",
             iconPath: <LuBookOpenText className="w-5 lg:w-6 h-5 lg:h-6" />,
           },
         ]
@@ -177,10 +177,27 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
                           path === "/admin/book-categories/new-book-category" ||
                           path === "/admin/books/add-new-book" ||
                           path === `/admin/books/book-overview/${id}` ||
-                          path === `/admin/books/book-overview/${id}/${resourceId}`
-                        ) && item.label === "Book Management" ?
+                          path === `/admin/books/book-overview/${id}/${resourceId}` ||
+                          path === `/teacher/classes` ||
+                          path === `/teacher/classes/${id}` ||
+                          path === `/teacher/classes/${id}/students` ||
+                          path === `/teacher/classes/${id}/assignments` ||
+                          path === `/teacher/classes/${id}/add-new-assignment` ||
+                          path === `/teacher/classes/${id}/assignments/${assignmentId}` ||
+                          path === `/teacher/classes/${id}/announcements` ||
+                          path === `/teacher/classes/${id}/assignments/${assignmentId}/${assignmentProgressId}` ||
+                          path === `/teacher/classes/${id}/add-new-announcement` ||
+                          path === `/teacher/classes/${id}/announcements/${announcmentId}`
+                        ) && (item.label === "Book Management" || item.label === "Classes") ?
                           "bg-[#1E3A8A] text-white" :
-                          "text-[#7C8091]"
+                          ((
+                            path === `/teacher/classes/books/${id}` ||
+                            path === `/teacher/classes/books/${id}/${bookId}` ||
+                            path === `/teacher/classes/books/${id}/${bookId}/pdf` ||
+                            path === `/teacher/classes/books/${id}/${bookId}/${resourceId}`) &&
+                            (item.label === "Book")) ?
+                            "bg-[#1E3A8A] text-white" :
+                            "text-[#7C8091]"
                       }`}
                   >
                     <div className="flex justify-center items-center">{item.iconPath}</div>
@@ -233,44 +250,52 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
                     (showDropdown && item.label === "Classes") ?
                       (<div className="flex flex-col">
                         <Link
-                          href="/teacher/student"
-                          className={`text-[#1E3A8A] font-medium p-3 ${isOpen && "pl-8 ml-8"} 
+                          href=""
+                          className={`font-medium p-3 ${isOpen && "pl-8 ml-8"} 
                           ${(
-                              path === "/teacher/student" ||
-                              path === "/admin/book-categories/new-book-category")
-                              ? "border-l-2 border-[#1E3A8A]"
+                              path === "/teacher/students" ||
+                              path === "/admin/book-categories/new-book-category" ||
+                              path === `/teacher/classes/${id}/students`)
+                              ? "border-l-2 border-[#1E3A8A] text-[#1E3A8A]"
                               : "border-l border-[#F3EEF6]"
                             }`}
                         >
-                          {!isOpen ? <TbCategoryPlus /> : "Student"}
+                          {!isOpen ? <PiUsersThree /> : "Students"}
                         </Link>
                         <Link
                           href=""
-                          className={`text-[#1E3A8A] font-medium p-3 ${isOpen && "pl-8 ml-8"} 
+                          className={`font-medium p-3 ${isOpen && "pl-8 ml-8"} 
                           ${(
                               path === "" ||
                               path === "/admin/books/add-new-book" ||
                               path === `/admin/books/book-overview/${id}` ||
-                              path === `/admin/books/book-overview/${id}/${resourceId}`)
-                              ? "border-l-2 border-[#1E3A8A]"
+                              path === `/admin/books/book-overview/${id}/${resourceId}` ||
+                              path === `/teacher/classes/${id}/assignments` ||
+                              path === `/teacher/classes/${id}/add-new-assignment` ||
+                              path === `/teacher/classes/${id}/assignments/${assignmentId}` ||
+                              path === `/teacher/classes/${id}/assignments/${assignmentId}/${assignmentProgressId}`)
+                              ? "border-l-2 border-[#1E3A8A] text-[#1E3A8A]"
                               : "border-l border-[#F3EEF6]"
                             }`}
                         >
-                          {!isOpen ? <PiBookBookmark /> : "Assignment"}
+                          {!isOpen ? <MdOutlineAssignment /> : "Assignments"}
                         </Link>
                         <Link
-                          href="/teacher/announcements"
-                          className={`text-[#1E3A8A] font-medium p-3 ${isOpen && "pl-8 ml-8"} 
+                          href=""
+                          className={`font-medium p-3 ${isOpen && "pl-8 ml-8"} 
                           ${(
-                              path === "/teacher/announcements" ||
                               path === "/admin/books/add-new-book" ||
                               path === `/admin/books/book-overview/${id}` ||
-                              path === `/admin/books/book-overview/${id}/${resourceId}`)
-                              ? "border-l-2 border-[#1E3A8A]"
+                              path === `/admin/books/book-overview/${id}/${resourceId}` ||
+                              path === "/teacher/announcements" ||
+                              path === `/teacher/classes/${id}/announcements` ||
+                              path === `/teacher/classes/${id}/add-new-announcement` ||
+                              path === `/teacher/classes/${id}/announcements/${announcmentId}`)
+                              ? "border-l-2 border-[#1E3A8A] text-[#1E3A8A]"
                               : "border-l border-[#F3EEF6]"
                             }`}
                         >
-                          {!isOpen ? <PiBookBookmark /> : "Announcements"}
+                          {!isOpen ? <TfiAnnouncement /> : "Announcements"}
                         </Link>
                       </div>) :
                       <></>
@@ -294,8 +319,8 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
             </button>
           </div>
         </div>
-      </aside>
-    </div>
+      </aside >
+    </div >
   );
 };
 

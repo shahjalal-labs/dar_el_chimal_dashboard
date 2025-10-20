@@ -101,15 +101,16 @@ const DashboardLayout = () => {
               {teacherOverviewData?.result?.grades?.slice(0, 5).map((grade: any) => (
                 <Link
                   href={`/teacher/classes/${grade?.id}`}
-                  key={grade.id}
+                  key={grade?.id}
                   className="bg-[#F7F9FF] border border-[#D8D8D8] rounded-lg p-5 flex justify-between items-center hover:bg-gray-50 cursor-pointer"
                 >
                   <div>
                     <p className="font-medium text-xl">
-                      {grade.grade} - Section A
+                      {grade?.grade} - Section A
                     </p>
-                    <p className="flex items-center gap-2 text-[#4C4C4C] mt-3">
-                      <BiBookReader className="text-lg" /> {grade.totalStudents} Student{grade.totalStudents > 1 ? "s" : ""} <SlCalender className="text-lg ml-2" /> {new Date().getFullYear()}
+                    <p className="md:flex items-center gap-4 text-[#4C4C4C] mt-3">
+                      <div className="flex items-center gap-2"><BiBookReader className="text-lg" /> {grade?.totalStudents} Student{grade?.totalStudents > 1 ? "s" : ""}</div>
+                      <div className="flex items-center gap-2"><SlCalender className="text-lg" /> {new Date().getFullYear()}</div>
                     </p>
                   </div>
                   <span className="text-[#1C1B1F]"><TfiAngleRight className="w-6 h-6" /></span>

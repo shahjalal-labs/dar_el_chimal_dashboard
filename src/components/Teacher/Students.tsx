@@ -5,9 +5,12 @@ import Image from 'next/image';
 import DataTable from '../Common/DataTable';
 import defaultImg from '@/assets/no-img.jpg';
 import { useGetAllStudentsByTeacherQuery } from '@/redux/api/teacher/overviewApi';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import { Button } from '../ui/button';
+import { TfiAngleLeft } from 'react-icons/tfi';
 
-const Student = () => {
+const Students = () => {
+    const route = useRouter();
     const { id } = useParams();
     const { data } = useGetAllStudentsByTeacherQuery(id);
 
@@ -41,9 +44,10 @@ const Student = () => {
 
     return (
         <div>
+            <Button onClick={() => route.back()} className='mb-6 bg-white/80 text-black cursor-pointer'><TfiAngleLeft />Back</Button>
             <DataTable title={`Students (${formattedData?.length})`} data={formattedData} willSearch={true} />
         </div>
     );
 };
 
-export default Student;
+export default Students;

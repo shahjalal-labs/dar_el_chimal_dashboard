@@ -12,8 +12,6 @@ const ViewStudentDetailsModal = ({ id }: { id: string }) => {
     const { data, isLoading } = useGetStudentDetailsByTeacherQuery(id);
     const student = data?.result;
 
-    console.log(data);
-
     if (isLoading) {
         return (
             <DialogContent className="p-10" showCloseButton>

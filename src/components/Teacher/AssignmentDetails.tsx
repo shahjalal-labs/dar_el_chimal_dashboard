@@ -3,7 +3,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useGetSingleAssignmentByTeacherQuery } from "@/redux/api/teacher/overviewApi";
 import { Eye } from "lucide-react";
 import { CiEdit } from "react-icons/ci";
@@ -11,8 +11,11 @@ import { SyncLoader } from "react-spinners";
 import Link from "next/link";
 import { Dialog, DialogTrigger } from "../ui/dialog";
 import GradeStudentAssignmentModal from "./GradeStudentAssignmentModal";
+import { Button } from "../ui/button";
+import { TfiAngleLeft } from "react-icons/tfi";
 
 const AssignmentDetails = () => {
+    const route = useRouter();
     const [open, setOpen] = useState(false);
     const { id, assignmentId } = useParams();
     const { data, isLoading } = useGetSingleAssignmentByTeacherQuery(assignmentId);
@@ -41,7 +44,10 @@ const AssignmentDetails = () => {
     return (
         <div className="">
             {/* Section Title */}
-            <h2 className="text-2xl font-bold mb-6">Assignments</h2>
+            <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold mb-6">Assignments</h2>
+                <Button onClick={() => route.back()} className='mb-6 bg-white/80 text-black cursor-pointer'><TfiAngleLeft />Back</Button>
+            </div>
 
             {/* Assignment Header Card */}
             <div className="bg-white rounded-lg p-6 mb-6">
@@ -67,7 +73,7 @@ const AssignmentDetails = () => {
             </div>
 
             {/* Students Table */}
-            <div className="bg-white rounded-lg overflow-hidden p-6">
+            <div className="bg-white rounded-lg overflow-x-auto p-6">
                 {/* Due Date & Submissions */}
                 <div className="mb-6">
                     <div>
@@ -83,7 +89,7 @@ const AssignmentDetails = () => {
                     </div>
                 </div>
 
-                <table className="w-full text-sm">
+                <table className="w-full text-sm overflow-x-auto">
                     <thead className="bg-gray-100 text-gray-700 text-left">
                         <tr>
                             <th className="py-3 px-5 font-medium">Name</th>
@@ -125,7 +131,7 @@ const AssignmentDetails = () => {
 
                                     {/* Action Buttons */}
                                     <td className="py-3 px-5 flex justify-center gap-3">
-                                        <Link href={`/teacher/classes/${id}/assignment/${assignmentId}/${student?.assignmentProgressId}`}>
+                                        <Link href={`/teacher/classes/${id}/assignments/${assignmentId}/${student?.assignmentProgressId}`}>
                                             <button className="text-[#F4A640] cursor-pointer">
                                                 <Eye size={24} />
                                             </button>

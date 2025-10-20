@@ -21,10 +21,11 @@ import { useGetSingleBookQuery } from '@/redux/api/book';
 
 const BookOverview = () => {
     const { id } = useParams();
+    const [tab, setTab] = useState('general');
     const [isAddResource, setIsAddResource] = useState(false);
+
     const { data, isLoading } = useGetSingleBookQuery(id);
     const book = data?.result;
-    const [tab, setTab] = useState('general');
 
     if (isLoading) {
         return (

@@ -1,10 +1,10 @@
 import React from 'react';
-import Student from '@/components/Teacher/Student';
+import Assignments from '@/components/Teacher/Assignments';
 
 const Page = () => {
     return (
         <div>
-            <Student />
+            <Assignments />
         </div>
     );
 };

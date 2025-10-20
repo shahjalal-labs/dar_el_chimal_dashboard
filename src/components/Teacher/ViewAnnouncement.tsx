@@ -1,20 +1,24 @@
 "use client";
 
 import React from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { SlCalender } from 'react-icons/sl';
 import { MdOutlineRemoveRedEye } from 'react-icons/md';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { useGetSingleAnnouncementByTeacherQuery } from '@/redux/api/teacher/overviewApi';
 import UpdateAnnouncement from './UpdateAnnouncement';
+import { TfiAngleLeft } from 'react-icons/tfi';
 
 const ViewAnnouncement = () => {
+    const route = useRouter();
     const { announcmentId } = useParams();
     const { data } = useGetSingleAnnouncementByTeacherQuery(announcmentId);
 
     return (
         <div>
+            <Button onClick={() => route.back()} className='mb-6 bg-white/80 text-black cursor-pointer'><TfiAngleLeft />Back</Button>
+
             <h1 className='text-[#262626] text-2xl font-bold'>{data?.result?.title}</h1>
             <div className='flex items-center gap-6 my-4'>
                 <div className='flex items-center gap-2'>

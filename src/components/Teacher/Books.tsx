@@ -5,9 +5,12 @@ import DataTable from "@/components/Common/DataTable";
 import { useGetAllBooksByTeacherQuery } from "@/redux/api/teacher/overviewApi";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import { Button } from "../ui/button";
+import { TfiAngleLeft } from "react-icons/tfi";
 
 const Books = () => {
+    const route = useRouter();
     const { id } = useParams();
     const { data } = useGetAllBooksByTeacherQuery(id);
 
@@ -39,7 +42,6 @@ const Books = () => {
             Description: entry.description,
             Author: entry.author,
             ISBN: entry.ISBN,
-            // Category: entry.category.name,
             PDF: (
                 entry?.file
                     ? <Link
@@ -70,7 +72,11 @@ const Books = () => {
 
     return (
         <div>
-            <h1 className="text-2xl font-bold mb-4">Book List</h1>
+            <div className='mb-6 flex justify-between md:items-center'>
+                <h1 className="text-2xl font-bold mb-4">Book List</h1>
+                <Button onClick={() => route.back()} className='mb-6 bg-white/80 text-black cursor-pointer'><TfiAngleLeft />Back</Button>
+            </div>
+
             <DataTable
                 title="Book List"
                 data={formattedData}

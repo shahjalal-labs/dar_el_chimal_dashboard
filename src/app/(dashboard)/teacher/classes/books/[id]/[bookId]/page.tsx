@@ -1,5 +1,5 @@
 import React from 'react';
-import BookOverview from '@/components/Admin/Books/BookOverview';
+import BookOverview from '@/components/Teacher/BookOverview';
 
 const Page = () => {
     return (

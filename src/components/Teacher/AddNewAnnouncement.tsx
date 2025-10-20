@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { PiSpinner } from "react-icons/pi";
 import { useCreateAnnouncementMutation } from "@/redux/api/teacher/overviewApi";
 import { useParams, useRouter } from "next/navigation";
+import { TfiAngleLeft } from "react-icons/tfi";
 
 interface AnnouncementFormData {
     announcementTitle: string;
@@ -27,7 +28,7 @@ const AddNewAnnouncement = () => {
     const { id } = useParams();
     const dispatch = useDispatch();
     const [open, setOpen] = useState(false);
-    
+
     const [formData, setFormData] = useState<AnnouncementFormData>({
         announcementTitle: "",
         announcement: "",
@@ -68,13 +69,16 @@ const AddNewAnnouncement = () => {
     return (
         <div>
             {/* Header */}
-            <div className="mb-10">
-                <h1 className="text-2xl font-bold mb-3">Add New Announcement</h1>
-                <p className="font-medium">
-                    <span className="text-[#72727299]">Announcement</span>
-                    <span className="text-[#72727299] px-2">/</span>
-                    Add New Announcement
-                </p>
+            <div className='mb-6 flex flex-col-reverse md:flex-row justify-between md:items-center'>
+                <div>
+                    <h1 className="text-2xl font-bold mb-3">Add New Announcement</h1>
+                    <p className="font-medium">
+                        <span className="text-[#72727299]">Announcement</span>
+                        <span className="text-[#72727299] px-2">/</span>
+                        Add New Announcement
+                    </p>
+                </div>
+                <Button onClick={() => router.back()} className='mb-6 md:mb-0 bg-white/80 text-black cursor-pointer w-fit'><TfiAngleLeft />Back</Button>
             </div>
 
             <form onSubmit={handleSubmit} className="bg-white rounded-2xl space-y-5 p-10">
@@ -149,7 +153,7 @@ const AddNewAnnouncement = () => {
                 </div>
 
                 {/* Buttons */}
-                <div className="flex justify-center gap-3 pt-3">
+                <div className="flex flex-col md:flex-row justify-center items-center gap-4 pt-3">
                     <Button
                         type="button"
                         variant="outline"

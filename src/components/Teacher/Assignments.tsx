@@ -3,20 +3,23 @@
 
 import React from 'react';
 import { useGetAllAssignmentsByTeacherQuery } from '@/redux/api/teacher/overviewApi';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '../ui/button';
 import { FaPlus } from 'react-icons/fa';
 import Image from 'next/image';
 import line from '@/assets/line.svg';
-import { TfiAngleRight } from 'react-icons/tfi';
+import { TfiAngleLeft, TfiAngleRight } from 'react-icons/tfi';
 
-const Assignment = () => {
+const Assignments = () => {
+    const route = useRouter();
     const { id } = useParams();
     const { data } = useGetAllAssignmentsByTeacherQuery(id)
 
     return (
         <div>
+            <Button onClick={() => route.back()} className='mb-6 bg-white/80 text-black cursor-pointer'><TfiAngleLeft />Back</Button>
+
             <div className='md:flex justify-between items-center mb-10'>
                 <div className='mb-6 md:mb-0'>
                     <h1 className='text-2xl font-bold mb-3'>Assignment List</h1>
@@ -32,7 +35,7 @@ const Assignment = () => {
             <div className='space-y-4'>
                 {
                     data?.result?.assignments?.map((assignment: any, idx: number) => (
-                        <Link href={`/teacher/classes/${id}/assignment/${assignment?.id}`} key={idx} className='bg-[#F7F9FF] border border-[#E7E8EB] rounded-xl p-5 flex justify-between items-center hover:bg-gray-50 cursor-pointer'>
+                        <Link href={`/teacher/classes/${id}/assignments/${assignment?.id}`} key={idx} className='bg-[#F7F9FF] border border-[#E7E8EB] rounded-xl p-5 flex justify-between items-center hover:bg-gray-50 cursor-pointer'>
                             <div>
                                 <h1 className='text-[#262626] text-xl font-medium mb-2'>{assignment?.title}</h1>
                                 <div className='flex items-center gap-2'>
@@ -67,4 +70,4 @@ const Assignment = () => {
     );
 };
 
-export default Assignment;
+export default Assignments;

@@ -9,6 +9,8 @@ import link from '@/assets/attach_file_add.svg';
 import { toast } from "sonner";
 import { PiSpinner } from "react-icons/pi";
 import { Dialog, DialogContent } from "../ui/dialog";
+import { Button } from "../ui/button";
+import { TfiAngleLeft } from "react-icons/tfi";
 
 interface AssignmentFormData {
     title: string;
@@ -110,9 +112,12 @@ const AddNewAssignment = () => {
     return (
         <div>
             <div>
-                <div className='mb-6'>
-                    <h1 className='text-2xl font-bold mb-3'>Add New Assignment</h1>
-                    <p className='font-medium'><span className='text-[#72727299]'>Assignment</span><span className='text-[#72727299] px-2'>/</span>Add New Assignment</p>
+                <div className='mb-6 flex flex-col-reverse md:flex-row justify-between md:items-center'>
+                    <div>
+                        <h1 className='text-2xl font-bold mb-3'>Add New Assignment</h1>
+                        <p className='font-medium'><span className='text-[#72727299]'>Assignment</span><span className='text-[#72727299] px-2'>/</span>Add New Assignment</p>
+                    </div>
+                    <Button onClick={() => route.back()} className='mb-6 md:mb-0 bg-white/80 text-black cursor-pointer w-fit'><TfiAngleLeft />Back</Button>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4 bg-white rounded-xl p-10">
@@ -312,7 +317,7 @@ const AddNewAssignment = () => {
                     </div>
 
                     {/* Buttons */}
-                    <div className="flex justify-center items-center space-x-4 pt-4">
+                    <div className="flex flex-col md:flex-row justify-center items-center gap-4 pt-4">
                         <button
                             type="button"
                             className="border px-4 py-2 rounded-md"
