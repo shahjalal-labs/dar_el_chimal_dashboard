@@ -1,8 +1,10 @@
 "use client";
 
 import { useGetBookDetailsQuery } from "@/redux/api/student/booksApi";
-import { ChevronRight, FileText, Link2, Music } from "lucide-react";
+import { ChevronRight, FileText, Link2, Music, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ReactNextPlayer } from "reactnextplayer";
 
 interface Attachment {
   id: string;
@@ -43,6 +45,10 @@ export default function Attachments({
   const [selectedType, setSelectedType] = useState<
     "Audio" | "Video" | "Pdf" | null
   >(null);
+  const [selectedResource, setSelectedResource] = useState<Resource | null>(
+    null
+  );
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { data: getBooksOverview } = useGetBookDetailsQuery(bookId);
   console.log("data in resource", getBooksOverview);
@@ -100,6 +106,24 @@ export default function Attachments({
     setSelectedType(null);
   };
 
+  const router = useRouter();
+  const handleViewResource = (resource: Resource) => {
+    if (resource.Type === "Pdf") {
+      // Open PDF in new tab
+      // window.open(resource.file, "_blank");
+      router.push(`/student/books/read/${bookId}`);
+    } else {
+      // Open Audio/Video in modal
+      setSelectedResource(resource);
+      setIsModalOpen(true);
+    }
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedResource(null);
+  };
+
   // Update attachments with actual counts from API
   const actualAttachments = attachments.map((attachment) => ({
     ...attachment,
@@ -109,84 +133,145 @@ export default function Attachments({
   // Show filtered resources when a type is selected
   if (selectedType) {
     return (
-      <div className="space-y-6 bg-white p-5 rounded-2xl">
-        {/* Header */}
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleBackToTypes}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <ChevronRight className="h-5 w-5 text-gray-600 rotate-180" />
-            </button>
-            <h2 className="text-lg font-semibold text-gray-900">
-              {selectedType} Resources ({filteredResources.length})
-            </h2>
+      <>
+        <div className="space-y-6 bg-white p-5 rounded-2xl">
+          {/* Header */}
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleBackToTypes}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <ChevronRight className="h-5 w-5 text-gray-600 rotate-180" />
+              </button>
+              <h2 className="text-lg font-semibold text-gray-900">
+                {selectedType} Resources ({filteredResources.length})
+              </h2>
+            </div>
           </div>
+
+          {/* Resources List */}
+          {filteredResources.length > 0 ? (
+            <div className="space-y-3">
+              {filteredResources.map((resource: Resource) => (
+                <div
+                  key={resource.id}
+                  className="flex items-center justify-between p-4 bg-[#F7F9FFCC] border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex-1">
+                    <h4 className="font-medium text-gray-900">
+                      {resource.title}
+                    </h4>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {resource.description}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-2">
+                      Uploaded:{" "}
+                      {new Date(resource.createdAt).toLocaleDateString()} • By:{" "}
+                      {resource.uploderName || resource.uplodedBy}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => handleViewResource(resource)}
+                    className="ml-4 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    View
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <div
+                className={`inline-flex h-16 w-16 items-center justify-center rounded-lg ${
+                  selectedType === "Audio"
+                    ? "bg-red-100"
+                    : selectedType === "Video"
+                    ? "bg-green-100"
+                    : "bg-orange-100"
+                }`}
+              >
+                {selectedType === "Audio" && (
+                  <Music className="h-8 w-8 text-red-600" />
+                )}
+                {selectedType === "Video" && (
+                  <Link2 className="h-8 w-8 text-green-600" />
+                )}
+                {selectedType === "Pdf" && (
+                  <FileText className="h-8 w-8 text-orange-600" />
+                )}
+              </div>
+              <h3 className="mt-4 text-lg font-medium text-gray-900">
+                No {selectedType} Resources
+              </h3>
+              <p className="mt-2 text-gray-500">
+                No {selectedType.toLowerCase()} files found for this book.
+              </p>
+            </div>
+          )}
         </div>
 
-        {/* Resources List */}
-        {filteredResources.length > 0 ? (
-          <div className="space-y-3">
-            {filteredResources.map((resource: Resource) => (
-              <div
-                key={resource.id}
-                className="flex items-center justify-between p-4 bg-[#F7F9FFCC] border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <div className="flex-1">
-                  <h4 className="font-medium text-gray-900">
-                    {resource.title}
-                  </h4>
-                  <p className="text-sm text-gray-600 mt-1">
-                    {resource.description}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-2">
-                    Uploaded:{" "}
-                    {new Date(resource.createdAt).toLocaleDateString()} • By:{" "}
-                    {resource.uploderName || resource.uplodedBy}
-                  </p>
-                </div>
-                <a
-                  href={resource.file}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="ml-4 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+        {/* Audio/Video Modal */}
+        {isModalOpen && selectedResource && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+              {/* Modal Header */}
+              <div className="flex justify-end items-center p-6 ">
+                <button
+                  onClick={closeModal}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                 >
-                  View
-                </a>
+                  <X className="h-5 w-5 text-gray-600" />
+                </button>
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <div
-              className={`inline-flex h-16 w-16 items-center justify-center rounded-lg ${
-                selectedType === "Audio"
-                  ? "bg-red-100"
-                  : selectedType === "Video"
-                  ? "bg-green-100"
-                  : "bg-orange-100"
-              }`}
-            >
-              {selectedType === "Audio" && (
-                <Music className="h-8 w-8 text-red-600" />
-              )}
-              {selectedType === "Video" && (
-                <Link2 className="h-8 w-8 text-green-600" />
-              )}
-              {selectedType === "Pdf" && (
-                <FileText className="h-8 w-8 text-orange-600" />
-              )}
+
+              {/* Modal Content */}
+              <div className="p-6">
+                {selectedResource.Type === "Video" && (
+                  <div style={{ maxWidth: "800px", margin: "0 auto" }}>
+                    <ReactNextPlayer
+                      src={selectedResource.file}
+                      // poster="/poster-image.jpg"
+                      autoplay={false}
+                      controls
+                      color="#ff4757"
+                      onPlay={() => console.log("Video started")}
+                      onPause={() => console.log("Video paused")}
+                      onEnded={() => console.log("Video ended")}
+                      onTimeUpdate={(t) => console.log("Current time:", t)}
+                    />
+                  </div>
+                )}
+
+                {selectedResource.Type === "Audio" && (
+                  <div className="w-full p-6 bg-gray-100 rounded-lg">
+                    <div className="max-w-md mx-auto">
+                      <div className="flex items-center gap-4 mb-4">
+                        <div className="flex-shrink-0">
+                          <Music className="h-8 w-8 text-red-600" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-medium text-gray-900">
+                            {selectedResource.title}
+                          </h4>
+                          <p className="text-sm text-gray-600">Audio File</p>
+                        </div>
+                      </div>
+                      <audio controls className="w-full" autoPlay>
+                        <source src={selectedResource.file} type="audio/mpeg" />
+                        <source src={selectedResource.file} type="audio/wav" />
+                        Your browser does not support the audio element.
+                      </audio>
+                    </div>
+                  </div>
+                )}
+
+                {/* File Info */}
+              </div>
             </div>
-            <h3 className="mt-4 text-lg font-medium text-gray-900">
-              No {selectedType} Resources
-            </h3>
-            <p className="mt-2 text-gray-500">
-              No {selectedType.toLowerCase()} files found for this book.
-            </p>
           </div>
         )}
-      </div>
+      </>
     );
   }
 

@@ -1,48 +1,52 @@
-// // "use client";
+"use client";
 
-// // import { useParams } from "next/navigation";
-// // import dynamic from "next/dynamic";
+import PdfReader from "@/components/Student/Book/BookReader/PdfReader";
+import { useGetBookDetailsQuery } from "@/redux/api/student/booksApi";
+import { useParams } from "next/navigation";
 
-// // // Dynamically import the flipbook PDF viewer (for client-side only)
-// // const FlipBookViewer = dynamic(
-// //   () => import("@/components/Student/Book/BookReader/PdfReader.tsx"),
-// //   { ssr: false }
-// // );
+// Define the type for the book overview data
+interface BookOverviewData {
+  file: string;
+  totalPages?: number;
+}
 
-// // export default function BookReaderPage() {
-// //   const params = useParams();
-// //   const id = params.id as string;
+// Define the type for the API response
+interface BookOverviewResponse {
+  result?: BookOverviewData;
+}
 
-// //   return (
-// //     <main className="min-h-screen bg-gray-50">
-// //       <FlipBookViewer bookId={id} />
-// //     </main>
-// //   );
-// // }
+export default function ReadBookPage() {
+  const params = useParams();
+  const bookId = params.id as string;
 
+  const { data: getBooksOverview, isLoading } = useGetBookDetailsQuery(bookId);
 
+  const bookData: BookOverviewData | undefined = (
+    getBooksOverview as BookOverviewResponse
+  )?.result;
+  console.log("read page ", bookData)
 
-// import PdfReader from '@/components/Student/Book/BookReader/PdfReader'
-// import React from 'react'
-
-// function page() {
-//   return (
-//     <div>
-//         <PdfReader/>
-//     </div>
-//   )
-// }
-
-// export default page
-
-import React from 'react';
-
-const Page = () => {
+  if (isLoading) {
     return (
-        <div>
-
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-gray-600">Loading book...</div>
+      </div>
     );
-};
+  }
 
-export default Page;
+  if (!bookData?.file) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-gray-600">Book not found</div>
+      </div>
+    );
+  }
+
+  return (
+    <PdfReader
+      bookId={bookId}
+      pdfUrl={bookData?.file}
+      totalPages={bookData?.totalPages || 1000000}
+    />
+  );
+}

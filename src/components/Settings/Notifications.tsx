@@ -6,7 +6,7 @@ import { formatDistanceToNow } from "date-fns";
 import { TbClipboardText } from "react-icons/tb";
 
 const Notifications = () => {
-  const { data, isLoading } = useGetMyNotificationsQuery(undefined);
+  const { data, isLoading } = useGetMyNotificationsQuery("");
 
   if (isLoading) {
     return (

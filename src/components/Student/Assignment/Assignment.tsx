@@ -181,7 +181,7 @@ export default function Assignment() {
             currentAssignments.map((assignment) => (
               <div
                 key={assignment.id}
-                className="flex items-center justify-between rounded-lg border border-gray-200 bg-[#F7F9FF] p-4 sm:p-6 hover:bg-gray-50 transition-colors"
+                className="flex items-center justify-between rounded-lg border border-gray-200 bg-[#F7F9FF] p-4 sm:p-6 hover:bg-gray-50 transition-colors cursor-pointer"
                   onClick={() => handleAssignmentClick(assignment)}
               >
                 <div className="flex-1">
