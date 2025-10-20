@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -32,12 +33,13 @@ export function AssignmentModal({
   const [attachment, setAttachment] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  if (!isOpen) return null;
-
+  
   const id = assignments?.id;
   const { data: assignmentDetails } = useGetassignmentDetailsQuery(id);
   const [submitAssignmentAnsFn] = useSubmitAssingmentAnsMutation();
-
+  
+  if (!isOpen) return null;
+  
   const assignment = assignmentDetails?.result?.assignment ?? assignments;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

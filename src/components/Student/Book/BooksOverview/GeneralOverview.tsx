@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Button } from "@/components/ui/button";
 import { useGetBookDetailsQuery } from "@/redux/api/student/booksApi";
 import Image from "next/image";

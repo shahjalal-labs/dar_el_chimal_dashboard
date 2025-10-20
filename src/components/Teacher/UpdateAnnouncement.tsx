@@ -12,7 +12,7 @@ import { useDispatch } from "react-redux";
 import { setAnnouncementDate } from "@/redux/features/announcementSlice";
 import { Textarea } from "@/components/ui/textarea";
 import { PiSpinner } from "react-icons/pi";
-import { useUpdateAnnouncementMutation } from "@/redux/api/announcement";
+// import { useUpdateAnnouncementMutation } from "@/redux/api/announcement";
 import { toast } from "sonner";
 import { useGetSingleAnnouncementByTeacherQuery, useUpdateAnnouncementByTeacherMutation } from "@/redux/api/teacher/overviewApi";
 

@@ -27,6 +27,7 @@ export default function Assignment() {
   const queryField = pathname.split("/").pop();
 
   const { data: getAssignment, refetch } = useGetStudentDetailsQuery(queryField);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const assignmentData: Assignment[] = getAssignment?.result?.assignments ?? [];
 
   const ITEMS_PER_PAGE = 7;

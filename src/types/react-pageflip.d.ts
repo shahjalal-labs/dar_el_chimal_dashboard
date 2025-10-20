@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // types/react-pageflip.d.ts
 declare module 'react-pageflip' {
-  import { Component, Ref } from 'react';
+  import { Component } from 'react';
 
   interface HTMLFlipBookProps {
     width?: number | string;
