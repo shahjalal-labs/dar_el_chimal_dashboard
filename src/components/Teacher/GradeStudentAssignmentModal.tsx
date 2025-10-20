@@ -74,7 +74,20 @@ const GradeStudentAssignmentModal = ({ assignmentProgressId, onClose, }: GradeSt
                     <div className="">
                         <span className="text-[#4C4C4C]">{data?.result?.user?.fullName ? data?.result?.user?.fullName : 'N/A'}</span><br />
                         {data?.result?.assignmentGrade ? (
-                            <><span className="text-[#4C4C4C]">{data?.result?.assignmentGrade}</span><br /></>
+                            <><span className="text-[#4C4C4C]">
+                                {
+                                    data?.result?.assignmentGrade === "A_plus" ? 'A+' :
+                                        data?.result?.assignmentGrade === "A" ? 'A' :
+                                            data?.result?.assignmentGrade === "A_minus" ? 'A-' :
+                                                data?.result?.assignmentGrade === "B_plus" ? 'B+' :
+                                                    data?.result?.assignmentGrade === "B" ? 'B' :
+                                                        data?.result?.assignmentGrade === "B_minus" ? 'B-' :
+                                                            data?.result?.assignmentGrade === "C_plus" ? 'C+' :
+                                                                data?.result?.assignmentGrade === "C" ? 'C' :
+                                                                    data?.result?.assignmentGrade === "C_minus" ? 'C-' :
+                                                                        data?.result?.assignmentGrade === "D" ? 'D' : 'F'
+                                }
+                            </span><br /></>
                         ) : (
                             <><span className="text-[#4C4C4C]">Not Graded</span><br /></>
                         )}

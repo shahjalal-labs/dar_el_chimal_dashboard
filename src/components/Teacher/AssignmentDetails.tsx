@@ -113,7 +113,20 @@ const AssignmentDetails = () => {
                                     {/* Grade */}
                                     <td className="py-3 px-5">
                                         {student?.grade ? (
-                                            <span className="font-semibold text-gray-900">{student?.grade}</span>
+                                            <span className="font-semibold text-gray-900">
+                                                {
+                                                    student?.grade === "A_plus" ? 'A+' :
+                                                        student?.grade === "A" ? 'A' :
+                                                            student?.grade === "A_minus" ? 'A-' :
+                                                                student?.grade === "B_plus" ? 'B+' :
+                                                                    student?.grade === "B" ? 'B' :
+                                                                        student?.grade === "B_minus" ? 'B-' :
+                                                                            student?.grade === "C_plus" ? 'C+' :
+                                                                                student?.grade === "C" ? 'C' :
+                                                                                    student?.grade === "C_minus" ? 'C-' :
+                                                                                        student?.grade === "D" ? 'D' : 'F'
+                                                }
+                                            </span>
                                         ) : (
                                             <span className="text-gray-500">---</span>
                                         )}

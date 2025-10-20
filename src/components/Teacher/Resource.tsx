@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 import { PiSpinner } from 'react-icons/pi';
 import { useCreateResourceMutation } from '@/redux/api/resource';
 
-const Resource = ({ bookId }: { bookId: any }) => {
+const Resource = ({ bookId, setIsAddResource }: { bookId: any, setIsAddResource: (value: boolean) => void }) => {
     const dispatch = useDispatch();
     const {
         resourceType,
@@ -62,7 +62,14 @@ const Resource = ({ bookId }: { bookId: any }) => {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-5">
-            <h2 className="text-2xl font-bold">Upload New Resource</h2>
+            <div className='md:flex justify-between items-center mb-6'>
+                <h2 className="text-2xl font-bold">Upload New Resource</h2>
+                <Button
+                    onClick={() => setIsAddResource(false)}
+                    className="bg-red-500 hover:bg-red-400/80 text-white font-medium px-6 mt-6 md:mt-0">
+                    Cancel
+                </Button>
+            </div>
 
             {/* Resource Type */}
             <div>
@@ -177,7 +184,7 @@ const Resource = ({ bookId }: { bookId: any }) => {
                         dispatch(setResourceLink(''))
                     }}
                 >
-                    Cancel
+                    Clear
                 </Button>
 
                 <Button

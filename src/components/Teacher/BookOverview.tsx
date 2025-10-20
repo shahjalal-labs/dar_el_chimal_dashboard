@@ -160,7 +160,7 @@ const BookOverview = () => {
                     <TabsContent value="resources">
                         {
                             isAddResource ?
-                                <><Resource bookId={bookId} /></> :
+                                <><Resource bookId={bookId} setIsAddResource={setIsAddResource} /></> :
                                 <>
                                     <div className='md:flex justify-between items-center mb-6'>
                                         <h1 className='font-medium text-xl md:text-2xl'>Total Attachment: {book?.Resources?.length}</h1>
