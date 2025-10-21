@@ -15,34 +15,47 @@ const SchoolList = () => {
     const { data } = useGetAllSchoolsByAdminQuery({ currentPage, limit: 10 });
 
     const formattedData = data?.result?.schools?.map(
-        (entry: { id: string, schoolLogo: string, name: string, location: string, teacherCount: number, studentsCount: number, createdAt: string, updatedAt: string }) => ({
-            "Id": entry.id,
+        (entry: {
+            id: string,
+            schoolLogo: string,
+            name: string,
+            location: string,
+            teacherCount: number,
+            studentsCount: number,
+            createdAt: string,
+            updatedAt: string
+        }) => ({
+            "Id": entry?.id,
             "School": (
                 <Image
-                    src={entry.schoolLogo || defaultImg}
+                    src={entry?.schoolLogo || defaultImg}
                     height={50}
                     width={50}
-                    alt={entry.name}
+                    alt={entry?.name || "School Logo"}
                     className="w-8 h-8 rounded-full object-cover"
                     priority
                 />
             ),
-            "School Name": entry.name,
-            "Location": (
-                entry.location.length > 30 ?
-                    entry.location.slice(0, 30) + "..." :
-                    entry.location
+            "School Name": (
+                entry?.name?.length > 30 ?
+                    entry?.name?.slice(0, 30) + "..." :
+                    entry?.name
             ),
-            "Total Teachers": entry.teacherCount,
-            "Total Students": entry.studentsCount,
-            "Created At": new Date(entry.createdAt).toLocaleString('en-US', {
+            "Location": (
+                entry?.location.length > 30 ?
+                    entry?.location.slice(0, 30) + "..." :
+                    entry?.location
+            ),
+            "Total Teachers": entry?.teacherCount,
+            "Total Students": entry?.studentsCount,
+            "Created At": new Date(entry?.createdAt).toLocaleString('en-US', {
                 year: 'numeric',
                 month: 'short',
                 day: 'numeric',
                 hour: '2-digit',
                 minute: '2-digit',
             }),
-            "Updated At": new Date(entry.updatedAt).toLocaleString('en-US', {
+            "Updated At": new Date(entry?.updatedAt).toLocaleString('en-US', {
                 year: 'numeric',
                 month: 'short',
                 day: 'numeric',
@@ -66,7 +79,7 @@ const SchoolList = () => {
                 </Link>
             </div>
 
-            <DataTable title="School List" data={formattedData} currentPage={currentPage} willSearch={true} />
+            <DataTable title="School List" data={formattedData} currentPage={currentPage} willSearch={true} deleteItem="School"/>
 
             <div className='flex flex-col md:flex-row justify-between items-center gap-6 mt-8'>
                 <div className='text-base text-[#4A4A4A] flex items-center justify-start gap-2'>

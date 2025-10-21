@@ -20,9 +20,9 @@ import { useGetTeacherDetailsQuery, useUpdateTeacherMutation } from '@/redux/api
 import { PiSpinner } from 'react-icons/pi';
 
 const General = ({ id }: { id: string }) => {
-    const [showPassword, setShowPassword] = useState(false);
     const pathname = usePathname();
     const dispatch = useDispatch();
+    const [showPassword, setShowPassword] = useState(false);
     const {
         teacherName,
         userName,
@@ -94,8 +94,8 @@ const General = ({ id }: { id: string }) => {
         }
     };
 
-    // const isButtonDisabled =
-    //     !teacherName || !userName || !email || !previewTeacherPhoto;
+    const isButtonDisabled =
+        !teacherName || !userName || !email || !password || !previewTeacherPhoto;
 
     return (
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -107,13 +107,12 @@ const General = ({ id }: { id: string }) => {
                     placeholder="Enter teacher name"
                     value={teacherName}
                     onChange={(e) => dispatch(setTeacherName(e.target.value))}
-                    className=""
                     required
                 />
             </div>
 
             {/* User Name & Password */}
-            <div className="flex gap-6">
+            <div className="md:flex gap-6">
                 <div className="flex-1">
                     <Label>User Name</Label>
                     <Input
@@ -121,20 +120,19 @@ const General = ({ id }: { id: string }) => {
                         placeholder="Enter user name"
                         value={userName}
                         onChange={(e) => dispatch(setUserName(e.target.value))}
-                        className=""
                         required
                     />
                 </div>
                 {
                     pathname === '/admin/teachers/add-new-teacher' &&
-                    <div className="flex-1 relative">
+                    <div className="flex-1 relative mt-5 md:mt-0">
                         <Label>Password</Label>
                         <Input
                             type={showPassword ? "text" : "password"}
                             placeholder="Enter password"
                             value={password}
                             onChange={(e) => dispatch(setPassword(e.target.value))}
-                            className="pr-10" // gives space for the icon
+                            className="pr-10"
                             required
                         />
                         <button
@@ -157,7 +155,6 @@ const General = ({ id }: { id: string }) => {
                     placeholder="Enter email"
                     value={email}
                     onChange={(e) => dispatch(setEmail(e.target.value))}
-                    className=""
                     required
                 />
             </div>
@@ -208,7 +205,7 @@ const General = ({ id }: { id: string }) => {
 
             {/* Buttons */}
             <div className="flex justify-center gap-3 pt-3">
-                <Link href="/admin/teachers">
+                <Link href="/admin/teachers" className={`${pathname === '/admin/teachers' ? 'hidden' : ''}`}>
                     <Button
                         variant="outline"
                         className="px-6 border-[#636F85] text-[#636F85]"
@@ -219,19 +216,19 @@ const General = ({ id }: { id: string }) => {
 
                 <Button
                     type="submit"
-                    // disabled={isButtonDisabled}
-                    className={`px-6 text-white font-medium border border-[#1E3A8A] transition-all duration-300 bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 `}
-                    // ${isButtonDisabled ? "bg-gray-400 cursor-not-allowed" : "bg-[#1E3A8A] hover:bg-[#1E3A8A]/80"}
+                    disabled={isButtonDisabled}
+                    className={`px-6 text-white font-medium transition-all ease-in-out duration-500 cursor-pointer ${isButtonDisabled ? "bg-gray-400 cursor-not-allowed" : "bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A]"}`}
                 >
                     {
                         isUpdating ?
                             <div className="flex justify-center items-center gap-2">
-                                Saving...
+                                Updating...
                                 <div className="animate-spin">
                                     <PiSpinner className="h-4 w-4" />
                                 </div>
                             </div> :
-                            "Save & Continue"
+                            pathname === '/admin/teachers' ? "Update & Continue" :
+                                "Save & Continue"
                     }
                 </Button>
             </div>

@@ -9,8 +9,14 @@ import { FaPlus } from 'react-icons/fa';
 import Image from 'next/image';
 import defaultImg from '@/assets/no-img.jpg';
 import { useGetAllStudentsByAdminQuery } from '@/redux/api/admin';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog } from '@/components/ui/dialog';
+import { useRouter } from 'next/navigation';
+import CreateStudentModal from './AddNewStudent/CreateStudentModal';
 
 const StudentList = () => {
+    const route = useRouter();
+    const [open, setOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const { data } = useGetAllStudentsByAdminQuery({ currentPage, limit: 10 });
 
@@ -28,32 +34,32 @@ const StudentList = () => {
             joinedAt: string,
             updatedAt: string,
         }) => ({
-            "Id": entry.id,
+            "Id": entry?.id,
             "Picture": (
                 <Image
-                    src={entry.profileImage || defaultImg}
+                    src={entry?.profileImage || defaultImg}
                     height={50}
                     width={50}
-                    alt={entry.fullName || "Full Name"}
+                    alt={entry?.fullName || "Full Name"}
                     className="w-8 h-8 rounded-full object-cover"
                     priority
                 />
             ),
-            "Full Name": entry.fullName,
-            "User Name": entry.loginUserName,
-            "Email": entry.email,
-            "Phone": entry.phone,
-            "Gender": entry.gender,
-            "Date of Birth": entry.DOB,
-            "Status": entry.status,
-            "Joined At": new Date(entry.joinedAt).toLocaleString('en-US', {
+            "Full Name": entry?.fullName,
+            "User Name": entry?.loginUserName,
+            "Email": entry?.email,
+            "Phone": entry?.phone,
+            "Gender": entry?.gender,
+            "Date of Birth": entry?.DOB,
+            "Status": entry?.status,
+            "Joined At": new Date(entry?.joinedAt).toLocaleString('en-US', {
                 year: 'numeric',
                 month: 'short',
                 day: 'numeric',
                 hour: '2-digit',
                 minute: '2-digit',
             }),
-            "Updated At": new Date(entry.joinedAt).toLocaleString('en-US', {
+            "Updated At": new Date(entry?.joinedAt).toLocaleString('en-US', {
                 year: 'numeric',
                 month: 'short',
                 day: 'numeric',
@@ -62,6 +68,15 @@ const StudentList = () => {
             }),
         }));
 
+    const handleRoute = (value: string) => {
+        if (value === 'manual') {
+            route.push('/admin/students/add-new-student')
+        }
+        else {
+            setOpen(true);
+        }
+    }
+
     return (
         <div>
             <div className='md:flex justify-between items-center mb-10'>
@@ -69,12 +84,23 @@ const StudentList = () => {
                     <h1 className='text-2xl font-bold mb-3'>Student</h1>
                     <p className='font-medium'><span className='text-[#72727299]'>Library</span><span className='text-[#72727299] px-2'>/</span>Student List</p>
                 </div>
-                <Link href="/admin/students/add-new-student">
-                    <Button className='bg-transparent text-[#1E3A8A] border border-[#1E3A8A] hover:bg-transparent cursor-pointer'>
-                        <FaPlus />
-                        Create New Student
-                    </Button>
-                </Link>
+                <Select onValueChange={(value) => handleRoute(value)}>
+                    <SelectTrigger className="w-fit border border-[#1E3A8A] text-[#1E3A8A] bg-transparent hover:bg-transparent cursor-pointer flex items-center gap-2 px-3 py-2 rounded-md data-[placeholder]:text-[#1E3A8A]">
+                        <FaPlus className="text-[#1E3A8A]" />
+                        <SelectValue placeholder="Create New Student" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="manual">
+                            <Link href="/admin/students/add-new-student">
+                                Manually Create
+                            </Link>
+                        </SelectItem>
+                        <SelectItem value="automatic">Automatically Create</SelectItem>
+                    </SelectContent>
+                </Select>
+                <Dialog open={open} onOpenChange={setOpen}>
+                    <CreateStudentModal />
+                </Dialog>
             </div>
 
             <DataTable title="Student List" data={formattedData} currentPage={currentPage} willSearch={true} />

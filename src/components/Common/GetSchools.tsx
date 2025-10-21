@@ -47,7 +47,7 @@ export const GetSchools: React.FC<GetSchoolProps> = ({ onChange, excludeIds = []
                         style={{ width: 24, height: 24, borderRadius: '50%' }}
                         priority
                     />
-                    <span>{option.schoolName}</span>
+                    <span className='font-light'>{option.schoolName}</span>
                 </div>
             )}
             styles={{

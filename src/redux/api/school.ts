@@ -25,7 +25,14 @@ export const schoolApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: ["school"]
         }),
+        deleteSchool: builder.mutation({
+            query: (id) => ({
+                url: `/school/${id}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: ["school"]
+        }),
     }),
 });
 
-export const { useCreateSchoolMutation, useGetSingleSchoolQuery, useUpdateSchoolMutation } = schoolApi;
+export const { useCreateSchoolMutation, useGetSingleSchoolQuery, useUpdateSchoolMutation, useDeleteSchoolMutation } = schoolApi;
