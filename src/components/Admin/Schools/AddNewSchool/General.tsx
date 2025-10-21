@@ -32,7 +32,7 @@ const General = ({ id }: { id: string }) => {
         schoolPhoto
     } = useSelector((state: RootState) => state.school);
 
-    const { data, isLoading } = useGetSingleSchoolQuery({ id });
+    const { data } = useGetSingleSchoolQuery({ id });
     const [UpdateSchool, { isLoading: isUpdating }] = useUpdateSchoolMutation();
 
     useEffect(() => {
@@ -117,7 +117,6 @@ const General = ({ id }: { id: string }) => {
                     placeholder="Enter school name"
                     value={schoolName}
                     onChange={(e) => dispatch(setSchoolName(e.target.value))}
-                    className=""
                     required
                 />
             </div>
@@ -130,7 +129,6 @@ const General = ({ id }: { id: string }) => {
                     placeholder="Enter school address"
                     value={address}
                     onChange={(e) => dispatch(setAddress(e.target.value))}
-                    className=""
                     required
                 />
             </div>
@@ -145,7 +143,6 @@ const General = ({ id }: { id: string }) => {
                         placeholder="00"
                         value={teacherCount}
                         onChange={(e) => dispatch(setTeacherCount(Number(e.target.value)))}
-                        className=""
                         required
                     />
                 </div>
@@ -157,7 +154,6 @@ const General = ({ id }: { id: string }) => {
                         placeholder="00"
                         value={activeTeachers}
                         onChange={(e) => dispatch(setActiveTeachers(Number(e.target.value)))}
-                        className=""
                         required
                     />
                 </div>
@@ -173,7 +169,6 @@ const General = ({ id }: { id: string }) => {
                         placeholder="00"
                         value={studentCount}
                         onChange={(e) => dispatch(setStudentCount(Number(e.target.value)))}
-                        className=""
                         required
                     />
                 </div>
@@ -185,7 +180,6 @@ const General = ({ id }: { id: string }) => {
                         placeholder="00"
                         value={activeStudents}
                         onChange={(e) => dispatch(setActiveStudents(Number(e.target.value)))}
-                        className=""
                         required
                     />
                 </div>
@@ -237,10 +231,10 @@ const General = ({ id }: { id: string }) => {
 
             {/* Buttons */}
             <div className="flex justify-center gap-3 pt-3">
-                <Link href="/admin/schools">
+                <Link href="/admin/schools" className={`${pathname === '/admin/schools' ? 'hidden' : ''}`}>
                     <Button
                         variant="outline"
-                        className="px-6 border-[#636F85] text-[#636F85]"
+                        className="border-[#636F85] text-[#636F85] transition-all ease-in-out duration-500 cursor-pointer px-6"
                     >
                         Cancel
                     </Button>
@@ -249,20 +243,21 @@ const General = ({ id }: { id: string }) => {
                 <Button
                     type="submit"
                     disabled={isButtonDisabled}
-                    className={`px-6 text-white font-medium border border-[#1E3A8A] transition-all duration-300 ${isButtonDisabled
+                    className={`px-6 text-white font-medium transition-all ease-in-out duration-500 cursor-pointer ${isButtonDisabled
                         ? "bg-gray-400 cursor-not-allowed"
-                        : "bg-[#1E3A8A] hover:bg-[#1E3A8A]/80"
+                        : "bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A]"
                         }`}
                 >
                     {
-                        (isLoading && pathname === '/admin/schools') || isUpdating ?
+                        isUpdating ?
                             <div className="flex justify-center items-center gap-2">
-                                Saving...
+                                Updating...
                                 <div className="animate-spin">
                                     <PiSpinner className="h-4 w-4" />
                                 </div>
                             </div> :
-                            "Save & Continue"
+                            pathname === '/admin/schools' ? "Update and Continue" :
+                                "Save and Continue"
                     }
                 </Button>
             </div>

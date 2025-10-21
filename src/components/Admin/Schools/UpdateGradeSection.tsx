@@ -7,11 +7,10 @@ import { Label } from '@/components/ui/label';
 import CreatableSelect from 'react-select/creatable';
 import { Button } from '@/components/ui/button';
 import { RootState } from '@/redux/store/store';
-import { clearGradeOptions, setActiveStudents, setActiveTeachers, setAddress, setGradeOptions, setPreviewSchoolPhoto, setSchoolName, setStudentCount, setTeacherCount } from '@/redux/features/schoolSlice';
+import { setActiveStudents, setActiveTeachers, setAddress, setGradeOptions, setPreviewSchoolPhoto, setSchoolName, setStudentCount, setTeacherCount } from '@/redux/features/schoolSlice';
 import { toast } from 'sonner';
-import { useCreateSchoolMutation, useGetSingleSchoolQuery, useUpdateSchoolMutation } from '@/redux/api/school';
+import { useGetSingleSchoolQuery, useUpdateSchoolMutation } from '@/redux/api/school';
 import { PiSpinner } from 'react-icons/pi';
-import { usePathname, useRouter } from 'next/navigation';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface Option {
@@ -20,19 +19,8 @@ interface Option {
     __isNew__?: boolean;
 }
 
-const Grade = ({ id }: { id: string }) => {
+const UpdateGradeSection = ({ id }: { id: string }) => {
     const dispatch = useDispatch();
-    const pathname = usePathname();
-    const route = useRouter();
-    const {
-        schoolName,
-        address,
-        teacherCount,
-        activeTeachers,
-        studentCount,
-        activeStudents,
-        schoolPhoto
-    } = useSelector((state: RootState) => state.school);
     const selectedFromRedux = useSelector((state: RootState) => state.school.options);
     const [selectedOptions, setSelectedOptions] = useState(selectedFromRedux);
 
@@ -40,7 +28,6 @@ const Grade = ({ id }: { id: string }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const { data } = useGetSingleSchoolQuery({ id });
-    const [CreateSchool, { isLoading: isCreating }] = useCreateSchoolMutation();
     const [UpdateSchool, { isLoading: isUpdating }] = useUpdateSchoolMutation();
 
     useEffect(() => {
@@ -70,98 +57,59 @@ const Grade = ({ id }: { id: string }) => {
     };
 
     const confirmRemove = async () => {
-        if (pathname === '/admin/schools') {
-            const deletedGrade = data?.result?.grades?.find((g: any) => g?.grade === optionToRemove?.value);
-            const body = {
-                schoolData: {},
-                DeleteGrades: [
-                    deletedGrade?.id
-                ],
-            }
-
-            const formData = new FormData();
-            formData.append('bodyData', JSON.stringify(body))
-
-            try {
-                const response = await UpdateSchool({ id, formData }).unwrap();
-                if (response.success) {
-                    toast.success(response.message);
-                    setSelectedOptions((prev) =>
-                        prev.filter((opt) => opt.value !== optionToRemove?.value)
-                    );
-                    setIsModalOpen(false);
-                    setOptionToRemove(null);
-                }
-            } catch (error) {
-                toast.warning((error as any)?.data?.message || "Something went wrong");
-            }
+        const deletedGrade = data?.result?.grades?.find((g: any) => g?.grade === optionToRemove?.value);
+        const body = {
+            schoolData: {},
+            DeleteGrades: [
+                deletedGrade?.id
+            ],
         }
-        else {
-            setSelectedOptions((prev) =>
-                prev.filter((opt) => opt.value !== optionToRemove?.value)
-            );
-            setIsModalOpen(false);
-            setOptionToRemove(null);
+
+        const formData = new FormData();
+        formData.append('bodyData', JSON.stringify(body))
+
+        try {
+            const response = await UpdateSchool({ id, formData }).unwrap();
+            if (response.success) {
+                toast.success(response.message);
+                setSelectedOptions((prev) =>
+                    prev.filter((opt) => opt.value !== optionToRemove?.value)
+                );
+                setIsModalOpen(false);
+                setOptionToRemove(null);
+            }
+        } catch (error) {
+            toast.warning((error as any)?.data?.message || "Something went wrong");
         }
     };
 
     const handleSave = async () => {
-        if (pathname === '/admin/schools') {
-            const body = {
-                schoolData: {},
-                grades: selectedFromRedux?.map((grade) => ({
-                    gradeLevel: grade?.value
-                }))
-            }
-
-            const formData = new FormData();
-            formData.append('bodyData', JSON.stringify(body))
-
-            try {
-                const response = await UpdateSchool({ id, formData }).unwrap();
-                if (response.success) {
-                    toast.success(response.message);
-                }
-            } catch (error) {
-                toast.warning((error as any)?.data?.message || "Something went wrong");
-            }
+        const body = {
+            schoolData: {},
+            grades: selectedFromRedux?.map((grade) => ({
+                gradeLevel: grade?.value
+            }))
         }
-        else {
-            const body = {
-                name: schoolName,
-                location: address,
-                teacherCount: Number(teacherCount),
-                studentsCount: Number(studentCount),
-                activeStudents: Number(activeStudents),
-                activeTeachers: Number(activeTeachers),
-                grades: selectedFromRedux?.map((grade) => ({
-                    gradeLevel: grade?.value
-                }))
-            }
 
-            const formData = new FormData();
-            formData.append('bodyData', JSON.stringify(body))
+        const formData = new FormData();
+        formData.append('bodyData', JSON.stringify(body))
 
-            if (schoolPhoto) {
-                formData.append('schoolLogo', schoolPhoto)
+        try {
+            const response = await UpdateSchool({ id, formData }).unwrap();
+            if (response.success) {
+                toast.success(response.message);
+                dispatch(setSchoolName(''))
+                dispatch(setAddress(''))
+                dispatch(setTeacherCount(0))
+                dispatch(setActiveTeachers(0))
+                dispatch(setStudentCount(0))
+                dispatch(setActiveStudents(0))
+                dispatch(setPreviewSchoolPhoto(''))
+                dispatch(setGradeOptions([]));
+                window.location.reload();
             }
-
-            try {
-                const response = await CreateSchool(formData).unwrap();
-                if (response.success) {
-                    toast.success(response.message);
-                    dispatch(setSchoolName(''))
-                    dispatch(setAddress(''))
-                    dispatch(setTeacherCount(0))
-                    dispatch(setActiveTeachers(0))
-                    dispatch(setStudentCount(0))
-                    dispatch(setActiveStudents(0))
-                    dispatch(setPreviewSchoolPhoto(''))
-                    route.push('/admin/schools')
-                }
-            } catch (error) {
-                toast.warning((error as any)?.data?.message || "Something went wrong");
-            }
+        } catch (error) {
+            toast.warning((error as any)?.data?.message || "Something went wrong");
         }
     };
 
@@ -227,42 +175,43 @@ const Grade = ({ id }: { id: string }) => {
                         </button>
                         <button
                             onClick={confirmRemove}
-                            className="px-3 py-1 bg-red-600 text-white rounded-md"
+                            className="px-3 py-1 bg-red-600 text-white rounded-md transition-all ease-in-out duration-500 cursor-pointer"
                         >
-                            Remove
+                            {
+                                (isUpdating) ?
+                                    <div className="flex justify-center items-center gap-2">
+                                        Removing...
+                                        <div className="animate-spin">
+                                            <PiSpinner className="h-4 w-4" />
+                                        </div>
+                                    </div> :
+                                    "Remove"
+                            }
                         </button>
                     </div>
                 </DialogContent>
             </Dialog>
 
             {/* Buttons */}
-            <div className="flex justify-center gap-3 pt-3 mt-6">
-                <Button
-                    variant="outline"
-                    className="px-6 border-[#636F85] text-[#636F85]"
-                    onClick={() => dispatch(clearGradeOptions())}
-                >
-                    Cancel
-                </Button>
-
+            <div className="flex justify-center pt-3 mt-6">
                 <Button
                     type="submit"
                     onClick={handleSave}
                     disabled={isButtonDisabled}
-                    className={`px-6 text-white font-medium border border-[#1E3A8A] transition-all duration-300 ${isButtonDisabled
+                    className={`px-6 text-white font-medium border border-[#1E3A8A] transition-all ease-in-out duration-500 cursor-pointer ${isButtonDisabled
                         ? "bg-gray-400 cursor-not-allowed"
                         : "bg-[#1E3A8A] hover:bg-[#1E3A8A]/80"
                         }`}
                 >
                     {
-                        (isCreating || isUpdating) ?
+                        (isUpdating && !isModalOpen) ?
                             <div className="flex justify-center items-center gap-2">
-                                Saving...
+                                Updating...
                                 <div className="animate-spin">
                                     <PiSpinner className="h-4 w-4" />
                                 </div>
                             </div> :
-                            "Save & Continue"
+                            "Update & Continue"
                     }
                 </Button>
             </div>
@@ -270,4 +219,4 @@ const Grade = ({ id }: { id: string }) => {
     );
 };
 
-export default Grade;
+export default UpdateGradeSection;

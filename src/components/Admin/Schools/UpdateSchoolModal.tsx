@@ -11,11 +11,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { SyncLoader } from 'react-spinners';
 import { useGetSingleSchoolQuery } from '@/redux/api/school';
 import General from './AddNewSchool/General';
-import Grade from './AddNewSchool/Grade';
+import UpdateGradeSection from './UpdateGradeSection';
 
 const UpdateSchoolModal = ({ id }: { id: string }) => {
-    const closeRef = useRef<HTMLButtonElement>(null);
     const dispatch = useDispatch();
+    const closeRef = useRef<HTMLButtonElement>(null);
     const tab = useSelector((state: RootState) => state.ui.activeBookTab);
     const { data, isLoading } = useGetSingleSchoolQuery({ id });
 
@@ -42,9 +42,10 @@ const UpdateSchoolModal = ({ id }: { id: string }) => {
         );
     }
     return (
-        <DialogContent className='overflow-y-auto overflow-x-hidden max-h-[75%] max-w-[90%] p-6'>
+        <DialogContent className='overflow-y-auto overflow-x-hidden max-h-[75%] max-w-[90%] p-6' showCloseButton>
             <DialogClose ref={closeRef} className="hidden" />
-            <h1 className='font-bold text-2xl'>Edit Book - {data?.result?.name}</h1>
+            <h1 className='font-bold text-2xl mt-4'>Edit School - {data?.result?.name}</h1>
+
             <div className="bg-white rounded-xl">
                 <Tabs value={tab} onValueChange={handleTabChange} className="w-full">
                     <TabsList className="flex gap-2 border-b border-gray-200 pb-2 mb-4">
@@ -69,12 +70,11 @@ const UpdateSchoolModal = ({ id }: { id: string }) => {
                         </TabsTrigger>
                     </TabsList>
 
-                    {/* ---------- TAB CONTENTS ---------- */}
                     <TabsContent value="general">
                         <General id={id} />
                     </TabsContent>
                     <TabsContent value="grade">
-                        <Grade id={id} />
+                        <UpdateGradeSection id={id} />
                     </TabsContent>
                 </Tabs>
             </div>

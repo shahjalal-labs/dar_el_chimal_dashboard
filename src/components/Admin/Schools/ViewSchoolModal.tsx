@@ -36,7 +36,7 @@ const ViewSchoolModal = ({ id }: { id: string }) => {
     return (
         <DialogContent className="p-6 max-h-[80vh] overflow-y-auto" showCloseButton>
             {/* School Info */}
-            <div className="flex items-start gap-4">
+            <div className="flex items-start gap-4 mt-4">
                 <Image
                     src={schoolLogo}
                     alt={name}

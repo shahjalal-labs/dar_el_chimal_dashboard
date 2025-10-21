@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setActiveBookTab } from '@/redux/features/uiSlice';
 import { RootState } from '@/redux/store/store';
 import General from './General';
-import Grade from './Grade';
+import AddGradeSection from './AddGradeSection';
 
 const AddNewSchool = () => {
     const dispatch = useDispatch();
@@ -55,12 +55,11 @@ const AddNewSchool = () => {
                         </TabsTrigger>
                     </TabsList>
 
-                    {/* ---------- TAB CONTENTS ---------- */}
                     <TabsContent value="general">
                         <General id='' />
                     </TabsContent>
                     <TabsContent value="grade">
-                        <Grade id='' />
+                        <AddGradeSection />
                     </TabsContent>
                 </Tabs>
             </div>

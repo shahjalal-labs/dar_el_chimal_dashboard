@@ -41,6 +41,7 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+import { useDeleteSchoolMutation } from "@/redux/api/school";
 
 const DataTable = ({
   title,
@@ -54,6 +55,7 @@ const DataTable = ({
   icon,
   iconTwo,
   willSearch,
+  deleteItem
 }: {
   title: string;
   data: any;
@@ -66,19 +68,19 @@ const DataTable = ({
   icon?: React.ReactNode;
   iconTwo?: React.ReactNode;
   willSearch?: boolean;
+  deleteItem?: string;
 }) => {
   const { id } = useParams();
   const pathname = usePathname();
   const [selectedId, setSelectedId] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const [DeleteBookCategory, { isLoading: isBookCategoryDeleting }] =
-    useDeleteBookCategroyMutation();
+  const [DeleteSchool, { isLoading: isSchoolDeleting }] = useDeleteSchoolMutation();
 
   const handleDelete = async (id: string) => {
     try {
-      if (pathname === "/admin/book-categories") {
-        const response = await DeleteBookCategory(id).unwrap();
+      if (pathname === "/admin/schools") {
+        const response = await DeleteSchool(id).unwrap();
         if (response.success) {
           toast.success(response.message);
         }
@@ -284,12 +286,12 @@ const DataTable = ({
                               ))}
                           </Dialog>
                           {
-                            // pathname !== '' &&
+                            pathname !== '/admin/book-categories' &&
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
                                 <Button className="bg-[#FE4D4F33] hover:bg-[#FE4D4F26] text-[#FE4D4F] transition-colors ease-in-out duration-200 cursor-pointer">
                                   <span className="sr-only">Delete</span>
-                                  {isBookCategoryDeleting &&
+                                  {isSchoolDeleting &&
                                     selectedId === singleData?.Id ? (
                                     <div className="animate-spin">
                                       <PiSpinner className="h-4 w-4" />
@@ -302,12 +304,11 @@ const DataTable = ({
                               <AlertDialogContent>
                                 <AlertDialogHeader>
                                   <AlertDialogTitle className="text-[#30373D] text-3xl font-bold text-center">
-                                    Are you sure?
+                                    Delete {deleteItem}?
                                   </AlertDialogTitle>
                                   <AlertDialogDescription className="text-[#636F85] text-center text-base mt-4">
-                                    This action cannot be undone. This will
-                                    permanently delete the{" "}
-                                    {singleData?.name ?? "item"}.
+                                    Are you sure you want to permanently delete this{" "}
+                                    {deleteItem}?
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter className="flex justify-center items-center gap-4">
