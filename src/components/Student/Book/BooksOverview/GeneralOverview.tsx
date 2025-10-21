@@ -54,7 +54,7 @@ function GeneralOverview({ bookId }: GeneralOverviewProps) {
 
   const handleOpenBook = () => {
     // Navigate to the PDF reader route
-    router.push(`/student/books/read/${bookId}`);
+    router.push(`/student/books/read?pdfurl=${bookOverviewData?.file}`);
   };
 
   const handleBack = () => {

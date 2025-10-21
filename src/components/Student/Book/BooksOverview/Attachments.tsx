@@ -111,7 +111,7 @@ export default function Attachments({
     if (resource.Type === "Pdf") {
       // Open PDF in new tab
       // window.open(resource.file, "_blank");
-      router.push(`/student/books/read/${bookId}`);
+      router.push(`/student/books/read?pdfurl=${resource.file}`);
     } else {
       // Open Audio/Video in modal
       setSelectedResource(resource);

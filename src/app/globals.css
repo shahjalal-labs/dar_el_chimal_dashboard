@@ -35,6 +35,26 @@
   height: auto !important;
 }
 
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.rotate-y-10 {
+  transform: rotateY(10deg);
+}
+
+.-rotate-y-10 {
+  transform: rotateY(-10deg);
+}
+
+.rotate-y-0 {
+  transform: rotateY(0deg);
+}
+
+.transform-gpu {
+  transform-style: preserve-3d;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
