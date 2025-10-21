@@ -27,6 +27,7 @@ import { PiEraser } from "react-icons/pi";
 interface PDFPageProxy {
   getViewport: (options: { scale: number }) => PDFPageViewport;
   render: (renderContext: any) => { promise: Promise<void> };
+  getTextContent: () => Promise<PDFTextContent>;
 }
 
 interface PDFPageViewport {
@@ -37,6 +38,21 @@ interface PDFPageViewport {
 interface PDFDocumentProxy {
   numPages: number;
   getPage: (pageNumber: number) => Promise<PDFPageProxy>;
+}
+
+interface PDFTextItem {
+  str: string;
+  transform: number[];
+  width: number;
+  height: number;
+  dir: string;
+  fontName: string;
+  hasEOL: boolean;
+}
+
+interface PDFTextContent {
+  items: PDFTextItem[];
+  styles: { [key: string]: any };
 }
 
 // Component props interface
@@ -182,6 +198,72 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
     },
     [history, historyIndex]
   );
+
+  // Extract text from PDF selection
+  const extractTextFromSelection = async (
+    pageNum: number,
+    x: number,
+    y: number,
+    width: number,
+    height: number
+  ): Promise<string> => {
+    if (!pdfDocRef.current) return "";
+
+    try {
+      const page = await pdfDocRef.current.getPage(pageNum);
+      const viewport = page.getViewport({ scale: 1 });
+      
+      // Get the current canvas dimensions
+      const currentCanvas = pageNum === currentPage ? canvasLeftRef.current : canvasRightRef.current;
+      if (!currentCanvas) return "";
+
+      // Convert canvas coordinates to PDF coordinates
+      const scale = (zoom / 100) * 1.5;
+      const pdfX = (x / currentCanvas.width) * viewport.width;
+      const pdfY = viewport.height - (y / currentCanvas.height) * viewport.height; // Invert Y axis
+      const pdfWidth = (width / currentCanvas.width) * viewport.width;
+      const pdfHeight = (height / currentCanvas.height) * viewport.height;
+
+      // Get text content from the page
+      const textContent = await page.getTextContent();
+      
+      // Extract text items within the selection area
+      const selectedTextItems = textContent.items.filter((item: PDFTextItem) => {
+        const itemX = item.transform[4];
+        const itemY = item.transform[5];
+        const itemWidth = item.width || 0;
+        const itemHeight = item.height || 10;
+
+        // Check if text item is within selection bounds
+        const isInX = itemX >= pdfX && itemX <= pdfX + pdfWidth;
+        const isInY = itemY <= pdfY && itemY >= pdfY - pdfHeight;
+        
+        return isInX && isInY;
+      });
+
+      // Sort text items by position (top to bottom, left to right)
+      selectedTextItems.sort((a: PDFTextItem, b: PDFTextItem) => {
+        const aY = a.transform[5];
+        const bY = b.transform[5];
+        const aX = a.transform[4];
+        const bX = b.transform[4];
+        
+        // First by Y coordinate (descending - higher Y is visually lower on page)
+        if (Math.abs(aY - bY) > 5) {
+          return bY - aY;
+        }
+        // Then by X coordinate
+        return aX - bX;
+      });
+
+      // Combine text items
+      const extractedText = selectedTextItems.map((item: PDFTextItem) => item.str).join(" ");
+      return extractedText || `Selected area from page ${pageNum}`;
+    } catch (error) {
+      console.error("Error extracting text:", error);
+      return `Selected area from page ${pageNum}`;
+    }
+  };
 
   // Load PDF.js library
   useEffect(() => {
@@ -546,7 +628,6 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
       width,
       height,
       page: pageNum,
-      text: `Selected text from page ${pageNum} at position (${startX}, ${startY})`, // Simulated text selection
     });
 
     // Update overlay
@@ -556,10 +637,10 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
     );
   };
 
-  const handleMouseUp = (
+  const handleMouseUp = async (
     e: React.MouseEvent<HTMLCanvasElement>,
     pageNum: number
-  ): void => {
+  ): Promise<void> => {
     if (selectedTool === "eraser") {
       setIsSelecting(false);
       setSelectionStart(null);
@@ -584,6 +665,18 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
       const startX = Math.min(x, selectionStart.x);
       const startY = Math.min(y, selectionStart.y);
 
+      // Extract actual text from PDF for copy and comment tools
+      let extractedText = "";
+      if (selectedTool === "copy" || selectedTool === "comment") {
+        extractedText = await extractTextFromSelection(
+          pageNum,
+          startX,
+          startY,
+          width,
+          height
+        );
+      }
+
       const newAnnotation: Highlight = {
         id: Date.now().toString(),
         x: startX,
@@ -599,7 +692,7 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
             : selectedTool === "bookmark"
             ? "bookmark"
             : "comment",
-        text: `Selected text from page ${pageNum}`, // In real implementation, extract text from PDF
+        text: extractedText || `Selected area from page ${pageNum}`,
       };
 
       if (selectedTool === "pen") {
@@ -617,12 +710,10 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
         setUnderlines(newUnderlines);
         addToHistory(highlights, newUnderlines, comments, bookmarks);
       } else if (selectedTool === "bookmark") {
-        // Show bookmark popup for the entire PDF
         setShowBookmarkPopup(true);
         setCurrentSelection(null);
       } else if (selectedTool === "comment") {
-        // Show comment popup
-        setSelectedText(`Selected text from page ${pageNum}`);
+        setSelectedText(extractedText || `Selected area from page ${pageNum}`);
         setShowCommentPopup(true);
         setCurrentSelection({
           x: startX,
@@ -630,10 +721,19 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
           width,
           height,
           page: pageNum,
-          text: `Selected text from page ${pageNum}`,
+          text: extractedText,
         });
       } else if (selectedTool === "copy") {
-        // Handle copy immediately
+        // Store the extracted text for copying
+        setCurrentSelection({
+          x: startX,
+          y: startY,
+          width,
+          height,
+          page: pageNum,
+          text: extractedText,
+        });
+        // Copy the actual extracted text
         handleCopyText();
       }
     }
@@ -680,7 +780,7 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
     if (typeof window !== "undefined") {
       try {
         // For modern browsers
-        const sidebar = (window as any).sidebar; // 👈 Type assertion fixes TS error
+        const sidebar = (window as any).sidebar;
 
         if (sidebar && sidebar.addPanel) {
           // Firefox
@@ -732,10 +832,24 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
   };
 
   const handleCopyText = () => {
-    if (currentSelection) {
-      const textToCopy = currentSelection.text || "Selected text from PDF";
+    if (currentSelection && currentSelection.text) {
+      const textToCopy = currentSelection.text;
       navigator.clipboard
         .writeText(textToCopy)
+        .then(() => {
+          setCopiedText("Text copied to clipboard!");
+          setTimeout(() => setCopiedText(""), 2000);
+        })
+        .catch((err) => {
+          console.error("Failed to copy text: ", err);
+          setCopiedText("Failed to copy text");
+          setTimeout(() => setCopiedText(""), 2000);
+        });
+      setCurrentSelection(null);
+    } else if (currentSelection) {
+      // Fallback if no text was extracted
+      navigator.clipboard
+        .writeText("Selected text from PDF")
         .then(() => {
           setCopiedText("Text copied to clipboard!");
           setTimeout(() => setCopiedText(""), 2000);
