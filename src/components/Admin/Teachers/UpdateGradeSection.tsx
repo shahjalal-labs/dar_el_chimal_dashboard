@@ -5,28 +5,22 @@ import React, { useEffect, useMemo, useState } from "react";
 import GetSchools, { SchoolOption } from "@/components/Common/GetSchools";
 import { Label } from "@/components/ui/label";
 import Image from "next/image";
-import { useGetAllGradesQuery } from "@/redux/api/grade";
 import {
     useGetTeacherDetailsQuery,
     useUpdateTeacherMutation,
 } from "@/redux/api/teacher";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import CreatableSelect from "react-select/creatable";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { PiSpinner } from "react-icons/pi";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/redux/store/store";
+import { useDispatch } from "react-redux";
 import {
     setSelectedGrades,
     setTeacherSchoolName,
 } from "@/redux/features/teacherSlice";
-import defaultImg from "@/assets/User.png";
+import defaultImg from "@/assets/school.png";
+import { useGetSingleSchoolQuery } from "@/redux/api/school";
 
 interface GradeOption {
     id: string;
@@ -35,79 +29,70 @@ interface GradeOption {
     __isNew__?: boolean;
 }
 
-interface Mapping {
-    id: string;
-    school: SchoolOption | null;
-    grades: GradeOption[];
-}
-
-const UpdateTeachersGrade = ({ id }: { id: string }) => {
+const UpdateGradeSection = ({ id }: { id: string }) => {
     const dispatch = useDispatch();
-    const { teacherSchoolName, selectedGrades } = useSelector(
-        (state: RootState) => state.teacher
-    );
-
+    const [selectedSchool, setSelectedSchool] = useState<SchoolOption | null>(null);
+    const [selectedGrades, setSelectedGradesState] = useState<GradeOption[]>([]);
     const [optionToRemove, setOptionToRemove] = useState<GradeOption | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [mappings, setMappings] = useState<Mapping[]>([
-        { id: Date.now().toString(), school: null, grades: [] },
-    ]);
 
-    const { data } = useGetTeacherDetailsQuery(id);
-    const { data: gradesData } = useGetAllGradesQuery({
-        currentPage: 1,
-        limit: 1000,
-    });
-    const [UpdateTeacher, { isLoading: isUpdating }] = useUpdateTeacherMutation();
+    const { data: teacherData } = useGetTeacherDetailsQuery(id);
+    const teacher = teacherData?.result;
+    const schoolId = teacher?.Teacher?.[0]?.grade?.school?.id;
+    const { data: schoolData } = useGetSingleSchoolQuery({ id: schoolId });
+    const [updateTeacher, { isLoading: isUpdating }] = useUpdateTeacherMutation();
 
     useEffect(() => {
-        if (data?.result?.Teacher?.length) {
-            const schoolData = data.result.Teacher[0].grade.school;
-            const school: SchoolOption = {
-                schoolId: schoolData.id,
-                schoolName: schoolData.name,
-                image: schoolData.schoolLogo,
-            };
+        if (teacher?.Teacher?.length) {
+            const school = teacher.Teacher[0].grade.school;
+            setSelectedSchool({
+                schoolId: school.id,
+                schoolName: school.name,
+                image: school.schoolLogo,
+            });
 
-            dispatch(setTeacherSchoolName(schoolData.name));
+            dispatch(setTeacherSchoolName(school.name));
 
-            const selectedGrades: GradeOption[] = data.result.Teacher.map(
-                (teacherEntry: any) => ({
-                    id: teacherEntry.grade.id,
-                    label: teacherEntry.grade.grade,
-                    schoolId: teacherEntry.grade.school.id,
-                })
-            );
+            const mappedGrades: GradeOption[] = teacher.Teacher.map((t: any) => ({
+                id: t.grade.id,
+                label: t.grade.grade,
+                schoolId: school.id,
+            }));
 
-            dispatch(setSelectedGrades(selectedGrades));
-
-            setMappings([
-                {
-                    id: Date.now().toString(),
-                    school,
-                    grades: selectedGrades,
-                },
-            ]);
+            setSelectedGradesState(mappedGrades);
+            dispatch(setSelectedGrades(mappedGrades));
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [data]);
+    }, [teacher, dispatch]);
 
-    const allGrades: GradeOption[] =
-        gradesData?.result?.map((singleGrade: any) => ({
-            id: singleGrade?.id,
-            label: singleGrade?.grade,
-            schoolId: singleGrade?.schoolId,
-        })) ?? [];
-
-    console.log(allGrades);
+    const gradeOptions: GradeOption[] = useMemo(() => {
+        if (!schoolData?.result?.grades) return [];
+        return schoolData.result.grades.map((g: any) => ({
+            id: g.id,
+            label: g.grade,
+            schoolId: schoolData.result.id,
+        }));
+    }, [schoolData]);
 
     const handleSchoolChange = (school: SchoolOption) => {
-        dispatch(setTeacherSchoolName(school?.schoolName));
-        setMappings((prev) =>
-            prev.map((item) =>
-                item.id === id ? { ...item, school, grades: [] } : item
-            )
-        );
+        setSelectedSchool(school);
+        dispatch(setTeacherSchoolName(school.schoolName));
+    };
+
+    const handleChange = (newValue: any) => {
+        setSelectedGradesState(newValue);
+        dispatch(setSelectedGrades(newValue));
+    };
+
+    const handleCreateOption = (inputValue: string) => {
+        const newOption: GradeOption = {
+            id: crypto.randomUUID(),
+            label: inputValue,
+            schoolId: selectedSchool?.schoolId || "",
+            __isNew__: true,
+        };
+        const newOptions = [...selectedGrades, newOption];
+        setSelectedGradesState(newOptions);
+        dispatch(setSelectedGrades(newOptions));
     };
 
     const handleRemoveClick = (option: GradeOption) => {
@@ -117,58 +102,37 @@ const UpdateTeachersGrade = ({ id }: { id: string }) => {
 
     const confirmRemove = async () => {
         if (!optionToRemove) return;
-
-        const body = {
-            userData: {},
-            gradeData: {
-                deletedGrade: [optionToRemove.id],
-                newGradeAssign: [],
-            },
-        };
-
-        const formData = new FormData();
-        formData.append("bodyData", JSON.stringify(body));
-
         try {
-            const response = await UpdateTeacher({ id, formData }).unwrap();
+            const body = {
+                userData: {},
+                gradeData: {
+                    deletedGrade: [optionToRemove.id],
+                    newGradeAssign: [],
+                },
+            };
+            const formData = new FormData();
+            formData.append("bodyData", JSON.stringify(body));
+            const response = await updateTeacher({ id, formData }).unwrap();
             if (response.success) {
                 toast.success(response.message);
-
-                // Remove from UI
-                setMappings((prev) =>
-                    prev.map((mapping) => ({
-                        ...mapping,
-                        grades: mapping.grades.filter(
-                            (grade) => grade.id !== optionToRemove.id
-                        ),
-                    }))
+                setSelectedGradesState((prev) =>
+                    prev.filter((g) => g.id !== optionToRemove.id)
                 );
-
                 setIsModalOpen(false);
                 setOptionToRemove(null);
             }
         } catch (error) {
             toast.warning(
                 (error as any)?.data?.message ||
-                "Something went wrong while removing grade."
+                "Something went wrong while removing the grade."
             );
         }
     };
 
-    const selectedSchoolIds = useMemo(
-        () =>
-            mappings
-                .filter((m) => m?.school)
-                .map((m) => m?.school!.schoolId),
-        [mappings]
-    );
-
     const handleSave = async () => {
-        const newGradeAssign = mappings.flatMap((mapping) =>
-            mapping.grades
-                .filter((grade) => grade.__isNew__)
-                .map((grade) => grade.id)
-        );
+        const newGradeAssign = selectedGrades
+            .filter((g) => g.__isNew__)
+            .map((g) => g.id);
 
         const body = {
             userData: {},
@@ -177,30 +141,18 @@ const UpdateTeachersGrade = ({ id }: { id: string }) => {
                 newGradeAssign,
             },
         };
-
         const formData = new FormData();
         formData.append("bodyData", JSON.stringify(body));
 
         try {
-            const response = await UpdateTeacher({ id, formData }).unwrap();
+            const response = await updateTeacher({ id, formData }).unwrap();
             if (response.success) {
                 toast.success(response.message);
-
-                // ✅ Mark them as saved
-                setMappings((prev) =>
-                    prev.map((mapping) => ({
-                        ...mapping,
-                        grades: mapping.grades.map((grade) => ({
-                            ...grade,
-                            __isNew__: false,
-                        })),
-                    }))
-                );
             }
         } catch (error) {
             toast.warning(
                 (error as any)?.data?.message ||
-                "Something went wrong while saving new grades."
+                "Something went wrong while updating grades."
             );
         }
     };
@@ -211,27 +163,23 @@ const UpdateTeachersGrade = ({ id }: { id: string }) => {
                 {/* ✅ School Name */}
                 <div className="flex-1 relative w-full">
                     <Label>School Name</Label>
-                    <GetSchools
-                        onChange={(selectedSchool) => handleSchoolChange(selectedSchool)}
-                        excludeIds={selectedSchoolIds}
-                    />
-
-                    {teacherSchoolName && (
+                    <GetSchools onChange={handleSchoolChange} />
+                    {selectedSchool && (
                         <div className="flex items-center gap-2 mt-2 absolute top-[35%] left-4">
                             <Image
-                                src={defaultImg}
+                                src={selectedSchool.image || defaultImg}
                                 height={50}
                                 width={50}
-                                alt={teacherSchoolName || "Teacher Name"}
+                                alt={selectedSchool.schoolName}
                                 style={{
                                     width: 24,
                                     height: 24,
                                     borderRadius: "50%",
-                                    opacity: "0%",
+                                    opacity: "50%",
                                 }}
                                 priority
                             />
-                            <span>{teacherSchoolName}</span>
+                            <span className="opacity-[55%]">{selectedSchool.schoolName}</span>
                         </div>
                     )}
                 </div>
@@ -241,15 +189,16 @@ const UpdateTeachersGrade = ({ id }: { id: string }) => {
                     <Label>Grade Section Mapping</Label>
                     <CreatableSelect
                         isMulti
+                        options={gradeOptions}
                         value={selectedGrades}
+                        onChange={handleChange}
+                        onCreateOption={handleCreateOption}
+                        getOptionLabel={(option) => option.label}
+                        getOptionValue={(option) => option.id}
                         components={{
                             MultiValueRemove: (props) => (
                                 <div
-                                    onMouseDown={(e) => {
-                                        e.stopPropagation();
-                                        e.preventDefault();
-                                        handleRemoveClick(props.data as GradeOption);
-                                    }}
+                                    onClick={() => handleRemoveClick(props.data as GradeOption)}
                                     className="px-1 cursor-pointer text-gray-500 hover:text-red-600"
                                 >
                                     ✕
@@ -300,7 +249,16 @@ const UpdateTeachersGrade = ({ id }: { id: string }) => {
                             disabled={isUpdating}
                             className="px-3 py-1 bg-red-600 text-white rounded-md"
                         >
-                            {isUpdating ? "Removing..." : "Remove"}
+                            {isUpdating ? (
+                                <div className="flex justify-center items-center gap-2">
+                                    Removing...
+                                    <div className="animate-spin">
+                                        <PiSpinner className="h-4 w-4" />
+                                    </div>
+                                </div>
+                            ) : (
+                                "Remove"
+                            )}
                         </button>
                     </div>
                 </DialogContent>
@@ -309,26 +267,19 @@ const UpdateTeachersGrade = ({ id }: { id: string }) => {
             {/* ✅ Buttons */}
             <div className="flex justify-center gap-3 pt-3 mt-6">
                 <Button
-                    variant="outline"
-                    className="px-6 border-[#636F85] text-[#636F85]"
-                >
-                    Cancel
-                </Button>
-
-                <Button
                     type="submit"
                     onClick={handleSave}
                     className="px-6 text-white font-medium border border-[#1E3A8A] transition-all duration-300 bg-[#1E3A8A] hover:bg-[#1E3A8A]/80"
                 >
                     {isUpdating ? (
                         <div className="flex justify-center items-center gap-2">
-                            Saving...
+                            Updating...
                             <div className="animate-spin">
                                 <PiSpinner className="h-4 w-4" />
                             </div>
                         </div>
                     ) : (
-                        "Save & Continue"
+                        "Update & Continue"
                     )}
                 </Button>
             </div>
@@ -336,4 +287,4 @@ const UpdateTeachersGrade = ({ id }: { id: string }) => {
     );
 };
 
-export default UpdateTeachersGrade;
+export default UpdateGradeSection;

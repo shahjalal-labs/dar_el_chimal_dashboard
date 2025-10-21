@@ -1,13 +1,14 @@
 "use client";
 
-import React from 'react';
-import { DialogContent } from '@/components/ui/dialog';
+import React, { useRef } from 'react';
+import { DialogClose, DialogContent } from '@/components/ui/dialog';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store/store';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 
 const ShowBulkTeachersModal = () => {
+    const closeRef = useRef<HTMLButtonElement>(null);
     const { teacherSchoolName, teacherList } = useSelector((state: RootState) => state.teacher);
 
     const handleExportToGoogleSheets = () => {
@@ -28,13 +29,11 @@ const ShowBulkTeachersModal = () => {
         const blob = new Blob([csvContent], { type: "text/csv" });
         const url = URL.createObjectURL(blob);
 
-        // 1️⃣ Trigger download
         const a = document.createElement("a");
         a.href = url;
         a.download = "teacher_list.csv";
         a.click();
 
-        // 2️⃣ Prompt user to open in Sheets (optional)
         setTimeout(() => {
             window.open("https://sheets.google.com", "_blank");
             URL.revokeObjectURL(url);
@@ -43,6 +42,7 @@ const ShowBulkTeachersModal = () => {
 
     return (
         <DialogContent className="overflow-y-auto overflow-x-hidden max-h-[75%] min-w-[50%] p-6">
+            <DialogClose ref={closeRef} className="hidden" />
             <h1 className="font-bold text-2xl mb-4">Teacher List</h1>
 
             <Table className="border border-[#F5F5F5] rounded-2xl">
@@ -69,6 +69,7 @@ const ShowBulkTeachersModal = () => {
             <div className="flex justify-center items-center gap-3 pt-6">
                 <Button
                     variant="outline"
+                    onClick={() => closeRef.current?.click()}
                     className="px-6 border-[#636F85] text-[#636F85] font-medium"
                 >
                     Cancel

@@ -15,9 +15,9 @@ import { Dialog } from '@/components/ui/dialog';
 import CreateTeacherModal from './AddNewTeacher/CreateTeacherModal';
 
 const TeacherList = () => {
+    const route = useRouter();
     const [open, setOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
-    const route = useRouter();
     const { data } = useGetAllTeachersByAdminQuery({ currentPage, limit: 10 });
 
     const formattedData = data?.result?.result?.map(
@@ -71,12 +71,9 @@ const TeacherList = () => {
                     <h1 className='text-2xl font-bold mb-3'>Teachers</h1>
                     <p className='font-medium'><span className='text-[#72727299]'>Library</span><span className='text-[#72727299] px-2'>/</span>Teacher List</p>
                 </div>
-                <Select
-                    onValueChange={(value) => handleRoute(value)}
-                >
-                    <SelectTrigger
-                        className="w-fit border border-[#1E3A8A] text-[#1E3A8A] bg-transparent hover:bg-transparent cursor-pointer flex items-center gap-2 px-3 py-2 rounded-md data-[placeholder]:text-[#1E3A8A]"
-                    >
+
+                <Select onValueChange={(value) => handleRoute(value)}>
+                    <SelectTrigger className="w-fit border border-[#1E3A8A] text-[#1E3A8A] bg-transparent hover:bg-transparent cursor-pointer flex items-center gap-2 px-3 py-2 rounded-md data-[placeholder]:text-[#1E3A8A]">
                         <FaPlus className="text-[#1E3A8A]" />
                         <SelectValue placeholder="Create New Teacher" />
                     </SelectTrigger>

@@ -32,7 +32,14 @@ export const announcementApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: ["announcement"]
         }),
+        deleteAnnouncement: builder.mutation({
+            query: (id) => ({
+                url: `/announcement/${id}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: ["announcement"]
+        }),
     }),
 });
 
-export const { useCreateAnnouncementMutation, useGetAllAnnouncementsQuery, useGetSingleAnnouncementQuery, useUpdateAnnouncementMutation } = announcementApi;
+export const { useCreateAnnouncementMutation, useGetAllAnnouncementsQuery, useGetSingleAnnouncementQuery, useUpdateAnnouncementMutation, useDeleteAnnouncementMutation } = announcementApi;

@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useDeleteBookCategroyMutation } from "@/redux/api/bookCategory";
 import { Eye, Search } from "lucide-react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
@@ -42,6 +41,8 @@ import {
   TableRow,
 } from "../ui/table";
 import { useDeleteSchoolMutation } from "@/redux/api/school";
+import ViewStudentModal from "../Admin/Students/ViewStudentModal";
+import UpdateStudentModal from "../Admin/Students/UpdateStudentModal";
 
 const DataTable = ({
   title,
@@ -243,8 +244,9 @@ const DataTable = ({
                               <ViewSchoolModal id={singleData?.Id} />
                             ) : pathname === "/admin/teachers" ? (
                               <ViewTeacherModal id={singleData?.Id} />
-                            ) : pathname ===
-                              `/teacher/classes/${id}/students` ? (
+                            ) : pathname === "/admin/students" ? (
+                              <ViewStudentModal id={singleData?.Id} />
+                            ) : pathname === `/teacher/classes/${id}/students` ? (
                               <ViewStudentDetailsModal id={singleData?.Id} />
                             ) : (
                               <></>
@@ -281,17 +283,19 @@ const DataTable = ({
                                 <UpdateSchoolModal id={singleData?.Id} />
                               ) : pathname === "/admin/teachers" ? (
                                 <UpdateTeacherModal id={singleData?.Id} />
+                              ) : pathname === "/admin/students" ? (
+                                <UpdateStudentModal id={singleData?.Id} />
                               ) : (
                                 <></>
                               ))}
                           </Dialog>
                           {
-                            pathname !== '/admin/book-categories' &&
+                            (pathname !== '/admin/book-categories' && pathname !== '/admin/teachers' && pathname !== '/admin/students') &&
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
                                 <Button className="bg-[#FE4D4F33] hover:bg-[#FE4D4F26] text-[#FE4D4F] transition-colors ease-in-out duration-200 cursor-pointer">
                                   <span className="sr-only">Delete</span>
-                                  {isSchoolDeleting &&
+                                  {(isSchoolDeleting) &&
                                     selectedId === singleData?.Id ? (
                                     <div className="animate-spin">
                                       <PiSpinner className="h-4 w-4" />

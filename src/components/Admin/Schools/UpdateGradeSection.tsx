@@ -44,9 +44,7 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
     }, [data])
 
     const handleChange = (newValue: any) => {
-        const newOptions = newValue.filter(
-            (v: any) => !data.result.grades.some((g: any) => g.grade === v.value)
-        );
+        const newOptions = newValue.filter((v: any) => !data.result.grades.some((g: any) => g.grade === v.value));
         setSelectedOptions(newValue);
         dispatch(setGradeOptions(newOptions));
     };

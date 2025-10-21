@@ -17,6 +17,7 @@ const AddNewTeacher = () => {
     const handleTabChange = (value: string) => {
         dispatch(setActiveBookTab(value as "general" | "resources" | "grade"));
     }
+
     return (
         <div>
             <div>
@@ -54,7 +55,6 @@ const AddNewTeacher = () => {
                             </TabsTrigger>
                         </TabsList>
 
-                        {/* ---------- TAB CONTENTS ---------- */}
                         <TabsContent value="general">
                             <General id='' />
                         </TabsContent>

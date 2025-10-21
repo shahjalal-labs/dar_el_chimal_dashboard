@@ -105,7 +105,7 @@ const General = ({ id }: { id: string }) => {
     };
 
     const isButtonDisabled =
-        !schoolName || !address || !teacherCount || !activeTeachers || !studentCount || !activeStudents || !previewSchoolPhoto;
+        !schoolName || !address || !teacherCount || !activeTeachers || !studentCount || !activeStudents;
 
     return (
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -188,7 +188,7 @@ const General = ({ id }: { id: string }) => {
             {/* School Photo */}
             <div className="flex-1">
                 <Label className="font-medium mb-2.5">
-                    School Photo<span className="text-red-600">*</span>
+                    School Photo
                 </Label>
 
                 {!previewSchoolPhoto ? (
@@ -243,10 +243,7 @@ const General = ({ id }: { id: string }) => {
                 <Button
                     type="submit"
                     disabled={isButtonDisabled}
-                    className={`px-6 text-white font-medium transition-all ease-in-out duration-500 cursor-pointer ${isButtonDisabled
-                        ? "bg-gray-400 cursor-not-allowed"
-                        : "bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A]"
-                        }`}
+                    className={`px-6 text-white font-medium transition-all ease-in-out duration-500 cursor-pointer ${isButtonDisabled ? "bg-gray-400 cursor-not-allowed" : "bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A]"}`}
                 >
                     {
                         isUpdating ?

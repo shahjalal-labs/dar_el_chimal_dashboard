@@ -54,9 +54,8 @@ const AddNewStudent = () => {
                             </TabsTrigger>
                         </TabsList>
 
-                        {/* ---------- TAB CONTENTS ---------- */}
                         <TabsContent value="general">
-                            <General />
+                            <General id='' />
                         </TabsContent>
                         <TabsContent value="grade">
                             <Grade />

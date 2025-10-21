@@ -9,8 +9,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import Select from 'react-select';
 import { setEmail, setPassword, setPreviewTeacherPhoto, setTeacherName, setUserName } from '@/redux/features/teacherSlice';
 import GetSchools, { SchoolOption } from '@/components/Common/GetSchools';
-import Image from 'next/image';
-import { FaTrash } from 'react-icons/fa';
 import Link from 'next/link';
 import { PiSpinner } from 'react-icons/pi';
 import { useGetAllGradesQuery } from '@/redux/api/grade';
@@ -31,8 +29,8 @@ interface Mapping {
 }
 
 const Grade = () => {
-    const dispatch = useDispatch();
     const route = useRouter();
+    const dispatch = useDispatch();
     const {
         teacherName,
         userName,
@@ -40,57 +38,34 @@ const Grade = () => {
         email,
         teacherPhoto
     } = useSelector((state: RootState) => state.teacher);
-    // const selectedFromRedux = useSelector((state: RootState) => state.school.options);
-    // const [selectedOptions, setSelectedOptions] = useState(selectedFromRedux);
-    const [mappings, setMappings] = useState<Mapping[]>([
-        { id: Date?.now()?.toString(), school: null, grades: [] },
-    ]);
+    const [mappings, setMappings] = useState<Mapping[]>([{ id: Date?.now()?.toString(), school: null, grades: [] },]);
 
-    const { data: gradesData } = useGetAllGradesQuery({
-        currentPage: 1,
-        limit: 1000,
-    });
+    const { data: gradesData } = useGetAllGradesQuery({ currentPage: 1, limit: 1000 });
 
     const [CreateTeacher, { isLoading: isCreating }] = useCreateTeacherMutation();
 
-    const allGrades: GradeOption[] =
-        gradesData?.result?.map((singleGrade: any) => ({
-            id: singleGrade?.id,
-            label: singleGrade?.grade,
-            schoolId: singleGrade?.schoolId,
-        })) ?? [];
+    const allGrades: GradeOption[] = gradesData?.result?.map((singleGrade: any) => ({
+        id: singleGrade?.id,
+        label: singleGrade?.grade,
+        schoolId: singleGrade?.schoolId,
+    })) ?? [];
 
     const handleSchoolChange = (id: string, school: SchoolOption) => {
-        setMappings((prev) =>
-            prev?.map((item) =>
-                item?.id === id ? { ...item, school, grades: [] } : item
-            )
-        );
+        setMappings((prev) => prev?.map((item) => item?.id === id ? { ...item, school, grades: [] } : item));
     };
 
     const handleGradeChange = (id: string, selectedGrades: readonly GradeOption[]) => {
-        setMappings((prev) =>
-            prev?.map((item) =>
-                item?.id === id ? { ...item, grades: [...selectedGrades] } : item
-            )
-        );
+        setMappings((prev) => prev?.map((item) => item?.id === id ? { ...item, grades: [...selectedGrades] } : item));
     };
 
-    const handleRemoveMapping = (id: string) => {
-        setMappings((prev) => prev?.filter((item) => item?.id !== id));
-    };
-
-    const selectedSchoolIds = useMemo(
-        () => mappings?.filter((m) => m?.school)?.map((m) => m?.school!.schoolId),
-        [mappings]
-    );
+    const selectedSchoolIds = useMemo(() => mappings?.filter((m) => m?.school)?.map((m) => m?.school!.schoolId), [mappings]);
 
     const handleSave = async () => {
         const body = {
             name: teacherName,
             userName: userName,
-            password: password,
             email: email,
+            password: password,
             schoolId: mappings[0]?.school?.schoolId,
             gradeIds: mappings[0]?.grades?.map((g: any) => g?.id)
         }
@@ -108,8 +83,8 @@ const Grade = () => {
                 toast.success(response.message);
                 dispatch(setTeacherName(''))
                 dispatch(setUserName(''))
-                dispatch(setPassword(''))
                 dispatch(setEmail(''))
+                dispatch(setPassword(''))
                 dispatch(setPreviewTeacherPhoto(''))
                 route.push('/admin/teachers')
             }
@@ -118,50 +93,27 @@ const Grade = () => {
         }
     };
 
-    // const isButtonDisabled = !selectedOptions?.length;
+    const isButtonDisabled = !mappings[0].school || !mappings[0].grades.length;
 
     return (
-        <div>
+        <form onSubmit={handleSave}>
             {mappings?.map((mapping) => {
                 const { school, grades } = mapping;
 
-                // Filter grades for the selected school
-                const filteredGradeOptions = school
-                    ? allGrades?.filter(
-                        (g) => String(g?.schoolId) === String(school?.schoolId)
-                    )
-                    : [];
+                const filteredGradeOptions = school ? allGrades?.filter((g) => String(g?.schoolId) === String(school?.schoolId)) : [];
 
                 return (
                     <div
                         key={mapping?.id}
-                        className="flex flex-col md:flex-row items-start gap-6 mb-6 relative"
+                        className="mb-6 relative space-y-5"
                     >
                         {/* School Name */}
                         <div className="flex-1 relative w-full">
                             <Label>School Name</Label>
                             <GetSchools
-                                onChange={(selectedSchool) =>
-                                    handleSchoolChange(mapping?.id, selectedSchool)
-                                }
+                                onChange={(selectedSchool) => handleSchoolChange(mapping?.id, selectedSchool)}
                                 excludeIds={selectedSchoolIds}
                             />
-
-                            {/* Display selected school */}
-                            {school && (
-                                <div className="flex items-center gap-2 mt-2 absolute top-[35%] left-4">
-                                    {school?.image && (
-                                        <Image
-                                            src={school?.image}
-                                            height={32}
-                                            width={24}
-                                            alt={school?.schoolName}
-                                            className="rounded-xl"
-                                        />
-                                    )}
-                                    <span>{school?.schoolName}</span>
-                                </div>
-                            )}
                         </div>
 
                         {/* Grade Section Mapping */}
@@ -175,9 +127,7 @@ const Grade = () => {
                                 getOptionLabel={(option) => option?.label}
                                 getOptionValue={(option) => option?.id}
                                 value={grades}
-                                onChange={(selectedOptions) =>
-                                    handleGradeChange(mapping?.id, selectedOptions)
-                                }
+                                onChange={(selectedOptions) => handleGradeChange(mapping?.id, selectedOptions)}
                                 styles={{
                                     control: (base) => ({
                                         ...base,
@@ -189,32 +139,13 @@ const Grade = () => {
                                 }}
                             />
                         </div>
-
-                        {/* Remove Button */}
-                        {mappings?.length > 1 && (
-                            <Button
-                                variant="ghost"
-                                className="absolute -top-2 right-0 text-red-500 hover:text-red-700 hover:bg-transparent cursor-pointer"
-                                onClick={() => handleRemoveMapping(mapping?.id)}
-                            >
-                                <FaTrash />
-                            </Button>
-                        )}
                     </div>
                 );
             })}
 
-            {/* Add More Button */}
-            {/* <Button
-                onClick={handleAddMapping}
-                className="font-semibold bg-[#1E3A8A1A] hover:bg-[#1E3A8A] text-[#1E3A8A] hover:text-white rounded-xl px-6 py-2?.5 transition-all duration-500 ease-in-out cursor-pointer mt-4"
-            >
-                <FaPlus className="mr-2" /> Add More
-            </Button> */}
-
             {/* Footer Buttons */}
             <div className="flex justify-center items-center gap-3 pt-6">
-                <Link href="/admin/books">
+                <Link href="/admin/teachers">
                     <Button
                         variant="outline"
                         className="px-6 border-[#636F85] text-[#636F85] font-medium"
@@ -224,12 +155,12 @@ const Grade = () => {
                 </Link>
 
                 <Button
-                    onClick={handleSave}
-                    // disabled={isButtonDisabled}
-                    className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A] text-white font-medium px-6"
+                    type="submit"
+                    disabled={isButtonDisabled}
+                    className={`px-6 text-white font-medium transition-all ease-in-out duration-500 cursor-pointer ${isButtonDisabled ? "bg-gray-400 cursor-not-allowed" : "bg-[#1E3A8A] hover:bg-[#1E3A8A]/80"}`}
                 >
                     {
-                        (isCreating) ?
+                        isCreating ?
                             <div className="flex justify-center items-center gap-2">
                                 Saving...
                                 <div className="animate-spin">
@@ -240,7 +171,7 @@ const Grade = () => {
                     }
                 </Button>
             </div>
-        </div>
+        </form>
     );
 };
 

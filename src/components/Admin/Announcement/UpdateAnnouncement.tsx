@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
-import { DialogContent } from '@/components/ui/dialog';
+import { DialogClose, DialogContent } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { RootState } from '@/redux/store/store';
@@ -17,11 +17,13 @@ import { useGetSingleAnnouncementQuery, useUpdateAnnouncementMutation } from '@/
 import { toast } from 'sonner';
 
 const UpdateAnnouncement = ({ id }: { id: string }) => {
-    const [open, setOpen] = useState(false);
     const dispatch = useDispatch();
+    const [open, setOpen] = useState(false);
+    const closeRef = useRef<HTMLButtonElement>(null);
     const { announcementTitle, announcement, announcementDate } = useSelector((state: RootState) => state.announcement);
 
     const { data } = useGetSingleAnnouncementQuery(id);
+    const [UpdateAnnouncement, { isLoading }] = useUpdateAnnouncementMutation();
 
     useEffect(() => {
         if (data?.result) {
@@ -31,7 +33,6 @@ const UpdateAnnouncement = ({ id }: { id: string }) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data])
 
-    const [UpdateAnnouncement, { isLoading }] = useUpdateAnnouncementMutation();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -57,6 +58,7 @@ const UpdateAnnouncement = ({ id }: { id: string }) => {
 
     return (
         <DialogContent className='p-6 space-y-5'>
+            <DialogClose ref={closeRef} className="hidden" />
             <h1 className='text-2xl font-bold'>Edit Announcement</h1>
 
             <form onSubmit={handleSubmit} className='space-y-5'>
@@ -110,7 +112,9 @@ const UpdateAnnouncement = ({ id }: { id: string }) => {
                 {/* Buttons */}
                 <div className="flex justify-center gap-3 pt-3">
                     <Button
+                        type='button'
                         variant="outline"
+                        onClick={() => closeRef.current?.click()}
                         className="px-6 border-[#636F85] text-[#636F85]"
                     >
                         Cancel
@@ -124,12 +128,12 @@ const UpdateAnnouncement = ({ id }: { id: string }) => {
                         {
                             (isLoading) ?
                                 <div className="flex justify-center items-center gap-2">
-                                    Saving...
+                                    Updating...
                                     <div className="animate-spin">
                                         <PiSpinner className="h-4 w-4" />
                                     </div>
                                 </div> :
-                                "Save Announcements"
+                                "Update Announcements"
                         }
                     </Button>
                 </div>

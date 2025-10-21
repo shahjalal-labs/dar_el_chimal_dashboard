@@ -31,49 +31,32 @@ interface Mapping {
 }
 
 const CreateTeacherModal = () => {
-    const closeRef = useRef<HTMLButtonElement>(null);
     const dispatch = useDispatch();
+    const closeRef = useRef<HTMLButtonElement>(null);
     const [showBulkModal, setShowBulkModal] = useState(false);
-    const {  numberOfTeacher } = useSelector((state: RootState) => state.teacher);
-    const [mappings, setMappings] = useState<Mapping[]>([
-        { id: Date?.now()?.toString(), school: null, grades: [] },
-    ]);
+    const { numberOfTeacher } = useSelector((state: RootState) => state.teacher);
+    const [mappings, setMappings] = useState<Mapping[]>([{ id: Date?.now()?.toString(), school: null, grades: [] },]);
 
-    const { data: gradesData } = useGetAllGradesQuery({
-        currentPage: 1,
-        limit: 1000,
-    });
+    const { data: gradesData } = useGetAllGradesQuery({ currentPage: 1, limit: 1000 });
 
     const [CreateTeacher, { isLoading: isCreating }] = useCreateBulkTeacherMutation();
 
-    const allGrades: GradeOption[] =
-        gradesData?.result?.map((singleGrade: any) => ({
-            id: singleGrade?.id,
-            label: singleGrade?.grade,
-            schoolId: singleGrade?.schoolId,
-        })) ?? [];
+    const allGrades: GradeOption[] = gradesData?.result?.map((singleGrade: any) => ({
+        id: singleGrade?.id,
+        label: singleGrade?.grade,
+        schoolId: singleGrade?.schoolId,
+    })) ?? [];
 
     const handleSchoolChange = (id: string, school: SchoolOption) => {
         dispatch(setTeacherSchoolName(school?.schoolName));
-        setMappings((prev) =>
-            prev?.map((item) =>
-                item?.id === id ? { ...item, school, grades: [] } : item
-            )
-        );
+        setMappings((prev) => prev?.map((item) => item?.id === id ? { ...item, school, grades: [] } : item));
     };
 
     const handleGradeChange = (id: string, selectedGrades: readonly GradeOption[]) => {
-        setMappings((prev) =>
-            prev?.map((item) =>
-                item?.id === id ? { ...item, grades: [...selectedGrades] } : item
-            )
-        );
+        setMappings((prev) => prev?.map((item) => item?.id === id ? { ...item, grades: [...selectedGrades] } : item));
     };
 
-    const selectedSchoolIds = useMemo(
-        () => mappings?.filter((m) => m?.school)?.map((m) => m?.school!.schoolId),
-        [mappings]
-    );
+    const selectedSchoolIds = useMemo(() => mappings?.filter((m) => m?.school)?.map((m) => m?.school!.schoolId), [mappings]);
 
     const handleSave = async () => {
         const formData = {
@@ -87,7 +70,6 @@ const CreateTeacherModal = () => {
             if (response.success) {
                 toast.success(response.message);
                 dispatch(setTeachersList(response?.result));
-                // closeRef.current?.click();
                 setShowBulkModal(true);
             }
         } catch (error) {
@@ -95,8 +77,11 @@ const CreateTeacherModal = () => {
         }
     };
 
+    const isButtonDisabled =
+        !mappings[0].school || !numberOfTeacher || !mappings[0].grades.length;
+
     return (
-        <DialogContent className="overflow-y-auto overflow-x-hidden max-h-[75%] min-w-[50%] p-6">
+        <DialogContent className="overflow-y-auto overflow-x-hidden max-h-[75%] min-w-[50%] p-6" showCloseButton>
             <DialogClose ref={closeRef} className="hidden" />
             <h1 className="font-bold text-2xl">Create New Teacher</h1>
 
@@ -116,9 +101,7 @@ const CreateTeacherModal = () => {
                                 <div className="flex-1 relative w-full">
                                     <Label>School Name</Label>
                                     <GetSchools
-                                        onChange={(selectedSchool) =>
-                                            handleSchoolChange(mapping?.id, selectedSchool)
-                                        }
+                                        onChange={(selectedSchool) => handleSchoolChange(mapping?.id, selectedSchool)}
                                         excludeIds={selectedSchoolIds}
                                     />
 
@@ -195,6 +178,7 @@ const CreateTeacherModal = () => {
                 <div className="flex justify-center items-center gap-3 pt-6">
                     <Button
                         variant="outline"
+                        onClick={() => closeRef.current?.click()}
                         className="px-6 border-[#636F85] text-[#636F85] font-medium"
                     >
                         Cancel
@@ -202,17 +186,18 @@ const CreateTeacherModal = () => {
 
                     <Button
                         onClick={handleSave}
-                        className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A] text-white font-medium px-6"
+                        disabled={isButtonDisabled}
+                        className={`px-6 text-white font-medium transition-all ease-in-out duration-500 cursor-pointer ${isButtonDisabled ? "bg-gray-400 cursor-not-allowed" : "bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A]"}`}
                     >
                         {isCreating ? (
                             <div className="flex justify-center items-center gap-2">
-                                Saving...
+                                Creating...
                                 <div className="animate-spin">
                                     <PiSpinner className="h-4 w-4" />
                                 </div>
                             </div>
                         ) : (
-                            "Save & Continue"
+                            "Create"
                         )}
                     </Button>
 

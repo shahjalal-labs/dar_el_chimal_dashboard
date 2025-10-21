@@ -123,7 +123,7 @@ const ViewTeacherModal = ({ id }: { id: string }) => {
                     groupedBySchool.map(({ school, grades }) => (
                         <div
                             key={school.id}
-                            className="border rounded-md p-4 mb-4 text-sm shadow-sm bg-white"
+                            className="border rounded-md p-4 mb-4 text-sm bg-white"
                         >
                             <div className="flex items-center gap-3 mb-2">
                                 <Image

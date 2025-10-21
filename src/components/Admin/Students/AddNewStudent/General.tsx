@@ -1,43 +1,108 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Eye, EyeOff } from 'lucide-react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { RxCross1 } from 'react-icons/rx';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '@/redux/store/store';
-import { setActiveBookTab } from '@/redux/features/uiSlice';
-import uploadImg from '@/assets/uploadImg.svg';
-import { setPreviewStudentPhoto, setStudentName, setStudentPassword, setStudentPhoto, setStudentUserName } from '@/redux/features/studentSlice';
+import React, { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Eye, EyeOff } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { RxCross1 } from "react-icons/rx";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/redux/store/store";
+import { setActiveBookTab } from "@/redux/features/uiSlice";
+import uploadImg from "@/assets/uploadImg.svg";
+import {
+    setPreviewStudentPhoto,
+    setStudentName,
+    setStudentPassword,
+    setStudentPhoto,
+    setStudentUserName,
+} from "@/redux/features/studentSlice";
+import { useGetStudentDetailsQuery, useUpdateStudentMutation } from "@/redux/api/student";
+import { usePathname } from "next/navigation";
+import { toast } from "sonner";
+import { PiSpinner } from "react-icons/pi";
 
-const General = () => {
-    const [showPassword, setShowPassword] = useState(false);
+const General = ({ id }: { id: string }) => {
+    const pathname = usePathname();
     const dispatch = useDispatch();
-    const {
-        studentName,
-        studentUserName,
-        studentPassword,
-        previewStudentPhoto
-    } = useSelector((state: RootState) => state.student);
+    const [showPassword, setShowPassword] = useState(false);
+    const { studentName, studentUserName, email, studentPassword, previewStudentPhoto, studentPhoto } =
+        useSelector((state: RootState) => state.student);
+
+    // Store created object URLs to revoke them later
+    const [objectUrl, setObjectUrl] = useState<string | null>(null);
+
+    const { data } = useGetStudentDetailsQuery(id);
+    const [UpdateStudent, { isLoading: isUpdating }] = useUpdateStudentMutation();
+
+    useEffect(() => {
+        if (pathname === '/admin/students' && data?.result) {
+            dispatch(setStudentName(data?.result?.fullName));
+            dispatch(setStudentUserName(data?.result?.loginUserName));
+            dispatch(setPreviewStudentPhoto(data?.result?.profileImage));
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [data])
 
     const handleImageChange = (file: File | null) => {
         if (file) {
             const imgURL = URL.createObjectURL(file);
+            setObjectUrl(imgURL);
             dispatch(setPreviewStudentPhoto(imgURL));
             dispatch(setStudentPhoto(file));
         } else {
-            dispatch(setPreviewStudentPhoto(''));
+            if (objectUrl) URL.revokeObjectURL(objectUrl);
+            setObjectUrl(null);
+            dispatch(setPreviewStudentPhoto(""));
             dispatch(setStudentPhoto(null));
         }
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    // ✅ Cleanup object URL on unmount
+    useEffect(() => {
+        return () => {
+            if (objectUrl) URL.revokeObjectURL(objectUrl);
+        };
+    }, [objectUrl]);
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        dispatch(setActiveBookTab("grade"));
+        if (pathname === '/admin/students') {
+            const body = {
+                userData:
+                {
+                    loginUserName: studentUserName,
+                    fullName: studentName,
+                    email: email,
+                },
+                gradeData: {}
+            }
+
+            const formData = new FormData();
+            formData.append('bodyData', JSON.stringify(body))
+            if (studentPhoto) {
+                formData.append('profileImage', studentPhoto)
+            }
+
+            try {
+                const response = await UpdateStudent({ id, formData }).unwrap();
+                if (response.success) {
+                    toast.success(response.message);
+                    dispatch(setStudentName(''))
+                    dispatch(setStudentUserName(''))
+                    // dispatch(setActiveBookTab("grade"));
+                }
+            }
+            catch (error) {
+                toast.warning((error as any)?.data?.message || "Something went wrong");
+            }
+        }
+        else {
+            dispatch(setActiveBookTab("grade"));
+        }
     };
 
     const isButtonDisabled =
@@ -50,28 +115,27 @@ const General = () => {
                 <Label>Student Name</Label>
                 <Input
                     type="text"
-                    placeholder="Enter teacher name"
+                    placeholder="Enter student name"
                     value={studentName}
                     onChange={(e) => dispatch(setStudentName(e.target.value))}
-                    className=""
                     required
                 />
             </div>
 
             {/* User Name & Password */}
-            <div className="flex gap-6">
-                <div className="flex-1">
+            <div className="flex gap-6 flex-wrap">
+                <div className="flex-1 min-w-[200px]">
                     <Label>User Name</Label>
                     <Input
                         type="text"
                         placeholder="Enter user name"
                         value={studentUserName}
                         onChange={(e) => dispatch(setStudentUserName(e.target.value))}
-                        className=""
                         required
                     />
                 </div>
-                <div className="flex-1 relative">
+
+                <div className="flex-1 min-w-[200px] relative">
                     <Label>Password</Label>
                     <Input
                         type={showPassword ? "text" : "password"}
@@ -84,12 +148,12 @@ const General = () => {
                     <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-11 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        aria-label="Toggle password visibility"
                     >
                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                 </div>
-
             </div>
 
             {/* Upload Student Photo */}
@@ -99,10 +163,10 @@ const General = () => {
                 </Label>
 
                 {!previewStudentPhoto ? (
-                    <label htmlFor="teacherPhoto">
+                    <label htmlFor="studentPhoto">
                         <div className="border border-dashed border-[#CBD5E1] rounded-lg px-6 py-8 w-full cursor-pointer">
                             <input
-                                id="teacherPhoto"
+                                id="studentPhoto"
                                 type="file"
                                 accept="image/*"
                                 onChange={(e) => handleImageChange(e.target.files?.[0] ?? null)}
@@ -118,19 +182,21 @@ const General = () => {
                         </div>
                     </label>
                 ) : (
-                    <div className="flex justify-center relative w-fit mx-auto group">
-                        <div
+                    <div className="relative w-fit mx-auto group">
+                        <button
+                            type="button"
                             onClick={() => handleImageChange(null)}
-                            className="bg-[#bdbfc4]/60 rounded-full p-2 absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                            className="absolute top-2 right-2 bg-[#bdbfc4]/70 hover:bg-[#a1a3a8] text-black rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                            aria-label="Remove photo"
                         >
                             <RxCross1 className="h-3 w-3" />
-                        </div>
+                        </button>
                         <Image
                             src={previewStudentPhoto}
                             height={200}
                             width={300}
                             alt="Preview"
-                            className="w-full h-[200px] object-cover rounded-md"
+                            className="w-full h-[200px] object-cover rounded-md border"
                         />
                     </div>
                 )}
@@ -138,8 +204,9 @@ const General = () => {
 
             {/* Buttons */}
             <div className="flex justify-center gap-3 pt-3">
-                <Link href="/admin/teachers">
+                <Link href="/admin/students">
                     <Button
+                        type="button"
                         variant="outline"
                         className="px-6 border-[#636F85] text-[#636F85]"
                     >
@@ -150,12 +217,19 @@ const General = () => {
                 <Button
                     type="submit"
                     disabled={isButtonDisabled}
-                    className={`px-6 text-white font-medium border border-[#1E3A8A] transition-all duration-300 ${isButtonDisabled
-                        ? "bg-gray-400 cursor-not-allowed"
-                        : "bg-[#1E3A8A] hover:bg-[#1E3A8A]/80"
-                        }`}
+                    className={`px-6 text-white font-medium transition-all ease-in-out duration-500 cursor-pointer ${isButtonDisabled ? "bg-gray-400 cursor-not-allowed" : "bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A]"}`}
                 >
-                    Save & Continue
+                    {
+                        isUpdating ?
+                            <div className="flex justify-center items-center gap-2">
+                                Updating...
+                                <div className="animate-spin">
+                                    <PiSpinner className="h-4 w-4" />
+                                </div>
+                            </div> :
+                            pathname === '/admin/students' ? "Update & Continue" :
+                                "Save & Continue"
+                    }
                 </Button>
             </div>
         </form>
