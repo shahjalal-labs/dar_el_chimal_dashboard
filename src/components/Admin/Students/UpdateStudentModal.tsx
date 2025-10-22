@@ -11,7 +11,7 @@ import { RootState } from '@/redux/store/store';
 import { setActiveBookTab } from '@/redux/features/uiSlice';
 import { useGetStudentDetailsQuery } from '@/redux/api/student';
 import General from './AddNewStudent/General';
-import UpdateGradeSection from '../Schools/UpdateGradeSection';
+import UpdateGradeSection from './AddNewStudent/UpdateGradeSection';
 
 const UpdateStudentModal = ({ id }: { id: string }) => {
     const dispatch = useDispatch();
@@ -59,7 +59,7 @@ const UpdateStudentModal = ({ id }: { id: string }) => {
                             <MdOutlineDataset /> General
                         </TabsTrigger>
 
-                        {/* <TabsTrigger
+                        <TabsTrigger
                             value="grade"
                             className={`px-4 py-2 rounded-md text-sm font-medium ${tab === "grade"
                                 ? "bg-[#F8F8F8] text-[#1E3A8A]"
@@ -67,7 +67,7 @@ const UpdateStudentModal = ({ id }: { id: string }) => {
                                 }`}
                         >
                             <RiGraduationCapLine /> Grade Mapping
-                        </TabsTrigger> */}
+                        </TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="general">

@@ -156,11 +156,7 @@ const Grade = () => {
 
             {mappings.map((mapping) => {
                 const { school, grade } = mapping;
-                const filteredGradeOptions = school
-                    ? allGrades.filter(
-                        (g) => String(g.schoolId) === String(school.schoolId)
-                    )
-                    : [];
+                const filteredGradeOptions = school ? allGrades.filter((g) => String(g.schoolId) === String(school.schoolId)) : [];
 
                 return (
                     <div key={mapping.id} className="mb-6 space-y-5">
@@ -168,9 +164,7 @@ const Grade = () => {
                         <div className="flex-1 w-full">
                             <Label>School Name</Label>
                             <GetSchools
-                                onChange={(selectedSchool) =>
-                                    handleSchoolChange(mapping.id, selectedSchool)
-                                }
+                                onChange={(selectedSchool) => handleSchoolChange(mapping.id, selectedSchool)}
                                 excludeIds={selectedSchoolIds}
                             />
                         </div>
@@ -186,9 +180,7 @@ const Grade = () => {
                                 getOptionLabel={(option) => option.label}
                                 getOptionValue={(option) => option.id}
                                 value={grade}
-                                onChange={(selected) =>
-                                    handleGradeChange(mapping.id, selected as GradeOption)
-                                }
+                                onChange={(selected) => handleGradeChange(mapping.id, selected as GradeOption)}
                                 styles={{
                                     control: (base) => ({
                                         ...base,
@@ -219,10 +211,7 @@ const Grade = () => {
                 <Button
                     type="submit"
                     disabled={isButtonDisabled}
-                    className={`px-6 text-white font-medium transition-all duration-300 ${isButtonDisabled
-                        ? "bg-gray-400 cursor-not-allowed"
-                        : "bg-[#1E3A8A] hover:bg-[#1E3A8A]/80"
-                        }`}
+                    className={`px-6 text-white font-medium border border-[#1E3A8A] transition-all ease-in-out duration-500 cursor-pointer ${isButtonDisabled ? "bg-gray-400 cursor-not-allowed" : "bg-[#1E3A8A] hover:bg-[#1E3A8A]/80"}`}
                 >
                     {isCreating ? (
                         <div className="flex items-center gap-2">
