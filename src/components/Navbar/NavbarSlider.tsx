@@ -169,8 +169,7 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
                         setShowDropdown(!showDropdown);
                     }}
                     className={`flex items-center gap-2 mb-2 rounded-lg hover:bg-[#1E3A8A] hover:text-white transition-colors duration-300 ease-in-out ${!isOpen ? "justify-center py-2" : "justify-start px-4 py-2"}
-                    ${path === item.route ?
-                        "bg-[#1E3A8A] text-white" :
+                    ${path === item.route ? "bg-[#1E3A8A] text-white" :
                         (
                           path === "/admin/books" ||
                           path === "/admin/book-categories" ||
@@ -190,14 +189,30 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
                           path === `/teacher/classes/${id}/announcements/${announcmentId}`
                         ) && (item.label === "Book Management" || item.label === "Classes") ?
                           "bg-[#1E3A8A] text-white" :
-                          ((
+                          (
                             path === `/teacher/classes/books/${id}` ||
                             path === `/teacher/classes/books/${id}/${bookId}` ||
                             path === `/teacher/classes/books/${id}/${bookId}/pdf` ||
-                            path === `/teacher/classes/books/${id}/${bookId}/${resourceId}`) &&
-                            (item.label === "Book")) ?
+                            path === `/teacher/classes/books/${id}/${bookId}/${resourceId}`
+                          ) && (item.label === "Book") ?
                             "bg-[#1E3A8A] text-white" :
-                            "text-[#7C8091]"
+                            (
+                              path === "/admin/schools/add-new-school"
+                            ) && (item.label === "Schools") ?
+                              "bg-[#1E3A8A] text-white" :
+                              (
+                                path === "/admin/teachers/add-new-teacher"
+                              ) && (item.label === "Teachers") ?
+                                "bg-[#1E3A8A] text-white" :
+                                (
+                                  path === "/admin/students/add-new-student"
+                                ) && (item.label === "Students") ?
+                                  "bg-[#1E3A8A] text-white" :
+                                  (
+                                    path === "/admin/announcements/add-new-announcement" ||
+                                    path === `/admin/announcements/${id}`
+                                  ) && (item.label === "Announcements") ?
+                                    "bg-[#1E3A8A] text-white" : "text-[#7C8091]"
                       }`}
                   >
                     <div className="flex justify-center items-center">{item.iconPath}</div>
@@ -221,26 +236,26 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
                     <div className="flex flex-col">
                       <Link
                         href="/admin/book-categories"
-                        className={`text-[#1E3A8A] font-medium p-3 ${isOpen && "pl-8 ml-8"} 
+                        className={`font-medium p-3 ${isOpen && "pl-8 ml-8"} 
                         ${(
                             path === "/admin/book-categories" ||
                             path === "/admin/book-categories/new-book-category")
-                            ? "border-l-2 border-[#1E3A8A]"
-                            : "border-l border-[#F3EEF6]"
+                            ? "border-l-2 border-[#1E3A8A] text-[#1E3A8A]"
+                            : "border-l border-[#F3EEF6] text-[#7C8091]"
                           }`}
                       >
                         {!isOpen ? <TbCategoryPlus /> : "Book Categories"}
                       </Link>
                       <Link
                         href="/admin/books"
-                        className={`text-[#1E3A8A] font-medium p-3 ${isOpen && "pl-8 ml-8"} 
+                        className={`font-medium p-3 ${isOpen && "pl-8 ml-8"} 
                         ${(
                             path === "/admin/books" ||
                             path === "/admin/books/add-new-book" ||
                             path === `/admin/books/book-overview/${id}` ||
                             path === `/admin/books/book-overview/${id}/${resourceId}`)
-                            ? "border-l-2 border-[#1E3A8A]"
-                            : "border-l border-[#F3EEF6]"
+                            ? "border-l-2 border-[#1E3A8A] text-[#1E3A8A]"
+                            : "border-l border-[#F3EEF6] text-[#7C8091]"
                           }`}
                       >
                         {!isOpen ? <PiBookBookmark /> : "Books"}

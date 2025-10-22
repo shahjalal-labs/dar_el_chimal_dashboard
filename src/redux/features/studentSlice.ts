@@ -19,7 +19,7 @@ interface StudentFormState {
 const initialState: StudentFormState = {
     studentName: '',
     studentUserName: '',
-    email: 'abc@gmail.com',
+    email: '',
     studentPassword: '',
     previewStudentPhoto: '',
     studentPhoto: null,
