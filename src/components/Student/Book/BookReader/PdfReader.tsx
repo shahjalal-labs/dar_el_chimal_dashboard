@@ -212,34 +212,40 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
     try {
       const page = await pdfDocRef.current.getPage(pageNum);
       const viewport = page.getViewport({ scale: 1 });
-      
+
       // Get the current canvas dimensions
-      const currentCanvas = pageNum === currentPage ? canvasLeftRef.current : canvasRightRef.current;
+      const currentCanvas =
+        pageNum === currentPage
+          ? canvasLeftRef.current
+          : canvasRightRef.current;
       if (!currentCanvas) return "";
 
       // Convert canvas coordinates to PDF coordinates
       const scale = (zoom / 100) * 1.5;
       const pdfX = (x / currentCanvas.width) * viewport.width;
-      const pdfY = viewport.height - (y / currentCanvas.height) * viewport.height; // Invert Y axis
+      const pdfY =
+        viewport.height - (y / currentCanvas.height) * viewport.height; // Invert Y axis
       const pdfWidth = (width / currentCanvas.width) * viewport.width;
       const pdfHeight = (height / currentCanvas.height) * viewport.height;
 
       // Get text content from the page
       const textContent = await page.getTextContent();
-      
-      // Extract text items within the selection area
-      const selectedTextItems = textContent.items.filter((item: PDFTextItem) => {
-        const itemX = item.transform[4];
-        const itemY = item.transform[5];
-        const itemWidth = item.width || 0;
-        const itemHeight = item.height || 10;
 
-        // Check if text item is within selection bounds
-        const isInX = itemX >= pdfX && itemX <= pdfX + pdfWidth;
-        const isInY = itemY <= pdfY && itemY >= pdfY - pdfHeight;
-        
-        return isInX && isInY;
-      });
+      // Extract text items within the selection area
+      const selectedTextItems = textContent.items.filter(
+        (item: PDFTextItem) => {
+          const itemX = item.transform[4];
+          const itemY = item.transform[5];
+          const itemWidth = item.width || 0;
+          const itemHeight = item.height || 10;
+
+          // Check if text item is within selection bounds
+          const isInX = itemX >= pdfX && itemX <= pdfX + pdfWidth;
+          const isInY = itemY <= pdfY && itemY >= pdfY - pdfHeight;
+
+          return isInX && isInY;
+        }
+      );
 
       // Sort text items by position (top to bottom, left to right)
       selectedTextItems.sort((a: PDFTextItem, b: PDFTextItem) => {
@@ -247,7 +253,7 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
         const bY = b.transform[5];
         const aX = a.transform[4];
         const bX = b.transform[4];
-        
+
         // First by Y coordinate (descending - higher Y is visually lower on page)
         if (Math.abs(aY - bY) > 5) {
           return bY - aY;
@@ -257,7 +263,9 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
       });
 
       // Combine text items
-      const extractedText = selectedTextItems.map((item: PDFTextItem) => item.str).join(" ");
+      const extractedText = selectedTextItems
+        .map((item: PDFTextItem) => item.str)
+        .join(" ");
       return extractedText || `Selected area from page ${pageNum}`;
     } catch (error) {
       console.error("Error extracting text:", error);
