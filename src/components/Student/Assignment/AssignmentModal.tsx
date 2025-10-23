@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -33,13 +34,16 @@ export function AssignmentModal({
   const [attachment, setAttachment] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  
+  // Move the hook calls to the top level - before any conditional returns
   const id = assignments?.id;
-  const { data: assignmentDetails } = useGetassignmentDetailsQuery(id);
+  const { data: assignmentDetails } = useGetassignmentDetailsQuery(id, {
+    skip: !isOpen || !id, // Skip the query if modal is not open or no ID
+  });
   const [submitAssignmentAnsFn] = useSubmitAssingmentAnsMutation();
-  
+
+  // Early return after all hooks have been called
   if (!isOpen) return null;
-  
+
   const assignment = assignmentDetails?.result?.assignment ?? assignments;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,7 +79,7 @@ export function AssignmentModal({
 
       // Reset form and close modal on success
       if (response?.success) {
-        toast.success("Anser submited successfully");
+        toast.success("Answer submitted successfully");
         refetch();
         setAnswer("");
         setAttachment(null);

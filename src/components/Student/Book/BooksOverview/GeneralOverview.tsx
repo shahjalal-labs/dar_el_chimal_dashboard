@@ -2,8 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { useGetBookDetailsQuery } from "@/redux/api/student/booksApi";
 import Image from "next/image";
-import { useState } from "react";
-
+import { useRouter } from "next/navigation";
 
 // Define the type for grade items
 interface GradeItem {
@@ -37,8 +36,7 @@ interface GeneralOverviewProps {
 }
 
 function GeneralOverview({ bookId }: GeneralOverviewProps) {
-  const [showPdfReader, setShowPdfReader] = useState(false);
-
+  const router = useRouter();
   const { data: getBooksOverview } = useGetBookDetailsQuery(bookId);
   console.log("data", getBooksOverview);
 
@@ -53,6 +51,15 @@ function GeneralOverview({ bookId }: GeneralOverviewProps) {
       (g: Grade) =>
         g?.gradesinthisSchool?.map((item: GradeItem) => item?.grade) || []
     ) || [];
+
+  const handleOpenBook = () => {
+    // Navigate to the PDF reader route
+    router.push(`/student/books/read?pdfurl=${bookOverviewData?.file}`);
+  };
+
+  const handleBack = () => {
+    router.back();
+  };
 
   return (
     <section className="bg-white rounded-2xl p-5">
@@ -122,31 +129,20 @@ function GeneralOverview({ bookId }: GeneralOverviewProps) {
         {/* Action Buttons */}
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-center pt-4">
           <Button
+            onClick={handleBack}
             variant="outline"
             className="border-gray-300 text-gray-700 hover:bg-gray-50 bg-transparent"
           >
             Back
           </Button>
-          {/* <Link href={`/student/books/read/${bookId}`}>
-           
-          </Link> */}
           <Button
-            onClick={() => setShowPdfReader(true)}
+            onClick={handleOpenBook}
             className="bg-[#1E3A8A] text-white hover:bg-[#1E3A8A]/90"
           >
             Open Book
           </Button>
         </div>
       </div>
-
-      {/* PDF Reader Modal */}
-      {/* {showPdfReader && (
-        <PdfReader
-          // bookFile={bookOverviewData?.file || ""}
-          // bookName={bookOverviewData?.bookName}
-          // onClose={() => setShowPdfReader(false)}
-        />
-      )} */}
     </section>
   );
 }

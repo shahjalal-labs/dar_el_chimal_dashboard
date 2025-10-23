@@ -4,13 +4,7 @@ import { useGetAnnouncementDetailsQuery } from "@/redux/api/student/overviewApi"
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 
-interface Announcement {
-  id: string;
-  date: string;
-  title: string;
 
-  content: string;
-}
 
 export default function AnnouncementDetailPage({
   params,

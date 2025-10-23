@@ -139,7 +139,9 @@ export function AssignmentDetailView({
                 <Image
                   src={answer.studentAttachment}
                   alt="Attachment"
-                  className="w-full rounded-lg"
+                  className="w-[665px] mx-auto rounded-lg object-contain"
+                  width={100}
+                  height={100}
                 />
               )}
             </div>
