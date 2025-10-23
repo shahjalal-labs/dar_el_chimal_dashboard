@@ -35,6 +35,7 @@ const General = ({ id }: { id: string }) => {
         uploadImage,
         uploadPdf
     } = useSelector((state: RootState) => state.book);
+    
     const { data } = useGetSingleBookQuery(id);
     const [UpdateBook, { isLoading }] = useUpdateBookMutation();
 

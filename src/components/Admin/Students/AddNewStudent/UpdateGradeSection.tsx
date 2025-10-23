@@ -39,103 +39,64 @@ interface Mapping {
 
 const UpdateGradeSection = ({ id }: { id: string }) => {
     const dispatch = useDispatch();
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [optionToRemove, setOptionToRemove] = useState("");
     const { email } = useSelector((state: RootState) => state.student);
 
-    const [mappings, setMappings] = useState<Mapping[]>([
-        { id: Date.now().toString(), school: null, grade: [] },
-    ]);
-
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [optionToRemove, setOptionToRemove] = useState<GradeOption | null>(null);
+    const [mappings, setMappings] = useState<Mapping[]>([{ id: Date.now().toString(), school: null, grade: [] }]);
 
     const { data } = useGetStudentDetailsQuery(id);
-    const { data: gradesData } = useGetAllGradesQuery({
-        currentPage: 1,
-        limit: 1000,
-    });
+    const { data: gradesData } = useGetAllGradesQuery({ currentPage: 1, limit: 1000 });
 
-    const [UpdateStudent, { isLoading: isUpdating }] =
-        useUpdateStudentMutation();
+    const [UpdateStudent, { isLoading: isUpdating }] = useUpdateStudentMutation();
 
     useEffect(() => {
         if (data?.result) {
             dispatch(setEmail(data?.result?.email || ""));
-            dispatch(
-                setStudentSchoolName(
-                    data?.result?.StudentGrades[0]?.grade?.school?.name
-                )
-            );
+            dispatch(setStudentSchoolName(data?.result?.StudentGrades[0]?.grade?.school?.name));
 
-            const prefilledSchool: SchoolOption | null =
-                data?.result?.StudentGrades?.[0]?.grade?.school
-                    ? {
-                        schoolId:
-                            data.result.StudentGrades[0].grade.school.id,
-                        schoolName:
-                            data.result.StudentGrades[0].grade.school.name,
-                        image:
-                            data.result.StudentGrades[0].grade.school
-                                .schoolLogo || "",
-                    }
-                    : null;
+            const prefilledSchool: SchoolOption | null = data?.result?.StudentGrades?.[0]?.grade?.school ?
+                {
+                    schoolId: data.result.StudentGrades[0].grade.school.id,
+                    schoolName: data.result.StudentGrades[0].grade.school.name,
+                    image: data.result.StudentGrades[0].grade.school.schoolLogo || "",
+                } : null;
 
-            const prefilledGrades: GradeOption[] =
-                data?.result?.StudentGrades?.map((g: any) => ({
-                    id: g.grade.id,
-                    label: g.grade.grade,
-                    schoolId: g.grade.schoolId,
-                })) ?? [];
+            const prefilledGrades: GradeOption[] = data?.result?.StudentGrades?.map((g: any) => ({
+                id: g.grade.id,
+                label: g.grade.grade,
+                schoolId: g.grade.schoolId,
+            })) ?? [];
 
-            setMappings((prev) =>
-                prev.map((item, idx) =>
-                    idx === 0
-                        ? { ...item, school: prefilledSchool, grade: prefilledGrades }
-                        : item
-                )
-            );
+            setMappings((prev) => prev.map((item, idx) => idx === 0 ? { ...item, school: prefilledSchool, grade: prefilledGrades } : item));
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data]);
 
-    const allGrades: GradeOption[] =
-        gradesData?.result?.map((g: any) => ({
-            id: g.id,
-            label: g.grade,
-            schoolId: g.schoolId,
-        })) ?? [];
+    const allGrades: GradeOption[] = gradesData?.result?.map((g: any) => ({
+        id: g.id,
+        label: g.grade,
+        schoolId: g.schoolId,
+    })) ?? [];
 
     const handleSchoolChange = (id: string, school: SchoolOption) => {
-        setMappings((prev) =>
-            prev.map((item) =>
-                item.id === id ? { ...item, school, grade: [] } : item
-            )
-        );
+        setMappings((prev) => prev.map((item) => item.id === id ? { ...item, school, grade: [] } : item));
     };
 
     const handleGradeChange = (id: string, selectedGrades: readonly GradeOption[]) => {
-        setMappings((prev) =>
-            prev.map((item) =>
-                item.id === id ? { ...item, grade: [...selectedGrades] } : item
-            )
-        );
+        setMappings((prev) => prev.map((item) => item.id === id ? { ...item, grade: [...selectedGrades] } : item));
     };
 
-    // 🧹 Triggered when clicking "×" on a grade tag
-    const handleRemoveClick = (option: GradeOption) => {
-        setOptionToRemove(option);
+    const handleRemoveClick = (id: string) => {
+        setOptionToRemove(id);
         setIsModalOpen(true);
     };
 
-    // ✅ Confirm and delete from backend
     const confirmRemove = async () => {
-        const deletedGrade = data?.result?.StudentGrades?.find(
-            (g: any) => g?.grade?.grade === optionToRemove?.label
-        );
-
         const body = {
             userData: {},
             gradeData: {
-                deletedGrade: [deletedGrade?.grade?.id],
+                deletedGrade: [optionToRemove],
                 newGradeAssign: [],
             },
         };
@@ -148,30 +109,17 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
             if (response.success) {
                 toast.success(response.message);
 
-                // remove from UI
-                setMappings((prev) =>
-                    prev.map((m) => ({
-                        ...m,
-                        grade: m.grade.filter(
-                            (g) => g.id !== optionToRemove?.id
-                        ),
-                    }))
-                );
+                setMappings((prev) => prev.map((m) => ({ ...m, grade: m.grade.filter((g) => g.id !== optionToRemove) })));
 
                 setIsModalOpen(false);
-                setOptionToRemove(null);
+                setOptionToRemove("");
             }
         } catch (error) {
-            toast.warning(
-                (error as any)?.data?.message || "Something went wrong"
-            );
+            toast.warning((error as any)?.data?.message || "Something went wrong");
         }
     };
 
-    const selectedSchoolIds = useMemo(
-        () => mappings.filter((m) => m.school).map((m) => m.school!.schoolId),
-        [mappings]
-    );
+    const selectedSchoolIds = useMemo(() => mappings.filter((m) => m.school).map((m) => m.school!.schoolId), [mappings]);
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -201,9 +149,7 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                 toast.success(response.message);
             }
         } catch (error) {
-            toast.warning(
-                (error as any)?.data?.message || "Something went wrong"
-            );
+            toast.warning((error as any)?.data?.message || "Something went wrong");
         }
     };
 
@@ -225,21 +171,16 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
 
             {mappings?.map((mapping) => {
                 const { school, grade } = mapping;
-                const filteredGradeOptions = school
-                    ? allGrades.filter(
-                        (g) => String(g.schoolId) === String(school.schoolId)
-                    )
-                    : [];
+                const filteredGradeOptions = school ? allGrades.filter((g) => String(g.schoolId) === String(school.schoolId)) : [];
 
                 return (
                     <div key={mapping.id} className="mb-6 space-y-5">
+
                         {/* School Name */}
                         <div className="flex-1 relative w-full">
                             <Label>School Name</Label>
                             <GetSchools
-                                onChange={(selectedSchool) =>
-                                    handleSchoolChange(mapping.id, selectedSchool)
-                                }
+                                onChange={(selectedSchool) => handleSchoolChange(mapping.id, selectedSchool)}
                                 excludeIds={selectedSchoolIds}
                             />
 
@@ -258,9 +199,7 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                                         }}
                                         priority
                                     />
-                                    <span className="opacity-[50%]">
-                                        {school?.schoolName}
-                                    </span>
+                                    <span className="opacity-[50%]">{school?.schoolName}</span>
                                 </div>
                             )}
                         </div>
@@ -276,26 +215,10 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                                 options={filteredGradeOptions}
                                 className="mt-2"
                                 classNamePrefix="select"
-                                value={grade}
+                                // value={grade}
                                 getOptionLabel={(option) => option.label}
                                 getOptionValue={(option) => option.id}
-                                onChange={(selected) =>
-                                    handleGradeChange(mapping.id, selected)
-                                }
-                                components={{
-                                    MultiValueRemove: (props) => (
-                                        <button
-                                            type="button"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleRemoveClick(props.data);
-                                            }}
-                                            className="ml-1 text-gray-500 hover:text-red-600 transition"
-                                        >
-                                            ×
-                                        </button>
-                                    ),
-                                }}
+                                onChange={(selected) => handleGradeChange(mapping.id, selected)}
                                 styles={{
                                     control: (base) => ({
                                         ...base,
@@ -327,6 +250,18 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                                 }}
                             />
                         </div>
+
+                        {/* Tag */}
+                        <div className="flex gap-2">
+                            {grade?.map((grade) => (
+                                <div key={grade?.id} className="bg-[#F1F5F9] text-sm rounded-md flex items-center gap-1.5 w-fit px-2.5 py-0.5">
+                                    {grade?.label}
+                                    <button type="button" onClick={() => handleRemoveClick(grade?.id)} className="text-gray-700 hover:text-red-600 text-lg cursor-pointer">
+                                        ×
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 );
             })}
@@ -344,14 +279,11 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                 </Link>
 
                 <Button
-                    type="submit"
+                    type={!isModalOpen ? "submit" : "button"}
                     disabled={isButtonDisabled}
-                    className={`px-6 text-white font-medium border border-[#1E3A8A] transition-all ease-in-out duration-500 cursor-pointer ${isButtonDisabled
-                        ? "bg-gray-400 cursor-not-allowed"
-                        : "bg-[#1E3A8A] hover:bg-[#1E3A8A]/80"
-                        }`}
+                    className={`px-6 text-white font-medium border border-[#1E3A8A] transition-all ease-in-out duration-500 cursor-pointer ${isButtonDisabled ? "bg-gray-400 cursor-not-allowed" : "bg-[#1E3A8A] hover:bg-[#1E3A8A]/80"}`}
                 >
-                    {isUpdating ? (
+                    {(isUpdating && !isModalOpen) ? (
                         <div className="flex items-center gap-2">
                             Updating...
                             <PiSpinner className="h-4 w-4 animate-spin" />
@@ -369,8 +301,7 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                         <DialogTitle>Remove Grade</DialogTitle>
                     </DialogHeader>
                     <p className="text-gray-700">
-                        Are you sure you want to remove{" "}
-                        <span className="font-semibold">{optionToRemove?.label}</span>?
+                        Are you sure you want to remove this grade?
                     </p>
                     <div className="flex justify-end gap-2 mt-4">
                         <button
