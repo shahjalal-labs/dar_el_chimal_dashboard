@@ -13,6 +13,7 @@ import LeftSide from "./LeftSide";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/redux/store/store";
 import { setUserToken } from "@/redux/features/authSlice";
+import { Button } from "../ui/button";
 
 const otpSchema = z.object({
     otp: z
@@ -114,7 +115,7 @@ export default function OtpPage() {
                             </p>
                         )}
 
-                        <button
+                        <Button
                             type="submit"
                             disabled={isLoading}
                             className="w-full bg-[#1E3A8A] hover:bg-[#1E3A8A80] text-white font-bold rounded-lg mt-2 flex justify-center items-center font-outfit text-[18px] py-[10px] cursor-pointer transition-colors duration-300 ease-in-out"
@@ -129,7 +130,7 @@ export default function OtpPage() {
                             ) : (
                                 <span>Submit OTP</span>
                             )}
-                        </button>
+                        </Button>
 
                         <div className="text-center">
                             <p className="text-xl text-slate-600">Don&apos;t receive the code?</p>

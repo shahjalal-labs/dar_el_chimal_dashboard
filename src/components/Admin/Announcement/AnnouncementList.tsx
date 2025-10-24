@@ -49,7 +49,7 @@ const AnnouncementList = () => {
                                     </div>
                                     <h1 className='text-[#262626] font-semibold mt-2'>{announce?.anouncement}</h1>
                                 </div>
-                                <button><TfiAngleRight className='w-6 h-6' /></button>
+                                <Button><TfiAngleRight className='w-6 h-6' /></Button>
                             </Link>
                         ))
                 }

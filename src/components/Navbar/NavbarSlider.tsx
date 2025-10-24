@@ -25,6 +25,7 @@ import { SiGoogleclassroom } from "react-icons/si";
 import { TbCategoryPlus } from "react-icons/tb";
 import { TfiAngleDown, TfiAngleUp, TfiAnnouncement } from "react-icons/tfi";
 import { useDispatch, useSelector } from "react-redux";
+import { Button } from "../ui/button";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -129,12 +130,12 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
   return (
     <div className="h-screen bg-white">
       {/* Sidebar Toggle Button */}
-      <button
+      <Button
         onClick={toggleSidebar}
         className="m-4 p-2 text-black rounded-md bg-white shadow-md lg:hidden"
       >
         {isOpen ? <IoClose size={20} /> : <FiMenu size={20} />}
-      </button>
+      </Button>
 
       {/* Sidebar Content */}
       <aside className={`duration-300 flex flex-col justify-between h-[calc(100%-80px)] font-inter ${isOpen ? "w-[250px] xl:w-[286px]" : "w-[80px]"}`}>
@@ -325,13 +326,13 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
 
           {/* Logout Button */}
           <div className="mt-auto p-6">
-            <button
+            <Button
               onClick={handleLogOut}
               className="flex items-center justify-start gap-2 text-red-400 transition-colors rounded-md bg-[#EF444433] w-full py-2 px-4"
             >
               <RiLogoutCircleRLine size={18} />
               {isOpen && <span className="text-lg">Log out</span>}
-            </button>
+            </Button>
           </div>
         </div>
       </aside >

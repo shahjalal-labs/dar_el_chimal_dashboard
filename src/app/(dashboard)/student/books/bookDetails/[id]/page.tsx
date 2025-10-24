@@ -2,6 +2,7 @@
 
 import Attachments from "@/components/Student/Book/BooksOverview/Attachments";
 import GeneralOverview from "@/components/Student/Book/BooksOverview/GeneralOverview";
+import { Button } from "@/components/ui/button";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 
@@ -25,7 +26,7 @@ export default function BackToSchoolPage() {
         </div>
         <div className="mb-8 border-b border-gray-200">
           <div className="flex gap-8">
-            <button
+            <Button
               onClick={() => setActiveTab("general")}
               className={`pb-4 font-medium transition-colors ${
                 activeTab === "general"
@@ -34,8 +35,8 @@ export default function BackToSchoolPage() {
               }`}
             >
               General
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => setActiveTab("resources")}
               className={`pb-4 font-medium transition-colors ${
                 activeTab === "resources"
@@ -44,7 +45,7 @@ export default function BackToSchoolPage() {
               }`}
             >
               Resources
-            </button>
+            </Button>
           </div>
         </div>
 

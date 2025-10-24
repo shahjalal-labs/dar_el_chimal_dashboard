@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 import { PiSpinner } from 'react-icons/pi';
 import LeftSide from './LeftSide';
+import { Button } from '../ui/button';
 
 const resetPasswordSchema = z
     .object({
@@ -103,7 +104,7 @@ const ResetPassword = () => {
                                     className={`w-full bg-white rounded-lg px-4 py-2 ${errors.newPassword ? "border-red-500" : "border-[#98A2B3]"
                                         } pr-10`}
                                 />
-                                <button
+                                <Button
                                     type="button"
                                     className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                                     onClick={() => setShowPassword(!showPassword)}
@@ -113,7 +114,7 @@ const ResetPassword = () => {
                                     ) : (
                                         <EyeIcon className="h-4 w-4 text-gray-400" />
                                     )}
-                                </button>
+                                </Button>
                             </div>
                             {errors?.newPassword && (
                                 <p className="text-red-500 text-sm">
@@ -141,7 +142,7 @@ const ResetPassword = () => {
                                         : "border-[#98A2B3]"
                                         } pr-10`}
                                 />
-                                <button
+                                <Button
                                     type="button"
                                     className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
@@ -151,7 +152,7 @@ const ResetPassword = () => {
                                     ) : (
                                         <EyeIcon className="h-4 w-4 text-gray-400" />
                                     )}
-                                </button>
+                                </Button>
                             </div>
                             {errors.confirmPassword && (
                                 <p className="text-red-500 text-sm">
@@ -161,7 +162,7 @@ const ResetPassword = () => {
                         </div>
 
                         {/* Submit Button */}
-                        <button
+                        <Button
                             type="submit"
                             className="w-full bg-[#1E3A8A] hover:bg-[#1E3A8A80] text-white font-bold rounded-lg mt-2 flex justify-center items-center font-outfit text-[18px] py-[10px] cursor-pointer transition-colors duration-300 ease-in-out"
                         >
@@ -175,7 +176,7 @@ const ResetPassword = () => {
                             ) : (
                                 <span>Save & Sign In</span>
                             )}
-                        </button>
+                        </Button>
                     </form>
                 </div>
             </div>

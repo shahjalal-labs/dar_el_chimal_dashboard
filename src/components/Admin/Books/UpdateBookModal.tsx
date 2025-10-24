@@ -14,9 +14,10 @@ import General from "./AddNewBook/General";
 import Grade from "./AddNewBook/Grade";
 
 const UpdateBookModal = ({ id }: { id: string }) => {
-  const closeRef = useRef<HTMLButtonElement>(null);
   const dispatch = useDispatch();
+  const closeRef = useRef<HTMLButtonElement>(null);
   const tab = useSelector((state: RootState) => state.ui.activeBookTab);
+  
   const { data, isLoading } = useGetSingleBookQuery(id);
 
   const handleTabChange = (value: string) => {

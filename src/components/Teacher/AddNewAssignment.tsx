@@ -318,14 +318,14 @@ const AddNewAssignment = () => {
 
                     {/* Buttons */}
                     <div className="flex flex-col md:flex-row justify-center items-center gap-4 pt-4">
-                        <button
+                        <Button
                             type="button"
                             className="border px-4 py-2 rounded-md"
                             onClick={() => route.back()}
                         >
                             Cancel
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             type="submit"
                             className="bg-[#1E3A8A] hover:bg-[#1E3A8A80] text-white px-4 py-2 rounded-md transition ease-in-out duration-500 cursor-pointer"
                         >
@@ -339,7 +339,7 @@ const AddNewAssignment = () => {
                                     "Save Assignment"
                                 )
                             }
-                        </button>
+                        </Button>
                     </div>
                 </form>
             </div >

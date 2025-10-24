@@ -1,11 +1,7 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-// import { Button } from "../ui/Button";
-// import { useUplaodVideoMutation } from "@/redux/api/Courses";
-// import { toast, ToastContainer } from "react-toastify";
 import { Plus } from "lucide-react";
-// import { useUploadFileMutation } from "@/redux/api/uploadFile";
 import { toast } from "sonner";
 import { Button } from "./button";
 
@@ -14,40 +10,30 @@ interface CreateSubGroupProps {
   id: string;
 }
 
-export default function UploadVideo({ setIsUpload, /* id */ }: CreateSubGroupProps) {
-  // State for file uploads
+export default function UploadVideo({ setIsUpload }: CreateSubGroupProps) {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoPreview, setVideoPreview] = useState<string | null>(null);
 
-  // Refs for hidden file inputs
   const videoInputRef = useRef<HTMLInputElement>(null);
 
-  // Handle video file selection
   const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setVideoFile(file);
 
-      // Create preview URL for video
       const fileUrl = URL.createObjectURL(file);
       setVideoPreview(fileUrl);
     }
   };
 
-  // Trigger file input click
   const triggerVideoUpload = () => {
     videoInputRef.current?.click();
   };
-
-//   const [/* uploadImageFN */, { isLoading: loading }] = useUploadFileMutation();
-
-//   const [uploadVideoFN, { isLoading }] = useUplaodVideoMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData();
 
-    // Append video file to form data
     if (!videoFile) {
       toast.error("Please select a video file before uploading.");
       return;
@@ -55,25 +41,7 @@ export default function UploadVideo({ setIsUpload, /* id */ }: CreateSubGroupPro
     formData.append("file", videoFile);
 
     try {
-    //   const res = await uploadImageFN(formData);
-
-    //   const fileUrl = res?.data?.data?.fileUrl;
-
       try {
-        /* if (fileUrl) {
-          const response = await uploadVideoFN({ videoUrl: fileUrl, id });
-
-          if (response?.data?.success) {
-            toast.success(
-              response?.data?.message || "Video uploaded successfully!"
-            );
-            setIsUpload(false);
-          } else {
-            toast.error(
-              response?.data?.error?.message || "Video upload failed........"
-            );
-          }
-        } */
       } catch (error) {
         console.log(error);
       }
@@ -85,7 +53,6 @@ export default function UploadVideo({ setIsUpload, /* id */ }: CreateSubGroupPro
 
   return (
     <div>
-      {/* <ToastContainer /> */}
       <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
         <div className="bg-white p-6 rounded-lg shadow-lg w-1/2">
           <h2 className="text-lg font-semibold mb-4 ">Create Sub Group</h2>
@@ -127,14 +94,13 @@ export default function UploadVideo({ setIsUpload, /* id */ }: CreateSubGroupPro
                 type="submit"
                 className="px-6 py-2 bg-primary text-white hover:bg-primary/80"
               >
-                {/* {isLoading || loading ? "Uploading..." : "Upload"} */}
               </Button>
-              <button
+              <Button
                 onClick={() => setIsUpload(false)}
                 className="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
               >
                 Close
-              </button>
+              </Button>
             </div>
           </form>
         </div>

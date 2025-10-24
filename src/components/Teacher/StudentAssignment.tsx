@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useGetStudentAssignmentDetailsByTeacherQuery } from "@/redux/api/teacher/overviewApi";
 import { SyncLoader } from "react-spinners";
 import { Input } from "../ui/input";
+import { Button } from "../ui/button";
 
 const StudentAssignment = () => {
     const router = useRouter();
@@ -126,15 +127,15 @@ const StudentAssignment = () => {
 
                 {/* Buttons */}
                 <div className="flex justify-center items-center gap-3 mt-6">
-                    <button
+                    <Button
                         onClick={() => router.back()}
                         className="px-6 py-2 border rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100"
                     >
                         Back
-                    </button>
-                    <button className="px-6 py-2 bg-[#1E3A8A] hover:bg-blue-800 text-white rounded-md text-sm font-medium cursor-pointer">
+                    </Button>
+                    <Button className="px-6 py-2 bg-[#1E3A8A] hover:bg-blue-800 text-white rounded-md text-sm font-medium cursor-pointer">
                         Grade Assignment
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>

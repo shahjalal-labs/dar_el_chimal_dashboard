@@ -160,12 +160,12 @@ const Resource = ({ bookId }: { bookId: any }) => {
                     </label>
                 ) : (
                     <div className="relative flex flex-col items-center p-6 border border-[#CBD5E1] rounded-lg bg-gray-50 mt-2">
-                        <button
+                        <Button
                             onClick={handleRemoveResourceFile}
                             className="absolute top-2 right-2 bg-gray-300 rounded-full p-1 hover:bg-gray-400 transition"
                         >
                             <RxCross1 className="w-3 h-3" />
-                        </button>
+                        </Button>
                         <p className="text-[#1E3A8A] font-medium text-center break-all">
                             {previewResourceFile}
                         </p>

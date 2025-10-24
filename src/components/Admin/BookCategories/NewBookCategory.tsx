@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useCreateBookCategoryMutation } from '@/redux/api/bookCategory';
+import { Button } from '@/components/ui/button';
 
 interface FormDataType {
     categoryName: string;
@@ -20,16 +21,15 @@ interface FormDataType {
 }
 
 const NewBookCategory = () => {
+    const route = useRouter();
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [formData, setFormData] = useState<FormDataType>({
         categoryName: '',
         description: '',
         uploadImage: null,
     });
 
-    const route = useRouter();
     const [CreateCategory, { isLoading }] = useCreateBookCategoryMutation();
-
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
     useEffect(() => {
         if (formData.uploadImage) {
@@ -158,11 +158,11 @@ const NewBookCategory = () => {
 
                     <div className='flex justify-center items-center gap-4'>
                         <Link href='/admin/book-categories'>
-                            <button className='font-medium text-[#636F85] border border-[#B8B8B8] rounded-xl hover:bg-[#B8B8B8] transition-all ease-in-out duration-500 cursor-pointer px-4 py-2.5'>Cancel</button>
+                            <Button className='font-medium text-[#636F85] border border-[#B8B8B8] rounded-xl hover:bg-[#B8B8B8] transition-all ease-in-out duration-500 cursor-pointer px-4 py-2.5'>Cancel</Button>
                         </Link>
 
                         {/* Submit Button */}
-                        <button
+                        <Button
                             type='submit'
                             className='bg-[#1E3A8A] hover:bg-[#1E3A8A80] rounded-lg px-4 py-3 text-white font-bold flex justify-center items-center gap-2 transition-colors duration-500 cursor-pointer'
                         >
@@ -176,7 +176,7 @@ const NewBookCategory = () => {
                                     </div> :
                                     "Save Category"
                             }
-                        </button>
+                        </Button>
                     </div>
                 </form>
             </div>

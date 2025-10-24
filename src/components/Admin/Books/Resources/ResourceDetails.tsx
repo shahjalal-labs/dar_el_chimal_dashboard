@@ -12,8 +12,9 @@ import { PiSpinner } from "react-icons/pi";
 import { useDeleteResourceMutation, useGetSingleResourceQuery } from "@/redux/api/resource";
 
 const ResourceDetails: React.FC = () => {
-    const { id, resourceId } = useParams();
     const route = useRouter();
+    const { id, resourceId } = useParams();
+    
     const { data, isLoading, isError } = useGetSingleResourceQuery(resourceId);
     const [DeleteResource, { isLoading: isDeleting }] = useDeleteResourceMutation();
 

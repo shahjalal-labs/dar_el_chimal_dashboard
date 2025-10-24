@@ -50,17 +50,12 @@ const Grade = ({ id }: { id: string }) => {
     } = useSelector((state: RootState) => state?.book);
 
     const { data } = useGetSingleBookQuery(id);
-    const { data: gradesData, isLoading, isError } = useGetAllGradesQuery({
-        currentPage: 1,
-        limit: 1000,
-    });
+    const { data: gradesData, isLoading, isError } = useGetAllGradesQuery({ currentPage: 1, limit: 1000 });
 
     const [CreateBook, { isLoading: isBookLoading }] = useCreateBookMutation();
     const [UpdateBook, { isLoading: isUpdating }] = useUpdateBookMutation();
 
-    const [mappings, setMappings] = useState<Mapping[]>([
-        { id: Date?.now()?.toString(), school: null, grades: [] },
-    ]);
+    const [mappings, setMappings] = useState<Mapping[]>([{ id: Date?.now()?.toString(), school: null, grades: [] }]);
 
     // Prepare grade options from API
     const allGrades: GradeOption[] =
@@ -115,7 +110,6 @@ const Grade = ({ id }: { id: string }) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [gradesData, schoolGradeMappings]);
 
-    // Add new blank mapping
     const handleAddMapping = () => {
         setMappings((prev) => [
             ...prev,
@@ -123,12 +117,10 @@ const Grade = ({ id }: { id: string }) => {
         ]);
     };
 
-    // Remove mapping
     const handleRemoveMapping = (id: string) => {
         setMappings((prev) => prev?.filter((item) => item?.id !== id));
     };
 
-    // School selection
     const handleSchoolChange = (id: string, school: SchoolOption) => {
         setMappings((prev) =>
             prev?.map((item) =>
@@ -137,7 +129,6 @@ const Grade = ({ id }: { id: string }) => {
         );
     };
 
-    // Grade selection
     const handleGradeChange = (id: string, selectedGrades: readonly GradeOption[]) => {
         setMappings((prev) =>
             prev?.map((item) =>
@@ -146,13 +137,11 @@ const Grade = ({ id }: { id: string }) => {
         );
     };
 
-    // Extract selected school IDs to prevent duplicates
     const selectedSchoolIds = useMemo(
         () => mappings?.filter((m) => m?.school)?.map((m) => m?.school!.schoolId),
         [mappings]
     );
 
-    // Save handler — transforms data to backend format
     const handleSave = async () => {
         const payload = mappings
             ?.filter((m) => m?.school)

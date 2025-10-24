@@ -35,7 +35,7 @@ const General = ({ id }: { id: string }) => {
         uploadImage,
         uploadPdf
     } = useSelector((state: RootState) => state.book);
-    
+
     const { data } = useGetSingleBookQuery(id);
     const [UpdateBook, { isLoading }] = useUpdateBookMutation();
 
@@ -123,7 +123,7 @@ const General = ({ id }: { id: string }) => {
     };
 
     const isButtonDisabled =
-        !bookName || !description || !isbn || !author || !categoryName || !previewImage || !previewPdf;
+        !bookName || !description || !isbn || !author || !categoryName || !previewPdf;
 
     return (
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -135,7 +135,6 @@ const General = ({ id }: { id: string }) => {
                     placeholder="Enter book name"
                     value={bookName}
                     onChange={(e) => dispatch(setBookName(e.target.value))}
-                    className=""
                     required
                 />
             </div>
@@ -148,7 +147,6 @@ const General = ({ id }: { id: string }) => {
                     placeholder="Enter description"
                     value={description}
                     onChange={(e) => dispatch(setDescription(e.target.value))}
-                    className=""
                     required
                 />
             </div>
@@ -162,7 +160,6 @@ const General = ({ id }: { id: string }) => {
                         placeholder="Enter ISBN"
                         value={isbn}
                         onChange={(e) => dispatch(setISBN(e.target.value))}
-                        className=""
                         required
                     />
                 </div>
@@ -173,7 +170,6 @@ const General = ({ id }: { id: string }) => {
                         placeholder="Enter author name"
                         value={author}
                         onChange={(e) => dispatch(setAuthor(e.target.value))}
-                        className=""
                         required
                     />
                 </div>
@@ -183,9 +179,7 @@ const General = ({ id }: { id: string }) => {
             <div className="relative">
                 <Label>Book Category</Label>
                 <GetBookCategory
-                    onChange={(category) => {
-                        dispatch(setCategory(category))
-                    }}
+                    onChange={(category) => { dispatch(setCategory(category)) }}
                 />
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }} className='absolute z-10 top-[50%] left-[15px]'>
                     <Image
@@ -204,9 +198,7 @@ const General = ({ id }: { id: string }) => {
             <div className="md:flex gap-6">
                 {/* Image Upload */}
                 <div className="flex-1">
-                    <Label className="font-medium mb-2.5">
-                        Book Cover<span className="text-red-600">*</span>
-                    </Label>
+                    <Label className="font-medium mb-2.5">Book Cover</Label>
 
                     {!previewImage ? (
                         <label htmlFor="uploadImage">
@@ -248,9 +240,7 @@ const General = ({ id }: { id: string }) => {
 
                 {/* PDF Upload */}
                 <div className="flex-1 mt-5 md:mt-0">
-                    <Label className="font-medium mb-2.5">
-                        PDF File<span className="text-red-600">*</span>
-                    </Label>
+                    <Label className="font-medium mb-2.5">PDF File<span className="text-red-600">*</span></Label>
 
                     {!previewPdf ? (
                         <label htmlFor="uploadPdf">
@@ -273,17 +263,13 @@ const General = ({ id }: { id: string }) => {
                         </label>
                     ) : (
                         <div className="relative flex flex-col items-center p-6 border border-[#CBD5E1] rounded-lg bg-gray-50">
-                            <button
+                            <Button
                                 type="button"
                                 onClick={() => handlePdfChange(null)}
                                 className="absolute top-2 right-2 bg-gray-300 rounded-full p-1 hover:bg-gray-400"
                             >
                                 <RxCross1 className="w-3 h-3" />
-                            </button>
-                            {/* <p className="text-[#1E3A8A] font-medium text-center break-all">
-                                {previewPdf}
-                            </p>
-                            <p className="text-xs text-gray-500 mt-1">(PDF File)</p> */}
+                            </Button>
                             <iframe
                                 src={previewPdf}
                                 title="PDF Preview"
@@ -308,10 +294,7 @@ const General = ({ id }: { id: string }) => {
                 <Button
                     type="submit"
                     disabled={isButtonDisabled}
-                    className={`px-6 text-white font-medium border border-[#1E3A8A] transition-all duration-300 ${isButtonDisabled
-                        ? "bg-gray-400 cursor-not-allowed"
-                        : "bg-[#1E3A8A] hover:bg-[#1E3A8A]/80"
-                        }`}
+                    className={`px-6 text-white font-medium transition-all duration-500 ease-in-out cursor-pointer ${isButtonDisabled ? "bg-gray-400 cursor-not-allowed" : "bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A]"}`}
                 >
                     {
                         (isLoading && pathname === '/admin/books') ?

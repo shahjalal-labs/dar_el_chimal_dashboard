@@ -16,6 +16,7 @@ const ViewAnnouncement = () => {
     const route = useRouter();
     const { id } = useParams();
     const { data } = useGetSingleAnnouncementQuery(id);
+    
     const [DeleteAnnouncement, { isLoading: isDeleting }] = useDeleteAnnouncementMutation();
 
     const handleDelete = async () => {

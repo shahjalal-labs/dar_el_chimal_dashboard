@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useLoginMutation, useStudentLoginMutation } from "@/redux/api/authApi";
@@ -12,16 +13,15 @@ import Cookies from "js-cookie";
 import { Bell, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
 import { FaRegUser } from "react-icons/fa";
 import { LuLockKeyhole } from "react-icons/lu";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 import LeftSide from "./LeftSide";
-// import { messaging } from "@/lib/firebase";
 import { messaging } from "@/lib/firebase";
 import { Modal } from "antd";
 import { getToken, Messaging } from "firebase/messaging";
+// import { messaging } from "@/lib/firebase";
 
 const customIcon = (
   <LoadingOutlined style={{ fontSize: 24, color: "#fff" }} spin />
@@ -141,12 +141,11 @@ export default function Login() {
     };
 
     try {
-      // ✅ If role is "Student", use the studentLoginFn API
       if (role === "Student") {
         const studentBody = {
-          userName: userName, // assuming userName is the student's email
+          userName: userName,
           password: password,
-          fcmToken: fcmToken || "", // include FCM token
+          fcmToken: fcmToken || "",
         };
 
         const response = await studentLoginFn(studentBody).unwrap();
@@ -160,13 +159,13 @@ export default function Login() {
         } else {
           toast.error(response?.data?.message || "Login failed!");
         }
-        return; // ✅ stop execution here for student login
+        return;
       }
       if (role === "Teacher") {
         const studentBody = {
-          userName: userName, // assuming userName is the student's email
+          userName: userName,
           password: password,
-          fcmToken: fcmToken || "", // include FCM token
+          fcmToken: fcmToken || "",
         };
 
         const response = await studentLoginFn(studentBody).unwrap();
@@ -180,10 +179,9 @@ export default function Login() {
         } else {
           toast.error(response?.data?.message || "Login failed!");
         }
-        return; // ✅ stop execution here for student login
+        return;
       }
 
-      // ✅ Default login for non-students
       const response = await login(body).unwrap();
       const token = response?.result?.accessToken;
       let decodedPayload: JWTPayload = {};
@@ -320,7 +318,7 @@ export default function Login() {
                     className="outline-none"
                     required
                   />
-                  <button
+                  <Button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
@@ -330,7 +328,7 @@ export default function Login() {
                     ) : (
                       <Eye className="h-5 w-5" />
                     )}
-                  </button>
+                  </Button>
                 </div>
               </div>
 

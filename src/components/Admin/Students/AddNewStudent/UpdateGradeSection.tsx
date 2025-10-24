@@ -256,9 +256,9 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                             {grade?.map((grade) => (
                                 <div key={grade?.id} className="bg-[#F1F5F9] text-sm rounded-md flex items-center gap-1.5 w-fit px-2.5 py-0.5">
                                     {grade?.label}
-                                    <button type="button" onClick={() => handleRemoveClick(grade?.id)} className="text-gray-700 hover:text-red-600 text-lg cursor-pointer">
+                                    <Button type="button" onClick={() => handleRemoveClick(grade?.id)} className="text-gray-700 hover:text-red-600 text-lg cursor-pointer">
                                         ×
-                                    </button>
+                                    </Button>
                                 </div>
                             ))}
                         </div>
@@ -304,13 +304,13 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                         Are you sure you want to remove this grade?
                     </p>
                     <div className="flex justify-end gap-2 mt-4">
-                        <button
+                        <Button
                             onClick={() => setIsModalOpen(false)}
                             className="px-3 py-1 border rounded-md"
                         >
                             Cancel
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             onClick={confirmRemove}
                             className="px-3 py-1 bg-red-600 text-white rounded-md transition-all ease-in-out duration-500 cursor-pointer"
                         >
@@ -324,7 +324,7 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                             ) : (
                                 "Remove"
                             )}
-                        </button>
+                        </Button>
                     </div>
                 </DialogContent>
             </Dialog>

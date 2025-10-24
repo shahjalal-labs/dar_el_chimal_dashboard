@@ -38,7 +38,6 @@ const CreateTeacherModal = () => {
     const [mappings, setMappings] = useState<Mapping[]>([{ id: Date?.now()?.toString(), school: null, grades: [] },]);
 
     const { data: gradesData } = useGetAllGradesQuery({ currentPage: 1, limit: 1000 });
-
     const [CreateTeacher, { isLoading: isCreating }] = useCreateBulkTeacherMutation();
 
     const allGrades: GradeOption[] = gradesData?.result?.map((singleGrade: any) => ({

@@ -45,17 +45,11 @@ const CreateStudentModal = () => {
     const [showBulkModal, setShowBulkModal] = useState(false);
     const { numberOfStudent } = useSelector((state: RootState) => state.student);
 
-    const [mappings, setMappings] = useState<Mapping[]>([
-        { id: Date.now().toString(), school: null, grade: null },
-    ]);
+    const [mappings, setMappings] = useState<Mapping[]>([{ id: Date.now().toString(), school: null, grade: null }]);
 
-    const { data: gradesData } = useGetAllGradesQuery({
-        currentPage: 1,
-        limit: 1000,
-    });
+    const { data: gradesData } = useGetAllGradesQuery({ currentPage: 1, limit: 1000 });
 
-    const [createStudent, { isLoading: isCreating }] =
-        useCreateBulkStudentMutation();
+    const [createStudent, { isLoading: isCreating }] = useCreateBulkStudentMutation();
 
     const allGrades: GradeOption[] =
         gradesData?.result?.map((g: any) => ({
@@ -66,25 +60,14 @@ const CreateStudentModal = () => {
 
     const handleSchoolChange = (id: string, school: SchoolOption) => {
         dispatch(setStudentSchoolName(school?.schoolName));
-        setMappings((prev) =>
-            prev.map((item) =>
-                item.id === id ? { ...item, school, grade: null } : item
-            )
-        );
+        setMappings((prev) => prev.map((item) => item.id === id ? { ...item, school, grade: null } : item));
     };
 
     const handleGradeChange = (id: string, selectedGrade: GradeOption | null) => {
-        setMappings((prev) =>
-            prev.map((item) =>
-                item.id === id ? { ...item, grade: selectedGrade } : item
-            )
-        );
+        setMappings((prev) => prev.map((item) => item.id === id ? { ...item, grade: selectedGrade } : item));
     };
 
-    const selectedSchoolIds = useMemo(
-        () => mappings.filter((m) => m.school).map((m) => m.school!.schoolId),
-        [mappings]
-    );
+    const selectedSchoolIds = useMemo(() => mappings.filter((m) => m.school).map((m) => m.school!.schoolId), [mappings]);
 
     const handleSave = async () => {
         if (
@@ -240,8 +223,8 @@ const CreateStudentModal = () => {
                         onClick={handleSave}
                         disabled={isButtonDisabled}
                         className={`px-6 text-white font-medium transition-all ease-in-out duration-500 cursor-pointer ${isButtonDisabled
-                                ? "bg-gray-400 cursor-not-allowed"
-                                : "bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A]"
+                            ? "bg-gray-400 cursor-not-allowed"
+                            : "bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A]"
                             }`}
                     >
                         {isCreating ? (

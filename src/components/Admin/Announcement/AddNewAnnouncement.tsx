@@ -18,8 +18,8 @@ import { useCreateAnnouncementMutation } from '@/redux/api/announcement';
 import { PiSpinner } from 'react-icons/pi';
 
 const AddNewAnnouncement = () => {
-    const [open, setOpen] = useState(false);
     const dispatch = useDispatch();
+    const [open, setOpen] = useState(false);
     const { announcement, announcementTitle, announcementDate } = useSelector((state: RootState) => state.announcement);
 
     const [CreateAnnouncement, { isLoading }] = useCreateAnnouncementMutation();

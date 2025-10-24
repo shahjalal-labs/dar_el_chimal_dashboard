@@ -145,15 +145,15 @@ const AssignmentDetails = () => {
                                     {/* Action Buttons */}
                                     <td className="py-3 px-5 flex justify-center gap-3">
                                         <Link href={`/teacher/classes/${id}/assignments/${assignmentId}/${student?.assignmentProgressId}`}>
-                                            <button className="text-[#F4A640] cursor-pointer">
+                                            <Button className="text-[#F4A640] cursor-pointer">
                                                 <Eye size={24} />
-                                            </button>
+                                            </Button>
                                         </Link>
                                         <Dialog open={open} onOpenChange={setOpen}>
                                             <DialogTrigger asChild>
-                                                <button className="text-[#17A235] cursor-pointer">
+                                                <Button className="text-[#17A235] cursor-pointer">
                                                     <CiEdit size={24} />
-                                                </button>
+                                                </Button>
                                             </DialogTrigger>
                                             {open && <GradeStudentAssignmentModal assignmentProgressId={String(student?.assignmentProgressId)} onClose={() => setOpen(false)} />}
                                         </Dialog>

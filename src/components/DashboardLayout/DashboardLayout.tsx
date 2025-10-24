@@ -17,6 +17,7 @@ import { SlCalender } from "react-icons/sl";
 import { BiBookReader } from "react-icons/bi";
 import { TfiAngleRight } from "react-icons/tfi";
 import Link from "next/link";
+import { Button } from "../ui/button";
 
 const DashboardLayout = () => {
   const [revenueYear, setRevenueYear] = useState("");
@@ -93,7 +94,7 @@ const DashboardLayout = () => {
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-2xl font-bold">My Classes</h3>
               <Link href='/teacher/classes'>
-                <button className="font-medium hover:underline">See All</button>
+                <Button className="font-medium hover:underline">See All</Button>
               </Link>
             </div>
 

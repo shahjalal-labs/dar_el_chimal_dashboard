@@ -898,7 +898,7 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, numPages, isFlipping]);
 
   const handleZoomIn = (): void => {
@@ -1019,7 +1019,7 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
             className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             autoFocus
           />
-          <button
+          <Button
             onClick={() => {
               setShowSearchBar(false);
               setSearchQuery("");
@@ -1028,7 +1028,7 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
             className="p-2 hover:bg-gray-100 rounded-lg"
           >
             <X className="w-5 h-5 text-gray-600" />
-          </button>
+          </Button>
         </div>
       )}
 
@@ -1102,7 +1102,7 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
       {/* Main Content Area */}
       <div className="flex-1 flex items-center justify-center p-8 relative overflow-auto">
         {/* Left Arrow */}
-        <button
+        <Button
           onClick={handlePrevPage}
           disabled={currentPage <= 1 || isFlipping}
           className={`absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center transition-all z-10
@@ -1113,7 +1113,7 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
           aria-label="Previous page"
         >
           <ChevronLeft className="w-6 h-6 text-gray-700" />
-        </button>
+        </Button>
 
         {/* Book Pages Container with 3D Flip Effect */}
         <div
@@ -1190,7 +1190,7 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
         </div>
 
         {/* Right Arrow */}
-        <button
+        <Button
           onClick={handleNextPage}
           disabled={currentPage >= numPages - 1 || isFlipping}
           className={`absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center transition-all z-10
@@ -1201,7 +1201,7 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
           aria-label="Next page"
         >
           <ChevronRight className="w-6 h-6 text-gray-700" />
-        </button>
+        </Button>
       </div>
 
       {/* Bottom Toolbar */}
@@ -1210,7 +1210,7 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
           {/* Left Section - Color Palette */}
           <div className="flex gap-2">
             {colors.map((color) => (
-              <button
+              <Button
                 key={color.name}
                 onClick={() => setSelectedColor(color.name)}
                 className={`w-8 h-8 rounded-full ${color.class} ${selectedColor === color.name
@@ -1224,7 +1224,7 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
 
           {/* Center Section - Tools */}
           <div className="flex items-center gap-1">
-            <button
+            <Button
               onClick={handleUndo}
               disabled={historyIndex <= 0}
               className={`p-2 rounded-lg transition-colors ${historyIndex <= 0
@@ -1235,8 +1235,8 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
               title="Undo last action"
             >
               <LuUndo2 className="w-5 h-5 text-gray-600" />
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleToolClick("eraser")}
               className={`p-2 rounded-lg transition-colors ${selectedTool === "eraser" ? "bg-gray-200" : "hover:bg-gray-100"
                 }`}
@@ -1244,8 +1244,8 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
               title="Click to enable eraser mode"
             >
               <PiEraser className="w-5 h-5 text-gray-600" />
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleToolClick("underline")}
               className={`p-2 rounded-lg transition-colors ${selectedTool === "underline"
                 ? "bg-gray-200"
@@ -1255,8 +1255,8 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
               title="Click to enable underline mode"
             >
               <Underline className="w-5 h-5 text-gray-600" />
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleToolClick("search")}
               className={`p-2 rounded-lg transition-colors ${showSearchBar ? "bg-gray-200" : "hover:bg-gray-100"
                 }`}
@@ -1264,8 +1264,8 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
               title="Search in PDF"
             >
               <Search className="w-5 h-5 text-gray-600" />
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleToolClick("pen")}
               className={`p-2 rounded-lg transition-colors ${selectedTool === "pen" ? "bg-gray-200" : "hover:bg-gray-100"
                 }`}
@@ -1273,8 +1273,8 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
               title="Click to enable highlighting mode"
             >
               <BiHighlight className="w-5 h-5 text-gray-600" />
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleToolClick("comment")}
               className={`p-2 rounded-lg transition-colors ${selectedTool === "comment" ? "bg-gray-200" : "hover:bg-gray-100"
                 }`}
@@ -1282,8 +1282,8 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
               title="Add comment to selected text"
             >
               <MessageSquare className="w-5 h-5 text-gray-600" />
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleToolClick("copy")}
               className={`p-2 rounded-lg transition-colors ${copiedText ? "bg-green-100" : "hover:bg-gray-100"
                 }`}
@@ -1291,8 +1291,8 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
               title="Copy selected text"
             >
               <Copy className="w-5 h-5 text-gray-600" />
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleToolClick("bookmark")}
               className={`p-2 rounded-lg transition-colors ${selectedTool === "bookmark"
                 ? "bg-gray-200"
@@ -1302,30 +1302,30 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
               title="Bookmark this PDF"
             >
               <Bookmark className="w-5 h-5 text-gray-600" />
-            </button>
+            </Button>
           </div>
 
           {/* Right Section - Zoom Controls */}
           <div className="flex items-center gap-3">
-            <button
+            <Button
               onClick={handleZoomOut}
               disabled={zoom <= 50}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-30"
               aria-label="Zoom out"
             >
               <ZoomOut className="w-5 h-5 text-gray-600" />
-            </button>
+            </Button>
             <span className="text-sm text-gray-600 font-medium min-w-[60px] text-center">
               {zoom}%
             </span>
-            <button
+            <Button
               onClick={handleZoomIn}
               disabled={zoom >= 200}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-30"
               aria-label="Zoom in"
             >
               <ZoomIn className="w-5 h-5 text-gray-600" />
-            </button>
+            </Button>
           </div>
         </div>
 

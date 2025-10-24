@@ -73,7 +73,7 @@ const AccountSection = () => {
           if ("data" in response.error && response.error.data) {
             toast.error(
               (response.error.data as { message?: string })?.message ||
-                "An unknown error occurred."
+              "An unknown error occurred."
             );
           } else if ("message" in response.error) {
             toast.error(response.error.message);
@@ -121,7 +121,7 @@ const AccountSection = () => {
                   className="px-5 py-4"
                   required
                 />
-                <button
+                <Button
                   type="button"
                   onClick={() => setShowOldPassword(!showOldPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
@@ -131,7 +131,7 @@ const AccountSection = () => {
                   ) : (
                     <Eye className="h-4 w-4" />
                   )}
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -149,9 +149,8 @@ const AccountSection = () => {
                   type={showNewPassword ? "text" : "password"}
                   placeholder="Input your new password"
                   {...register("newPassword")}
-                  className={`${
-                    errors?.newPassword ? "border-red-500" : ""
-                  } px-5 py-4`}
+                  className={`${errors?.newPassword ? "border-red-500" : ""
+                    } px-5 py-4`}
                   required
                 />
                 <Button
@@ -192,9 +191,8 @@ const AccountSection = () => {
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="Confirm your new password"
                   {...register("confirmPassword")}
-                  className={`${
-                    errors?.confirmPassword ? "border-red-500" : ""
-                  } px-5 py-4`}
+                  className={`${errors?.confirmPassword ? "border-red-500" : ""
+                    } px-5 py-4`}
                   required
                 />
                 <Button

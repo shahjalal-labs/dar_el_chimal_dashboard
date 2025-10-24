@@ -124,20 +124,20 @@ const DataTable = ({
           {isButton && (
             <Dialog>
               <DialogTrigger asChild>
-                <button className="flex justify-center items-center rounded-lg gap-1 px-4 py-2 transition-colors ease-in-out duration-500 cursor-pointer bg-[#1E3A8A] hover:bg-[#1E3A8A80] text-white">
+                <Button className="flex justify-center items-center rounded-lg gap-1 px-4 py-2 transition-colors ease-in-out duration-500 cursor-pointer bg-[#1E3A8A] hover:bg-[#1E3A8A80] text-white">
                   {icon}
                   {buttonText}
-                </button>
+                </Button>
               </DialogTrigger>
             </Dialog>
           )}
           {isButtonTwo && (
             <Dialog>
               <DialogTrigger asChild>
-                <button className="flex justify-center items-center rounded-lg gap-1 px-4 py-2 transition-colors ease-in-out duration-500 cursor-pointer bg-[#1E3A8A] hover:bg-[#1E3A8A80] text-white mt-4 md:mt-0">
+                <Button className="flex justify-center items-center rounded-lg gap-1 px-4 py-2 transition-colors ease-in-out duration-500 cursor-pointer bg-[#1E3A8A] hover:bg-[#1E3A8A80] text-white mt-4 md:mt-0">
                   {iconTwo}
                   {buttonTextTwo}
-                </button>
+                </Button>
               </DialogTrigger>
             </Dialog>
           )}
