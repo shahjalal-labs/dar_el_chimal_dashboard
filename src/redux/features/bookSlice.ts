@@ -13,6 +13,7 @@ interface BookFormState {
     previewImage: string;
     uploadPdf: File | null;
     previewPdf: string;
+    isAddResource: boolean;
     resourceType: string;
     resourceTitle: string;
     resourceDescription: string;
@@ -38,6 +39,7 @@ const initialState: BookFormState = {
     previewImage: '',
     uploadPdf: null,
     previewPdf: '',
+    isAddResource: false,
     resourceType: '',
     resourceTitle: '',
     resourceDescription: '',
@@ -86,6 +88,9 @@ const bookSlice = createSlice({
         setPreviewPdf: (state, action: PayloadAction<string>) => {
             state.previewPdf = action.payload;
         },
+        setIsAddResource: (state, action: PayloadAction<boolean>) => {
+            state.isAddResource = action.payload;
+        },
         setResourceType: (state, action: PayloadAction<string>) => {
             state.resourceType = action.payload;
         },
@@ -115,5 +120,5 @@ const bookSlice = createSlice({
     },
 });
 
-export const { setBookID, setBookName, setDescription, setISBN, setAuthor, setCategory, setUploadImage, setPreviewImage, setUploadPdf, setPreviewPdf, setResourceType, setResourceTitle, setResourceDescription, setResourceFile, setPreviewResourceFile, setResourceLink, setSchool, setSchoolGradeMappings } = bookSlice.actions;
+export const { setBookID, setBookName, setDescription, setISBN, setAuthor, setCategory, setUploadImage, setPreviewImage, setUploadPdf, setPreviewPdf, setIsAddResource, setResourceType, setResourceTitle, setResourceDescription, setResourceFile, setPreviewResourceFile, setResourceLink, setSchool, setSchoolGradeMappings } = bookSlice.actions;
 export default bookSlice.reducer;

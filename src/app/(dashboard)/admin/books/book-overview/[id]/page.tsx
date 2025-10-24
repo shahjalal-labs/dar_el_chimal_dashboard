@@ -1,11 +1,12 @@
 import React from 'react';
 import BookOverview from '@/components/Admin/Books/BookOverview';
+import RoleGuard from '@/components/RoleGaurd';
 
 const Page = () => {
     return (
-        <div>
+        <RoleGuard role='Admin'>
             <BookOverview />
-        </div>
+        </RoleGuard>
     );
 };
 export default Page;

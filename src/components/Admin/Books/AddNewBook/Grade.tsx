@@ -9,7 +9,7 @@ import Link from 'next/link';
 import { FaPlus, FaTrash } from 'react-icons/fa';
 import GetSchools, { SchoolOption } from '@/components/Common/GetSchools';
 import { useDispatch, useSelector } from 'react-redux';
-import { setAuthor, setBookName, setCategory, setDescription, setISBN, setPreviewImage, setPreviewPdf, setPreviewResourceFile, setResourceDescription, setResourceFile, setResourceLink, setResourceTitle, setResourceType, setSchoolGradeMappings, setUploadImage, setUploadPdf } from '@/redux/features/bookSlice';
+import { setAuthor, setBookName, setCategory, setDescription, setISBN, setPreviewImage, setPreviewPdf, setPreviewResourceFile, setResourceDescription, setResourceLink, setResourceTitle, setResourceType, setSchoolGradeMappings } from '@/redux/features/bookSlice';
 import { RootState } from '@/redux/store/store';
 import Image from 'next/image';
 import { toast } from 'sonner';
@@ -46,8 +46,10 @@ const Grade = ({ id }: { id: string }) => {
         resourceDescription,
         resourceType,
         previewResourceFile,
+        resourceLink,
         schoolGradeMappings
     } = useSelector((state: RootState) => state?.book);
+    const [mappings, setMappings] = useState<Mapping[]>([{ id: Date?.now()?.toString(), school: null, grades: [] }]);
 
     const { data } = useGetSingleBookQuery(id);
     const { data: gradesData, isLoading, isError } = useGetAllGradesQuery({ currentPage: 1, limit: 1000 });
@@ -55,9 +57,7 @@ const Grade = ({ id }: { id: string }) => {
     const [CreateBook, { isLoading: isBookLoading }] = useCreateBookMutation();
     const [UpdateBook, { isLoading: isUpdating }] = useUpdateBookMutation();
 
-    const [mappings, setMappings] = useState<Mapping[]>([{ id: Date?.now()?.toString(), school: null, grades: [] }]);
 
-    // Prepare grade options from API
     const allGrades: GradeOption[] =
         gradesData?.result?.map((singleGrade: any) => ({
             id: singleGrade?.id,
@@ -79,7 +79,6 @@ const Grade = ({ id }: { id: string }) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data])
 
-    // 🧩 Preload existing Redux data into mappings
     useEffect(() => {
         if (gradesData && schoolGradeMappings && schoolGradeMappings?.length > 0) {
             const preloadedMappings: Mapping[] = schoolGradeMappings?.map(
@@ -155,7 +154,6 @@ const Grade = ({ id }: { id: string }) => {
         dispatch(setSchoolGradeMappings(payload));
 
         if (pathname === '/admin/books') {
-            console?.log(schoolGradeMappings);
             const body = {
                 NewGradesAssign: schoolGradeMappings?.map((mapping: { schoolId: string, grade: string[] }) => ({
                     schoolId: mapping?.schoolId,
@@ -188,7 +186,7 @@ const Grade = ({ id }: { id: string }) => {
                     {
                         title: resourceTitle,
                         description: resourceDescription,
-                        file: previewResourceFile,
+                        file: previewResourceFile ? previewResourceFile : resourceLink,
                         type: resourceType
                     }
                 ],
@@ -219,37 +217,41 @@ const Grade = ({ id }: { id: string }) => {
                     dispatch(setISBN(''))
                     dispatch(setCategory(''))
                     dispatch(setPreviewImage(''))
-                    dispatch(setUploadImage(null))
                     dispatch(setPreviewPdf(''))
-                    dispatch(setUploadPdf(null))
                     dispatch(setResourceType(''))
                     dispatch(setResourceTitle(''))
                     dispatch(setResourceDescription(''))
-                    dispatch(setResourceFile(null))
                     dispatch(setPreviewResourceFile(''))
                     dispatch(setResourceLink(''))
                     route?.push('/admin/books');
                 }
             } catch (error) {
-                toast?.warning((error as any)?.data?.message || "Something went wrong");
+                if ((error as any)?.status === 400) {
+                    toast?.error("Please fill all the required fields before proceeding.");
+                    return;
+                }
+                else {
+                    toast?.warning((error as any)?.data?.message || "Something went wrong");
+                }
             }
         }
     };
 
-    if (isLoading) return <p>Loading grades...</p>;
-    if (isError) return <p>Failed to load grades?</p>;
+    if (isLoading) return (
+        <div className="flex justify-center items-center gap-2 text-lg text-[#1E3A8A]">
+            Grades are loading...
+            <div className="animate-spin">
+                <PiSpinner className="h-6 w-6 text-[#1E3A8A]" />
+            </div>
+        </div>
+    );
+    if (isError) return <p className='text-center text-red-500'>Failed to load grades?</p>;
 
     return (
         <div>
             {mappings?.map((mapping) => {
                 const { school, grades } = mapping;
-
-                // Filter grades for the selected school
-                const filteredGradeOptions = school
-                    ? allGrades?.filter(
-                        (g) => String(g?.schoolId) === String(school?.schoolId)
-                    )
-                    : [];
+                const filteredGradeOptions = school ? allGrades?.filter((g) => String(g?.schoolId) === String(school?.schoolId)) : [];
 
                 return (
                     <div

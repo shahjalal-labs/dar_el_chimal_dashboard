@@ -84,7 +84,7 @@ const AddNewAnnouncement = () => {
                             <Button
                                 id="date"
                                 variant="outline"
-                                className={`w-full bg-white border border-gray-300 rounded-lg px-5 py-3 transition-colors duration-200 justify-between mt-2 ${announcementDate ? "text-gray-800" : "text-gray-400"
+                                className={`w-full bg-white border border-gray-300 rounded-lg px-5 py-3 transition-all duration-500 ease-in-out cursor-pointer justify-between mt-2 ${announcementDate ? "text-gray-800" : "text-gray-400"
                                     }`}
                             >
                                 {announcementDate
@@ -120,7 +120,7 @@ const AddNewAnnouncement = () => {
                     <Link href="/admin/announcements">
                         <Button
                             variant="outline"
-                            className="px-6 border-[#636F85] text-[#636F85]"
+                            className="px-6 border-[#636F85] text-[#636F85] transition-all duration-500 ease-in-out cursor-pointer"
                         >
                             Cancel
                         </Button>
@@ -129,7 +129,7 @@ const AddNewAnnouncement = () => {
                     <Button
                         type="submit"
                         disabled={isButtonDisabled}
-                        className={`px-6 text-white font-medium transition-all duration-300 ${isButtonDisabled ? "bg-gray-400 cursor-not-allowed" : "bg-[#1E3A8A] hover:bg-[#1E3A8A]/80"}`}
+                        className={`px-6 text-white font-medium transition-all duration-500 ease-in-out cursor-pointer ${isButtonDisabled ? "bg-gray-400 cursor-not-allowed" : "bg-[#1E3A8A] hover:bg-[#1E3A8A]/80"}`}
                     >
                         {
                             (isLoading) ?

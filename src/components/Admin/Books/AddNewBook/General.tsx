@@ -285,7 +285,7 @@ const General = ({ id }: { id: string }) => {
                 <Link href="/admin/books">
                     <Button
                         variant="outline"
-                        className="px-6 border-[#636F85] text-[#636F85]"
+                        className="px-6 border-[#636F85] text-[#636F85] "
                     >
                         Cancel
                     </Button>

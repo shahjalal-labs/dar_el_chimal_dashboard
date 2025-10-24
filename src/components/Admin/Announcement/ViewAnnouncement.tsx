@@ -55,7 +55,7 @@ const ViewAnnouncement = () => {
             <div className="flex justify-center gap-3 pt-3">
                 <AlertDialog>
                     <AlertDialogTrigger asChild>
-                        <Button className="bg-[#FE4D4F33] hover:bg-[#FE4D4F26] text-[#FE4D4F] transition-colors ease-in-out duration-200 cursor-pointer">
+                        <Button className="bg-[#FE4D4F33] hover:bg-[#FE4D4F26] text-[#FE4D4F] transition-all duration-500 ease-in-out cursor-pointer">
                             <span className="">Delete</span>
                             {isDeleting ? (
                                 <div className="animate-spin">
@@ -92,7 +92,7 @@ const ViewAnnouncement = () => {
                 <Dialog>
                     <DialogTrigger asChild>
                         <Button
-                            className={`px-10 text-white font-medium border border-[#1E3A8A] transition-all duration-300 bg-[#1E3A8A] hover:bg-[#1E3A8A]/80`}
+                            className={`px-10 text-white font-medium border border-[#1E3A8A] transition-all duration-500 ease-in-out cursor-pointer bg-[#1E3A8A] hover:bg-[#1E3A8A]/80`}
                         >
                             Edit
                         </Button>

@@ -20,7 +20,7 @@ const AnnouncementList = () => {
                     <h1 className='text-2xl font-bold mb-3'>Announcement List</h1>
                 </div>
                 <Link href="/admin/announcements/add-new-announcement">
-                    <Button className='bg-transparent text-[#1E3A8A] border border-[#1E3A8A] hover:bg-transparent cursor-pointer'>
+                    <Button className='bg-transparent text-[#1E3A8A] border border-[#1E3A8A] hover:bg-transparent transition-all duration-500 ease-in-out cursor-pointer'>
                         <FaPlus />
                         Add New Announcement
                     </Button>

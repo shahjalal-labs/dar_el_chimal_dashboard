@@ -57,7 +57,7 @@ const BookCategoryList = () => {
                     <p className='font-medium'><span className='text-[#72727299]'>Book Management</span><span className='text-[#72727299] px-2'>/</span>Book Categories</p>
                 </div>
                 <Link href="/admin/book-categories/new-book-category">
-                    <Button className='bg-transparent text-[#1E3A8A] border border-[#1E3A8A] hover:bg-transparent cursor-pointer'>
+                    <Button className='bg-transparent text-[#1E3A8A] border border-[#1E3A8A] hover:bg-transparent transition-all duration-500 ease-in-out cursor-pointer'>
                         <FaPlus />
                         Add New Category
                     </Button>
@@ -72,7 +72,7 @@ const BookCategoryList = () => {
                     <Button
                         variant="default"
                         size="icon"
-                        className="h-8 w-8 rounded-none bg-[#1E3A8A1A] text-[#1E3A8A] hover:bg-[#1E3A8A1A]"
+                        className="h-8 w-8 rounded-none bg-[#1E3A8A1A] text-[#1E3A8A] hover:bg-[#1E3A8A1A] transition-all duration-500 ease-in-out cursor-pointer"
                     >
                         {formattedData?.length}
                     </Button>

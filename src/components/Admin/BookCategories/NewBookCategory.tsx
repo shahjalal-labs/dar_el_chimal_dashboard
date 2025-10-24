@@ -164,7 +164,7 @@ const NewBookCategory = () => {
                         {/* Submit Button */}
                         <Button
                             type='submit'
-                            className='bg-[#1E3A8A] hover:bg-[#1E3A8A80] rounded-lg px-4 py-3 text-white font-bold flex justify-center items-center gap-2 transition-colors duration-500 cursor-pointer'
+                            className='bg-[#1E3A8A] hover:bg-[#1E3A8A80] rounded-lg px-4 py-3 text-white font-bold flex justify-center items-center gap-2 transition-all duration-500 ease-in-out cursor-pointer'
                         >
                             {
                                 isLoading ?

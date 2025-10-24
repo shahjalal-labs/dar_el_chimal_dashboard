@@ -8,16 +8,18 @@ import { Label } from '@/components/ui/label';
 import { CgSoftwareUpload } from 'react-icons/cg';
 import { RxCross1 } from 'react-icons/rx';
 import { useDispatch, useSelector } from 'react-redux';
-import { setPreviewResourceFile, setResourceDescription, setResourceFile, setResourceLink, setResourceTitle, setResourceType } from "@/redux/features/bookSlice";
+import { setIsAddResource, setPreviewResourceFile, setResourceDescription, setResourceFile, setResourceLink, setResourceTitle, setResourceType } from "@/redux/features/bookSlice";
 import { RootState } from '@/redux/store/store';
 import { setActiveBookTab } from '@/redux/features/uiSlice';
 import { toast } from 'sonner';
 import { PiSpinner } from 'react-icons/pi';
 import { useUploadResourceMutation } from '@/redux/api/book';
 import { useCreateResourceMutation } from '@/redux/api/resource';
-import { usePathname } from 'next/navigation';
+import { useParams, usePathname } from 'next/navigation';
+import Link from 'next/link';
 
 const Resource = ({ bookId }: { bookId: any }) => {
+    const { id } = useParams();
     const pathname = usePathname();
     const dispatch = useDispatch();
     const {
@@ -47,7 +49,7 @@ const Resource = ({ bookId }: { bookId: any }) => {
         }
 
         const formData = new FormData();
-        if (pathname === '/admin/books/add-new-book') {
+        if (pathname === '/admin/books/add-new-book' && resourceFile) {
             if (resourceFile) {
                 formData.append('file', resourceFile)
             }
@@ -62,7 +64,7 @@ const Resource = ({ bookId }: { bookId: any }) => {
                 toast.warning((error as any)?.data?.message || "Something went wrong");
             }
         }
-        else {
+        else if (pathname === `/admin/books/book-overview/${id}`) {
             formData.append('bodyData', JSON.stringify(body));
             if (resourceFile) {
                 formData.append('file', resourceFile)
@@ -71,16 +73,19 @@ const Resource = ({ bookId }: { bookId: any }) => {
                 const response = await CreateResource({ bookId, formData }).unwrap();
                 if (response.success) {
                     toast.success(response.message);
-                    window.location.reload();
+                    dispatch(setIsAddResource(false));
                 }
             } catch (error) {
                 toast.warning((error as any)?.data?.message || "Something went wrong");
             }
         }
+        else {
+            dispatch(setActiveBookTab("grade"));
+        }
     };
 
     const isButtonDisabled =
-        !resourceType || !resourceTitle || !resourceDescription || !previewResourceFile || !resourceLink;
+        !resourceType || !resourceTitle || !resourceDescription || (!previewResourceFile && !resourceLink);
 
     return (
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -97,7 +102,6 @@ const Resource = ({ bookId }: { bookId: any }) => {
                                 checked={resourceType === type}
                                 onChange={() => dispatch(setResourceType(type))}
                                 className="h-4 w-4 accent-[#1E3A8A] stroke-[#D8D8D8]"
-                            // required
                             />
                             <span className="capitalize text-[#4C4C4C]">{type}</span>
                         </label>
@@ -136,7 +140,7 @@ const Resource = ({ bookId }: { bookId: any }) => {
                             <input
                                 id="resourceFile"
                                 type="file"
-                                accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.mp4,.mp3"
+                                accept={`${resourceType === 'Pdf' ? '.pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,svg' : resourceType === 'Audio' ? '.mp3,.wav' : resourceType === 'Video' ? '.mp4,.mov' : ''}`}
                                 onChange={(e) => {
                                     const file = e.target.files?.[0] ?? null;
                                     if (file) {
@@ -173,39 +177,44 @@ const Resource = ({ bookId }: { bookId: any }) => {
                 )}
             </div>
 
-            {/* OR Link */}
-            <div className="text-center text-[#D8D8D8]">────────── <span className="text-[#4C4C4C]">Or</span> ──────────</div>
+            {
+                pathname !== `/admin/books/book-overview/${id}` && (
+                    <>
+                        {/* OR Link */}
+                        <div className="text-center text-[#D8D8D8]">────────── <span className="text-[#4C4C4C]">Or</span> ──────────</div>
 
-            <div>
-                <Input
-                    type='url'
-                    placeholder="Paste your link"
-                    value={resourceLink}
-                    onChange={(e) => dispatch(setResourceLink(e.target.value))}
-                />
-            </div>
+                        <div>
+                            <Input
+                                type='url'
+                                placeholder="Paste your link"
+                                value={resourceLink}
+                                onChange={(e) => dispatch(setResourceLink(e.target.value))}
+                            />
+                        </div>
+                    </>
+                )
+            }
 
             {/* Buttons */}
             <div className="flex justify-center items-center gap-3 pt-3">
-                <Button
-                    variant="outline"
-                    className="px-6 border-[#636F85] text-[#636F85] font-medium"
-                    onClick={() => {
-                        dispatch(setResourceType(''))
-                        dispatch(setResourceTitle(''))
-                        dispatch(setResourceDescription(''))
-                        dispatch(setResourceFile(null))
-                        dispatch(setPreviewResourceFile(''))
-                        dispatch(setResourceLink(''))
-                    }}
-                >
-                    Cancel
-                </Button>
+                <Link href={`${pathname === "/admin/books/add-new-book" ? '/admin/books' : ""}`}>
+                    <Button
+                        variant="outline"
+                        onClick={() => {
+                            if (pathname === `/admin/books/book-overview/${id}`) {
+                                dispatch(setIsAddResource(false));
+                            }
+                        }}
+                        className="px-6 border-[#636F85] text-[#636F85]"
+                    >
+                        Cancel
+                    </Button>
+                </Link>
 
                 <Button
                     type='submit'
-                    className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A] text-white font-medium px-6"
                     disabled={isButtonDisabled}
+                    className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A] text-white font-medium px-6"
                 >
                     {
                         (isLoading || isResourceLoading) ?

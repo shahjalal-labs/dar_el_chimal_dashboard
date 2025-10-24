@@ -28,7 +28,7 @@ export default function BackToSchoolPage() {
           <div className="flex gap-8">
             <Button
               onClick={() => setActiveTab("general")}
-              className={`pb-4 font-medium transition-colors ${
+              className={`pb-4 font-medium transition-all duration-500 ease-in-out cursor-pointer ${
                 activeTab === "general"
                   ? "border-b-2 border-blue-600 text-blue-600"
                   : "text-gray-600 hover:text-gray-900"
@@ -38,7 +38,7 @@ export default function BackToSchoolPage() {
             </Button>
             <Button
               onClick={() => setActiveTab("resources")}
-              className={`pb-4 font-medium transition-colors ${
+              className={`pb-4 font-medium transition-all duration-500 ease-in-out cursor-pointer ${
                 activeTab === "resources"
                   ? "border-b-2 border-blue-600 text-blue-600"
                   : "text-gray-600 hover:text-gray-900"

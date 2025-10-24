@@ -1,11 +1,12 @@
 import React from 'react';
 import PDF from '@/components/Admin/Books/PDF';
+import RoleGuard from '@/components/RoleGaurd';
 
 const Page = () => {
     return (
-        <div>
+        <RoleGuard role='Admin'>
             <PDF />
-        </div>
+        </RoleGuard>
     );
 };
 
