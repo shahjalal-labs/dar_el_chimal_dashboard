@@ -43,6 +43,7 @@ import {
 import { useDeleteSchoolMutation } from "@/redux/api/school";
 import ViewStudentModal from "../Admin/Students/ViewStudentModal";
 import UpdateStudentModal from "../Admin/Students/UpdateStudentModal";
+import { useDeleteBookMutation } from "@/redux/api/book";
 
 const DataTable = ({
   title,
@@ -76,10 +77,17 @@ const DataTable = ({
   const [selectedId, setSelectedId] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
+  const [DeleteBook, { isLoading: isBookDeleting }] = useDeleteBookMutation();
   const [DeleteSchool, { isLoading: isSchoolDeleting }] = useDeleteSchoolMutation();
 
   const handleDelete = async (id: string) => {
     try {
+      if (pathname === "/admin/books") {
+        const response = await DeleteBook(id).unwrap();
+        if (response.success) {
+          toast.success(response.message);
+        }
+      }
       if (pathname === "/admin/schools") {
         const response = await DeleteSchool(id).unwrap();
         if (response.success) {
@@ -295,7 +303,7 @@ const DataTable = ({
                               <AlertDialogTrigger asChild>
                                 <Button className="bg-[#FE4D4F33] hover:bg-[#FE4D4F26] text-[#FE4D4F] transition-colors ease-in-out duration-200 cursor-pointer">
                                   <span className="sr-only">Delete</span>
-                                  {(isSchoolDeleting) &&
+                                  {(isSchoolDeleting || isBookDeleting) &&
                                     selectedId === singleData?.Id ? (
                                     <div className="animate-spin">
                                       <PiSpinner className="h-4 w-4" />

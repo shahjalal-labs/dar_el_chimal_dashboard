@@ -166,14 +166,14 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                     </p>
                     <div className="flex justify-end gap-2 mt-4">
                         <Button
+                            variant="outline"
                             onClick={() => setIsModalOpen(false)}
-                            className="px-3 py-1 border rounded-md"
                         >
                             Cancel
                         </Button>
                         <Button
+                            variant="destructive"
                             onClick={confirmRemove}
-                            className="px-3 py-1 bg-red-600 text-white rounded-md transition-all ease-in-out duration-500 cursor-pointer"
                         >
                             {
                                 (isUpdating) ?

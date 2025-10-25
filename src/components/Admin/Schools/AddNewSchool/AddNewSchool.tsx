@@ -10,6 +10,8 @@ import { setActiveBookTab } from '@/redux/features/uiSlice';
 import { RootState } from '@/redux/store/store';
 import General from './General';
 import AddGradeSection from './AddGradeSection';
+import { GoLink } from 'react-icons/go';
+import Resource from './Resource';
 
 const AddNewSchool = () => {
     const dispatch = useDispatch();
@@ -45,6 +47,16 @@ const AddNewSchool = () => {
                         </TabsTrigger>
 
                         <TabsTrigger
+                            value="resources"
+                            className={`px-4 py-2 rounded-md text-sm font-medium ${tab === "resources"
+                                ? "bg-[#F8F8F8] text-[#1E3A8A]"
+                                : "bg-white text-black hover:bg-gray-200"
+                                }`}
+                        >
+                            <GoLink /> Resources
+                        </TabsTrigger>
+
+                        <TabsTrigger
                             value="grade"
                             className={`px-4 py-2 rounded-md text-sm font-medium ${tab === "grade"
                                 ? "bg-[#F8F8F8] text-[#1E3A8A]"
@@ -57,6 +69,9 @@ const AddNewSchool = () => {
 
                     <TabsContent value="general">
                         <General id='' />
+                    </TabsContent>
+                    <TabsContent value="resources">
+                        <Resource bookId="" />
                     </TabsContent>
                     <TabsContent value="grade">
                         <AddGradeSection />

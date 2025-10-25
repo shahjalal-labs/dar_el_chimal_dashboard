@@ -32,7 +32,15 @@ export const schoolApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: ["school"]
         }),
+        uploadSchoolResource: builder.mutation({
+            query: (formData) => ({
+                url: `/school/upload-file`,
+                method: "POST",
+                body: formData,
+            }),
+            invalidatesTags: ["school"],
+        }),
     }),
 });
 
-export const { useCreateSchoolMutation, useGetSingleSchoolQuery, useUpdateSchoolMutation, useDeleteSchoolMutation } = schoolApi;
+export const { useCreateSchoolMutation, useGetSingleSchoolQuery, useUpdateSchoolMutation, useDeleteSchoolMutation, useUploadSchoolResourceMutation } = schoolApi;

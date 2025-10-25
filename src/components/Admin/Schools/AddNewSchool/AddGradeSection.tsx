@@ -40,6 +40,7 @@ const AddGradeSection = () => {
         studentCount,
         activeStudents,
         schoolPhoto,
+        previewResourceFile
     } = useSelector((state: RootState) => state.school);
     const selectedFromRedux = useSelector(
         (state: RootState) => state.school.options
@@ -72,6 +73,7 @@ const AddGradeSection = () => {
             grades: selectedFromRedux?.map((grade) => ({
                 gradeLevel: grade?.value,
             })),
+            schoolDocuments: previewResourceFile
         };
 
         const formData = new FormData();

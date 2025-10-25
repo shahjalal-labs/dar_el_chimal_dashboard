@@ -17,11 +17,15 @@ const UpdateBookModal = ({ id }: { id: string }) => {
   const dispatch = useDispatch();
   const closeRef = useRef<HTMLButtonElement>(null);
   const tab = useSelector((state: RootState) => state.ui.activeBookTab);
-  
+
   const { data, isLoading } = useGetSingleBookQuery(id);
 
   const handleTabChange = (value: string) => {
     dispatch(setActiveBookTab(value as "general" | "resources" | "grade"));
+  };
+
+  const handleCloseDialog = () => {
+    closeRef.current?.click();
   };
 
   if (isLoading) {
@@ -44,7 +48,7 @@ const UpdateBookModal = ({ id }: { id: string }) => {
   }
 
   return (
-    <DialogContent className="overflow-y-auto overflow-x-hidden max-h-[75%] max-w-[90%] p-6">
+    <DialogContent className="overflow-y-auto overflow-x-hidden max-h-[75%] max-w-[90%] p-6" showCloseButton>
       <DialogClose ref={closeRef} className="hidden" />
       <h1 className="font-bold text-2xl">Edit Book</h1>
       <div className="bg-white rounded-xl">
@@ -52,33 +56,30 @@ const UpdateBookModal = ({ id }: { id: string }) => {
           <TabsList className="flex gap-2 border-b border-gray-200 pb-2 mb-4">
             <TabsTrigger
               value="general"
-              className={`px-4 py-2 rounded-md text-sm font-medium ${
-                tab === "general"
-                  ? "bg-[#F8F8F8] text-[#1E3A8A]"
-                  : "bg-white text-black hover:bg-gray-200"
-              }`}
+              className={`px-4 py-2 rounded-md text-sm font-medium ${tab === "general"
+                ? "bg-[#F8F8F8] text-[#1E3A8A]"
+                : "bg-white text-black hover:bg-gray-200"
+                }`}
             >
               <MdOutlineDataset /> General
             </TabsTrigger>
 
             <TabsTrigger
               value="grade"
-              className={`px-4 py-2 rounded-md text-sm font-medium ${
-                tab === "grade"
-                  ? "bg-[#F8F8F8] text-[#1E3A8A]"
-                  : "bg-white text-black hover:bg-gray-200"
-              }`}
+              className={`px-4 py-2 rounded-md text-sm font-medium ${tab === "grade"
+                ? "bg-[#F8F8F8] text-[#1E3A8A]"
+                : "bg-white text-black hover:bg-gray-200"
+                }`}
             >
               <RiGraduationCapLine /> Grade Mapping
             </TabsTrigger>
           </TabsList>
 
-          {/* ---------- TAB CONTENTS ---------- */}
           <TabsContent value="general">
             <General id={id} />
           </TabsContent>
           <TabsContent value="grade">
-            <Grade id={id} />
+            <Grade id={id} onClose={handleCloseDialog} />
           </TabsContent>
         </Tabs>
       </div>

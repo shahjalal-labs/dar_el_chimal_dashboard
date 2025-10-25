@@ -39,7 +39,7 @@ const SelectRole = () => {
 
         <div className="space-y-4 w-full max-w-md">
           {/* Student */}
-          <Label className={`flex items-start border rounded-lg p-4 cursor-pointer ${role === "Student" ? "border-[#1E3A8A] bg-[#DFE5F6]" : "border-[#D8D8D8] bg-[#F7F9FF]"}`}
+          <label className={`flex items-start border rounded-lg p-4 cursor-pointer ${role === "Student" ? "border-[#1E3A8A] bg-[#DFE5F6]" : "border-[#D8D8D8] bg-[#F7F9FF]"}`}
           >
             <Input
               type="radio"
@@ -47,45 +47,45 @@ const SelectRole = () => {
               value="Student"
               checked={role === "Student"}
               onChange={() => handleSelect("Student")}
-              className="mt-2 mr-2 accent-[#1E3A8A]"
+              className="mt-2 mr-2 accent-[#1E3A8A] w-fit"
             />
             <div>
               <span className={`font-semibold ${role === "Admin" ? "text-[#1E3A8A]" : "text-black"}`}>I&apos;m a Student</span>
               <p className="text-[#636F85]">View lessons, complete activities, and track your progress.</p>
             </div>
-          </Label>
+          </label>
 
           {/* Teacher */}
-          <Label className={`flex items-start border rounded-lg p-4 cursor-pointer ${role === "Teacher" ? "border-[#1E3A8A] bg-[#DFE5F6]" : "border-[#D8D8D8] bg-[#F7F9FF]"}`}>
+          <label className={`flex items-start border rounded-lg p-4 cursor-pointer ${role === "Teacher" ? "border-[#1E3A8A] bg-[#DFE5F6]" : "border-[#D8D8D8] bg-[#F7F9FF]"}`}>
             <Input
               type="radio"
               name="role"
               value="Teacher"
               checked={role === "Teacher"}
               onChange={() => handleSelect("Teacher")}
-              className="mt-2 mr-2 accent-[#1E3A8A]"
+              className="mt-2 mr-2 accent-[#1E3A8A] w-fit"
             />
             <div>
               <span className={`font-semibold ${role === "admin" ? "text-[#1E3A8A]" : "text-black"}`}>I&apos;m a Teacher</span>
               <p className="text-[#636F85]">Access your dashboard, manage classes, and share resources.</p>
             </div>
-          </Label>
+          </label>
 
           {/* Admin */}
-          <Label className={`flex items-start border rounded-lg p-4 cursor-pointer ${role === "Admin" ? "border-[#1E3A8A] bg-[#DFE5F6]" : "border-[#D8D8D8] bg-[#F7F9FF]"}`}>
+          <label className={`flex items-start border rounded-lg p-4 cursor-pointer ${role === "Admin" ? "border-[#1E3A8A] bg-[#DFE5F6]" : "border-[#D8D8D8] bg-[#F7F9FF]"}`}>
             <Input
               type="radio"
               name="role"
               value="Admin"
               checked={role === "Admin"}
               onChange={() => handleSelect("Admin")}
-              className="mt-2 mr-2 accent-[#1E3A8A]"
+              className="mt-2 mr-2 accent-[#1E3A8A] w-fit"
             />
             <div>
               <span className={`font-semibold ${role === "Admin" ? "text-[#1E3A8A]" : "text-black"}`}>I&apos;m an Admin</span>
               <p className="text-[#636F85]">Manage users, oversee platform activity, and configure system settings.</p>
             </div>
-          </Label>
+          </label>
         </div>
 
         <Button

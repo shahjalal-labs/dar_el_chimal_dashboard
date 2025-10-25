@@ -82,6 +82,7 @@ const Books = () => {
         data={formattedData}
         currentPage={currentPage}
         willSearch={true}
+        deleteItem="Book"
       />
 
       <div className="flex flex-col md:flex-row justify-between items-center gap-6 mt-8">

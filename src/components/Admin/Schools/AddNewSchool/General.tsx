@@ -17,6 +17,13 @@ import { useGetSingleSchoolQuery, useUpdateSchoolMutation } from '@/redux/api/sc
 import { usePathname } from 'next/navigation';
 import { PiSpinner } from 'react-icons/pi';
 import { toast } from 'sonner';
+import defaultImg from "@/assets/no-img.jpg";
+
+async function importedToFile(importedSrc: string, fileName: string): Promise<File> {
+    const response = await fetch(importedSrc);
+    const blob = await response.blob();
+    return new File([blob], fileName, { type: blob.type });
+}
 
 const General = ({ id }: { id: string }) => {
     const dispatch = useDispatch();
@@ -80,6 +87,10 @@ const General = ({ id }: { id: string }) => {
 
             if (schoolPhoto) {
                 formData.append('schoolLogo', schoolPhoto)
+            }
+            else {
+                const file = await importedToFile(defaultImg.src, "no-img.jpg");
+                formData.append('schoolLogo', file)
             }
 
             try {
