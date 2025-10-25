@@ -8,6 +8,9 @@ interface SchoolFormState {
     studentCount: number
     activeStudents: number
     previewSchoolPhoto: string
+    resourceFile: File | File[] | null;
+    previewResourceFile: string[];
+    resourceLink: string;
     schoolPhoto: File | null
     options: { value: string; label: string }[]
 }
@@ -20,6 +23,9 @@ const initialState: SchoolFormState = {
     studentCount: 0,
     activeStudents: 0,
     previewSchoolPhoto: '',
+    resourceFile: null,
+    previewResourceFile: [],
+    resourceLink: '',
     schoolPhoto: null,
     options: [],
 };
@@ -52,6 +58,15 @@ const schoolSlice = createSlice({
         setPreviewSchoolPhoto: (state, action: PayloadAction<string>) => {
             state.previewSchoolPhoto = action.payload;
         },
+        setResourceFile: (state, action: PayloadAction<File | File[] | null>) => {
+            state.resourceFile = action.payload;
+        },
+        setPreviewResourceFile: (state, action: PayloadAction<string[]>) => {
+            state.previewResourceFile = action.payload;
+        },
+        setResourceLink: (state, action: PayloadAction<string>) => {
+            state.resourceLink = action.payload;
+        },
         setGradeOptions: (state, action: PayloadAction<{ value: string; label: string }[]>) => {
             state.options = action.payload;
         },
@@ -61,5 +76,5 @@ const schoolSlice = createSlice({
     },
 });
 
-export const { setSchoolName, setAddress, setTeacherCount, setActiveTeachers, setStudentCount, setActiveStudents, setSchoolPhoto, setPreviewSchoolPhoto, setGradeOptions, clearGradeOptions } = schoolSlice.actions;
+export const { setSchoolName, setAddress, setTeacherCount, setActiveTeachers, setStudentCount, setActiveStudents, setSchoolPhoto, setPreviewSchoolPhoto, setResourceFile, setPreviewResourceFile, setResourceLink, setGradeOptions, clearGradeOptions } = schoolSlice.actions;
 export default schoolSlice.reducer;

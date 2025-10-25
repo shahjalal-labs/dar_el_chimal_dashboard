@@ -19,7 +19,7 @@ interface Assignment {
 export default function Assignment() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null)
+  const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null)
   const [showModal, setShowModal] = useState(false)
   const [showDetailView, setShowDetailView] = useState(false)
 
@@ -112,7 +112,7 @@ export default function Assignment() {
   };
 
 
-   const handleAssignmentClick = (assignments: Assignment) => {
+  const handleAssignmentClick = (assignments: Assignment) => {
     setSelectedAssignment(assignments)
     if (assignments.status === "Pending" || assignments.status === "Missed") {
       setShowModal(true)
@@ -182,7 +182,7 @@ export default function Assignment() {
               <div
                 key={assignment.id}
                 className="flex items-center justify-between rounded-lg border border-gray-200 bg-[#F7F9FF] p-4 sm:p-6 hover:bg-gray-50 transition-colors cursor-pointer"
-                  onClick={() => handleAssignmentClick(assignment)}
+                onClick={() => handleAssignmentClick(assignment)}
               >
                 <div className="flex-1">
                   <h3 className="font-semibold text-gray-900">
@@ -213,55 +213,54 @@ export default function Assignment() {
           )}
         </div>
 
-       
+
       </div>
 
 
- {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-end gap-2 mt-6">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-              disabled={currentPage === 1}
-              className="h-10 w-10"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-end gap-2 mt-6">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+            disabled={currentPage === 1}
+            className="h-10 w-10"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
 
-            {getPageNumbers().map((page, index) => (
-              <button
-                key={index}
-                onClick={() => typeof page === "number" && setCurrentPage(page)}
-                disabled={page === "..."}
-                className={`h-10 w-10 rounded-lg font-medium transition-colors ${
-                  page === currentPage
-                    ? "bg-[#1E3A8A] text-white"
-                    : page === "..."
+          {getPageNumbers().map((page, index) => (
+            <Button
+              key={index}
+              onClick={() => typeof page === "number" && setCurrentPage(page)}
+              disabled={page === "..."}
+              className={`h-10 w-10 rounded-lg font-medium transition-colors ${page === currentPage
+                  ? "bg-[#1E3A8A] text-white"
+                  : page === "..."
                     ? "cursor-default text-gray-600"
                     : "border border-gray-300 text-gray-700 hover:bg-gray-50"
                 }`}
-              >
-                {page}
-              </button>
-            ))}
-
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() =>
-                setCurrentPage(Math.min(totalPages, currentPage + 1))
-              }
-              disabled={currentPage === totalPages}
-              className="h-10 w-10"
             >
-              <ChevronRight className="h-4 w-4" />
+              {page}
             </Button>
-          </div>
-        )}
+          ))}
 
-       {selectedAssignment && (
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() =>
+              setCurrentPage(Math.min(totalPages, currentPage + 1))
+            }
+            disabled={currentPage === totalPages}
+            className="h-10 w-10"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+
+      {selectedAssignment && (
         <AssignmentModal
           isOpen={showModal}
           onClose={handleCloseModal}

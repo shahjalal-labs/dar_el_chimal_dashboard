@@ -20,7 +20,7 @@ const AnnouncementList = () => {
                     <h1 className='text-2xl font-bold mb-3'>Announcement List</h1>
                 </div>
                 <Link href="/admin/announcements/add-new-announcement">
-                    <Button className='bg-transparent text-[#1E3A8A] border border-[#1E3A8A] hover:bg-transparent cursor-pointer'>
+                    <Button className='bg-transparent text-[#1E3A8A] border border-[#1E3A8A] hover:bg-transparent transition-all duration-500 ease-in-out cursor-pointer'>
                         <FaPlus />
                         Add New Announcement
                     </Button>
@@ -49,7 +49,7 @@ const AnnouncementList = () => {
                                     </div>
                                     <h1 className='text-[#262626] font-semibold mt-2'>{announce?.anouncement}</h1>
                                 </div>
-                                <button><TfiAngleRight className='w-6 h-6' /></button>
+                                <Button><TfiAngleRight className='w-6 h-6' /></Button>
                             </Link>
                         ))
                 }

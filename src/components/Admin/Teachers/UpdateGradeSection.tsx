@@ -238,13 +238,13 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                         <span className="font-semibold">{optionToRemove?.label}</span>?
                     </p>
                     <div className="flex justify-end gap-2 mt-4">
-                        <button
+                        <Button
                             onClick={() => setIsModalOpen(false)}
                             className="px-3 py-1 border rounded-md"
                         >
                             Cancel
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             onClick={confirmRemove}
                             disabled={isUpdating}
                             className="px-3 py-1 bg-red-600 text-white rounded-md"
@@ -259,7 +259,7 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                             ) : (
                                 "Remove"
                             )}
-                        </button>
+                        </Button>
                     </div>
                 </DialogContent>
             </Dialog>

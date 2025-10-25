@@ -21,7 +21,7 @@ const NotFound = () => {
                     Oops! The page you&apos;re looking for doesn&apos;t exist or has been moved.
                 </p>
                 <Link href="/">
-                    <Button className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 text-white font-medium px-6 py-2">
+                    <Button className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 text-white font-medium transition-all duration-500 ease-in-out cursor-pointer px-6 py-2">
                         Go Back Home
                     </Button>
                 </Link>

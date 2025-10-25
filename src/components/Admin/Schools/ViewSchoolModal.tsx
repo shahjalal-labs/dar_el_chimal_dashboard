@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-"us client";
+"use client";
 
 import React from "react";
 import { SyncLoader } from "react-spinners";
@@ -31,14 +31,14 @@ const ViewSchoolModal = ({ id }: { id: string }) => {
         );
     }
 
-    const { headerData, name, schoolLogo, grades } = school;
+    const { headerData, name, schoolLogo, grades, schoolDocuments, teacherCount, studentsCount, activeTeachers, activeStudents, location } = school;
 
     return (
         <DialogContent className="p-6 max-h-[80vh] overflow-y-auto" showCloseButton>
             {/* School Info */}
             <div className="flex items-start gap-4 mt-4">
                 <Image
-                    src={schoolLogo}
+                    src={schoolLogo || '/placeholder-school.png'}
                     alt={name}
                     height={500}
                     width={500}
@@ -47,6 +47,7 @@ const ViewSchoolModal = ({ id }: { id: string }) => {
                 />
                 <div>
                     <h2 className="text-lg font-semibold">{name}</h2>
+                    <p className="text-sm text-gray-600">{location}</p>
                     <p className="text-sm text-gray-600">{headerData?.gradeLevel}</p>
                 </div>
             </div>
@@ -56,12 +57,16 @@ const ViewSchoolModal = ({ id }: { id: string }) => {
             {/* School Stats */}
             <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
-                    <span className="font-medium">Total Teachers:</span>{" "}
-                    {headerData?.totalTeacherInThisSchool ?? 0}
+                    <span className="font-medium">Total Teachers:</span> {teacherCount}
                 </div>
                 <div>
-                    <span className="font-medium">Total Students:</span>{" "}
-                    {headerData?.totalStudentInThisSchool ?? 0}
+                    <span className="font-medium">Total Students:</span> {studentsCount}
+                </div>
+                <div>
+                    <span className="font-medium">Active Teachers:</span> {activeTeachers}
+                </div>
+                <div>
+                    <span className="font-medium">Active Students:</span> {activeStudents}
                 </div>
             </div>
 
@@ -72,7 +77,7 @@ const ViewSchoolModal = ({ id }: { id: string }) => {
                 <h3 className="font-semibold mb-2 text-gray-800">Grades</h3>
                 {grades?.length > 0 ? (
                     <div className="space-y-2">
-                        {grades?.map((grade: any) => (
+                        {grades.map((grade: any) => (
                             <div
                                 key={grade.id}
                                 className="border p-3 rounded-md text-sm flex justify-between items-center"
@@ -87,6 +92,26 @@ const ViewSchoolModal = ({ id }: { id: string }) => {
                     </div>
                 ) : (
                     <p className="text-gray-600 text-sm">No grades available</p>
+                )}
+            </div>
+
+            <Separator className="my-4" />
+
+            {/* School Documents */}
+            <div>
+                <h3 className="font-semibold mb-2 text-gray-800">School Documents</h3>
+                {schoolDocuments?.length > 0 ? (
+                    <ul className="space-y-2 list-disc list-inside text-blue-600">
+                        {schoolDocuments.map((doc: string, index: number) => (
+                            <li key={index}>
+                                <a href={doc} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                                    {doc.split('/').pop()}
+                                </a>
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <p className="text-gray-600 text-sm">No documents uploaded</p>
                 )}
             </div>
         </DialogContent>

@@ -22,7 +22,6 @@ const AddNewBook = () => {
 
     return (
         <div>
-            {/* ---------- PAGE HEADER ---------- */}
             <div>
                 <h1 className="text-2xl font-bold mb-3">
                     {tab === "general"
@@ -42,10 +41,9 @@ const AddNewBook = () => {
                 </p>
             </div>
 
-            {/* ---------- MAIN TABS ---------- */}
             <div className="p-6 bg-white rounded-xl mt-6">
                 <Tabs value={tab} onValueChange={handleTabChange} className="w-full">
-                    <TabsList className="flex gap-2 border-b border-gray-200 pb-2 mb-4">
+                    <TabsList className="flex flex-wrap gap-2 border-b border-gray-200 pb-2 mb-4">
                         <TabsTrigger
                             value="general"
                             className={`px-4 py-2 rounded-md text-sm font-medium ${tab === "general"
@@ -77,7 +75,6 @@ const AddNewBook = () => {
                         </TabsTrigger>
                     </TabsList>
 
-                    {/* ---------- TAB CONTENTS ---------- */}
                     <TabsContent value="general">
                         <General id="" />
                     </TabsContent>

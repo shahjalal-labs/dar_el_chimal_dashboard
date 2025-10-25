@@ -9,6 +9,7 @@ import {
 import { DialogContent } from "../ui/dialog";
 import { toast } from "sonner";
 import { PiSpinner } from "react-icons/pi";
+import { Button } from "../ui/button";
 
 interface GradeStudentAssignmentModalProps {
     assignmentProgressId: string;
@@ -159,14 +160,14 @@ const GradeStudentAssignmentModal = ({ assignmentProgressId, onClose, }: GradeSt
 
                 {/* Buttons */}
                 <div className="flex justify-center items-center gap-3 mt-6">
-                    <button
+                    <Button
                         type="button"
                         onClick={onClose}
                         className="px-6 py-2 border rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100"
                     >
                         Cancel
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         type="submit"
                         disabled={isGrading}
                         className="px-6 py-2 bg-[#1E3A8A] hover:bg-blue-800 text-white rounded-md text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-70"
@@ -179,7 +180,7 @@ const GradeStudentAssignmentModal = ({ assignmentProgressId, onClose, }: GradeSt
                         ) : (
                             "Save Grade"
                         )}
-                    </button>
+                    </Button>
                 </div>
             </form>
         </DialogContent>

@@ -18,11 +18,15 @@ import pdf from "@/assets/docs.svg";
 import Link from 'next/link';
 import Resource from './AddNewBook/Resource';
 import { useGetSingleBookQuery } from '@/redux/api/book';
+import { setIsAddResource } from '@/redux/features/bookSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '@/redux/store/store';
 
 const BookOverview = () => {
     const { id } = useParams();
     const [tab, setTab] = useState('general');
-    const [isAddResource, setIsAddResource] = useState(false);
+    const dispatch = useDispatch();
+    const { isAddResource } = useSelector((state: RootState) => state.book);
 
     const { data, isLoading } = useGetSingleBookQuery(id);
     const book = data?.result;
@@ -88,8 +92,8 @@ const BookOverview = () => {
                             {/* Cover Image */}
                             <div className="w-full">
                                 <Image
-                                    src={book.coverImg}
-                                    alt={book.bookName}
+                                    src={book?.coverImg}
+                                    alt={book?.bookName || 'Book Cover'}
                                     height={1000}
                                     width={2000}
                                     className="w-full h-full xl:h-[400px] object-cover rounded-lg border"
@@ -99,8 +103,8 @@ const BookOverview = () => {
 
                             {/* Book Info */}
                             <div>
-                                <h2 className="text-2xl xl:text-3xl font-bold">{book.bookName}</h2>
-                                <p className="text-[#4C4C4C] text-xl xl:text-2xl mt-4">{book.category?.name}</p>
+                                <h2 className="text-2xl xl:text-3xl font-bold">{book?.bookName}</h2>
+                                <p className="text-[#4C4C4C] text-xl xl:text-2xl mt-4">{book?.category?.name}</p>
                             </div>
 
                             {/* Book Meta */}
@@ -108,19 +112,19 @@ const BookOverview = () => {
                                 <div className="p-6 w-full max-w-sm xl:text-xl">
                                     <div className="flex justify-between py-1">
                                         <span className="font-semibold">Author:</span>
-                                        <span className='text-[#636F85]'>{book.author}</span>
+                                        <span className='text-[#636F85]'>{book?.author}</span>
                                     </div>
                                     <div className="flex justify-between py-1">
                                         <span className="font-semibold">Category:</span>
-                                        <span className='text-[#636F85]'>{book.category?.name}</span>
+                                        <span className='text-[#636F85]'>{book?.category?.name}</span>
                                     </div>
                                     <div className="flex justify-between py-1">
                                         <span className="font-semibold">ISBN:</span>
-                                        <span className='text-[#636F85]'>{book.ISBN}</span>
+                                        <span className='text-[#636F85]'>{book?.ISBN}</span>
                                     </div>
                                     <div className="flex justify-between py-1">
                                         <span className="font-semibold">Created At:</span>
-                                        <span className='text-[#636F85]'>{new Date(book.createdAt).toLocaleDateString()}</span>
+                                        <span className='text-[#636F85]'>{new Date(book?.createdAt).toLocaleDateString()}</span>
                                     </div>
                                 </div>
                             </div>
@@ -130,7 +134,7 @@ const BookOverview = () => {
                                 <Separator className="my-3" />
                                 <h3 className="font-semibold text-xl mb-1">Description</h3>
                                 <p className="text-gray-700 text-sm leading-relaxed">
-                                    {book.description}
+                                    {book?.description}
                                 </p>
                             </div>
 
@@ -139,16 +143,14 @@ const BookOverview = () => {
                                 <Link href="/admin/books">
                                     <Button
                                         variant="outline"
-                                        // onClick={() => router.back()}
-                                        className="px-6 border-[#636F85] text-[#636F85] font-medium"
+                                        className="px-6 border-[#636F85] text-[#636F85] font-medium transition-all duration-500 ease-in-out cursor-pointer"
                                     >
                                         Back
                                     </Button>
                                 </Link>
-                                <Link href={`/admin/books/book-overview/${id}/pdf`}>
+                                <Link href={`/admin/books/book-overview/${id}/pdf?pdfurl=${book?.file}`}>
                                     <Button
-                                        // onClick={() => window.open(book.file, '_blank')}
-                                        className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A] text-white font-medium px-6"
+                                        className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A] text-white font-medium transition-all duration-500 ease-in-out cursor-pointer px-6"
                                     >
                                         Open Book
                                     </Button>
@@ -166,23 +168,23 @@ const BookOverview = () => {
                                     <div className='md:flex justify-between items-center mb-6'>
                                         <h1 className='font-medium text-xl md:text-2xl'>Total Attachment: {book?.Resources?.length}</h1>
                                         <Button
-                                            onClick={() => setIsAddResource(true)}
-                                            className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A] text-white font-medium px-6 mt-6 md:mt-0">
+                                            onClick={() => dispatch(setIsAddResource(true))}
+                                            className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A] text-white font-medium transition-all duration-500 ease-in-out cursor-pointer px-6 mt-6 md:mt-0">
                                             <FaPlus />Add
                                         </Button>
                                     </div>
-                                    {book.Resources?.length > 0 ? (
+                                    {book?.Resources?.length > 0 ? (
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            {book.Resources.map((res: any) => (
+                                            {book?.Resources?.map((res: any) => (
                                                 <Link
-                                                    key={res.id}
+                                                    key={res?.id}
                                                     href={`/admin/books/book-overview/${id}/${res?.id}`}
                                                     className="border border-[#D8D8D880] bg-[#F7F9FFCC] rounded-lg p-4 flex justify-between items-center hover:bg-gray-50 transition"
                                                 >
                                                     <div className='flex items-center gap-4'>
-                                                        <div className={`px-2 py-2.5 rounded-lg ${res.Type === "Pdf" ? 'bg-[#FF9A3E1A]' : res.Type === "Video" ? 'bg-[#56A5781A]' : 'bg-[#FF4A4A1A]'}`}>
+                                                        <div className={`px-2 py-2.5 rounded-lg ${res?.Type === "Pdf" ? 'bg-[#FF9A3E1A]' : res?.Type === "Video" ? 'bg-[#56A5781A]' : 'bg-[#FF4A4A1A]'}`}>
                                                             <Image
-                                                                src={res.Type === "Pdf" ? pdf : res.Type === "Video" ? video : audio}
+                                                                src={res?.Type === "Pdf" ? pdf : res?.Type === "Video" ? video : audio}
                                                                 height={100}
                                                                 width={100}
                                                                 alt=''
@@ -191,14 +193,13 @@ const BookOverview = () => {
                                                             />
                                                         </div>
                                                         <div>
-                                                            <h4 className="font-semibold md:text-lg">{res.title}</h4>
-                                                            <p className="text-[#636F85] text-sm md:text-base">Type: {res.Type}</p>
-                                                            <p className="text-xs text-gray-500 mt-1">{new Date(res.createdAt).toLocaleString('en-US')}</p>
+                                                            <h4 className="font-semibold md:text-lg">{res?.title}</h4>
+                                                            <p className="text-[#636F85] text-sm md:text-base">Type: {res?.Type}</p>
+                                                            <p className="text-xs text-gray-500 mt-1">{new Date(res?.createdAt).toLocaleString('en-US')}</p>
                                                         </div>
                                                     </div>
                                                     <Button
-                                                        onClick={() => window.open(res.file, '_blank')}
-                                                        className="bg-transparent hover:bg-transparent text-black text-3xl"
+                                                        className="bg-transparent hover:bg-transparent text-black text-3xl transition-all duration-500 ease-in-out cursor-pointer"
                                                     >
                                                         <TfiAngleRight className='w-6 md:w-12 h-6 md:h-12' />
                                                     </Button>

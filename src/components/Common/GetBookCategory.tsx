@@ -77,6 +77,18 @@ export const GetBookCategory: React.FC<GetBookCategoryProps> = ({ onChange }) =>
                     ...base,
                     outline: 'none',
                 }),
+                menu: (base) => ({
+                    ...base,
+                    backgroundColor: '#1E3A8A',
+                }),
+                option: (base, state) => ({
+                    ...base,
+                    backgroundColor: state.isFocused ? '#3B82F6' : '#1E3A8A',
+                    color: state.isFocused ? '#FFFFFF' : '#E2E8F0',
+                    cursor: 'pointer',
+                    padding: '8px 12px',
+                    transition: 'background-color 0.2s ease',
+                }),
             }}
         />
     );

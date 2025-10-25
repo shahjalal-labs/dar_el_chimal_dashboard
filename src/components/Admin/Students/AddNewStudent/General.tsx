@@ -29,8 +29,7 @@ const General = ({ id }: { id: string }) => {
     const pathname = usePathname();
     const dispatch = useDispatch();
     const [showPassword, setShowPassword] = useState(false);
-    const { studentName, studentUserName, email, studentPassword, previewStudentPhoto, studentPhoto } =
-        useSelector((state: RootState) => state.student);
+    const { studentName, studentUserName, email, studentPassword, previewStudentPhoto, studentPhoto } = useSelector((state: RootState) => state.student);
 
     // Store created object URLs to revoke them later
     const [objectUrl, setObjectUrl] = useState<string | null>(null);
@@ -145,14 +144,14 @@ const General = ({ id }: { id: string }) => {
                         className="pr-10"
                         required
                     />
-                    <button
+                    <Button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
                         aria-label="Toggle password visibility"
                     >
                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
+                    </Button>
                 </div>
             </div>
 
@@ -183,14 +182,14 @@ const General = ({ id }: { id: string }) => {
                     </label>
                 ) : (
                     <div className="relative w-fit mx-auto group">
-                        <button
+                        <Button
                             type="button"
                             onClick={() => handleImageChange(null)}
                             className="absolute top-2 right-2 bg-[#bdbfc4]/70 hover:bg-[#a1a3a8] text-black rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                             aria-label="Remove photo"
                         >
                             <RxCross1 className="h-3 w-3" />
-                        </button>
+                        </Button>
                         <Image
                             src={previewStudentPhoto}
                             height={200}

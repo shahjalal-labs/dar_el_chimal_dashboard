@@ -79,7 +79,7 @@ const SchoolList = () => {
                 </Link>
             </div>
 
-            <DataTable title="School List" data={formattedData} currentPage={currentPage} willSearch={true} deleteItem="School"/>
+            <DataTable title="School List" data={formattedData} currentPage={currentPage} willSearch={true} deleteItem="School" />
 
             <div className='flex flex-col md:flex-row justify-between items-center gap-6 mt-8'>
                 <div className='text-base text-[#4A4A4A] flex items-center justify-start gap-2'>

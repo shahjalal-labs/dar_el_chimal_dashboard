@@ -17,6 +17,7 @@ const UpdateTeacherModal = ({ id }: { id: string }) => {
     const dispatch = useDispatch();
     const closeRef = useRef<HTMLButtonElement>(null);
     const tab = useSelector((state: RootState) => state.ui.activeBookTab);
+    
     const { data, isLoading } = useGetTeacherDetailsQuery(id);
 
     const handleTabChange = (value: string) => {

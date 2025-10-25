@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/components/ui/button";
 import { useGetassignmentDetailsQuery } from "@/redux/api/student/assignmentApi";
 import { ChevronLeft } from "lucide-react";
 import Image from "next/image";
@@ -34,13 +35,13 @@ export function AssignmentDetailView({
     <div className="px-4">
       <div className="bg-white rounded-2xl p-5">
         {/* Back Button */}
-        <button
+        <Button
           onClick={onBack}
           className="mb-8 flex items-center gap-2 text-gray-600 hover:text-gray-900"
         >
           <ChevronLeft className="h-5 w-5" />
           Back
-        </button>
+        </Button>
 
         {/* Title and Description */}
         <div className="mb-8">
@@ -81,9 +82,8 @@ export function AssignmentDetailView({
           <div className="flex justify-between">
             <span className="font-semibold text-gray-900">Status:</span>
             <span
-              className={`font-medium ${
-                isGraded ? "text-gray-500" : "text-green-500"
-              }`}
+              className={`font-medium ${isGraded ? "text-gray-500" : "text-green-500"
+                }`}
             >
               {answer?.status || "Submitted"}
             </span>
@@ -107,9 +107,9 @@ export function AssignmentDetailView({
         </div>
 
         {/* Open Books Button */}
-        <button className="mb-8 w-full rounded-lg border border-gray-300 bg-white py-3 font-medium text-blue-600 hover:bg-gray-50">
+        <Button className="mb-8 w-full rounded-lg border border-gray-300 bg-white py-3 font-medium text-blue-600 hover:bg-gray-50">
           Open Book
-        </button>
+        </Button>
       </div>
 
       {/* Answer Section */}

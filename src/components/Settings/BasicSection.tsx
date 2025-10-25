@@ -129,11 +129,11 @@ const BasicSection = () => {
                                                 className='rounded-lg h-full w-full'
                                                 priority
                                             />
-                                            <button
+                                            <Button
                                                 onClick={() => setActive(true)}
                                                 className="absolute -bottom-0 -right-0 rounded-br-sm bg-black/20 p-1.5 hover:bg-gray-50 transition-colors shadow-sm">
                                                 <MdEdit className="h-4 w-4" />
-                                            </button>
+                                            </Button>
                                         </div>
                                     </div>
                                     {active && <ImageUploader />}

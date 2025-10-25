@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useLoginMutation, useStudentLoginMutation } from "@/redux/api/authApi";
@@ -12,16 +14,15 @@ import Cookies from "js-cookie";
 import { Bell, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
 import { FaRegUser } from "react-icons/fa";
 import { LuLockKeyhole } from "react-icons/lu";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 import LeftSide from "./LeftSide";
-// import { messaging } from "@/lib/firebase";
 import { messaging } from "@/lib/firebase";
 import { Modal } from "antd";
 import { getToken, Messaging } from "firebase/messaging";
+// import { messaging } from "@/lib/firebase";
 
 const customIcon = (
   <LoadingOutlined style={{ fontSize: 24, color: "#fff" }} spin />
@@ -32,8 +33,7 @@ const requestPermission = async () => {
   if (permission === "granted") {
     try {
       const token = await getToken(messaging as Messaging, {
-        vapidKey:
-          "BE2GwQzKBZKyQUNC-QLCNXQY1pg_WfnlHyltdlT6EFaxdRi1mbEzowoUQd9k2Xx3fUw-CVH-9_9Qpv3EuGUOYjs",
+        vapidKey: "BE2GwQzKBZKyQUNC-QLCNXQY1pg_WfnlHyltdlT6EFaxdRi1mbEzowoUQd9k2Xx3fUw-CVH-9_9Qpv3EuGUOYjs",
       });
       return token;
     } catch (err) {
@@ -55,33 +55,25 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [notificationModalVisible, setNotificationModalVisible] =
-    useState(false);
+  const [notificationModalVisible, setNotificationModalVisible] = useState(false);
   const [notificationEnabled, setNotificationEnabled] = useState(false);
   const [fcmToken, setFcmToken] = useState<string | null>(null);
-  const [notificationStatus, setNotificationStatus] = useState<
-    "pending" | "granted" | "denied" | "skipped"
-  >("pending");
+  const [notificationStatus, setNotificationStatus] = useState<"pending" | "granted" | "denied" | "skipped">("pending");
 
   const route = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const role = useSelector((state: any) => state.auth.role);
-  console.log("login role", role, notificationEnabled, notificationStatus);
 
   const [login, { isLoading, error }] = useLoginMutation();
   const [studentLoginFn] = useStudentLoginMutation();
 
-  // Check notification permission status on component mount
-  // Check notification permission status on component mount
   useEffect(() => {
     if (Notification.permission === "default") {
-      // Show modal to ask for notification permission
       setNotificationModalVisible(true);
       setNotificationStatus("pending");
     } else if (Notification.permission === "granted") {
       setNotificationEnabled(true);
       setNotificationStatus("granted");
-      // Get FCM token immediately if permission is already granted
       getFcmToken();
     } else {
       setNotificationStatus("denied");
@@ -91,8 +83,7 @@ export default function Login() {
   const getFcmToken = async () => {
     try {
       const token = await getToken(messaging as Messaging, {
-        vapidKey:
-          "BM5LMmA2cx23HK13GdLZqkQEGz0wl7-NszqL6q08D1RnfCuKnkhExvQvPs64VVkVjUgME36mLbpXWpEFFpFEgnM",
+        vapidKey: "BM5LMmA2cx23HK13GdLZqkQEGz0wl7-NszqL6q08D1RnfCuKnkhExvQvPs64VVkVjUgME36mLbpXWpEFFpFEgnM",
       });
       setFcmToken(token);
       return token;
@@ -131,8 +122,6 @@ export default function Login() {
     toast.info("You will not get notify for any notification");
   };
 
-  console.log("fcm token", fcmToken);
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     const body = {
@@ -141,12 +130,11 @@ export default function Login() {
     };
 
     try {
-      // ✅ If role is "Student", use the studentLoginFn API
       if (role === "Student") {
         const studentBody = {
-          userName: userName, // assuming userName is the student's email
+          userName: userName,
           password: password,
-          fcmToken: fcmToken || "", // include FCM token
+          fcmToken: fcmToken || "",
         };
 
         const response = await studentLoginFn(studentBody).unwrap();
@@ -160,13 +148,13 @@ export default function Login() {
         } else {
           toast.error(response?.data?.message || "Login failed!");
         }
-        return; // ✅ stop execution here for student login
+        return;
       }
       if (role === "Teacher") {
         const studentBody = {
-          userName: userName, // assuming userName is the student's email
+          userName: userName,
           password: password,
-          fcmToken: fcmToken || "", // include FCM token
+          fcmToken: fcmToken || "",
         };
 
         const response = await studentLoginFn(studentBody).unwrap();
@@ -180,10 +168,9 @@ export default function Login() {
         } else {
           toast.error(response?.data?.message || "Login failed!");
         }
-        return; // ✅ stop execution here for student login
+        return;
       }
 
-      // ✅ Default login for non-students
       const response = await login(body).unwrap();
       const token = response?.result?.accessToken;
       let decodedPayload: JWTPayload = {};
@@ -207,8 +194,7 @@ export default function Login() {
         toast.error(response?.data?.message || "Login failed!");
       }
     } catch (error) {
-      console.error("An error occurred:", error);
-      toast.error("Something went wrong. Please try again.");
+      toast.error((error as any)?.data?.message || "Something went wrong. Please try again.");
     } finally {
       console.log("Execution completed.");
     }
@@ -252,19 +238,13 @@ export default function Login() {
           <div className="flex items-start gap-3 bg-blue-50 p-3 rounded-md">
             <Bell className="h-5 w-5 text-[#54BB52] mt-0.5 flex-shrink-0" />
             <div>
-              <p className="text-sm font-medium text-[#54BB52]">
-                What to expect:
-              </p>
+              <p className="text-sm font-medium text-[#54BB52]">What to expect:</p>
               <ul className="text-xs text-[#54BB52] mt-1 list-disc pl-4">
-                {/*  <li>Order updates and status changes</li>
-                <li>Special offers and promotions</li> */}
                 <li>Important account notifications</li>
               </ul>
             </div>
           </div>
-          <p className="text-xs text-gray-500 mt-3">
-            You can not get notify for any notification.
-          </p>
+          <p className="text-xs text-gray-500 mt-3">You can not get notify for any notification.</p>
         </div>
       </Modal>
 
@@ -320,8 +300,9 @@ export default function Login() {
                     className="outline-none"
                     required
                   />
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
@@ -330,7 +311,7 @@ export default function Login() {
                     ) : (
                       <Eye className="h-5 w-5" />
                     )}
-                  </button>
+                  </Button>
                 </div>
               </div>
 

@@ -32,7 +32,7 @@ const TopNavbar = () => {
           <Link
             href='/notifications'
             className="bg-[#F5F3F6] rounded-full px-2 py-1 h-full cursor-pointer"
-            // onClick={() => setIsModalOpen(true)}
+          // onClick={() => setIsModalOpen(true)}
           >
             <Badge count={unreadCount} size="small">
               <IoMdNotificationsOutline className="w-6 h-6 text-black" />

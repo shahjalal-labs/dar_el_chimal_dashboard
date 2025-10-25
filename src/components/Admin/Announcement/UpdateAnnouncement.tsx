@@ -69,7 +69,7 @@ const UpdateAnnouncement = ({ id }: { id: string }) => {
                             <Button
                                 variant="outline"
                                 id="date"
-                                className={`w-full bg-white border border-gray-300 rounded-lg px-5 py-3 transition-colors duration-200 justify-between mt-2 ${announcementDate ? "text-gray-800" : "text-gray-400"
+                                className={`w-full bg-white border border-gray-300 rounded-lg px-5 py-3 transition-all duration-500 ease-in-out cursor-pointer justify-between mt-2 ${announcementDate ? "text-gray-800" : "text-gray-400"
                                     }`}
                             >
                                 {announcementDate
@@ -115,7 +115,7 @@ const UpdateAnnouncement = ({ id }: { id: string }) => {
                         type='button'
                         variant="outline"
                         onClick={() => closeRef.current?.click()}
-                        className="px-6 border-[#636F85] text-[#636F85]"
+                        className="px-6 border-[#636F85] text-[#636F85] transition-all duration-500 ease-in-out cursor-pointer"
                     >
                         Cancel
                     </Button>
@@ -123,7 +123,7 @@ const UpdateAnnouncement = ({ id }: { id: string }) => {
                     <Button
                         type="submit"
                         disabled={isButtonDisabled}
-                        className={`px-6 text-white font-medium border border-[#1E3A8A] transition-all duration-300 ${isButtonDisabled ? "bg-gray-400 cursor-not-allowed" : "bg-[#1E3A8A] hover:bg-[#1E3A8A]/80"}`}
+                        className={`px-6 text-white font-medium border border-[#1E3A8A] transition-all duration-500 ease-in-out cursor-pointer ${isButtonDisabled ? "bg-gray-400 cursor-not-allowed" : "bg-[#1E3A8A] hover:bg-[#1E3A8A]/80"}`}
                     >
                         {
                             (isLoading) ?

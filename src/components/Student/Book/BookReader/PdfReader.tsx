@@ -3,7 +3,6 @@
 "use client";
 
 import type React from "react";
-
 import { Button } from "@/components/ui/button";
 import {
   Bookmark,
@@ -23,7 +22,6 @@ import { BiHighlight } from "react-icons/bi";
 import { LuUndo2 } from "react-icons/lu";
 import { PiEraser } from "react-icons/pi";
 
-// PDF.js types
 interface PDFPageProxy {
   getViewport: (options: { scale: number }) => PDFPageViewport;
   render: (renderContext: any) => { promise: Promise<void> };
@@ -55,14 +53,12 @@ interface PDFTextContent {
   styles: { [key: string]: any };
 }
 
-// Component props interface
 interface PdfReaderProps {
   bookId: string | number;
   pdfUrl: string;
   totalPages?: number;
 }
 
-// Highlight and annotation interfaces
 interface Highlight {
   id: string;
   x: number;
@@ -83,7 +79,6 @@ interface HistoryState {
   bookmarks: { [key: number]: Highlight[] };
 }
 
-// Tool types
 type ToolType =
   | "pen"
   | "underline"
@@ -94,7 +89,6 @@ type ToolType =
   | "search"
   | null;
 
-// Color type
 type ColorName = "red" | "green" | "blue" | "purple";
 
 function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
@@ -114,16 +108,10 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
   const overlayRightRef = useRef<HTMLCanvasElement>(null);
   const pdfDocRef = useRef<PDFDocumentProxy | null>(null);
 
-  const [highlights, setHighlights] = useState<{ [key: number]: Highlight[] }>(
-    {}
-  );
-  const [underlines, setUnderlines] = useState<{ [key: number]: Highlight[] }>(
-    {}
-  );
+  const [highlights, setHighlights] = useState<{ [key: number]: Highlight[] }>({});
+  const [underlines, setUnderlines] = useState<{ [key: number]: Highlight[] }>({});
   const [comments, setComments] = useState<{ [key: number]: Highlight[] }>({});
-  const [bookmarks, setBookmarks] = useState<{ [key: number]: Highlight[] }>(
-    {}
-  );
+  const [bookmarks, setBookmarks] = useState<{ [key: number]: Highlight[] }>({});
   const [isSelecting, setIsSelecting] = useState<boolean>(false);
   const [selectionStart, setSelectionStart] = useState<{
     x: number;
@@ -142,9 +130,7 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
   const [historyIndex, setHistoryIndex] = useState<number>(-1);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [showSearchBar, setShowSearchBar] = useState<boolean>(false);
-  const [searchResults, setSearchResults] = useState<{
-    [key: number]: Highlight[];
-  }>({});
+  const [searchResults, setSearchResults] = useState<{ [key: number]: Highlight[] }>({});
   const [copiedText, setCopiedText] = useState<string>("");
   const [showCommentPopup, setShowCommentPopup] = useState<boolean>(false);
   const [showBookmarkPopup, setShowBookmarkPopup] = useState<boolean>(false);
@@ -152,9 +138,7 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
   const [bookmarkName, setBookmarkName] = useState<string>("");
   const [selectedText, setSelectedText] = useState<string>("");
   const [isFlipping, setIsFlipping] = useState<boolean>(false);
-  const [flipDirection, setFlipDirection] = useState<"left" | "right" | null>(
-    null
-  );
+  const [flipDirection, setFlipDirection] = useState<"left" | "right" | null>(null);
 
   // Load bookmarks from localStorage on component mount
   useEffect(() => {
@@ -177,6 +161,7 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
   // Initialize history
   useEffect(() => {
     addToHistory(highlights, underlines, comments, bookmarks);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const addToHistory = useCallback(
@@ -212,34 +197,40 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
     try {
       const page = await pdfDocRef.current.getPage(pageNum);
       const viewport = page.getViewport({ scale: 1 });
-      
+
       // Get the current canvas dimensions
-      const currentCanvas = pageNum === currentPage ? canvasLeftRef.current : canvasRightRef.current;
+      const currentCanvas =
+        pageNum === currentPage
+          ? canvasLeftRef.current
+          : canvasRightRef.current;
       if (!currentCanvas) return "";
 
       // Convert canvas coordinates to PDF coordinates
       const scale = (zoom / 100) * 1.5;
       const pdfX = (x / currentCanvas.width) * viewport.width;
-      const pdfY = viewport.height - (y / currentCanvas.height) * viewport.height; // Invert Y axis
+      const pdfY =
+        viewport.height - (y / currentCanvas.height) * viewport.height; // Invert Y axis
       const pdfWidth = (width / currentCanvas.width) * viewport.width;
       const pdfHeight = (height / currentCanvas.height) * viewport.height;
 
       // Get text content from the page
       const textContent = await page.getTextContent();
-      
-      // Extract text items within the selection area
-      const selectedTextItems = textContent.items.filter((item: PDFTextItem) => {
-        const itemX = item.transform[4];
-        const itemY = item.transform[5];
-        const itemWidth = item.width || 0;
-        const itemHeight = item.height || 10;
 
-        // Check if text item is within selection bounds
-        const isInX = itemX >= pdfX && itemX <= pdfX + pdfWidth;
-        const isInY = itemY <= pdfY && itemY >= pdfY - pdfHeight;
-        
-        return isInX && isInY;
-      });
+      // Extract text items within the selection area
+      const selectedTextItems = textContent.items.filter(
+        (item: PDFTextItem) => {
+          const itemX = item.transform[4];
+          const itemY = item.transform[5];
+          const itemWidth = item.width || 0;
+          const itemHeight = item.height || 10;
+
+          // Check if text item is within selection bounds
+          const isInX = itemX >= pdfX && itemX <= pdfX + pdfWidth;
+          const isInY = itemY <= pdfY && itemY >= pdfY - pdfHeight;
+
+          return isInX && isInY;
+        }
+      );
 
       // Sort text items by position (top to bottom, left to right)
       selectedTextItems.sort((a: PDFTextItem, b: PDFTextItem) => {
@@ -247,7 +238,7 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
         const bY = b.transform[5];
         const aX = a.transform[4];
         const bX = b.transform[4];
-        
+
         // First by Y coordinate (descending - higher Y is visually lower on page)
         if (Math.abs(aY - bY) > 5) {
           return bY - aY;
@@ -257,7 +248,9 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
       });
 
       // Combine text items
-      const extractedText = selectedTextItems.map((item: PDFTextItem) => item.str).join(" ");
+      const extractedText = selectedTextItems
+        .map((item: PDFTextItem) => item.str)
+        .join(" ");
       return extractedText || `Selected area from page ${pageNum}`;
     } catch (error) {
       console.error("Error extracting text:", error);
@@ -688,10 +681,10 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
           selectedTool === "pen"
             ? "highlight"
             : selectedTool === "underline"
-            ? "underline"
-            : selectedTool === "bookmark"
-            ? "bookmark"
-            : "comment",
+              ? "underline"
+              : selectedTool === "bookmark"
+                ? "bookmark"
+                : "comment",
         text: extractedText || `Selected area from page ${pageNum}`,
       };
 
@@ -905,6 +898,7 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, numPages, isFlipping]);
 
   const handleZoomIn = (): void => {
@@ -1003,7 +997,7 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header */}
-      <div className="px-4 py-3 flex items-center">
+      <div className="px-4 py-3 flex items-center mt-20">
         <Button
           variant="ghost"
           onClick={() => router.back()}
@@ -1025,7 +1019,7 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
             className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             autoFocus
           />
-          <button
+          <Button
             onClick={() => {
               setShowSearchBar(false);
               setSearchQuery("");
@@ -1034,7 +1028,7 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
             className="p-2 hover:bg-gray-100 rounded-lg"
           >
             <X className="w-5 h-5 text-gray-600" />
-          </button>
+          </Button>
         </div>
       )}
 
@@ -1108,37 +1102,34 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
       {/* Main Content Area */}
       <div className="flex-1 flex items-center justify-center p-8 relative overflow-auto">
         {/* Left Arrow */}
-        <button
+        <Button
           onClick={handlePrevPage}
           disabled={currentPage <= 1 || isFlipping}
           className={`absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center transition-all z-10
-            ${
-              currentPage <= 1 || isFlipping
-                ? "opacity-30 cursor-not-allowed"
-                : "hover:bg-gray-50 hover:shadow-xl cursor-pointer"
+            ${currentPage <= 1 || isFlipping
+              ? "opacity-30 cursor-not-allowed"
+              : "hover:bg-gray-50 hover:shadow-xl cursor-pointer"
             }`}
           aria-label="Previous page"
         >
           <ChevronLeft className="w-6 h-6 text-gray-700" />
-        </button>
+        </Button>
 
         {/* Book Pages Container with 3D Flip Effect */}
         <div
-          className={`flex gap-8 max-w-7xl transition-all duration-500 ${
-            isFlipping
-              ? flipDirection === "left"
-                ? "transform-gpu perspective-1000 rotate-y-10 scale-95"
-                : "transform-gpu perspective-1000 -rotate-y-10 scale-95"
-              : "transform-gpu perspective-1000 rotate-y-0 scale-100"
-          }`}
+          className={`flex gap-8 max-w-7xl transition-all duration-500 ${isFlipping
+            ? flipDirection === "left"
+              ? "transform-gpu perspective-1000 rotate-y-10 scale-95"
+              : "transform-gpu perspective-1000 -rotate-y-10 scale-95"
+            : "transform-gpu perspective-1000 rotate-y-0 scale-100"
+            }`}
         >
           {/* Left Page */}
           <div
-            className={`bg-white shadow-2xl rounded-lg overflow-hidden flex items-center justify-center relative transition-all duration-500 ${
-              isFlipping && flipDirection === "right"
-                ? "z-20 shadow-xl"
-                : "z-10"
-            }`}
+            className={`bg-white shadow-2xl rounded-lg overflow-hidden flex items-center justify-center relative transition-all duration-500 ${isFlipping && flipDirection === "right"
+              ? "z-20 shadow-xl"
+              : "z-10"
+              }`}
             style={{ minWidth: "450px", minHeight: "600px" }}
           >
             <canvas ref={canvasLeftRef} className="max-w-full max-h-full" />
@@ -1158,8 +1149,8 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
                   selectedTool === "eraser"
                     ? "not-allowed"
                     : selectedTool
-                    ? "crosshair"
-                    : "default",
+                      ? "crosshair"
+                      : "default",
               }}
             />
           </div>
@@ -1167,11 +1158,10 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
           {/* Right Page */}
           {rightPage <= numPages && (
             <div
-              className={`bg-white shadow-2xl rounded-lg overflow-hidden flex items-center justify-center relative transition-all duration-500 ${
-                isFlipping && flipDirection === "left"
-                  ? "z-20 shadow-xl"
-                  : "z-10"
-              }`}
+              className={`bg-white shadow-2xl rounded-lg overflow-hidden flex items-center justify-center relative transition-all duration-500 ${isFlipping && flipDirection === "left"
+                ? "z-20 shadow-xl"
+                : "z-10"
+                }`}
               style={{ minWidth: "450px", minHeight: "600px" }}
             >
               <canvas ref={canvasRightRef} className="max-w-full max-h-full" />
@@ -1191,8 +1181,8 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
                     selectedTool === "eraser"
                       ? "not-allowed"
                       : selectedTool
-                      ? "crosshair"
-                      : "default",
+                        ? "crosshair"
+                        : "default",
                 }}
               />
             </div>
@@ -1200,19 +1190,18 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
         </div>
 
         {/* Right Arrow */}
-        <button
+        <Button
           onClick={handleNextPage}
           disabled={currentPage >= numPages - 1 || isFlipping}
           className={`absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center transition-all z-10
-            ${
-              currentPage >= numPages - 1 || isFlipping
-                ? "opacity-30 cursor-not-allowed"
-                : "hover:bg-gray-50 hover:shadow-xl cursor-pointer"
+            ${currentPage >= numPages - 1 || isFlipping
+              ? "opacity-30 cursor-not-allowed"
+              : "hover:bg-gray-50 hover:shadow-xl cursor-pointer"
             }`}
           aria-label="Next page"
         >
           <ChevronRight className="w-6 h-6 text-gray-700" />
-        </button>
+        </Button>
       </div>
 
       {/* Bottom Toolbar */}
@@ -1221,14 +1210,13 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
           {/* Left Section - Color Palette */}
           <div className="flex gap-2">
             {colors.map((color) => (
-              <button
+              <Button
                 key={color.name}
                 onClick={() => setSelectedColor(color.name)}
-                className={`w-8 h-8 rounded-full ${color.class} ${
-                  selectedColor === color.name
-                    ? "ring-2 ring-offset-2 ring-gray-400"
-                    : ""
-                } transition-all hover:scale-110`}
+                className={`w-8 h-8 rounded-full ${color.class} ${selectedColor === color.name
+                  ? "ring-2 ring-offset-2 ring-gray-400"
+                  : ""
+                  } transition-all hover:scale-110`}
                 aria-label={`Select ${color.name} color`}
               />
             ))}
@@ -1236,116 +1224,108 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
 
           {/* Center Section - Tools */}
           <div className="flex items-center gap-1">
-            <button
+            <Button
               onClick={handleUndo}
               disabled={historyIndex <= 0}
-              className={`p-2 rounded-lg transition-colors ${
-                historyIndex <= 0
-                  ? "opacity-30 cursor-not-allowed"
-                  : "hover:bg-gray-100"
-              }`}
+              className={`p-2 rounded-lg transition-colors ${historyIndex <= 0
+                ? "opacity-30 cursor-not-allowed"
+                : "hover:bg-gray-100"
+                }`}
               aria-label="Undo"
               title="Undo last action"
             >
               <LuUndo2 className="w-5 h-5 text-gray-600" />
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleToolClick("eraser")}
-              className={`p-2 rounded-lg transition-colors ${
-                selectedTool === "eraser" ? "bg-gray-200" : "hover:bg-gray-100"
-              }`}
+              className={`p-2 rounded-lg transition-colors ${selectedTool === "eraser" ? "bg-gray-200" : "hover:bg-gray-100"
+                }`}
               aria-label="Eraser"
               title="Click to enable eraser mode"
             >
               <PiEraser className="w-5 h-5 text-gray-600" />
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleToolClick("underline")}
-              className={`p-2 rounded-lg transition-colors ${
-                selectedTool === "underline"
-                  ? "bg-gray-200"
-                  : "hover:bg-gray-100"
-              }`}
+              className={`p-2 rounded-lg transition-colors ${selectedTool === "underline"
+                ? "bg-gray-200"
+                : "hover:bg-gray-100"
+                }`}
               aria-label="Underline"
               title="Click to enable underline mode"
             >
               <Underline className="w-5 h-5 text-gray-600" />
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleToolClick("search")}
-              className={`p-2 rounded-lg transition-colors ${
-                showSearchBar ? "bg-gray-200" : "hover:bg-gray-100"
-              }`}
+              className={`p-2 rounded-lg transition-colors ${showSearchBar ? "bg-gray-200" : "hover:bg-gray-100"
+                }`}
               aria-label="Search"
               title="Search in PDF"
             >
               <Search className="w-5 h-5 text-gray-600" />
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleToolClick("pen")}
-              className={`p-2 rounded-lg transition-colors ${
-                selectedTool === "pen" ? "bg-gray-200" : "hover:bg-gray-100"
-              }`}
+              className={`p-2 rounded-lg transition-colors ${selectedTool === "pen" ? "bg-gray-200" : "hover:bg-gray-100"
+                }`}
               aria-label="Highlight"
               title="Click to enable highlighting mode"
             >
               <BiHighlight className="w-5 h-5 text-gray-600" />
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleToolClick("comment")}
-              className={`p-2 rounded-lg transition-colors ${
-                selectedTool === "comment" ? "bg-gray-200" : "hover:bg-gray-100"
-              }`}
+              className={`p-2 rounded-lg transition-colors ${selectedTool === "comment" ? "bg-gray-200" : "hover:bg-gray-100"
+                }`}
               aria-label="Comment"
               title="Add comment to selected text"
             >
               <MessageSquare className="w-5 h-5 text-gray-600" />
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleToolClick("copy")}
-              className={`p-2 rounded-lg transition-colors ${
-                copiedText ? "bg-green-100" : "hover:bg-gray-100"
-              }`}
+              className={`p-2 rounded-lg transition-colors ${copiedText ? "bg-green-100" : "hover:bg-gray-100"
+                }`}
               aria-label="Copy"
               title="Copy selected text"
             >
               <Copy className="w-5 h-5 text-gray-600" />
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleToolClick("bookmark")}
-              className={`p-2 rounded-lg transition-colors ${
-                selectedTool === "bookmark"
-                  ? "bg-gray-200"
-                  : "hover:bg-gray-100"
-              }`}
+              className={`p-2 rounded-lg transition-colors ${selectedTool === "bookmark"
+                ? "bg-gray-200"
+                : "hover:bg-gray-100"
+                }`}
               aria-label="Bookmark"
               title="Bookmark this PDF"
             >
               <Bookmark className="w-5 h-5 text-gray-600" />
-            </button>
+            </Button>
           </div>
 
           {/* Right Section - Zoom Controls */}
           <div className="flex items-center gap-3">
-            <button
+            <Button
               onClick={handleZoomOut}
               disabled={zoom <= 50}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-30"
               aria-label="Zoom out"
             >
               <ZoomOut className="w-5 h-5 text-gray-600" />
-            </button>
+            </Button>
             <span className="text-sm text-gray-600 font-medium min-w-[60px] text-center">
               {zoom}%
             </span>
-            <button
+            <Button
               onClick={handleZoomIn}
               disabled={zoom >= 200}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-30"
               aria-label="Zoom in"
             >
               <ZoomIn className="w-5 h-5 text-gray-600" />
-            </button>
+            </Button>
           </div>
         </div>
 

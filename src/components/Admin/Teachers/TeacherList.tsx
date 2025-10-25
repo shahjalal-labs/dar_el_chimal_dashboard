@@ -18,6 +18,7 @@ const TeacherList = () => {
     const route = useRouter();
     const [open, setOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
+    
     const { data } = useGetAllTeachersByAdminQuery({ currentPage, limit: 10 });
 
     const formattedData = data?.result?.result?.map(

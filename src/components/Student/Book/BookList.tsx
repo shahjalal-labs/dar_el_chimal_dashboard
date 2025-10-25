@@ -10,15 +10,11 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 const BookList = () => {
+  const pathname = usePathname(); 
+  const queryField = pathname.split("/").pop(); 
   const [currentPage, setCurrentPage] = useState(1);
 
-  const pathname = usePathname(); // e.g. "/student/books"
-  const queryField = pathname.split("/").pop(); // "books"
-
-  console.log("Query field:", queryField);
-
   const { data } = useGetStudentDetailsQuery(queryField);
-  console.log("data in books", data);
 
   const formattedData = data?.result?.books?.map(
     (entry: {

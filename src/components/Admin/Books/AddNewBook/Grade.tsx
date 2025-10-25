@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
@@ -9,14 +10,38 @@ import Link from 'next/link';
 import { FaPlus, FaTrash } from 'react-icons/fa';
 import GetSchools, { SchoolOption } from '@/components/Common/GetSchools';
 import { useDispatch, useSelector } from 'react-redux';
-import { setAuthor, setBookName, setCategory, setDescription, setISBN, setPreviewImage, setPreviewPdf, setPreviewResourceFile, setResourceDescription, setResourceFile, setResourceLink, setResourceTitle, setResourceType, setSchoolGradeMappings, setUploadImage, setUploadPdf } from '@/redux/features/bookSlice';
+import {
+    setAuthor,
+    setBookName,
+    setCategory,
+    setDescription,
+    setISBN,
+    setPreviewImage,
+    setPreviewPdf,
+    setPreviewResourceFile,
+    setResourceDescription,
+    setResourceLink,
+    setResourceTitle,
+    setResourceType,
+    setSchoolGradeMappings,
+} from '@/redux/features/bookSlice';
 import { RootState } from '@/redux/store/store';
 import Image from 'next/image';
 import { toast } from 'sonner';
 import { usePathname, useRouter } from 'next/navigation';
 import { PiSpinner } from 'react-icons/pi';
 import { useGetAllGradesQuery } from '@/redux/api/grade';
-import { useCreateBookMutation, useGetSingleBookQuery, useUpdateBookMutation } from '@/redux/api/book';
+import {
+    useCreateBookMutation,
+    useGetSingleBookQuery,
+    useUpdateBookMutation,
+} from '@/redux/api/book';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 
 interface GradeOption {
     id: string;
@@ -30,7 +55,7 @@ interface Mapping {
     grades: GradeOption[];
 }
 
-const Grade = ({ id }: { id: string }) => {
+const Grade = ({ id, onClose }: { id: string, onClose?: () => void }) => {
     const route = useRouter();
     const pathname = usePathname();
     const dispatch = useDispatch();
@@ -46,23 +71,21 @@ const Grade = ({ id }: { id: string }) => {
         resourceDescription,
         resourceType,
         previewResourceFile,
-        schoolGradeMappings
+        resourceLink,
+        schoolGradeMappings,
     } = useSelector((state: RootState) => state?.book);
 
+    const [mappings, setMappings] = useState<Mapping[]>([{ id: Date.now().toString(), school: null, grades: [] }]);
+
+    const [optionToRemove, setOptionToRemove] = useState<GradeOption | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
     const { data } = useGetSingleBookQuery(id);
-    const { data: gradesData, isLoading, isError } = useGetAllGradesQuery({
-        currentPage: 1,
-        limit: 1000,
-    });
+    const { data: gradesData, isLoading, isError } = useGetAllGradesQuery({ currentPage: 1, limit: 1000 });
 
     const [CreateBook, { isLoading: isBookLoading }] = useCreateBookMutation();
     const [UpdateBook, { isLoading: isUpdating }] = useUpdateBookMutation();
 
-    const [mappings, setMappings] = useState<Mapping[]>([
-        { id: Date?.now()?.toString(), school: null, grades: [] },
-    ]);
-
-    // Prepare grade options from API
     const allGrades: GradeOption[] =
         gradesData?.result?.map((singleGrade: any) => ({
             id: singleGrade?.id,
@@ -71,23 +94,52 @@ const Grade = ({ id }: { id: string }) => {
         })) ?? [];
 
     useEffect(() => {
-        if (data?.result) {
-            const payload = data?.result?.grades?.map((m: any) => ({
-                schoolId: m?.schoolId,
-                schoolName: m?.schoolName || '',
-                image: m?.schoolLogo || '',
-                grade: m?.gradesinthisSchool?.map((g: any) => g?.id),
-            }));
+        if (data?.result && Array.isArray(data?.result?.grades)) {
+            const preloadedMappings: Mapping[] = data.result.grades.map(
+                (entry: any) => {
+                    const school: SchoolOption | null = {
+                        schoolId: entry?.schoolId,
+                        schoolName: entry?.schoolName || '',
+                        image: entry?.schoolLogo || '',
+                    };
 
-            dispatch(setSchoolGradeMappings(payload));
+                    const grades: GradeOption[] =
+                        entry?.gradesinthisSchool
+                            ?.map((grade: any) =>
+                                allGrades?.find((g) => g?.id === grade?.id)
+                            )
+                            ?.filter(Boolean) as GradeOption[];
+
+                    return {
+                        id: Math.random().toString(),
+                        school,
+                        grades,
+                    };
+                }
+            );
+            setMappings(preloadedMappings ?? []);
+            dispatch(
+                setSchoolGradeMappings(
+                    data.result.grades.map((m: any) => ({
+                        schoolId: m?.schoolId,
+                        schoolName: m?.schoolName || '',
+                        image: m?.schoolLogo || '',
+                        grade: m?.gradesinthisSchool?.map((g: any) => g?.id),
+                    }))
+                )
+            );
+        } else {
+            setMappings([]);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [data])
+    }, [data]);
 
-    // 🧩 Preload existing Redux data into mappings
     useEffect(() => {
-        if (gradesData && schoolGradeMappings && schoolGradeMappings?.length > 0) {
-            const preloadedMappings: Mapping[] = schoolGradeMappings?.map(
+        if (
+            Array.isArray(schoolGradeMappings) &&
+            schoolGradeMappings.length > 0 &&
+            gradesData
+        ) {
+            const preloadedMappings: Mapping[] = schoolGradeMappings.map(
                 (entry: any) => {
                     const school: SchoolOption | null = entry?.school
                         ? entry?.school
@@ -104,168 +156,227 @@ const Grade = ({ id }: { id: string }) => {
                         ?.filter(Boolean) as GradeOption[];
 
                     return {
-                        id: Math?.random()?.toString(),
+                        id: Math.random().toString(),
                         school,
                         grades,
                     };
                 }
             );
-            setMappings(preloadedMappings);
+            setMappings(preloadedMappings ?? []);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [gradesData, schoolGradeMappings]);
 
-    // Add new blank mapping
     const handleAddMapping = () => {
         setMappings((prev) => [
-            ...prev,
-            { id: Date?.now()?.toString(), school: null, grades: [] },
+            ...(Array.isArray(prev) ? prev : []),
+            { id: Date.now().toString(), school: null, grades: [] },
         ]);
     };
 
-    // Remove mapping
     const handleRemoveMapping = (id: string) => {
-        setMappings((prev) => prev?.filter((item) => item?.id !== id));
+        setMappings((prev) =>
+            Array.isArray(prev) ? prev.filter((item) => item?.id !== id) : []
+        );
     };
 
-    // School selection
     const handleSchoolChange = (id: string, school: SchoolOption) => {
         setMappings((prev) =>
-            prev?.map((item) =>
-                item?.id === id ? { ...item, school, grades: [] } : item
-            )
+            Array.isArray(prev)
+                ? prev.map((item) =>
+                    item?.id === id ? { ...item, school, grades: [] } : item
+                )
+                : []
         );
     };
 
-    // Grade selection
-    const handleGradeChange = (id: string, selectedGrades: readonly GradeOption[]) => {
+    const handleGradeChange = (
+        id: string,
+        selectedGrades: readonly GradeOption[]
+    ) => {
         setMappings((prev) =>
-            prev?.map((item) =>
-                item?.id === id ? { ...item, grades: [...selectedGrades] } : item
-            )
+            Array.isArray(prev)
+                ? prev.map((item) =>
+                    item?.id === id ? { ...item, grades: [...selectedGrades] } : item
+                )
+                : []
         );
     };
 
-    // Extract selected school IDs to prevent duplicates
+    const handleRemoveClick = (option: GradeOption) => {
+        setOptionToRemove(option);
+        setIsModalOpen(true);
+    };
+
+    const confirmRemove = async () => {
+        const deletedGrade = data?.result?.grades
+            ?.find((g: any) => g?.schoolId === optionToRemove?.schoolId)
+            ?.gradesinthisSchool?.find(
+                (grade: any) => grade?.grade === optionToRemove?.label
+            );
+
+        const body = {
+            BookData: {},
+            NewGradesAssign: [],
+            deletedGrades: [deletedGrade?.id],
+        };
+
+        const formData = new FormData();
+        formData.append('bodyData', JSON.stringify(body));
+
+        try {
+            const response = await UpdateBook({ bookId: id, formData })?.unwrap();
+            if (response.success) {
+                toast.success(response.message);
+                setIsModalOpen(false);
+                setOptionToRemove(null);
+            }
+        } catch (error) {
+            toast.warning((error as any)?.data?.message || 'Something went wrong');
+        }
+    };
+
     const selectedSchoolIds = useMemo(
         () => mappings?.filter((m) => m?.school)?.map((m) => m?.school!.schoolId),
         [mappings]
     );
 
-    // Save handler — transforms data to backend format
     const handleSave = async () => {
-        const payload = mappings
-            ?.filter((m) => m?.school)
-            ?.map((m) => ({
-                schoolId: m?.school!.schoolId,
-                schoolName: m?.school!.schoolName,
-                image: m?.school!.image,
-                grade: m?.grades?.map((g) => g?.id),
-            }));
-
-        dispatch(setSchoolGradeMappings(payload));
+        const formattedData = mappings.map(m => ({
+            schoolId: m?.school?.schoolId,
+            schoolName: m?.school?.schoolName,
+            image: m?.school?.image,
+            grade: m?.grades?.map(g => g?.id)
+        }));
+        dispatch(setSchoolGradeMappings(formattedData));
 
         if (pathname === '/admin/books') {
-            console?.log(schoolGradeMappings);
+            const existingGradeMap = new Map();
+            data?.result?.grades?.forEach((school: any) => {
+                const gradeIds = school.gradesinthisSchool.map((g: any) => g.id);
+                existingGradeMap.set(school.schoolId, gradeIds);
+            });
+
+            const newAssignedGrades = mappings
+                .map((item: any) => {
+                    const existingIds = existingGradeMap.get(item.school.schoolId) || [];
+                    const newGrades =
+                        item.grades
+                            ?.map((g: any) => g.id)
+                            ?.filter((id: any) => !existingIds.includes(id)) || [];
+
+                    return newGrades.length > 0
+                        ? { schoolId: item.school.schoolId, grade: newGrades }
+                        : null;
+                })
+                .filter(Boolean);
+
             const body = {
-                NewGradesAssign: schoolGradeMappings?.map((mapping: { schoolId: string, grade: string[] }) => ({
-                    schoolId: mapping?.schoolId,
-                    grade: mapping?.grade,
-                })),
-            }
+                BookData: {},
+                NewGradesAssign: newAssignedGrades,
+                deletedGrades: []
+            };
 
             const formData = new FormData();
-            formData?.append('bodyData', JSON?.stringify(body))
+            formData?.append('bodyData', JSON?.stringify(body));
 
             try {
                 const response = await UpdateBook({ bookId: id, formData })?.unwrap();
                 if (response?.success) {
                     toast?.success(response?.message);
+                    onClose?.();
                 }
             } catch (error) {
-                toast?.warning((error as any)?.data?.message || "Something went wrong");
+                toast?.warning(
+                    (error as any)?.data?.message || 'Something went wrong'
+                );
             }
-        }
-        else {
+        } else {
             const body = {
                 BookData: {
-                    bookName: bookName,
-                    author: author,
-                    description: description,
+                    bookName,
+                    author,
+                    description,
                     ISBN: isbn,
-                    categoryId: categoryId
+                    categoryId,
                 },
                 Resources: [
                     {
                         title: resourceTitle,
                         description: resourceDescription,
-                        file: previewResourceFile,
-                        type: resourceType
-                    }
+                        file: previewResourceFile ? previewResourceFile : resourceLink,
+                        type: resourceType,
+                    },
                 ],
-                Grades: schoolGradeMappings?.map((mapping: { schoolId: string, grade: string[] }) => ({
-                    schoolId: mapping?.schoolId,
-                    grade: mapping?.grade,
-                })),
-            }
+                Grades: mappings?.map((mapping: any) => ({
+                    schoolId: mapping?.school?.schoolId,
+                    grade: mapping?.grades?.map((g: any) => g?.id),
+                })
+                ),
+            };
 
             const formData = new FormData();
-            formData?.append('bodyData', JSON?.stringify(body))
+            formData?.append('bodyData', JSON?.stringify(body));
 
-            if (uploadImage) {
-                formData?.append('coverImage', uploadImage)
-            }
-
-            if (uploadPdf) {
-                formData?.append('bookPdf', uploadPdf)
-            }
+            if (uploadImage) formData?.append('coverImage', uploadImage);
+            if (uploadPdf) formData?.append('bookPdf', uploadPdf);
 
             try {
                 const response = await CreateBook(formData)?.unwrap();
                 if (response?.success) {
                     toast?.success(response?.message);
-                    dispatch(setBookName(''))
-                    dispatch(setDescription(''))
-                    dispatch(setAuthor(''))
-                    dispatch(setISBN(''))
-                    dispatch(setCategory(''))
-                    dispatch(setPreviewImage(''))
-                    dispatch(setUploadImage(null))
-                    dispatch(setPreviewPdf(''))
-                    dispatch(setUploadPdf(null))
-                    dispatch(setResourceType(''))
-                    dispatch(setResourceTitle(''))
-                    dispatch(setResourceDescription(''))
-                    dispatch(setResourceFile(null))
-                    dispatch(setPreviewResourceFile(''))
-                    dispatch(setResourceLink(''))
+                    dispatch(setBookName(''));
+                    dispatch(setDescription(''));
+                    dispatch(setAuthor(''));
+                    dispatch(setISBN(''));
+                    dispatch(setCategory(''));
+                    dispatch(setPreviewImage(''));
+                    dispatch(setPreviewPdf(''));
+                    dispatch(setResourceType(''));
+                    dispatch(setResourceTitle(''));
+                    dispatch(setResourceDescription(''));
+                    dispatch(setPreviewResourceFile(''));
+                    dispatch(setResourceLink(''));
                     route?.push('/admin/books');
                 }
             } catch (error) {
-                toast?.warning((error as any)?.data?.message || "Something went wrong");
+                if ((error as any)?.status === 400) {
+                    toast?.error(
+                        'Please fill all the required fields before proceeding.'
+                    );
+                    return;
+                } else {
+                    toast?.warning(
+                        (error as any)?.data?.message || 'Something went wrong'
+                    );
+                }
             }
         }
     };
 
-    if (isLoading) return <p>Loading grades...</p>;
-    if (isError) return <p>Failed to load grades?</p>;
+    if (isLoading)
+        return (
+            <div className="flex justify-center items-center gap-2 text-lg text-[#1E3A8A]">
+                Grades are loading...
+                <div className="animate-spin">
+                    <PiSpinner className="h-6 w-6 text-[#1E3A8A]" />
+                </div>
+            </div>
+        );
+
+    if (isError)
+        return <p className="text-center text-red-500">Failed to load grades?</p>;
 
     return (
         <div>
             {mappings?.map((mapping) => {
                 const { school, grades } = mapping;
-
-                // Filter grades for the selected school
-                const filteredGradeOptions = school
-                    ? allGrades?.filter(
-                        (g) => String(g?.schoolId) === String(school?.schoolId)
-                    )
-                    : [];
+                const filteredGradeOptions = school ? allGrades?.filter((g) => String(g?.schoolId) === String(school?.schoolId)) : [];
 
                 return (
                     <div
                         key={mapping?.id}
-                        className="flex flex-col md:flex-row items-start gap-6 mb-6 relative"
+                        className={`flex items-start gap-6 mb-6 relative ${pathname === '/admin/books' ? 'flex-col' : 'flex-col md:flex-row'
+                            }`}
                     >
                         {/* School Name */}
                         <div className="flex-1 relative w-full">
@@ -277,7 +388,6 @@ const Grade = ({ id }: { id: string }) => {
                                 excludeIds={selectedSchoolIds}
                             />
 
-                            {/* Display selected school */}
                             {school && (
                                 <div className="flex items-center gap-2 mt-2 absolute top-[35%] left-4">
                                     {school?.image && (
@@ -308,6 +418,22 @@ const Grade = ({ id }: { id: string }) => {
                                 onChange={(selectedOptions) =>
                                     handleGradeChange(mapping?.id, selectedOptions)
                                 }
+                                components={{
+                                    MultiValueRemove: (props) => (
+                                        <div
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                e.preventDefault();
+                                                if (pathname === '/admin/books') {
+                                                    handleRemoveClick(props.data as GradeOption);
+                                                }
+                                            }}
+                                            className="px-1 cursor-pointer text-gray-500 hover:text-red-600"
+                                        >
+                                            ✕
+                                        </div>
+                                    ),
+                                }}
                                 styles={{
                                     control: (base) => ({
                                         ...base,
@@ -330,6 +456,43 @@ const Grade = ({ id }: { id: string }) => {
                                 <FaTrash />
                             </Button>
                         )}
+
+                        {/* Modal */}
+                        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                            <DialogContent className="p-6">
+                                <DialogHeader>
+                                    <DialogTitle>Remove Grade</DialogTitle>
+                                </DialogHeader>
+                                <p className="text-gray-700">
+                                    Are you sure you want to remove{' '}
+                                    <span className="font-semibold">{optionToRemove?.label}</span>?
+                                </p>
+                                <div className="flex justify-end gap-2 mt-4">
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => setIsModalOpen(false)}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        variant="destructive"
+                                        onClick={confirmRemove}
+                                        className=""
+                                    >
+                                        {isUpdating ? (
+                                            <div className="flex justify-center items-center gap-2">
+                                                Removing...
+                                                <div className="animate-spin">
+                                                    <PiSpinner className="h-4 w-4" />
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            'Remove'
+                                        )}
+                                    </Button>
+                                </div>
+                            </DialogContent>
+                        </Dialog>
                     </div>
                 );
             })}
@@ -337,7 +500,7 @@ const Grade = ({ id }: { id: string }) => {
             {/* Add More Button */}
             <Button
                 onClick={handleAddMapping}
-                className="font-semibold bg-[#1E3A8A1A] hover:bg-[#1E3A8A] text-[#1E3A8A] hover:text-white rounded-xl px-6 py-2?.5 transition-all duration-500 ease-in-out cursor-pointer mt-4"
+                className="font-semibold bg-[#1E3A8A1A] hover:bg-[#1E3A8A] text-[#1E3A8A] hover:text-white rounded-xl px-6 py-2 transition-all duration-500 ease-in-out cursor-pointer mt-4"
             >
                 <FaPlus className="mr-2" /> Add More
             </Button>
@@ -357,16 +520,18 @@ const Grade = ({ id }: { id: string }) => {
                     onClick={handleSave}
                     className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A] text-white font-medium px-6"
                 >
-                    {
-                        (isBookLoading || isUpdating) ?
-                            <div className="flex justify-center items-center gap-2">
-                                Saving...
-                                <div className="animate-spin">
-                                    <PiSpinner className="h-4 w-4" />
-                                </div>
-                            </div> :
-                            "Save & Continue"
-                    }
+                    {isBookLoading || isUpdating ? (
+                        <div className="flex justify-center items-center gap-2">
+                            {pathname === '/admin/books' ? 'Updating...' : 'Saving...'}
+                            <div className="animate-spin">
+                                <PiSpinner className="h-4 w-4" />
+                            </div>
+                        </div>
+                    ) : pathname === '/admin/books' ? (
+                        'Update Book'
+                    ) : (
+                        'Save & Continue'
+                    )}
                 </Button>
             </div>
         </div>

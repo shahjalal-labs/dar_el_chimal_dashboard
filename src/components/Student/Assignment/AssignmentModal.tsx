@@ -110,13 +110,13 @@ export function AssignmentModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="relative w-full max-w-3xl rounded-2xl bg-white p-8 shadow-lg">
         {/* Close Button */}
-        <button
+        <Button
           onClick={onClose}
           className="absolute right-6 top-6 text-gray-400 hover:text-gray-600"
           disabled={isSubmitting}
         >
           <X className="h-6 w-6" />
-        </button>
+        </Button>
 
         {/* Modal Content */}
         <div className="space-y-6">
@@ -164,9 +164,8 @@ export function AssignmentModal({
             <div className="flex justify-between">
               <span className="font-semibold text-gray-900">Status:</span>
               <span
-                className={`font-medium ${
-                  isPending ? "text-orange-500" : "text-red-500"
-                }`}
+                className={`font-medium ${isPending ? "text-orange-500" : "text-red-500"
+                  }`}
               >
                 {isPending ? "Pending" : "Missed"}
               </span>
@@ -174,12 +173,12 @@ export function AssignmentModal({
           </div>
 
           {/* Open Books Button */}
-          <button
+          <Button
             className="w-full rounded-lg border border-gray-300 bg-white py-3 font-medium text-blue-600 hover:bg-gray-50"
             disabled={isSubmitting}
           >
             Open Books
-          </button>
+          </Button>
 
           {/* Your Answer Section */}
           <div className="space-y-2">
@@ -211,11 +210,10 @@ export function AssignmentModal({
               />
               <label
                 htmlFor="file-upload"
-                className={`flex flex-col items-center gap-2 ${
-                  isSubmitting
+                className={`flex flex-col items-center gap-2 ${isSubmitting
                     ? "cursor-not-allowed opacity-50"
                     : "cursor-pointer"
-                }`}
+                  }`}
               >
                 <Upload className="h-8 w-8 text-gray-400" />
                 <span className="text-gray-600">

@@ -38,7 +38,6 @@ interface Mapping {
 const Grade = () => {
     const route = useRouter();
     const dispatch = useDispatch();
-
     const {
         studentName,
         studentUserName,
@@ -47,14 +46,9 @@ const Grade = () => {
         studentPhoto,
     } = useSelector((state: RootState) => state.student);
 
-    const [mappings, setMappings] = useState<Mapping[]>([
-        { id: Date.now().toString(), school: null, grade: null },
-    ]);
+    const [mappings, setMappings] = useState<Mapping[]>([{ id: Date.now().toString(), school: null, grade: null }]);
 
-    const { data: gradesData } = useGetAllGradesQuery({
-        currentPage: 1,
-        limit: 1000,
-    });
+    const { data: gradesData } = useGetAllGradesQuery({ currentPage: 1, limit: 1000 });
 
     const [createStudent, { isLoading: isCreating }] = useCreateStudentMutation();
 

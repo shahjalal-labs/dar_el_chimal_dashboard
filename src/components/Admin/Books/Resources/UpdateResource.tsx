@@ -16,8 +16,8 @@ import { setPreviewResourceFile, setResourceDescription, setResourceFile, setRes
 import { useGetSingleResourceQuery, useUpdateResourceMutation } from '@/redux/api/resource';
 
 const UpdateResource = ({ resourceId }: { resourceId: string }) => {
-    const closeRef = useRef<HTMLButtonElement>(null);
     const dispatch = useDispatch();
+    const closeRef = useRef<HTMLButtonElement>(null);
     const {
         resourceType,
         resourceTitle,
@@ -28,6 +28,7 @@ const UpdateResource = ({ resourceId }: { resourceId: string }) => {
     } = useSelector((state: RootState) => state.book);
 
     const { data } = useGetSingleResourceQuery(resourceId);
+    const [UpdateResource, { isLoading: isResourceLoading }] = useUpdateResourceMutation();
 
     useEffect(() => {
         if (data) {
@@ -38,8 +39,6 @@ const UpdateResource = ({ resourceId }: { resourceId: string }) => {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data])
-
-    const [UpdateResource, { isLoading: isResourceLoading }] = useUpdateResourceMutation();
 
     const handleRemoveResourceFile = () => {
         dispatch(setResourceFile(null));
@@ -151,12 +150,12 @@ const UpdateResource = ({ resourceId }: { resourceId: string }) => {
                         </label>
                     ) : (
                         <div className="relative flex flex-col items-center p-6 border border-[#CBD5E1] rounded-lg bg-gray-50 mt-2">
-                            <button
+                            <Button
                                 onClick={handleRemoveResourceFile}
                                 className="absolute top-2 right-2 bg-gray-300 rounded-full p-1 hover:bg-gray-400 transition"
                             >
                                 <RxCross1 className="w-3 h-3" />
-                            </button>
+                            </Button>
                             <p className="text-[#1E3A8A] font-medium text-center break-all">
                                 {previewResourceFile}
                             </p>

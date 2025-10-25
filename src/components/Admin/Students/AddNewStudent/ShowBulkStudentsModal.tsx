@@ -17,9 +17,7 @@ import { toast } from "sonner";
 
 const ShowBulkStudentsModal = () => {
     const closeRef = useRef<HTMLButtonElement>(null);
-    const { studentSchoolName, studentList } = useSelector(
-        (state: RootState) => state.student
-    );
+    const { studentSchoolName, studentList } = useSelector((state: RootState) => state.student);
 
     const handleExportToGoogleSheets = () => {
         if (!studentList || studentList.length === 0) {

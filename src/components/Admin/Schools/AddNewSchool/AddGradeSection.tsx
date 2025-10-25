@@ -8,7 +8,6 @@ import CreatableSelect from "react-select/creatable";
 import { Button } from "@/components/ui/button";
 import { RootState } from "@/redux/store/store";
 import {
-    clearGradeOptions,
     setActiveStudents,
     setActiveTeachers,
     setAddress,
@@ -41,6 +40,7 @@ const AddGradeSection = () => {
         studentCount,
         activeStudents,
         schoolPhoto,
+        previewResourceFile
     } = useSelector((state: RootState) => state.school);
     const selectedFromRedux = useSelector(
         (state: RootState) => state.school.options
@@ -73,6 +73,7 @@ const AddGradeSection = () => {
             grades: selectedFromRedux?.map((grade) => ({
                 gradeLevel: grade?.value,
             })),
+            schoolDocuments: previewResourceFile
         };
 
         const formData = new FormData();
@@ -133,8 +134,8 @@ const AddGradeSection = () => {
                     onClick={handleSave}
                     disabled={isButtonDisabled}
                     className={`px-6 text-white font-medium transition-all ease-in-out duration-500 cursor-pointer ${isButtonDisabled
-                            ? "bg-gray-400 cursor-not-allowed"
-                            : "bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A]"
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A]"
                         }`}
                 >
                     {isCreating ? (

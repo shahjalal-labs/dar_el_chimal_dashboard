@@ -8,6 +8,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { useForgotPasswordMutation } from "@/redux/api/authApi";
 import LeftSide from "./LeftSide";
+import { Button } from "../ui/button";
 
 const ForgotPasswordSchema = z.object({
     email: z
@@ -113,7 +114,7 @@ export default function ForgotPassword() {
                             </Link>
                         </div>
 
-                        <button
+                        <Button
                             type="submit"
                             className="w-full bg-[#1E3A8A] hover:bg-[#1E3A8A80] text-white font-bold rounded-lg mt-2 flex justify-center items-center font-outfit text-[18px] py-[10px] cursor-pointer transition-colors duration-300 ease-in-out"
                             disabled={isLoading}
@@ -139,7 +140,7 @@ export default function ForgotPassword() {
                                     </svg>
                                 </>
                             )}
-                        </button>
+                        </Button>
                     </form>
                 </div>
             </div>

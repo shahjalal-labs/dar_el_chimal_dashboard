@@ -7,6 +7,7 @@ import BasicSection from "./BasicSection"
 import AccountSection from "./AccountSection"
 import { TooltipProvider } from "../ui/tooltip"
 import Notifications from "./Notifications";
+import { Button } from "../ui/button";
 
 type SettingsSection = "basic" | "account" | "notifications"
 
@@ -27,7 +28,7 @@ export default function Settings() {
                     <div className="p-6">
                         <nav className="space-y-2">
                             {sidebarItems.map((item) => (
-                                <button
+                                <Button
                                     key={item.id}
                                     onClick={() => setActiveSection(item.id)}
                                     className={`w-full flex items-center justify-between px-4 py-3 text-left rounded-lg transition-colors ${activeSection === item.id ? "bg-[#1E3A8A] text-white" : "text-gray-700 hover:bg-gray-100"
@@ -35,7 +36,7 @@ export default function Settings() {
                                 >
                                     <span className="font-medium">{item.label}</span>
                                     <ChevronRight className="h-4 w-4" />
-                                </button>
+                                </Button>
                             ))}
                         </nav>
                     </div>
