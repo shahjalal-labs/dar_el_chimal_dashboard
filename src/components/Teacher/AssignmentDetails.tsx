@@ -46,7 +46,7 @@ const AssignmentDetails = () => {
             {/* Section Title */}
             <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold mb-6">Assignments</h2>
-                <Button onClick={() => route.back()} className='mb-6 bg-white/80 text-black cursor-pointer'><TfiAngleLeft />Back</Button>
+                <Button onClick={() => route.back()} className='mb-6 bg-white/80 text-black hover:text-white cursor-pointer'><TfiAngleLeft />Back</Button>
             </div>
 
             {/* Assignment Header Card */}

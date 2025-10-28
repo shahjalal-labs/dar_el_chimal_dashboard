@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { useGetBookDetailsQuery } from "@/redux/api/student/booksApi";
 import { ChevronRight, FileText, Link2, Music, X } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -139,12 +138,12 @@ export default function Attachments({
           {/* Header */}
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <Button
+              <button
                 onClick={handleBackToTypes}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 <ChevronRight className="h-5 w-5 text-gray-600 rotate-180" />
-              </Button>
+              </button>
               <h2 className="text-lg font-semibold text-gray-900">
                 {selectedType} Resources ({filteredResources.length})
               </h2>
@@ -172,12 +171,12 @@ export default function Attachments({
                       {resource.uploderName || resource.uplodedBy}
                     </p>
                   </div>
-                  <Button
+                  <button
                     onClick={() => handleViewResource(resource)}
                     className="ml-4 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
                   >
                     View
-                  </Button>
+                  </button>
                 </div>
               ))}
             </div>
@@ -185,10 +184,10 @@ export default function Attachments({
             <div className="text-center py-12">
               <div
                 className={`inline-flex h-16 w-16 items-center justify-center rounded-lg ${selectedType === "Audio"
-                    ? "bg-red-100"
-                    : selectedType === "Video"
-                      ? "bg-green-100"
-                      : "bg-orange-100"
+                  ? "bg-red-100"
+                  : selectedType === "Video"
+                    ? "bg-green-100"
+                    : "bg-orange-100"
                   }`}
               >
                 {selectedType === "Audio" && (
@@ -217,12 +216,12 @@ export default function Attachments({
             <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
               {/* Modal Header */}
               <div className="flex justify-end items-center p-6 ">
-                <Button
+                <button
                   onClick={closeModal}
                   className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                 >
                   <X className="h-5 w-5 text-gray-600" />
-                </Button>
+                </button>
               </div>
 
               {/* Modal Content */}
@@ -285,14 +284,14 @@ export default function Attachments({
         </h2>
       </div>
 
-      {/* Type Filter Buttons */}
+      {/* Type Filter buttons */}
       <div className="grid gap-4 md:grid-cols-2">
         {actualAttachments.map((attachment) => {
           const config = getIconConfig(attachment.type);
           const IconComponent = config.icon;
 
           return (
-            <Button
+            <button
               key={attachment.id}
               onClick={() => handleAttachmentClick(attachment)}
               className="group flex items-center gap-4 rounded-lg border border-[#D8D8D880] bg-[#F7F9FFCC] p-4 transition-all hover:border-gray-300 hover:shadow-md active:scale-95"
@@ -316,7 +315,7 @@ export default function Attachments({
 
               {/* Chevron */}
               <ChevronRight className="h-5 w-5 text-gray-400 transition-transform group-hover:translate-x-1" />
-            </Button>
+            </button>
           );
         })}
       </div>

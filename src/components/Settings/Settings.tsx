@@ -30,8 +30,9 @@ export default function Settings() {
                             {sidebarItems.map((item) => (
                                 <Button
                                     key={item.id}
+                                    variant="default"
                                     onClick={() => setActiveSection(item.id)}
-                                    className={`w-full flex items-center justify-between px-4 py-3 text-left rounded-lg transition-colors ${activeSection === item.id ? "bg-[#1E3A8A] text-white" : "text-gray-700 hover:bg-gray-100"
+                                    className={`w-full flex items-center justify-between px-4 py-3 text-left rounded-lg transition-colors bg-gray-100 hover:bg-[#1E3A8A] ${activeSection === item.id ? "bg-[#1E3A8A] text-white" : "text-gray-700 hover:bg-gray-100"
                                         }`}
                                 >
                                     <span className="font-medium">{item.label}</span>

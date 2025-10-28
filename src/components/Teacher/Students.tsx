@@ -44,7 +44,7 @@ const Students = () => {
 
     return (
         <div>
-            <Button onClick={() => route.back()} className='mb-6 bg-white/80 text-black cursor-pointer'><TfiAngleLeft />Back</Button>
+            <Button onClick={() => route.back()} className='mb-6 bg-white/80 text-black hover:text-white cursor-pointer'><TfiAngleLeft />Back</Button>
             <DataTable title={`Students (${formattedData?.length})`} data={formattedData} willSearch={true} />
         </div>
     );

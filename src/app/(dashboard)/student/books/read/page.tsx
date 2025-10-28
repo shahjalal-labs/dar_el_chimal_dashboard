@@ -1,9 +1,12 @@
 "use client";
 
 import PdfReader from "@/components/Student/Book/BookReader/PdfReader";
-import { useSearchParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { useRouter, useSearchParams } from "next/navigation";
+import { TfiAngleLeft } from "react-icons/tfi";
 
 export default function ReadBookPage() {
+  const route = useRouter();
   const params = useSearchParams();
   const pdfUrl = params.get("pdfurl");
 
@@ -16,10 +19,14 @@ export default function ReadBookPage() {
   }
 
   return (
-    <PdfReader
-      bookId="default-book-id"
-      pdfUrl={pdfUrl}
-      totalPages={1000000}
-    />
+    <div>
+      <Button onClick={() => route.back()} className='mb-6 bg-white/80 text-black hover:text-white cursor-pointer'><TfiAngleLeft />Back</Button>
+      <PdfReader
+        bookId="default-book-id"
+        pdfUrl={pdfUrl}
+        totalPages={1000000}
+        isButton={false}
+      />
+    </div>
   );
 }

@@ -1,10 +1,13 @@
 "use client";
 
 import React from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import PdfReader from "@/components/Student/Book/BookReader/PdfReader";
+import { Button } from "@/components/ui/button";
+import { TfiAngleLeft } from "react-icons/tfi";
 
 const PDF = () => {
+    const route = useRouter();
     const fileUrl = useSearchParams().get("pdfurl");
 
     if (!fileUrl) {
@@ -16,16 +19,20 @@ const PDF = () => {
     }
 
     return (
-        <div className="w-full h-screen flex justify-center items-center">
-            {fileUrl ? (
-                <PdfReader
-                    bookId="default-book-id"
-                    pdfUrl={fileUrl}
-                    totalPages={1000000}
-                />
-            ) : (
-                <p>No PDF file found.</p>
-            )}
+        <div>
+            <Button onClick={() => route.back()} className='mb-6 bg-white/80 text-black hover:text-white cursor-pointer'><TfiAngleLeft />Back</Button>
+            <div className="w-full h-screen flex justify-center items-center">
+                {fileUrl ? (
+                    <PdfReader
+                        bookId="default-book-id"
+                        pdfUrl={fileUrl}
+                        totalPages={1000000}
+                        isButton={false}
+                    />
+                ) : (
+                    <p>No PDF file found.</p>
+                )}
+            </div>
         </div>
     );
 };

@@ -111,7 +111,7 @@ const General = ({ id }: { id: string }) => {
             }
         }
         else {
-            dispatch(setActiveBookTab("grade"));
+            dispatch(setActiveBookTab("resources"));
         }
     };
 

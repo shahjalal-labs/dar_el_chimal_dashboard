@@ -57,6 +57,7 @@ interface PdfReaderProps {
   bookId: string | number;
   pdfUrl: string;
   totalPages?: number;
+  isButton?: boolean;
 }
 
 interface Highlight {
@@ -91,7 +92,7 @@ type ToolType =
 
 type ColorName = "red" | "green" | "blue" | "purple";
 
-function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
+function PdfReader({ pdfUrl, totalPages = 120, isButton }: PdfReaderProps) {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [zoom, setZoom] = useState<number>(100);
@@ -998,14 +999,17 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
     <div className="flex flex-col min-h-screen">
       {/* Header */}
       <div className="px-4 py-3 flex items-center mt-20">
-        <Button
-          variant="ghost"
-          onClick={() => router.back()}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
-        >
-          <ChevronLeft className="w-5 h-5" />
-          Back
-        </Button>
+        {
+          isButton &&
+          <Button
+            variant="ghost"
+            onClick={() => router.back()}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+          >
+            <ChevronLeft className="w-5 h-5" />
+            Back
+          </Button>
+        }
       </div>
 
       {/* Search Bar */}
@@ -1020,6 +1024,7 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
             autoFocus
           />
           <Button
+            variant="default"
             onClick={() => {
               setShowSearchBar(false);
               setSearchQuery("");
@@ -1059,7 +1064,7 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
               >
                 Cancel
               </Button>
-              <Button onClick={handleAddComment}>Add Comment</Button>
+              <Button variant="default" onClick={handleAddComment}>Add Comment</Button>
             </div>
           </div>
         </div>
@@ -1103,6 +1108,7 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
       <div className="flex-1 flex items-center justify-center p-8 relative overflow-auto">
         {/* Left Arrow */}
         <Button
+          variant="default"
           onClick={handlePrevPage}
           disabled={currentPage <= 1 || isFlipping}
           className={`absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center transition-all z-10
@@ -1191,6 +1197,7 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
 
         {/* Right Arrow */}
         <Button
+          variant="default"
           onClick={handleNextPage}
           disabled={currentPage >= numPages - 1 || isFlipping}
           className={`absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center transition-all z-10
@@ -1211,9 +1218,10 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
           <div className="flex gap-2">
             {colors.map((color) => (
               <Button
+                variant="default"
                 key={color.name}
                 onClick={() => setSelectedColor(color.name)}
-                className={`w-8 h-8 rounded-full ${color.class} ${selectedColor === color.name
+                className={`w-8 h-8 rounded-full bg-white ${color.class} ${selectedColor === color.name
                   ? "ring-2 ring-offset-2 ring-gray-400"
                   : ""
                   } transition-all hover:scale-110`}
@@ -1225,9 +1233,10 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
           {/* Center Section - Tools */}
           <div className="flex items-center gap-1">
             <Button
+              variant="default"
               onClick={handleUndo}
               disabled={historyIndex <= 0}
-              className={`p-2 rounded-lg transition-colors ${historyIndex <= 0
+              className={`p-2 rounded-lg transition-colors bg-white ${historyIndex <= 0
                 ? "opacity-30 cursor-not-allowed"
                 : "hover:bg-gray-100"
                 }`}
@@ -1237,8 +1246,9 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
               <LuUndo2 className="w-5 h-5 text-gray-600" />
             </Button>
             <Button
+              variant="default"
               onClick={() => handleToolClick("eraser")}
-              className={`p-2 rounded-lg transition-colors ${selectedTool === "eraser" ? "bg-gray-200" : "hover:bg-gray-100"
+              className={`p-2 rounded-lg transition-colors bg-white ${selectedTool === "eraser" ? "bg-gray-200" : "hover:bg-gray-100"
                 }`}
               aria-label="Eraser"
               title="Click to enable eraser mode"
@@ -1246,8 +1256,9 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
               <PiEraser className="w-5 h-5 text-gray-600" />
             </Button>
             <Button
+              variant="default"
               onClick={() => handleToolClick("underline")}
-              className={`p-2 rounded-lg transition-colors ${selectedTool === "underline"
+              className={`p-2 rounded-lg transition-colors bg-white ${selectedTool === "underline"
                 ? "bg-gray-200"
                 : "hover:bg-gray-100"
                 }`}
@@ -1257,8 +1268,9 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
               <Underline className="w-5 h-5 text-gray-600" />
             </Button>
             <Button
+              variant="default"
               onClick={() => handleToolClick("search")}
-              className={`p-2 rounded-lg transition-colors ${showSearchBar ? "bg-gray-200" : "hover:bg-gray-100"
+              className={`p-2 rounded-lg transition-colors bg-white ${showSearchBar ? "bg-gray-200" : "hover:bg-gray-100"
                 }`}
               aria-label="Search"
               title="Search in PDF"
@@ -1266,8 +1278,9 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
               <Search className="w-5 h-5 text-gray-600" />
             </Button>
             <Button
+              variant="default"
               onClick={() => handleToolClick("pen")}
-              className={`p-2 rounded-lg transition-colors ${selectedTool === "pen" ? "bg-gray-200" : "hover:bg-gray-100"
+              className={`p-2 rounded-lg transition-colors bg-white ${selectedTool === "pen" ? "bg-gray-200" : "hover:bg-gray-100"
                 }`}
               aria-label="Highlight"
               title="Click to enable highlighting mode"
@@ -1275,8 +1288,9 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
               <BiHighlight className="w-5 h-5 text-gray-600" />
             </Button>
             <Button
+              variant="default"
               onClick={() => handleToolClick("comment")}
-              className={`p-2 rounded-lg transition-colors ${selectedTool === "comment" ? "bg-gray-200" : "hover:bg-gray-100"
+              className={`p-2 rounded-lg transition-colors bg-white ${selectedTool === "comment" ? "bg-gray-200" : "hover:bg-gray-100"
                 }`}
               aria-label="Comment"
               title="Add comment to selected text"
@@ -1284,8 +1298,9 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
               <MessageSquare className="w-5 h-5 text-gray-600" />
             </Button>
             <Button
+              variant="default"
               onClick={() => handleToolClick("copy")}
-              className={`p-2 rounded-lg transition-colors ${copiedText ? "bg-green-100" : "hover:bg-gray-100"
+              className={`p-2 rounded-lg transition-colors bg-white ${copiedText ? "bg-green-100" : "hover:bg-gray-100"
                 }`}
               aria-label="Copy"
               title="Copy selected text"
@@ -1293,8 +1308,9 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
               <Copy className="w-5 h-5 text-gray-600" />
             </Button>
             <Button
+              variant="default"
               onClick={() => handleToolClick("bookmark")}
-              className={`p-2 rounded-lg transition-colors ${selectedTool === "bookmark"
+              className={`p-2 rounded-lg transition-colors bg-white ${selectedTool === "bookmark"
                 ? "bg-gray-200"
                 : "hover:bg-gray-100"
                 }`}
@@ -1308,9 +1324,10 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
           {/* Right Section - Zoom Controls */}
           <div className="flex items-center gap-3">
             <Button
+              variant="default"
               onClick={handleZoomOut}
               disabled={zoom <= 50}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-30"
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-30 bg-white"
               aria-label="Zoom out"
             >
               <ZoomOut className="w-5 h-5 text-gray-600" />
@@ -1319,9 +1336,10 @@ function PdfReader({ pdfUrl, totalPages = 120 }: PdfReaderProps) {
               {zoom}%
             </span>
             <Button
+              variant="default"
               onClick={handleZoomIn}
               disabled={zoom >= 200}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-30"
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-30 bg-white"
               aria-label="Zoom in"
             >
               <ZoomIn className="w-5 h-5 text-gray-600" />

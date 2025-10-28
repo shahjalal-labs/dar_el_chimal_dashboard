@@ -29,9 +29,8 @@ const General = ({ id }: { id: string }) => {
     const pathname = usePathname();
     const dispatch = useDispatch();
     const [showPassword, setShowPassword] = useState(false);
-    const { studentName, studentUserName, email, studentPassword, previewStudentPhoto, studentPhoto } = useSelector((state: RootState) => state.student);
+    const { studentName, studentUserName, studentPassword, previewStudentPhoto, studentPhoto } = useSelector((state: RootState) => state.student);
 
-    // Store created object URLs to revoke them later
     const [objectUrl, setObjectUrl] = useState<string | null>(null);
 
     const { data } = useGetStudentDetailsQuery(id);
@@ -60,7 +59,6 @@ const General = ({ id }: { id: string }) => {
         }
     };
 
-    // ✅ Cleanup object URL on unmount
     useEffect(() => {
         return () => {
             if (objectUrl) URL.revokeObjectURL(objectUrl);
@@ -75,7 +73,6 @@ const General = ({ id }: { id: string }) => {
                 {
                     loginUserName: studentUserName,
                     fullName: studentName,
-                    email: email,
                 },
                 gradeData: {}
             }
@@ -92,7 +89,7 @@ const General = ({ id }: { id: string }) => {
                     toast.success(response.message);
                     dispatch(setStudentName(''))
                     dispatch(setStudentUserName(''))
-                    // dispatch(setActiveBookTab("grade"));
+                    dispatch(setActiveBookTab("grade"));
                 }
             }
             catch (error) {
@@ -105,11 +102,11 @@ const General = ({ id }: { id: string }) => {
     };
 
     const isButtonDisabled =
-        !studentName || !studentUserName || !studentPassword || !previewStudentPhoto;
+        !studentName || !studentUserName || !studentPassword;
 
     return (
         <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Student Name */}
+            {/* Student Name & Email */}
             <div>
                 <Label>Student Name</Label>
                 <Input
@@ -122,8 +119,8 @@ const General = ({ id }: { id: string }) => {
             </div>
 
             {/* User Name & Password */}
-            <div className="flex gap-6 flex-wrap">
-                <div className="flex-1 min-w-[200px]">
+            <div className="md:flex gap-6">
+                <div className="flex-1">
                     <Label>User Name</Label>
                     <Input
                         type="text"
@@ -134,7 +131,7 @@ const General = ({ id }: { id: string }) => {
                     />
                 </div>
 
-                <div className="flex-1 min-w-[200px] relative">
+                <div className="flex-1 relative mt-2 md:mt-0">
                     <Label>Password</Label>
                     <Input
                         type={showPassword ? "text" : "password"}
@@ -146,8 +143,9 @@ const General = ({ id }: { id: string }) => {
                     />
                     <Button
                         type="button"
+                        variant="ghost"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        className="absolute right-3 top-[70%] -translate-y-1/2 text-gray-500 hover:text-gray-700"
                         aria-label="Toggle password visibility"
                     >
                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -182,14 +180,14 @@ const General = ({ id }: { id: string }) => {
                     </label>
                 ) : (
                     <div className="relative w-fit mx-auto group">
-                        <Button
+                        <button
                             type="button"
                             onClick={() => handleImageChange(null)}
                             className="absolute top-2 right-2 bg-[#bdbfc4]/70 hover:bg-[#a1a3a8] text-black rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                             aria-label="Remove photo"
                         >
                             <RxCross1 className="h-3 w-3" />
-                        </Button>
+                        </button>
                         <Image
                             src={previewStudentPhoto}
                             height={200}

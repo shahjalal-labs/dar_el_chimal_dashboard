@@ -17,7 +17,7 @@ const Announcements = () => {
 
     return (
         <div>
-            <Button onClick={() => route.back()} className='mb-6 bg-white/80 text-black cursor-pointer'><TfiAngleLeft />Back</Button>
+            <Button onClick={() => route.back()} className='mb-6 bg-white/80 text-black hover:text-white cursor-pointer'><TfiAngleLeft />Back</Button>
 
             <div className='md:flex justify-between items-center mb-10'>
                 <div className='mb-6 md:mb-0'>
@@ -48,7 +48,7 @@ const Announcements = () => {
                                     </div>
                                     <h1 className='text-[#262626] font-semibold mt-2'>{announce?.anouncement}</h1>
                                 </div>
-                                <Button><TfiAngleRight className='w-6 h-6' /></Button>
+                                <Button variant="ghost"><TfiAngleRight className='w-6 h-6' /></Button>
                             </Link>
                         ))
                 }

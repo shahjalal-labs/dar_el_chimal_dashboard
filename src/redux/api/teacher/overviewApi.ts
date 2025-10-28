@@ -104,6 +104,13 @@ export const overviewApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: ["announcements"]
         }),
+        deleteAnnouncementByTeacher: builder.mutation({
+            query: (announcmentId) => ({
+                url: `/announcement/${announcmentId}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: ["announcements"]
+        }),
         getAllBooksByTeacher: builder.query({
             query: (id) => ({
                 url: `/teacher/grade-details/${id}?queryField=books`,
@@ -129,5 +136,6 @@ export const {
     useCreateAnnouncementMutation,
     useGetSingleAnnouncementByTeacherQuery,
     useUpdateAnnouncementByTeacherMutation,
+    useDeleteAnnouncementByTeacherMutation,
     useGetAllBooksByTeacherQuery
 } = overviewApi;

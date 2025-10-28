@@ -78,7 +78,7 @@ const AddNewAnnouncement = () => {
                         Add New Announcement
                     </p>
                 </div>
-                <Button onClick={() => router.back()} className='mb-6 md:mb-0 bg-white/80 text-black cursor-pointer w-fit'><TfiAngleLeft />Back</Button>
+                <Button onClick={() => router.back()} className='mb-6 md:mb-0 bg-white/80 text-black hover:text-white cursor-pointer w-fit'><TfiAngleLeft />Back</Button>
             </div>
 
             <form onSubmit={handleSubmit} className="bg-white rounded-2xl space-y-5 p-10">

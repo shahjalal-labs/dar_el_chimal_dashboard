@@ -74,7 +74,7 @@ const Books = () => {
         <div>
             <div className='mb-6 flex justify-between md:items-center'>
                 <h1 className="text-2xl font-bold mb-4">Book List</h1>
-                <Button onClick={() => route.back()} className='mb-6 bg-white/80 text-black cursor-pointer'><TfiAngleLeft />Back</Button>
+                <Button onClick={() => route.back()} className='mb-6 bg-white/80 text-black hover:text-white cursor-pointer'><TfiAngleLeft />Back</Button>
             </div>
 
             <DataTable

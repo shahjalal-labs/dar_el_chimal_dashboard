@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { DialogContent } from "@/components/ui/dialog";
+import { DialogClose, DialogContent } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ChevronDownIcon } from "lucide-react";
@@ -24,6 +24,7 @@ interface AnnouncementFormData {
 const UpdateAnnouncement = ({ announcmentId }: { announcmentId: string }) => {
     const dispatch = useDispatch();
     const [open, setOpen] = useState(false);
+    const closeRef = useRef<HTMLButtonElement>(null);
 
     const [formData, setFormData] = useState<AnnouncementFormData>({
         announcementTitle: "",
@@ -67,6 +68,7 @@ const UpdateAnnouncement = ({ announcmentId }: { announcmentId: string }) => {
             const response = await UpdateAnnouncement({ announcmentId, body }).unwrap();
             if (response.success) {
                 toast.success(response.message || "Announcement updated successfully");
+                closeRef?.current?.click();
             } else {
                 toast.warning(response.message || "Failed to update announcement");
             }
@@ -77,6 +79,7 @@ const UpdateAnnouncement = ({ announcmentId }: { announcmentId: string }) => {
 
     return (
         <DialogContent className="p-6 space-y-5">
+            <DialogClose ref={closeRef} className="hidden" />
             <h1 className="text-2xl font-bold">Edit Announcement</h1>
 
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -161,6 +164,7 @@ const UpdateAnnouncement = ({ announcmentId }: { announcmentId: string }) => {
                     <Button
                         type="button"
                         variant="outline"
+                        onClick={() => closeRef?.current?.click()}
                         className="px-6 border-[#636F85] text-[#636F85]"
                     >
                         Cancel
@@ -187,7 +191,7 @@ const UpdateAnnouncement = ({ announcmentId }: { announcmentId: string }) => {
                     </Button>
                 </div>
             </form>
-        </DialogContent>
+        </DialogContent >
     );
 };
 

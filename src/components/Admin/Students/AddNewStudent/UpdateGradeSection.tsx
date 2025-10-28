@@ -24,6 +24,7 @@ import {
 } from "@/redux/features/studentSlice";
 import Image from "next/image";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { usePathname } from "next/navigation";
 
 interface GradeOption {
     id: string;
@@ -39,6 +40,7 @@ interface Mapping {
 
 const UpdateGradeSection = ({ id }: { id: string }) => {
     const dispatch = useDispatch();
+    const pathname = usePathname();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [optionToRemove, setOptionToRemove] = useState("");
     const { email } = useSelector((state: RootState) => state.student);
@@ -159,15 +161,18 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
     return (
         <form onSubmit={handleSave} className="space-y-6">
             {/* Email Field */}
-            <div>
-                <Label>Email</Label>
-                <Input
-                    type="email"
-                    placeholder="Enter student email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                />
-            </div>
+            {
+                pathname !== "/admin/students" &&
+                <div>
+                    <Label>Email</Label>
+                    <Input
+                        type="email"
+                        placeholder="Enter student email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
+                </div>
+            }
 
             {mappings?.map((mapping) => {
                 const { school, grade } = mapping;
@@ -256,9 +261,9 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                             {grade?.map((grade) => (
                                 <div key={grade?.id} className="bg-[#F1F5F9] text-sm rounded-md flex items-center gap-1.5 w-fit px-2.5 py-0.5">
                                     {grade?.label}
-                                    <Button type="button" onClick={() => handleRemoveClick(grade?.id)} className="text-gray-700 hover:text-red-600 text-lg cursor-pointer">
+                                    <button type="button" onClick={() => handleRemoveClick(grade?.id)} className="text-gray-700 hover:text-red-600 text-lg cursor-pointer">
                                         ×
-                                    </Button>
+                                    </button>
                                 </div>
                             ))}
                         </div>
@@ -268,15 +273,18 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
 
             {/* Footer Buttons */}
             <div className="flex justify-center items-center gap-3 pt-4">
-                <Link href="/admin/students">
-                    <Button
-                        variant="outline"
-                        type="button"
-                        className="px-6 border-[#636F85] text-[#636F85] font-medium"
-                    >
-                        Cancel
-                    </Button>
-                </Link>
+                {
+                    pathname !== '/admin/students' &&
+                    <Link href="/admin/students">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="px-6 border-[#636F85] text-[#636F85] font-medium"
+                        >
+                            Cancel
+                        </Button>
+                    </Link>
+                }
 
                 <Button
                     type={!isModalOpen ? "submit" : "button"}
@@ -305,14 +313,16 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                     </p>
                     <div className="flex justify-end gap-2 mt-4">
                         <Button
+                            variant="default"
                             onClick={() => setIsModalOpen(false)}
-                            className="px-3 py-1 border rounded-md"
+                            className="px-4 py-2 border rounded-md bg-white text-black hover:text-white"
                         >
                             Cancel
                         </Button>
                         <Button
+                            variant="destructive"
                             onClick={confirmRemove}
-                            className="px-3 py-1 bg-red-600 text-white rounded-md transition-all ease-in-out duration-500 cursor-pointer"
+                            className="px-4 py-2 bg-red-600 hover:bg-red-300 text-white rounded-md transition-all ease-in-out duration-500 cursor-pointer"
                         >
                             {isUpdating ? (
                                 <div className="flex justify-center items-center gap-2">

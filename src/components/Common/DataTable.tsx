@@ -223,9 +223,7 @@ const DataTable = ({
                     )}
 
                     {pathname === "/student/books" && (
-                      <Link
-                        href={`/student/books/bookDetails/${singleData?.Id}`}
-                      >
+                      <Link href={`/student/books/bookDetails/${singleData?.Id}`}>
                         <Button className="bg-[#F4A64033] hover:bg-[#F4A64026] text-[#F4A640] transition-colors ease-in-out duration-200 cursor-pointer">
                           <span className="sr-only">View details</span>
                           <Eye className="h-6 w-6" />
@@ -233,7 +231,7 @@ const DataTable = ({
                       </Link>
                     )}
 
-                    {(pathname !== "/admin/books" && pathname !== `/teacher/classes/books/${id}`) ? (
+                    {(pathname !== "/admin/books" && pathname !== `/teacher/classes/books/${id}` && pathname !== "/student/books") ? (
                       <Dialog>
                         <DialogTrigger asChild>
                           <Button

@@ -18,7 +18,7 @@ const Assignments = () => {
 
     return (
         <div>
-            <Button onClick={() => route.back()} className='mb-6 bg-white/80 text-black cursor-pointer'><TfiAngleLeft />Back</Button>
+            <Button onClick={() => route.back()} className='mb-6 bg-white/80 text-black hover:text-white cursor-pointer'><TfiAngleLeft />Back</Button>
 
             <div className='md:flex justify-between items-center mb-10'>
                 <div className='mb-6 md:mb-0'>
