@@ -144,9 +144,8 @@ const BookOverview = () => {
                                 >
                                     Back
                                 </Button>
-                                <Link href={`/teacher/classes/books/${id}/${bookId}/pdf`}>
+                                <Link href={`/teacher/classes/books/${id}/${bookId}/pdf?pdfurl=${book?.file}`}>
                                     <Button
-                                        // onClick={() => window.open(book.file, '_blank')}
                                         className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A] text-white font-medium px-6"
                                     >
                                         Open Book

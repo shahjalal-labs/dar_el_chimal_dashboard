@@ -51,6 +51,7 @@ const UpdateResource = ({ resourceId }: { resourceId: string }) => {
         const body = {
             title: resourceTitle,
             description: resourceDescription,
+            file: resourceFile ? resourceFile : resourceLink,
             Type: resourceType
         }
 

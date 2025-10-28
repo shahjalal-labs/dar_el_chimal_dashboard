@@ -58,7 +58,7 @@ const Resource = ({ bookId, setIsAddResource }: { bookId: any, setIsAddResource:
     };
 
     const isButtonDisabled =
-        !resourceType || !resourceTitle || !resourceDescription || !previewResourceFile || !resourceLink;
+        !resourceType || !resourceTitle || !resourceDescription || (!previewResourceFile && !resourceLink);
 
     return (
         <form onSubmit={handleSubmit} className="space-y-5">

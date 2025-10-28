@@ -469,15 +469,16 @@ const Grade = ({ id, onClose }: { id: string, onClose?: () => void }) => {
                                 </p>
                                 <div className="flex justify-end gap-2 mt-4">
                                     <Button
-                                        variant="outline"
+                                        variant="default"
                                         onClick={() => setIsModalOpen(false)}
+                                        className='px-4 py-2 border rounded-md bg-white text-black hover:text-white'
                                     >
                                         Cancel
                                     </Button>
                                     <Button
                                         variant="destructive"
                                         onClick={confirmRemove}
-                                        className=""
+                                        className="px-4 py-2 bg-red-600 hover:bg-red-300 text-white rounded-md transition-all ease-in-out duration-500 cursor-pointer"
                                     >
                                         {isUpdating ? (
                                             <div className="flex justify-center items-center gap-2">

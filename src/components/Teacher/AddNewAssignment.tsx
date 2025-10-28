@@ -117,7 +117,7 @@ const AddNewAssignment = () => {
                         <h1 className='text-2xl font-bold mb-3'>Add New Assignment</h1>
                         <p className='font-medium'><span className='text-[#72727299]'>Assignment</span><span className='text-[#72727299] px-2'>/</span>Add New Assignment</p>
                     </div>
-                    <Button onClick={() => route.back()} className='mb-6 md:mb-0 bg-white/80 text-black cursor-pointer w-fit'><TfiAngleLeft />Back</Button>
+                    <Button onClick={() => route.back()} className='mb-6 md:mb-0 bg-white/80 text-black hover:text-white cursor-pointer w-fit'><TfiAngleLeft />Back</Button>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4 bg-white rounded-xl p-10">
@@ -320,7 +320,8 @@ const AddNewAssignment = () => {
                     <div className="flex flex-col md:flex-row justify-center items-center gap-4 pt-4">
                         <Button
                             type="button"
-                            className="border px-4 py-2 rounded-md"
+                            variant="default"
+                            className="border px-4 py-2 rounded-md bg-white text-black hover:text-white"
                             onClick={() => route.back()}
                         >
                             Cancel

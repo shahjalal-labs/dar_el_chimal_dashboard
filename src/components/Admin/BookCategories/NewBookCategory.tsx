@@ -158,7 +158,7 @@ const NewBookCategory = () => {
 
                     <div className='flex justify-center items-center gap-4'>
                         <Link href='/admin/book-categories'>
-                            <Button className='font-medium text-[#636F85] border border-[#B8B8B8] rounded-xl hover:bg-[#B8B8B8] transition-all ease-in-out duration-500 cursor-pointer px-4 py-2.5'>Cancel</Button>
+                            <Button variant="default" className='font-medium text-[#636F85] border border-[#B8B8B8] rounded-xl bg-white hover:bg-gray-200 transition-all ease-in-out duration-500 cursor-pointer px-4 py-2.5'>Cancel</Button>
                         </Link>
 
                         {/* Submit Button */}

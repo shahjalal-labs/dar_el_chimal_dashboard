@@ -1,20 +1,16 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Button } from "@/components/ui/button";
 import { useGetBookDetailsQuery } from "@/redux/api/student/booksApi";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-// Define the type for grade items
 interface GradeItem {
   grade: string;
 }
 
-// Define the type for grades
 interface Grade {
   gradesinthisSchool?: GradeItem[];
 }
 
-// Define the type for the book overview data
 interface BookOverviewData {
   coverImg: string;
   bookName: string;
@@ -25,12 +21,10 @@ interface BookOverviewData {
   file: string;
 }
 
-// Define the type for the API response
 interface BookOverviewResponse {
   result?: BookOverviewData;
 }
 
-// Define props interface
 interface GeneralOverviewProps {
   bookId: string | number;
 }
@@ -38,14 +32,11 @@ interface GeneralOverviewProps {
 function GeneralOverview({ bookId }: GeneralOverviewProps) {
   const router = useRouter();
   const { data: getBooksOverview } = useGetBookDetailsQuery(bookId);
-  console.log("data", getBooksOverview);
 
-  // Type the response data
   const bookOverviewData: BookOverviewData | undefined = (
     getBooksOverview as BookOverviewResponse
   )?.result;
 
-  // Extract all grade names with proper typing
   const gradesList: string[] =
     bookOverviewData?.grades?.flatMap(
       (g: Grade) =>
@@ -53,7 +44,6 @@ function GeneralOverview({ bookId }: GeneralOverviewProps) {
     ) || [];
 
   const handleOpenBook = () => {
-    // Navigate to the PDF reader route
     router.push(`/student/books/read?pdfurl=${bookOverviewData?.file}`);
   };
 

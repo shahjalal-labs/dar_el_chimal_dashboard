@@ -52,7 +52,7 @@ const ClassDetails = () => {
 
     return (
         <>
-            <Button onClick={() => route.back()} className='mb-6 bg-white/80 text-black cursor-pointer'><TfiAngleLeft />Back</Button>
+            <Button onClick={() => route.back()} className='mb-6 bg-white/80 text-black hover:text-white cursor-pointer'><TfiAngleLeft />Back</Button>
             <div className="p-6 bg-white rounded-lg">
                 {/* Header Section */}
                 <div>

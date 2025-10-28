@@ -17,7 +17,7 @@ const UpdateStudentModal = ({ id }: { id: string }) => {
     const dispatch = useDispatch();
     const closeRef = useRef<HTMLButtonElement>(null);
     const tab = useSelector((state: RootState) => state.ui.activeBookTab);
-    
+
     const { data, isLoading } = useGetStudentDetailsQuery(id);
 
     const handleTabChange = (value: string) => {
@@ -43,7 +43,7 @@ const UpdateStudentModal = ({ id }: { id: string }) => {
         );
     }
     return (
-        <DialogContent className='overflow-y-auto overflow-x-hidden max-h-[75%] max-w-[90%] p-6'>
+        <DialogContent className='overflow-y-auto overflow-x-hidden max-h-[75%] max-w-[90%] p-6' showCloseButton>
             <DialogClose ref={closeRef} className="hidden" />
             <h1 className='font-bold text-2xl'>Edit Student - ({data?.result?.loginUserName})</h1>
 

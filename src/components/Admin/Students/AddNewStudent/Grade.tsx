@@ -4,7 +4,6 @@
 import React, { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { RootState } from "@/redux/store/store";
 import { useDispatch, useSelector } from "react-redux";
 import Select from "react-select";
@@ -100,7 +99,6 @@ const Grade = () => {
             name: studentName,
             userName: studentUserName,
             password: studentPassword,
-            email,
             schoolId: school.schoolId,
             gradeId: grade.id,
         };
@@ -136,17 +134,6 @@ const Grade = () => {
 
     return (
         <form onSubmit={handleSave} className="space-y-6">
-            {/* Email Field */}
-            <div>
-                <Label>Email</Label>
-                <Input
-                    type="email"
-                    placeholder="Enter student email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                />
-            </div>
 
             {mappings.map((mapping) => {
                 const { school, grade } = mapping;

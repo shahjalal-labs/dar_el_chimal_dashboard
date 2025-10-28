@@ -41,12 +41,6 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
   const authState = useSelector((state: any) => state.auth.role);
 
   const navigation = [
-    {
-      label: "Overview",
-      route: "/",
-      iconPath: <RxDashboard className="w-5 lg:w-6 h-5 lg:h-6" />,
-    },
-
     ...(authState === "Student"
       ? [
         {
@@ -73,6 +67,11 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
       : authState === "Teacher"
         ? [
           {
+            label: "Overview",
+            route: "/",
+            iconPath: <RxDashboard className="w-5 lg:w-6 h-5 lg:h-6" />,
+          },
+          {
             label: "Classes",
             route: "",
             iconPath: <SiGoogleclassroom className="w-5 lg:w-6 h-5 lg:h-6" />,
@@ -84,6 +83,11 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
           },
         ]
         : [
+          {
+            label: "Overview",
+            route: "/",
+            iconPath: <RxDashboard className="w-5 lg:w-6 h-5 lg:h-6" />,
+          },
           {
             label: "Book Management",
             route: "",
@@ -328,7 +332,7 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
           <div className="mt-auto p-6">
             <Button
               onClick={handleLogOut}
-              className="flex items-center justify-start gap-2 text-red-400 transition-colors rounded-md bg-[#EF444433] w-full py-2 px-4"
+              className="flex items-center justify-start gap-2 text-red-400 transition-colors rounded-md bg-[#EF444433] hover:bg-[#EF4444] hover:text-white w-full py-2 px-4"
             >
               <RiLogoutCircleRLine size={18} />
               {isOpen && <span className="text-lg">Log out</span>}

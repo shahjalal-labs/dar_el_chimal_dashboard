@@ -26,26 +26,24 @@ export default function BackToSchoolPage() {
         </div>
         <div className="mb-8 border-b border-gray-200">
           <div className="flex gap-8">
-            <Button
+            <button
               onClick={() => setActiveTab("general")}
-              className={`pb-4 font-medium transition-all duration-500 ease-in-out cursor-pointer ${
-                activeTab === "general"
+              className={`pb-4 font-medium transition-all duration-500 ease-in-out cursor-pointer ${activeTab === "general"
                   ? "border-b-2 border-blue-600 text-blue-600"
                   : "text-gray-600 hover:text-gray-900"
-              }`}
+                }`}
             >
               General
-            </Button>
-            <Button
+            </button>
+            <button
               onClick={() => setActiveTab("resources")}
-              className={`pb-4 font-medium transition-all duration-500 ease-in-out cursor-pointer ${
-                activeTab === "resources"
+              className={`pb-4 font-medium transition-all duration-500 ease-in-out cursor-pointer ${activeTab === "resources"
                   ? "border-b-2 border-blue-600 text-blue-600"
                   : "text-gray-600 hover:text-gray-900"
-              }`}
+                }`}
             >
               Resources
-            </Button>
+            </button>
           </div>
         </div>
 

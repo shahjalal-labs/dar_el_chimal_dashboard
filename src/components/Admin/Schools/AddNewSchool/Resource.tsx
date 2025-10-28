@@ -125,12 +125,12 @@ const Resource = ({ bookId }: { bookId: any }) => {
                     <div className="flex flex-col gap-2 mt-2">
                         {previewResourceFile?.map((fileName: string) => (
                             <div key={fileName} className="relative flex items-center p-4 border border-[#CBD5E1] rounded-lg bg-gray-50">
-                                <Button
+                                <button
                                     onClick={() => handleRemoveResourceFile(fileName)}
                                     className="absolute top-2 right-2 bg-gray-300 rounded-full p-1 hover:bg-gray-400 transition"
                                 >
                                     <RxCross1 className="w-3 h-3" />
-                                </Button>
+                                </button>
                                 <p className="text-[#1E3A8A] font-medium break-all">{fileName}</p>
                             </div>
                         ))}

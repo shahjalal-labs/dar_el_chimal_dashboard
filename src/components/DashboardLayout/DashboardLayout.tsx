@@ -94,7 +94,7 @@ const DashboardLayout = () => {
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-2xl font-bold">My Classes</h3>
               <Link href='/teacher/classes'>
-                <Button className="font-medium hover:underline">See All</Button>
+                <Button variant="default" className="font-medium hover:underline bg-gray-50 text-black hover:text-white">See All</Button>
               </Link>
             </div>
 

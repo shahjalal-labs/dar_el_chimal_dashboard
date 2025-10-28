@@ -25,7 +25,7 @@ const Classes = () => {
 
     return (
         <>
-            <Button onClick={() => route.back()} className='mb-6 bg-white/80 text-black cursor-pointer'><TfiAngleLeft />Back</Button>
+            <Button onClick={() => route.back()} className='mb-6 bg-white/80 text-black hover:text-white cursor-pointer'><TfiAngleLeft />Back</Button>
             <div className="p-8 rounded-lg bg-[#FFFFFF]">
                 {/* My Classes */}
                 <div className="flex justify-between items-center mb-6">

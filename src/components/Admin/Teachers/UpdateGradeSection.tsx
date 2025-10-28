@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -31,14 +32,16 @@ interface GradeOption {
 
 const UpdateGradeSection = ({ id }: { id: string }) => {
     const dispatch = useDispatch();
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedSchool, setSelectedSchool] = useState<SchoolOption | null>(null);
     const [selectedGrades, setSelectedGradesState] = useState<GradeOption[]>([]);
     const [optionToRemove, setOptionToRemove] = useState<GradeOption | null>(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const { data: teacherData } = useGetTeacherDetailsQuery(id);
     const teacher = teacherData?.result;
-    const schoolId = teacher?.Teacher?.[0]?.grade?.school?.id;
+
+    const [schoolId, setSchoolId] = useState<string>(teacher?.Teacher?.[0]?.grade?.school?.id);
+
     const { data: schoolData } = useGetSingleSchoolQuery({ id: schoolId });
     const [updateTeacher, { isLoading: isUpdating }] = useUpdateTeacherMutation();
 
@@ -75,24 +78,13 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
 
     const handleSchoolChange = (school: SchoolOption) => {
         setSelectedSchool(school);
-        dispatch(setTeacherSchoolName(school.schoolName));
+        setSchoolId(school?.schoolId);
+        dispatch(setTeacherSchoolName(school?.schoolName));
     };
 
     const handleChange = (newValue: any) => {
         setSelectedGradesState(newValue);
         dispatch(setSelectedGrades(newValue));
-    };
-
-    const handleCreateOption = (inputValue: string) => {
-        const newOption: GradeOption = {
-            id: crypto.randomUUID(),
-            label: inputValue,
-            schoolId: selectedSchool?.schoolId || "",
-            __isNew__: true,
-        };
-        const newOptions = [...selectedGrades, newOption];
-        setSelectedGradesState(newOptions);
-        dispatch(setSelectedGrades(newOptions));
     };
 
     const handleRemoveClick = (option: GradeOption) => {
@@ -106,7 +98,7 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
             const body = {
                 userData: {},
                 gradeData: {
-                    deletedGrade: [optionToRemove.id],
+                    deletedGrade: [optionToRemove?.id],
                     newGradeAssign: [],
                 },
             };
@@ -130,15 +122,27 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
     };
 
     const handleSave = async () => {
-        const newGradeAssign = selectedGrades
-            .filter((g) => g.__isNew__)
-            .map((g) => g.id);
+        let newGradeAssign = [""];
+
+        const mappedGrades = teacher.Teacher.map((t: any) => ({
+            id: t.grade.id
+        }));
+
+        if (teacher?.Teacher[0]?.grade?.school?.id !== schoolId) {
+            newGradeAssign = selectedGrades?.map((g) => g.id);
+        }
+        else {
+            const mappedIds = mappedGrades.map((g: any) => String(g.id).trim());
+            newGradeAssign = selectedGrades
+                .filter(sg => !mappedIds.includes(String(sg.id).trim()))
+                .map(sg => sg.id);
+        }
 
         const body = {
             userData: {},
             gradeData: {
                 deletedGrade: [],
-                newGradeAssign,
+                newGradeAssign: newGradeAssign,
             },
         };
         const formData = new FormData();
@@ -192,15 +196,12 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                         options={gradeOptions}
                         value={selectedGrades}
                         onChange={handleChange}
-                        onCreateOption={handleCreateOption}
+                        // onCreateOption={handleCreateOption}
                         getOptionLabel={(option) => option.label}
                         getOptionValue={(option) => option.id}
                         components={{
                             MultiValueRemove: (props) => (
-                                <div
-                                    onClick={() => handleRemoveClick(props.data as GradeOption)}
-                                    className="px-1 cursor-pointer text-gray-500 hover:text-red-600"
-                                >
+                                <div className="px-1 cursor-pointer text-gray-500 hover:text-red-600">
                                     ✕
                                 </div>
                             ),
@@ -225,6 +226,18 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                         }}
                     />
                 </div>
+
+                {/* Tag */}
+                <div className="flex flex-wrap gap-2">
+                    {selectedGrades?.map((grade: any) => (
+                        <div key={grade?.id} className="bg-[#F1F5F9] text-sm rounded-md flex items-center gap-1.5 w-fit px-2.5 py-0.5">
+                            {grade?.label}
+                            <button type="button" onClick={() => handleRemoveClick(grade)} className="text-gray-700 hover:text-red-600 text-lg cursor-pointer">
+                                ×
+                            </button>
+                        </div>
+                    ))}
+                </div>
             </div>
 
             {/* ✅ Confirmation Modal */}
@@ -239,15 +252,17 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                     </p>
                     <div className="flex justify-end gap-2 mt-4">
                         <Button
+                            variant="default"
                             onClick={() => setIsModalOpen(false)}
-                            className="px-3 py-1 border rounded-md"
+                            className="px-4 py-2 border rounded-md bg-white text-black hover:text-white"
                         >
                             Cancel
                         </Button>
                         <Button
+                            variant="destructive"
                             onClick={confirmRemove}
                             disabled={isUpdating}
-                            className="px-3 py-1 bg-red-600 text-white rounded-md"
+                            className="px-4 py-2 bg-red-600 hover:bg-red-300 text-white rounded-md transition-all ease-in-out duration-500 cursor-pointer"
                         >
                             {isUpdating ? (
                                 <div className="flex justify-center items-center gap-2">

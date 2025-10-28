@@ -50,7 +50,7 @@ const ResourceDetails: React.FC = () => {
 
     return (
         <div>
-            <Button onClick={() => route.back()} className='mb-6 bg-white/80 text-black cursor-pointer'><TfiAngleLeft />Back</Button>
+            <Button onClick={() => route.back()} className='mb-6 bg-white/80 text-black hover:text-white cursor-pointer'><TfiAngleLeft />Back</Button>
 
             <div className="bg-white rounded-xl p-6">
                 {/* Title and Description */}
