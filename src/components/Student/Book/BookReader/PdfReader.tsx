@@ -1030,9 +1030,9 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton }: PdfReaderProps) {
               setSearchQuery("");
               setSearchResults({});
             }}
-            className="p-2 hover:bg-gray-100 rounded-lg"
+            className="p-2 bg-gray-200 hover:bg-gray-50 rounded-lg"
           >
-            <X className="w-5 h-5 text-gray-600" />
+            <X className="w-5 h-5 text-black" />
           </Button>
         </div>
       )}
