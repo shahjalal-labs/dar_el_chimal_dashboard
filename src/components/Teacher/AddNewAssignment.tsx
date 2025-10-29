@@ -45,6 +45,8 @@ const AddNewAssignment = () => {
         assignToAll: true,
     });
 
+    console.log(formData?.book);
+
     const handleChange = (e: any) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
@@ -154,19 +156,22 @@ const AddNewAssignment = () => {
                         <label className="font-medium text-[#30373D]">Books</label>
                         <select
                             name="book"
-                            value={formData.book.id}
+                            value={JSON.stringify(formData.book)}
                             onChange={(e) => {
                                 const value = JSON.parse(e.target.value);
                                 setFormData((prev) => ({ ...prev, book: value }));
                             }}
-                            className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none bg-white"
+                            className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none bg-white mt-2"
                             required
                         >
-                            {
-                                allBooks?.result?.map((book: any) => (
-                                    <option key={book?.id} value={JSON.stringify({ id: book?.id, name: book?.bookName })}>{book?.bookName}</option>
-                                ))
-                            }
+                            {allBooks?.result?.map((book: any) => (
+                                <option
+                                    key={book.id}
+                                    value={JSON.stringify({ id: book.id, name: book.bookName })}
+                                >
+                                    {book.bookName}
+                                </option>
+                            ))}
                         </select>
                     </div>
 

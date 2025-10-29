@@ -107,7 +107,7 @@ const DashboardLayout = () => {
                 >
                   <div>
                     <p className="font-medium text-xl">
-                      {grade?.grade} - Section A
+                      {grade?.grade}
                     </p>
                     <p className="md:flex items-center gap-4 text-[#4C4C4C] mt-3">
                       <div className="flex items-center gap-2"><BiBookReader className="text-lg" /> {grade?.totalStudents} Student{grade?.totalStudents > 1 ? "s" : ""}</div>

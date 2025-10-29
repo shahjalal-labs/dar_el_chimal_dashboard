@@ -34,36 +34,38 @@ const Assignments = () => {
 
             <div className='space-y-4'>
                 {
-                    data?.result?.assignments?.map((assignment: any, idx: number) => (
-                        <Link href={`/teacher/classes/${id}/assignments/${assignment?.id}`} key={idx} className='bg-[#F7F9FF] border border-[#E7E8EB] rounded-xl p-5 flex justify-between items-center hover:bg-gray-50 cursor-pointer'>
-                            <div>
-                                <h1 className='text-[#262626] text-xl font-medium mb-2'>{assignment?.title}</h1>
-                                <div className='flex items-center gap-2'>
-                                    <Image
-                                        src={line}
-                                        height={50}
-                                        width={50}
-                                        alt=''
-                                        className='h-10 w-8'
-                                        priority
-                                    />
-                                    <div>
-                                        <p className='text-[#4C4C4C]'>Assigned on: {new Date(assignment?.createdAt).toLocaleString('en-US', {
-                                            year: 'numeric',
-                                            month: 'long',
-                                            day: 'numeric'
-                                        })}</p>
-                                        <p className='text-[#4C4C4C] mt-1.5'>Due Date: {new Date(assignment?.dueDate).toLocaleString('en-US', {
-                                            year: 'numeric',
-                                            month: 'long',
-                                            day: 'numeric'
-                                        })}</p>
+                    !data?.result?.assignments?.length ?
+                        <div className='text-center'>No assignment created yet!</div> :
+                        data?.result?.assignments?.map((assignment: any, idx: number) => (
+                            <Link href={`/teacher/classes/${id}/assignments/${assignment?.id}`} key={idx} className='bg-[#F7F9FF] border border-[#E7E8EB] rounded-xl p-5 flex justify-between items-center hover:bg-gray-50 cursor-pointer'>
+                                <div>
+                                    <h1 className='text-[#262626] text-xl font-medium mb-2'>{assignment?.title}</h1>
+                                    <div className='flex items-center gap-2'>
+                                        <Image
+                                            src={line}
+                                            height={50}
+                                            width={50}
+                                            alt=''
+                                            className='h-10 w-8'
+                                            priority
+                                        />
+                                        <div>
+                                            <p className='text-[#4C4C4C]'>Assigned on: {new Date(assignment?.createdAt).toLocaleString('en-US', {
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric'
+                                            })}</p>
+                                            <p className='text-[#4C4C4C] mt-1.5'>Due Date: {new Date(assignment?.dueDate).toLocaleString('en-US', {
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric'
+                                            })}</p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <span className="text-[#1C1B1F]"><TfiAngleRight className="w-6 h-6" /></span>
-                        </Link>
-                    ))
+                                <span className="text-[#1C1B1F]"><TfiAngleRight className="w-6 h-6" /></span>
+                            </Link>
+                        ))
                 }
             </div>
         </div>

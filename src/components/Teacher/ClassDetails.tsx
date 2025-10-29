@@ -57,7 +57,7 @@ const ClassDetails = () => {
                 {/* Header Section */}
                 <div>
                     <p className="font-medium text-xl">
-                        Grade {gradeData?.grade} - Section A
+                        {gradeData?.grade}
                     </p>
                     <p className="flex items-center gap-2 text-[#4C4C4C] mt-3">
                         <BiBookReader className="text-lg" /> {totalStudent} Student{totalStudent > 1 ? "s" : ""} <SlCalender className="text-lg ml-2" /> {new Date().getFullYear()}

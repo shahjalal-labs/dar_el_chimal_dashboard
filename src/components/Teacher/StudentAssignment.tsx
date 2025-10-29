@@ -1,18 +1,45 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useGetStudentAssignmentDetailsByTeacherQuery } from "@/redux/api/teacher/overviewApi";
+import { useGetStudentAssignmentDetailsByTeacherQuery, useGradeAssignmentMutation } from "@/redux/api/teacher/overviewApi";
 import { SyncLoader } from "react-spinners";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
+import { toast } from "sonner";
+import { PiSpinner } from "react-icons/pi";
 
 const StudentAssignment = () => {
     const router = useRouter();
     const { assignmentProgressId } = useParams();
     const { data, isLoading } = useGetStudentAssignmentDetailsByTeacherQuery(assignmentProgressId);
 
+    const [grade, setGrade] = useState(data?.result?.assignmentGrade);
+    const [feedback, setFeedback] = useState(data?.result?.FeedBack);
+
     const result = data?.result;
+
+    const [GradeAssignment, { isLoading: isGrading }] = useGradeAssignmentMutation();
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        const body = {
+            grade,
+            feedback,
+        };
+
+        try {
+            const response = await GradeAssignment({ assignmentProgressId, body }).unwrap();
+            if (response.success) {
+                toast.success(response.message || "Assignment graded successfully.");
+                router.back()
+            }
+        } catch (error: any) {
+            toast.error(error?.data?.message || "Something went wrong while grading assignment.");
+        }
+    };
 
     if (isLoading) {
         return (
@@ -92,35 +119,42 @@ const StudentAssignment = () => {
             </div>
 
             {/* Grading Form */}
-            <div className="">
+            <form onSubmit={handleSubmit} className="">
                 <div className="space-y-4">
                     {/* Grade Select */}
                     <div>
-                        <label className="font-semibold mb-1.5">Grade</label>
-                        <Input
-                            value={
-                                data?.result?.assignmentGrade === "A_plus" ? 'A+' :
-                                    data?.result?.assignmentGrade === "A" ? 'A' :
-                                        data?.result?.assignmentGrade === "A_minus" ? 'A-' :
-                                            data?.result?.assignmentGrade === "B_plus" ? 'B+' :
-                                                data?.result?.assignmentGrade === "B" ? 'B' :
-                                                    data?.result?.assignmentGrade === "B_minus" ? 'B-' :
-                                                        data?.result?.assignmentGrade === "C_plus" ? 'C+' :
-                                                            data?.result?.assignmentGrade === "C" ? 'C' :
-                                                                data?.result?.assignmentGrade === "C_minus" ? 'C-' :
-                                                                    data?.result?.assignmentGrade === "D" ? 'D' : 'F'
-                            }
-                            readOnly />
+                        <label className="font-semibold mb-1.5 block">Grade</label>
+                        <select
+                            value={grade}
+                            onChange={(e) => setGrade(e.target.value)}
+                            className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none bg-white"
+                            disabled={!data?.result?.studentAnswer?.length}
+                            required
+                        >
+                            <option value="">Select Grade</option>
+                            <option value="A_plus">A+</option>
+                            <option value="A">A</option>
+                            <option value="A_minus">A-</option>
+                            <option value="B_plus">B+</option>
+                            <option value="B">B</option>
+                            <option value="B_minus">B-</option>
+                            <option value="C_plus">C+</option>
+                            <option value="C">C</option>
+                            <option value="C_minus">C-</option>
+                            <option value="D">D</option>
+                            <option value="F">F</option>
+                        </select>
                     </div>
 
                     {/* Feedback Input */}
                     <div>
-                        <label className="font-semibold mb-1.5">Feedback</label>
+                        <label className="font-semibold mb-1.5 block">Feedback</label>
                         <textarea
-                            value={data?.result?.FeedBack}
+                            value={feedback}
+                            onChange={(e) => setFeedback(e.target.value)}
                             placeholder="Enter your feedback..."
                             className="w-full border rounded-md px-3 py-2 text-sm resize-none h-24 focus:outline-none bg-white mt-2"
-                            readOnly
+                            disabled={!data?.result?.studentAnswer?.length}
                         />
                     </div>
                 </div>
@@ -128,16 +162,28 @@ const StudentAssignment = () => {
                 {/* Buttons */}
                 <div className="flex justify-center items-center gap-3 mt-6">
                     <Button
+                        variant="outline"
                         onClick={() => router.back()}
                         className="px-6 py-2 border rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100"
                     >
                         Back
                     </Button>
-                    <Button className="px-6 py-2 bg-[#1E3A8A] hover:bg-blue-800 text-white rounded-md text-sm font-medium cursor-pointer">
-                        Grade Assignment
+                    <Button
+                        type="submit"
+                        className="px-6 py-2 bg-[#1E3A8A] hover:bg-blue-800 text-white rounded-md text-sm font-medium cursor-pointer"
+                        disabled={!data?.result?.studentAnswer?.length}
+                    >
+                        {isGrading ? (
+                            <>
+                                <PiSpinner className="animate-spin h-4 w-4" />
+                                Saving...
+                            </>
+                        ) : (
+                            " Grade Assignment"
+                        )}
                     </Button>
                 </div>
-            </div>
+            </form>
         </div>
     );
 };
