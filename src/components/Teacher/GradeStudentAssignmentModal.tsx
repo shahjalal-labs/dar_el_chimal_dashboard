@@ -129,6 +129,7 @@ const GradeStudentAssignmentModal = ({ assignmentProgressId, onClose, }: GradeSt
                             value={grade}
                             onChange={(e) => setGrade(e.target.value)}
                             className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none bg-white"
+                            disabled={!data?.result?.studentAnswer?.length}
                             required
                         >
                             <option value="">Select Grade</option>
@@ -140,7 +141,7 @@ const GradeStudentAssignmentModal = ({ assignmentProgressId, onClose, }: GradeSt
                             <option value="B_minus">B-</option>
                             <option value="C_plus">C+</option>
                             <option value="C">C</option>
-                            <option value="C_minus">C</option>
+                            <option value="C_minus">C-</option>
                             <option value="D">D</option>
                             <option value="F">F</option>
                         </select>
@@ -154,6 +155,7 @@ const GradeStudentAssignmentModal = ({ assignmentProgressId, onClose, }: GradeSt
                             onChange={(e) => setFeedback(e.target.value)}
                             placeholder="Enter your feedback..."
                             className="w-full border rounded-md px-3 py-2 text-sm resize-none h-24 focus:outline-none bg-white mt-2"
+                            disabled={!data?.result?.studentAnswer?.length}
                         />
                     </div>
                 </div>
@@ -162,6 +164,7 @@ const GradeStudentAssignmentModal = ({ assignmentProgressId, onClose, }: GradeSt
                 <div className="flex justify-center items-center gap-3 mt-6">
                     <Button
                         type="button"
+                        variant="outline"
                         onClick={onClose}
                         className="px-6 py-2 border rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100"
                     >
@@ -169,16 +172,16 @@ const GradeStudentAssignmentModal = ({ assignmentProgressId, onClose, }: GradeSt
                     </Button>
                     <Button
                         type="submit"
-                        disabled={isGrading}
                         className="px-6 py-2 bg-[#1E3A8A] hover:bg-blue-800 text-white rounded-md text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-70"
+                        disabled={!data?.result?.studentAnswer?.length}
                     >
                         {isGrading ? (
                             <>
                                 <PiSpinner className="animate-spin h-4 w-4" />
-                                Saving...
+                                Updating...
                             </>
                         ) : (
-                            "Save Grade"
+                            "Update Grade"
                         )}
                     </Button>
                 </div>

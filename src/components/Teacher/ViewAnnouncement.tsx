@@ -47,10 +47,10 @@ const ViewAnnouncement = () => {
                         day: 'numeric',
                     })}</p>
                 </div>
-                <div className='flex items-center gap-2'>
+                {/* <div className='flex items-center gap-2'>
                     <MdOutlineRemoveRedEye className='w-4 h-4' />
                     <p className='text-[#4C4C4C]'>Seen by 21</p>
-                </div>
+                </div> */}
             </div>
             <p className='text-[#4C4C4C] mb-10'>{data?.result?.anouncement}</p>
 

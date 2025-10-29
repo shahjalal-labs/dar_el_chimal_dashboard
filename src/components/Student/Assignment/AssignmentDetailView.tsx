@@ -37,7 +37,8 @@ export function AssignmentDetailView({
         {/* Back Button */}
         <Button
           onClick={onBack}
-          className="mb-8 flex items-center gap-2 text-gray-600 hover:text-gray-900"
+          variant="default"
+          className="mb-8 flex items-center gap-2 bg-gray-200 text-black hover:text-white"
         >
           <ChevronLeft className="h-5 w-5" />
           Back
