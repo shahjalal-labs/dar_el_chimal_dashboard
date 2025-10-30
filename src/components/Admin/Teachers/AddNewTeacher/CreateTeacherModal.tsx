@@ -6,7 +6,7 @@ import { Dialog, DialogClose, DialogContent, DialogTrigger } from "@/components/
 import { Label } from "@/components/ui/label";
 import GetSchools, { SchoolOption } from "@/components/Common/GetSchools";
 import Image from "next/image";
-import Select from "react-select";
+import Select, { ActionMeta, OnChangeValue, StylesConfig } from 'react-select';
 import { useGetAllGradesQuery } from "@/redux/api/grade";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setNumberOfTeacher, setTeacherSchoolName, setTeachersList } from "@/redux/features/teacherSlice";
 import { RootState } from "@/redux/store/store";
 import ShowBulkTeachersModal from "./ShowBulkTeachersModal";
+import { useGetAllBookCategoriesQuery } from "@/redux/api/bookCategory";
 
 interface GradeOption {
     id: string;
@@ -30,6 +31,39 @@ interface Mapping {
     grades: GradeOption[];
 }
 
+interface CategoryOption {
+    id: string;
+    categoryName: string;
+    isFixed?: false;
+}
+
+const styles: StylesConfig<CategoryOption, true> = {
+    multiValue: (base, state) => ({
+        ...base,
+        backgroundColor: state.data.isFixed ? "#9CA3AF" : "#E5E7EB", // gray
+        borderRadius: "9999px",
+        padding: "0 4px",
+    }),
+    multiValueLabel: (base, state) => ({
+        ...base,
+        fontWeight: state.data.isFixed ? "600" : "400",
+        color: state.data.isFixed ? "white" : "#374151",
+        paddingRight: 6,
+    }),
+    multiValueRemove: (base, state) => ({
+        ...base,
+        display: state.data.isFixed ? "none" : "flex",
+        cursor: "pointer",
+    }),
+    control: (base) => ({
+        ...base,
+        borderColor: '#CBD5E1',
+        borderRadius: '0.5rem',
+        boxShadow: 'none',
+        padding: '2px 4px',
+    }),
+};
+
 const CreateTeacherModal = () => {
     const dispatch = useDispatch();
     const closeRef = useRef<HTMLButtonElement>(null);
@@ -38,6 +72,24 @@ const CreateTeacherModal = () => {
     const [mappings, setMappings] = useState<Mapping[]>([{ id: Date?.now()?.toString(), school: null, grades: [] },]);
 
     const { data: gradesData } = useGetAllGradesQuery({ currentPage: 1, limit: 1000 });
+    const { data: allBookCategories } = useGetAllBookCategoriesQuery({ currentPage: 1, limit: 1000 });
+
+    const allCategories: CategoryOption[] =
+        allBookCategories?.result?.result?.map((category: any) => ({
+            id: category?.id,
+            categoryName: category?.name,
+            isFixed: false,
+        })) ?? [];
+
+    const orderOptions = (values: readonly CategoryOption[]) => {
+        return [
+            ...values.filter((v) => v.isFixed),
+            ...values.filter((v) => !v.isFixed),
+        ];
+    };
+
+    const [value, setValue] = useState<readonly CategoryOption[]>([]);
+
     const [CreateTeacher, { isLoading: isCreating }] = useCreateBulkTeacherMutation();
 
     const allGrades: GradeOption[] = gradesData?.result?.map((singleGrade: any) => ({
@@ -45,6 +97,25 @@ const CreateTeacherModal = () => {
         label: singleGrade?.grade,
         schoolId: singleGrade?.schoolId,
     })) ?? [];
+
+    const onChange = (
+        newValue: OnChangeValue<CategoryOption, true>,
+        actionMeta: ActionMeta<CategoryOption>
+    ) => {
+        switch (actionMeta.action) {
+            case "remove-value":
+            case "pop-value":
+                if (actionMeta.removedValue.isFixed) {
+                    return;
+                }
+                break;
+            case "clear":
+                newValue = value.filter((v) => v.isFixed); // keep fixed ones
+                break;
+        }
+
+        setValue(orderOptions(newValue));
+    };
 
     const handleSchoolChange = (id: string, school: SchoolOption) => {
         dispatch(setTeacherSchoolName(school?.schoolName));
@@ -62,6 +133,7 @@ const CreateTeacherModal = () => {
             schoolId: mappings[0]?.school?.schoolId,
             gradeIds: mappings[0]?.grades?.map((g: any) => g?.id),
             numberOfTeacher: numberOfTeacher,
+            bookCategoryIds: value?.map((c: any) => c?.id)
         };
 
         try {
@@ -83,6 +155,23 @@ const CreateTeacherModal = () => {
         <DialogContent className="overflow-y-auto overflow-x-hidden max-h-[75%] min-w-[50%] p-6" showCloseButton>
             <DialogClose ref={closeRef} className="hidden" />
             <h1 className="font-bold text-2xl">Create New Teacher</h1>
+
+            <div className="w-full">
+                <Label>Select Book Categories</Label>
+                <Select
+                    value={value}
+                    isMulti
+                    styles={styles}
+                    name="categories"
+                    className="react-select-container rounded-xl mt-2"
+                    classNamePrefix="select"
+                    getOptionLabel={(option) => option.categoryName}
+                    getOptionValue={(option) => option.id}
+                    onChange={onChange}
+                    options={allCategories}
+                    placeholder="Choose categories..."
+                />
+            </div>
 
             <div>
                 {mappings?.map((mapping) => {

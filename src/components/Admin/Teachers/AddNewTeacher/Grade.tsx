@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { RootState } from '@/redux/store/store';
 import { useDispatch, useSelector } from 'react-redux';
-import Select from 'react-select';
 import { setEmail, setPassword, setPreviewTeacherPhoto, setTeacherName, setUserName } from '@/redux/features/teacherSlice';
 import GetSchools, { SchoolOption } from '@/components/Common/GetSchools';
 import Link from 'next/link';
@@ -15,6 +14,8 @@ import { useGetAllGradesQuery } from '@/redux/api/grade';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { useCreateTeacherMutation } from '@/redux/api/teacher';
+import Select, { ActionMeta, OnChangeValue, StylesConfig } from 'react-select';
+import { useGetAllBookCategoriesQuery } from '@/redux/api/bookCategory';
 
 interface GradeOption {
     id: string;
@@ -27,6 +28,39 @@ interface Mapping {
     school: SchoolOption | null;
     grades: GradeOption[];
 }
+
+interface CategoryOption {
+    id: string;
+    categoryName: string;
+    isFixed?: false;
+}
+
+const styles: StylesConfig<CategoryOption, true> = {
+    multiValue: (base, state) => ({
+        ...base,
+        backgroundColor: state.data.isFixed ? "#9CA3AF" : "#E5E7EB", // gray
+        borderRadius: "9999px",
+        padding: "0 4px",
+    }),
+    multiValueLabel: (base, state) => ({
+        ...base,
+        fontWeight: state.data.isFixed ? "600" : "400",
+        color: state.data.isFixed ? "white" : "#374151",
+        paddingRight: 6,
+    }),
+    multiValueRemove: (base, state) => ({
+        ...base,
+        display: state.data.isFixed ? "none" : "flex",
+        cursor: "pointer",
+    }),
+    control: (base) => ({
+        ...base,
+        borderColor: '#CBD5E1',
+        borderRadius: '0.5rem',
+        boxShadow: 'none',
+        padding: '2px 4px',
+    }),
+};
 
 const Grade = () => {
     const route = useRouter();
@@ -41,8 +75,44 @@ const Grade = () => {
     const [mappings, setMappings] = useState<Mapping[]>([{ id: Date?.now()?.toString(), school: null, grades: [] },]);
 
     const { data: gradesData } = useGetAllGradesQuery({ currentPage: 1, limit: 1000 });
+    const { data: allBookCategories } = useGetAllBookCategoriesQuery({ currentPage: 1, limit: 1000 });
+
+    const allCategories: CategoryOption[] =
+        allBookCategories?.result?.result?.map((category: any) => ({
+            id: category?.id,
+            categoryName: category?.name,
+            isFixed: false,
+        })) ?? [];
+
+    const orderOptions = (values: readonly CategoryOption[]) => {
+        return [
+            ...values.filter((v) => v.isFixed),
+            ...values.filter((v) => !v.isFixed),
+        ];
+    };
+
+    const [value, setValue] = useState<readonly CategoryOption[]>([]);
 
     const [CreateTeacher, { isLoading: isCreating }] = useCreateTeacherMutation();
+
+    const onChange = (
+        newValue: OnChangeValue<CategoryOption, true>,
+        actionMeta: ActionMeta<CategoryOption>
+    ) => {
+        switch (actionMeta.action) {
+            case "remove-value":
+            case "pop-value":
+                if (actionMeta.removedValue.isFixed) {
+                    return;
+                }
+                break;
+            case "clear":
+                newValue = value.filter((v) => v.isFixed); // keep fixed ones
+                break;
+        }
+
+        setValue(orderOptions(newValue));
+    };
 
     const allGrades: GradeOption[] = gradesData?.result?.map((singleGrade: any) => ({
         id: singleGrade?.id,
@@ -67,7 +137,8 @@ const Grade = () => {
             email: email,
             password: password,
             schoolId: mappings[0]?.school?.schoolId,
-            gradeIds: mappings[0]?.grades?.map((g: any) => g?.id)
+            gradeIds: mappings[0]?.grades?.map((g: any) => g?.id),
+            bookCategoryIds: value?.map((c: any) => c?.id)
         }
 
         const formData = new FormData();
@@ -97,6 +168,23 @@ const Grade = () => {
 
     return (
         <form onSubmit={handleSave}>
+            <div className="w-full">
+                <Label>Select Book Categories</Label>
+                <Select
+                    value={value}
+                    isMulti
+                    styles={styles}
+                    name="categories"
+                    className="react-select-container rounded-xl mt-2 mb-5"
+                    classNamePrefix="select"
+                    getOptionLabel={(option) => option.categoryName}
+                    getOptionValue={(option) => option.id}
+                    onChange={onChange}
+                    options={allCategories}
+                    placeholder="Choose categories..."
+                />
+            </div>
+
             {mappings?.map((mapping) => {
                 const { school, grades } = mapping;
 
