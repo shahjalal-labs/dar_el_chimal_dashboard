@@ -22,6 +22,8 @@ import {
 } from "@/redux/features/teacherSlice";
 import defaultImg from "@/assets/school.png";
 import { useGetSingleSchoolQuery } from "@/redux/api/school";
+import { useGetAllBookCategoriesQuery } from "@/redux/api/bookCategory";
+import Select, { ActionMeta, OnChangeValue, StylesConfig } from 'react-select';
 
 interface GradeOption {
     id: string;
@@ -29,6 +31,39 @@ interface GradeOption {
     schoolId: string;
     __isNew__?: boolean;
 }
+
+interface CategoryOption {
+    id: string;
+    categoryName: string;
+    isFixed?: false;
+}
+
+const styles: StylesConfig<CategoryOption, true> = {
+    multiValue: (base, state) => ({
+        ...base,
+        backgroundColor: state.data.isFixed ? "#9CA3AF" : "#E5E7EB", // gray
+        borderRadius: "9999px",
+        padding: "0 4px",
+    }),
+    multiValueLabel: (base, state) => ({
+        ...base,
+        fontWeight: state.data.isFixed ? "600" : "400",
+        color: state.data.isFixed ? "white" : "#374151",
+        paddingRight: 6,
+    }),
+    multiValueRemove: (base, state) => ({
+        ...base,
+        display: state.data.isFixed ? "none" : "flex",
+        cursor: "pointer",
+    }),
+    control: (base) => ({
+        ...base,
+        borderColor: '#CBD5E1',
+        borderRadius: '0.5rem',
+        boxShadow: 'none',
+        padding: '2px 4px',
+    }),
+};
 
 const UpdateGradeSection = ({ id }: { id: string }) => {
     const dispatch = useDispatch();
@@ -43,6 +78,26 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
     const [schoolId, setSchoolId] = useState<string>(teacher?.Teacher?.[0]?.grade?.school?.id);
 
     const { data: schoolData } = useGetSingleSchoolQuery({ id: schoolId });
+    const { data: allBookCategories } = useGetAllBookCategoriesQuery({ currentPage: 1, limit: 1000 });
+
+    const allCategories: CategoryOption[] =
+        allBookCategories?.result?.result?.map((category: any) => ({
+            id: category?.id,
+            categoryName: category?.name,
+            isFixed: false,
+        })) ?? [];
+
+    const orderOptions = (values: readonly CategoryOption[]) => {
+        return [
+            ...values.filter((v) => v.isFixed),
+            ...values.filter((v) => !v.isFixed),
+        ];
+    };
+
+    const [value, setValue] = useState<readonly CategoryOption[]>(
+        teacherData?.result?.teachersBookCategories?.map((category: any) => ({ id: category?.category?.id, categoryName: category?.category?.name }))
+    );
+
     const [updateTeacher, { isLoading: isUpdating }] = useUpdateTeacherMutation();
 
     useEffect(() => {
@@ -75,6 +130,25 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
             schoolId: schoolData.result.id,
         }));
     }, [schoolData]);
+
+    const onChange = (
+        newValue: OnChangeValue<CategoryOption, true>,
+        actionMeta: ActionMeta<CategoryOption>
+    ) => {
+        switch (actionMeta.action) {
+            case "remove-value":
+            case "pop-value":
+                if (actionMeta.removedValue.isFixed) {
+                    return;
+                }
+                break;
+            case "clear":
+                newValue = value.filter((v) => v.isFixed); // keep fixed ones
+                break;
+        }
+
+        setValue(orderOptions(newValue));
+    };
 
     const handleSchoolChange = (school: SchoolOption) => {
         setSelectedSchool(school);
@@ -128,6 +202,16 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
             id: t.grade.id
         }));
 
+        const mappedCategories = teacherData?.result?.teachersBookCategories?.map((category: any) => ({
+            id: category?.category?.id
+        }))
+
+        const mappedIds = mappedCategories.map((g: any) => String(g.id).trim());
+
+        const newBookCategoryIds = value
+            .filter(sg => !mappedIds.includes(String(sg.id).trim()))
+            .map(sg => sg.id);
+
         if (teacher?.Teacher[0]?.grade?.school?.id !== schoolId) {
             newGradeAssign = selectedGrades?.map((g) => g.id);
         }
@@ -144,6 +228,8 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                 deletedGrade: [],
                 newGradeAssign: newGradeAssign,
             },
+            newBookCategoryIds: newBookCategoryIds,
+            deletedBookCategoryIds: []
         };
         const formData = new FormData();
         formData.append("bodyData", JSON.stringify(body));
@@ -164,6 +250,23 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
     return (
         <div>
             <div className="flex flex-col items-start gap-6 mb-6 relative">
+                <div className="w-full">
+                    <Label>Select Book Categories</Label>
+                    <Select
+                        value={value}
+                        isMulti
+                        styles={styles}
+                        name="categories"
+                        className="react-select-container rounded-xl mt-2"
+                        classNamePrefix="select"
+                        getOptionLabel={(option) => option.categoryName}
+                        getOptionValue={(option) => option.id}
+                        onChange={onChange}
+                        options={allCategories}
+                        placeholder="Choose categories..."
+                    />
+                </div>
+
                 {/* ✅ School Name */}
                 <div className="flex-1 relative w-full">
                     <Label>School Name</Label>

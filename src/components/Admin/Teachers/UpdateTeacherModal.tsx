@@ -45,7 +45,7 @@ const UpdateTeacherModal = ({ id }: { id: string }) => {
     return (
         <DialogContent className='overflow-y-auto overflow-x-hidden max-h-[75%] max-w-[90%] p-6' showCloseButton>
             <DialogClose ref={closeRef} className="hidden" />
-            <h1 className='font-bold text-2xl'>Edit Teacher: {data?.result?.fullName || ""}</h1>
+            <h1 className='font-bold text-2xl'>Edit Teacher: ({data?.result?.loginUserName || ""})</h1>
 
             <div className="bg-white rounded-xl">
                 <Tabs value={tab} onValueChange={handleTabChange} className="w-full">

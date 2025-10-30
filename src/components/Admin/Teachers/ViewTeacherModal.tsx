@@ -15,6 +15,8 @@ const ViewTeacherModal = ({ id }: { id: string }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const teacherDetails = teacher?.Teacher || [];
 
+    console.log(teacher);
+
     const groupedBySchool = useMemo(() => {
         if (!teacherDetails?.length) return [];
 
@@ -176,6 +178,30 @@ const ViewTeacherModal = ({ id }: { id: string }) => {
                 ) : (
                     <p className="text-gray-600 text-sm">
                         No grade or school information available
+                    </p>
+                )}
+            </div>
+
+            {/* Book Categories Section */}
+            <Separator className="my-4" />
+
+            <div>
+                <h3 className="font-semibold mb-3 text-gray-800">Book Categories</h3>
+
+                {teacher.teachersBookCategories && teacher.teachersBookCategories.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                        {teacher.teachersBookCategories.map((item: any) => (
+                            <span
+                                key={item.id}
+                                className="bg-[#FFF4ED] text-[#E35314] text-xs font-medium px-3 py-1 rounded-full border border-[#E3531430]"
+                            >
+                                {item.category?.name || "Unnamed Category"}
+                            </span>
+                        ))}
+                    </div>
+                ) : (
+                    <p className="text-gray-600 text-sm">
+                        No book categories assigned to this teacher.
                     </p>
                 )}
             </div>
