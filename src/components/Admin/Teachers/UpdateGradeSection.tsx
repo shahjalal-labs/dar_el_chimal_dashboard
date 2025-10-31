@@ -68,9 +68,11 @@ const styles: StylesConfig<CategoryOption, true> = {
 const UpdateGradeSection = ({ id }: { id: string }) => {
     const dispatch = useDispatch();
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
     const [selectedSchool, setSelectedSchool] = useState<SchoolOption | null>(null);
     const [selectedGrades, setSelectedGradesState] = useState<GradeOption[]>([]);
     const [optionToRemove, setOptionToRemove] = useState<GradeOption | null>(null);
+    const [categoryOptionToRemove, setCategoryOptionToRemove] = useState<CategoryOption | null>(null);
 
     const { data: teacherData } = useGetTeacherDetailsQuery(id);
     const teacher = teacherData?.result;
@@ -161,6 +163,11 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
         dispatch(setSelectedGrades(newValue));
     };
 
+    const handleRemoveCategory = (option: CategoryOption) => {
+        setCategoryOptionToRemove(option);
+        setIsCategoryModalOpen(true);
+    };
+
     const handleRemoveClick = (option: GradeOption) => {
         setOptionToRemove(option);
         setIsModalOpen(true);
@@ -191,6 +198,34 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
             toast.warning(
                 (error as any)?.data?.message ||
                 "Something went wrong while removing the grade."
+            );
+        }
+    };
+
+    const confirmRemoveCategory = async () => {
+        if (!categoryOptionToRemove) return;
+        try {
+            const body = {
+                userData: {},
+                gradeData: {},
+                newBookCategoryIds: [],
+                deletedBookCategoryIds: [categoryOptionToRemove?.id]
+            };
+
+            const formData = new FormData();
+            formData.append("bodyData", JSON.stringify(body));
+            const response = await updateTeacher({ id, formData }).unwrap();
+
+            if (response.success) {
+                toast.success(response.message);
+                setValue((prev) => prev.filter((g) => g.id !== categoryOptionToRemove.id));
+                setIsCategoryModalOpen(false);
+                setCategoryOptionToRemove(null);
+            }
+        } catch (error) {
+            toast.warning(
+                (error as any)?.data?.message ||
+                "Something went wrong while removing the category."
             );
         }
     };
@@ -264,6 +299,19 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                         onChange={onChange}
                         options={allCategories}
                         placeholder="Choose categories..."
+                        components={{
+                            MultiValueRemove: (props) => (
+                                <div
+                                    onClick={(e) => {
+                                        console.log(props);
+                                        e.preventDefault();
+                                        handleRemoveCategory(props.data as CategoryOption);
+                                    }}
+                                    className="px-1 cursor-pointer text-gray-500 hover:text-red-600">
+                                    ✕
+                                </div>
+                            )
+                        }}
                     />
                 </div>
 
@@ -364,6 +412,45 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                         <Button
                             variant="destructive"
                             onClick={confirmRemove}
+                            disabled={isUpdating}
+                            className="px-4 py-2 bg-red-600 hover:bg-red-300 text-white rounded-md transition-all ease-in-out duration-500 cursor-pointer"
+                        >
+                            {isUpdating ? (
+                                <div className="flex justify-center items-center gap-2">
+                                    Removing...
+                                    <div className="animate-spin">
+                                        <PiSpinner className="h-4 w-4" />
+                                    </div>
+                                </div>
+                            ) : (
+                                "Remove"
+                            )}
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* ✅ Confirmation Modal 2 */}
+            <Dialog open={isCategoryModalOpen} onOpenChange={setIsCategoryModalOpen}>
+                <DialogContent className="p-6">
+                    <DialogHeader>
+                        <DialogTitle>Remove Category</DialogTitle>
+                    </DialogHeader>
+                    <p className="text-gray-700">
+                        Are you sure you want to remove{" "}
+                        <span className="font-semibold">{categoryOptionToRemove?.categoryName}</span>?
+                    </p>
+                    <div className="flex justify-end gap-2 mt-4">
+                        <Button
+                            variant="default"
+                            onClick={() => setIsCategoryModalOpen(false)}
+                            className="px-4 py-2 border rounded-md bg-white text-black hover:text-white"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={confirmRemoveCategory}
                             disabled={isUpdating}
                             className="px-4 py-2 bg-red-600 hover:bg-red-300 text-white rounded-md transition-all ease-in-out duration-500 cursor-pointer"
                         >

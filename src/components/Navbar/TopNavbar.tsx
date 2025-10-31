@@ -50,8 +50,8 @@ const TopNavbar = () => {
               priority
             />
             <div>
-              <p className="text-black font-medium">{profileData?.result?.fullName || "Priscilla Lily"}</p>
-              <p className="text-[#79767B] text-sm">{profileData?.result?.loginUserName || "Admin"}</p>
+              <p className="text-black font-medium">{profileData?.result?.fullName || ""}</p>
+              <p className="text-[#79767B] text-sm">{profileData?.result?.loginUserName || ""}</p>
             </div>
           </Link>
         </div>
