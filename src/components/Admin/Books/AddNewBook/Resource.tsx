@@ -84,9 +84,6 @@ const Resource = ({ bookId }: { bookId: any }) => {
         }
     };
 
-    const isButtonDisabled =
-        !resourceType || !resourceTitle || !resourceDescription || (!previewResourceFile && !resourceLink);
-
     return (
         <form onSubmit={handleSubmit} className="space-y-5">
             <h2 className="text-2xl font-bold">Upload New Resource</h2>
@@ -116,7 +113,6 @@ const Resource = ({ bookId }: { bookId: any }) => {
                     placeholder="Enter your resource title"
                     value={resourceTitle}
                     onChange={(e) => dispatch(setResourceTitle(e.target.value))}
-                    required
                 />
             </div>
 
@@ -213,7 +209,6 @@ const Resource = ({ bookId }: { bookId: any }) => {
 
                 <Button
                     type='submit'
-                    disabled={isButtonDisabled}
                     className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A] text-white font-medium px-6"
                 >
                     {

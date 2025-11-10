@@ -5,6 +5,7 @@ import React from 'react';
 import Select from 'react-select';
 import Image from 'next/image';
 import { useGetAllSchoolsByAdminQuery } from '@/redux/api/admin';
+import schoolImg from "@/assets/school.png";
 
 export interface SchoolOption {
     readonly schoolId: string;
@@ -40,7 +41,7 @@ export const GetSchools: React.FC<GetSchoolProps> = ({ onChange, excludeIds = []
             formatOptionLabel={(option) => (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <Image
-                        src={option.image}
+                        src={option.image || schoolImg}
                         height={50}
                         width={50}
                         alt={option.schoolName}

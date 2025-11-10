@@ -122,8 +122,7 @@ const General = ({ id }: { id: string }) => {
         }
     };
 
-    const isButtonDisabled =
-        !bookName || !description || !isbn || !author || !categoryName || !previewPdf;
+    const isButtonDisabled = !categoryName || !uploadPdf;
 
     return (
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -135,7 +134,6 @@ const General = ({ id }: { id: string }) => {
                     placeholder="Enter book name"
                     value={bookName}
                     onChange={(e) => dispatch(setBookName(e.target.value))}
-                    required
                 />
             </div>
 
@@ -147,7 +145,6 @@ const General = ({ id }: { id: string }) => {
                     placeholder="Enter description"
                     value={description}
                     onChange={(e) => dispatch(setDescription(e.target.value))}
-                    required
                 />
             </div>
 
@@ -160,7 +157,6 @@ const General = ({ id }: { id: string }) => {
                         placeholder="Enter ISBN"
                         value={isbn}
                         onChange={(e) => dispatch(setISBN(e.target.value))}
-                        required
                     />
                 </div>
                 <div className="flex-1 mt-5 md:mt-0">
@@ -170,7 +166,6 @@ const General = ({ id }: { id: string }) => {
                         placeholder="Enter author name"
                         value={author}
                         onChange={(e) => dispatch(setAuthor(e.target.value))}
-                        required
                     />
                 </div>
             </div>
@@ -240,7 +235,7 @@ const General = ({ id }: { id: string }) => {
 
                 {/* PDF Upload */}
                 <div className="flex-1 mt-5 md:mt-0">
-                    <Label className="font-medium mb-2.5">PDF File<span className="text-red-600">*</span></Label>
+                    <Label className="font-medium mb-2.5">PDF File</Label>
 
                     {!previewPdf ? (
                         <label htmlFor="uploadPdf">
@@ -283,18 +278,22 @@ const General = ({ id }: { id: string }) => {
             {/* Buttons */}
             <div className="flex justify-center gap-3 pt-3">
                 <Link href="/admin/books">
-                    <Button
-                        variant="outline"
-                        className="px-6 border-[#636F85] text-[#636F85]"
-                    >
-                        Cancel
-                    </Button>
+                    {
+                        pathname === '/admin/books' ?
+                            <></> :
+                            <Button
+                                variant="outline"
+                                className="px-6 border-[#636F85] text-[#636F85]"
+                            >
+                                Cancel
+                            </Button>
+                    }
                 </Link>
 
                 <Button
                     type="submit"
-                    disabled={isButtonDisabled}
-                    className={`px-6 text-white font-medium transition-all duration-500 ease-in-out cursor-pointer ${isButtonDisabled ? "bg-gray-400 cursor-not-allowed" : "bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A]"}`}
+                    disabled={pathname === '/admin/books' ? false : isButtonDisabled}
+                    className={`px-6 text-white font-medium transition-all duration-500 ease-in-out cursor-pointer bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A]`}
                 >
                     {
                         (isLoading && pathname === '/admin/books') ?

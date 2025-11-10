@@ -24,6 +24,8 @@ import {
     setResourceTitle,
     setResourceType,
     setSchoolGradeMappings,
+    setUploadImage,
+    setUploadPdf,
 } from '@/redux/features/bookSlice';
 import { RootState } from '@/redux/store/store';
 import Image from 'next/image';
@@ -42,6 +44,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import schoolImg from "@/assets/school.png";
 
 interface GradeOption {
     id: string;
@@ -299,7 +302,7 @@ const Grade = ({ id, onClose }: { id: string, onClose?: () => void }) => {
                     ISBN: isbn,
                     categoryId,
                 },
-                Resources: [
+                Resources: (!resourceTitle && !resourceDescription && !previewResourceFile && !resourceLink && !resourceType) ? [] : [
                     {
                         title: resourceTitle,
                         description: resourceDescription,
@@ -330,7 +333,9 @@ const Grade = ({ id, onClose }: { id: string, onClose?: () => void }) => {
                     dispatch(setISBN(''));
                     dispatch(setCategory(''));
                     dispatch(setPreviewImage(''));
+                    dispatch(setUploadImage(null));
                     dispatch(setPreviewPdf(''));
+                    dispatch(setUploadPdf(null));
                     dispatch(setResourceType(''));
                     dispatch(setResourceTitle(''));
                     dispatch(setResourceDescription(''));
@@ -340,14 +345,7 @@ const Grade = ({ id, onClose }: { id: string, onClose?: () => void }) => {
                 }
             } catch (error) {
                 if ((error as any)?.status === 400) {
-                    toast?.error(
-                        'Please fill all the required fields before proceeding.'
-                    );
-                    return;
-                } else {
-                    toast?.warning(
-                        (error as any)?.data?.message || 'Something went wrong'
-                    );
+                    toast.warning(((error as any)?.data?.errors.map((err: any) => err?.message + ". ")) || ((error as any)?.data?.errorMessages.map((err: any) => err?.message + ". ")) || "Something went wrong");
                 }
             }
         }
@@ -390,15 +388,13 @@ const Grade = ({ id, onClose }: { id: string, onClose?: () => void }) => {
 
                             {school && (
                                 <div className="flex items-center gap-2 mt-2 absolute top-[35%] left-4">
-                                    {school?.image && (
-                                        <Image
-                                            src={school?.image}
-                                            height={32}
-                                            width={24}
-                                            alt={school?.schoolName}
-                                            className="rounded-xl"
-                                        />
-                                    )}
+                                    <Image
+                                        src={school?.image || schoolImg}
+                                        height={32}
+                                        width={24}
+                                        alt={school?.schoolName}
+                                        className="rounded-xl"
+                                    />
                                     <span>{school?.schoolName}</span>
                                 </div>
                             )}
@@ -509,12 +505,16 @@ const Grade = ({ id, onClose }: { id: string, onClose?: () => void }) => {
             {/* Footer Buttons */}
             <div className="flex justify-center items-center gap-3 pt-6">
                 <Link href="/admin/books">
-                    <Button
-                        variant="outline"
-                        className="px-6 border-[#636F85] text-[#636F85] font-medium"
-                    >
-                        Cancel
-                    </Button>
+                    {
+                        pathname === '/admin/books' ?
+                            <></> :
+                            <Button
+                                variant="outline"
+                                className="px-6 border-[#636F85] text-[#636F85]"
+                            >
+                                Cancel
+                            </Button>
+                    }
                 </Link>
 
                 <Button

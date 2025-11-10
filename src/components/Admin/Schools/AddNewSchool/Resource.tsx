@@ -89,8 +89,6 @@ const Resource = ({ bookId }: { bookId: any }) => {
         }
     };
 
-    const isButtonDisabled = ((!previewResourceFile || previewResourceFile.length === 0) && !resourceLink);
-
     return (
         <form onSubmit={handleSubmit} className="space-y-5">
             <h2 className="text-2xl font-bold">Upload New Resource</h2>
@@ -161,7 +159,6 @@ const Resource = ({ bookId }: { bookId: any }) => {
 
                 <Button
                     type='submit'
-                    disabled={isButtonDisabled}
                     className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A] text-white font-medium px-6"
                 >
                     {(isLoading || isResourceLoading) ? (
