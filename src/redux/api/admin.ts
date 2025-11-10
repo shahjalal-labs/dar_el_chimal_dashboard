@@ -17,15 +17,15 @@ export const adminApi = baseApi.injectEndpoints({
             providesTags: ["admin"]
         }),
         getAllTeachersByAdmin: builder.query({
-            query: ({ currentPage, limit }) => ({
-                url: `/users/get-teachers?page=${currentPage}&limit=${limit}`,
+            query: ({ schoolId }) => ({
+                url: `${schoolId !== undefined ? `/users/get-teachers?schoolId=${schoolId}` : '/users/get-teachers'}`,
                 method: "GET",
             }),
             providesTags: ["teacher"],
         }),
         getAllStudentsByAdmin: builder.query({
-            query: ({ currentPage, limit }) => ({
-                url: `/users/get-students?page=${currentPage}&limit=${limit}`,
+            query: ({ schoolId }) => ({
+                url: `${schoolId !== undefined ? `/users/get-students?schoolId=${schoolId}` : '/users/get-students'}`,
                 method: "GET",
             }),
             providesTags: ["student"],

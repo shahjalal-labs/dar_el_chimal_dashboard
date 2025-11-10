@@ -111,8 +111,6 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
         }
     };
 
-    const isButtonDisabled = !selectedOptions?.length;
-
     return (
         <div>
             <Label>Grade Section Mapping</Label>
@@ -197,11 +195,7 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                 <Button
                     type="submit"
                     onClick={handleSave}
-                    disabled={isButtonDisabled}
-                    className={`px-6 text-white font-medium border border-[#1E3A8A] transition-all ease-in-out duration-500 cursor-pointer ${isButtonDisabled
-                        ? "bg-gray-400 cursor-not-allowed"
-                        : "bg-[#1E3A8A] hover:bg-[#1E3A8A]/80"
-                        }`}
+                    className={`px-6 text-white font-medium border border-[#1E3A8A] transition-all ease-in-out duration-500 cursor-pointer bg-[#1E3A8A] hover:bg-[#1E3A8A]/80`}
                 >
                     {
                         (isUpdating && !isModalOpen) ?

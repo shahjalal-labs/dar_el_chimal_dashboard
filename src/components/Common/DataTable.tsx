@@ -54,10 +54,13 @@ const DataTable = ({
   buttonTextTwo,
   currentPage,
   sort,
+  sortTwo,
+  sortThree,
   icon,
   iconTwo,
   willSearch,
-  deleteItem
+  deleteItem,
+  isLoading
 }: {
   title: string;
   data: any;
@@ -67,10 +70,13 @@ const DataTable = ({
   buttonTextTwo?: string;
   currentPage?: number;
   sort?: React.ReactNode;
+  sortTwo?: React.ReactNode;
+  sortThree?: React.ReactNode;
   icon?: React.ReactNode;
   iconTwo?: React.ReactNode;
   willSearch?: boolean;
   deleteItem?: string;
+  isLoading?: boolean;
 }) => {
   const { id } = useParams();
   const pathname = usePathname();
@@ -129,6 +135,8 @@ const DataTable = ({
             </div>
           )}
           <div className="mt-4 md:mt-0">{sort}</div>
+          <div className="mt-4 md:mt-0">{sortTwo}</div>
+          <div className="mt-4 md:mt-0">{sortThree}</div>
           {isButton && (
             <Dialog>
               <DialogTrigger asChild>
@@ -152,7 +160,7 @@ const DataTable = ({
         </div>
       </div>
 
-      {!data ? (
+      {(!data || isLoading) ? (
         <div className="flex justify-center items-center gap-4">
           <span className="text-[#1E3A8A]">Table Data is Loading</span>
           <SyncLoader color="#1E3A8A" />

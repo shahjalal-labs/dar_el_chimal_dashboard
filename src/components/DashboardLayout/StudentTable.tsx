@@ -7,7 +7,7 @@ import defaultImg from '@/assets/no-img.jpg';
 import { useGetAllStudentsByAdminQuery } from '@/redux/api/admin';
 
 const StudentTable = () => {
-    const { data: allStudents } = useGetAllStudentsByAdminQuery({ currentPage: 1, limit: 5 });
+    const { data: allStudents } = useGetAllStudentsByAdminQuery(undefined);
 
     const adminFormattedData = allStudents?.result?.result?.slice(0, 5).map((entry:
         {

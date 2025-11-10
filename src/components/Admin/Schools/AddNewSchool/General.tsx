@@ -107,16 +107,13 @@ const General = ({ id }: { id: string }) => {
                     dispatch(setActiveBookTab("grade"));
                 }
             } catch (error) {
-                toast.warning((error as any)?.data?.message || "Something went wrong");
+                toast.warning(((error as any).data.errors.map((err: any) => err.message + ". ")) || "Something went wrong");
             }
         }
         else {
             dispatch(setActiveBookTab("resources"));
         }
     };
-
-    const isButtonDisabled =
-        !schoolName || !address || !teacherCount || !activeTeachers || !studentCount || !activeStudents;
 
     return (
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -154,7 +151,6 @@ const General = ({ id }: { id: string }) => {
                         placeholder="00"
                         value={teacherCount}
                         onChange={(e) => dispatch(setTeacherCount(Number(e.target.value)))}
-                        required
                     />
                 </div>
                 <div className="flex-1">
@@ -165,7 +161,6 @@ const General = ({ id }: { id: string }) => {
                         placeholder="00"
                         value={activeTeachers}
                         onChange={(e) => dispatch(setActiveTeachers(Number(e.target.value)))}
-                        required
                     />
                 </div>
             </div>
@@ -180,7 +175,6 @@ const General = ({ id }: { id: string }) => {
                         placeholder="00"
                         value={studentCount}
                         onChange={(e) => dispatch(setStudentCount(Number(e.target.value)))}
-                        required
                     />
                 </div>
                 <div className="flex-1">
@@ -191,7 +185,6 @@ const General = ({ id }: { id: string }) => {
                         placeholder="00"
                         value={activeStudents}
                         onChange={(e) => dispatch(setActiveStudents(Number(e.target.value)))}
-                        required
                     />
                 </div>
             </div>
@@ -253,8 +246,7 @@ const General = ({ id }: { id: string }) => {
 
                 <Button
                     type="submit"
-                    disabled={isButtonDisabled}
-                    className={`px-6 text-white font-medium transition-all ease-in-out duration-500 cursor-pointer ${isButtonDisabled ? "bg-gray-400 cursor-not-allowed" : "bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A]"}`}
+                    className={`px-6 text-white font-medium transition-all ease-in-out duration-500 cursor-pointer bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A]`}
                 >
                     {
                         isUpdating ?

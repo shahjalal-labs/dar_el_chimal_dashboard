@@ -18,6 +18,7 @@ import { setNumberOfTeacher, setTeacherSchoolName, setTeachersList } from "@/red
 import { RootState } from "@/redux/store/store";
 import ShowBulkTeachersModal from "./ShowBulkTeachersModal";
 import { useGetAllBookCategoriesQuery } from "@/redux/api/bookCategory";
+import schoolImg from "@/assets/school.png";
 
 interface GradeOption {
     id: string;
@@ -196,15 +197,13 @@ const CreateTeacherModal = () => {
                                     {/* Display selected school */}
                                     {school && (
                                         <div className="flex items-center gap-2 mt-2 absolute top-[35%] left-4">
-                                            {school?.image && (
-                                                <Image
-                                                    src={school?.image}
-                                                    height={32}
-                                                    width={24}
-                                                    alt={school?.schoolName}
-                                                    className="rounded-xl"
-                                                />
-                                            )}
+                                            <Image
+                                                src={school?.image ? school?.image : schoolImg}
+                                                height={32}
+                                                width={24}
+                                                alt={school?.schoolName}
+                                                className="rounded-xl"
+                                            />
                                             <span>{school?.schoolName}</span>
                                         </div>
                                     )}

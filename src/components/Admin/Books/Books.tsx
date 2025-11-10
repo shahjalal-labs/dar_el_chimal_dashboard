@@ -8,11 +8,16 @@ import Pagination from "@/components/ui/pagination";
 import { useGetAllBooksQuery } from "@/redux/api/book";
 import Image from "next/image";
 import Link from "next/link";
-import { FaPlus } from "react-icons/fa";
+import { FaAngleDown, FaPlus } from "react-icons/fa";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { FiLoader } from "react-icons/fi";
+import { useGetAllBookCategoriesQuery } from "@/redux/api/bookCategory";
 
 const Books = () => {
+  const [bookCategoryId, setBookCategoryId] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const { data } = useGetAllBooksQuery(currentPage);
+  const { data } = useGetAllBooksQuery({ currentPage, bookCategoryId: bookCategoryId ? bookCategoryId : undefined });
+  const { data: allBookCategories, isLoading } = useGetAllBookCategoriesQuery({ currentPage: 1, limit: 1000 });
 
   const formattedData = data?.result?.result?.map(
     (entry: {
@@ -83,6 +88,33 @@ const Books = () => {
         currentPage={currentPage}
         willSearch={true}
         deleteItem="Book"
+        sort={(
+          <Select onValueChange={(value) => setBookCategoryId(value)}>
+            <SelectTrigger className="w-fit border border-[#1E3A8A] text-[#1E3A8A] bg-transparent hover:bg-transparent cursor-pointer flex items-center gap-2 px-3 py-2 rounded-md data-[placeholder]:text-[#1E3A8A]">
+              <SelectValue placeholder="Select Category" />
+              <FaAngleDown className='text-[#1E3A8A]' />
+            </SelectTrigger>
+            <SelectContent className='max-h-80'>
+              {
+                isLoading ?
+                  <div className='flex justify-center items-center text-[#1E3A8A] animate-spin my-6'><FiLoader size={24} /></div> :
+                  allBookCategories?.result?.result?.map((category: { id: string, name: string, image: string }, idx: number) =>
+                    <SelectItem key={idx} value={category?.id}>
+                      <Image
+                        src={category.image ? category.image : defaultImg}
+                        height={50}
+                        width={50}
+                        alt={category.name}
+                        style={{ width: 24, height: 24, borderRadius: '50%' }}
+                        priority
+                      />
+                      {category?.name}
+                    </SelectItem>
+                  )
+              }
+            </SelectContent>
+          </Select>
+        )}
       />
 
       <div className="flex flex-col md:flex-row justify-between items-center gap-6 mt-8">
