@@ -63,8 +63,6 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data])
 
-    console.log(data?.result?.grades);
-
     const handleChange = (
         newValue: readonly Option[],
     ) => {

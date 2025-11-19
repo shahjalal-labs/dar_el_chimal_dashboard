@@ -303,7 +303,6 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                             MultiValueRemove: (props) => (
                                 <div
                                     onClick={(e) => {
-                                        console.log(props);
                                         e.preventDefault();
                                         handleRemoveCategory(props.data as CategoryOption);
                                     }}

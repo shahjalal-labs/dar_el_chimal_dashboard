@@ -50,8 +50,6 @@ const BasicSection = () => {
 
     const { data, isLoading } = useGetMyProfileQuery(undefined);
 
-    console.log(data?.result);
-
     useEffect(() => {
         if (data?.result) {
             setProfile({

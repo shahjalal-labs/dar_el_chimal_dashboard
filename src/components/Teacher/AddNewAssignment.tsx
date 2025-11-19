@@ -45,8 +45,6 @@ const AddNewAssignment = () => {
         assignToAll: true,
     });
 
-    console.log(formData?.book);
-
     const handleChange = (e: any) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));

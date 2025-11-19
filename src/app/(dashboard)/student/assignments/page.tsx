@@ -1,6 +1,6 @@
 
-import Assignment from '@/components/Student/Assignment/Assignment'
 import React from 'react'
+import Assignment from '@/components/Student/Assignment/Assignment'
 
 function pag() {
   return (

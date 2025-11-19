@@ -22,7 +22,6 @@ import LeftSide from "./LeftSide";
 import { messaging } from "@/lib/firebase";
 import { Modal } from "antd";
 import { getToken, Messaging } from "firebase/messaging";
-// import { messaging } from "@/lib/firebase";
 
 const customIcon = (
   <LoadingOutlined style={{ fontSize: 24, color: "#fff" }} spin />
@@ -195,8 +194,6 @@ export default function Login() {
       }
     } catch (error) {
       toast.error((error as any)?.data?.message || "Something went wrong. Please try again.");
-    } finally {
-      console.log("Execution completed.");
     }
   };
 

@@ -1,11 +1,12 @@
 import React from 'react';
 import AddNewAnnouncement from '@/components/Admin/Announcement/AddNewAnnouncement';
+import RoleGuard from '@/components/RoleGaurd';
 
 const Page = () => {
     return (
-        <div>
+        <RoleGuard role='Admin'>
             <AddNewAnnouncement />
-        </div>
+        </RoleGuard>
     );
 };
 

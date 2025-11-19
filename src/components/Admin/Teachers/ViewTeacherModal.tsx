@@ -15,8 +15,6 @@ const ViewTeacherModal = ({ id }: { id: string }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const teacherDetails = teacher?.Teacher || [];
 
-    console.log(teacher);
-
     const groupedBySchool = useMemo(() => {
         if (!teacherDetails?.length) return [];
 

@@ -25,7 +25,6 @@ export function AssignmentDetailView({
 }: AssignmentDetailViewProps) {
   const id = assignments?.id;
   const { data: assingmentDetails } = useGetassignmentDetailsQuery(id);
-  console.log("assignment details", assingmentDetails);
 
   const assignment = assingmentDetails?.result?.assignment;
   const answer = assingmentDetails?.result?.answer;

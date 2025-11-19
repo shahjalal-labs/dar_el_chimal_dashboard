@@ -9,7 +9,6 @@ import { useGetStudentOverviewQuery } from "@/redux/api/student/overviewApi";
 
 export default function Home() {
   const { data: overviewData } = useGetStudentOverviewQuery({});
-  console.log("data overview", overviewData);
 
   const studentOverviewData = overviewData?.result;
   const TotalBooks = studentOverviewData?.TotalBooks;

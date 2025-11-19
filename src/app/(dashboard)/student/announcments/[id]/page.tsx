@@ -1,22 +1,15 @@
 "use client";
+
 import { AnnouncementDetail } from "@/components/Student/Announcments/AnnouncementDetail";
 import { useGetAnnouncementDetailsQuery } from "@/redux/api/student/overviewApi";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 
-
-
-export default function AnnouncementDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default function AnnouncementDetailPage({ params, }: { params: { id: string }; }) {
   const id = params?.id;
 
   const { data: announcementDetails } = useGetAnnouncementDetailsQuery(id);
   const announcementData = announcementDetails?.result;
-
-  console.log("data in announcement", announcementDetails);
 
   if (!announcementData) {
     return (

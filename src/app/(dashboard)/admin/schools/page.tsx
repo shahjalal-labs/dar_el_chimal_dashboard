@@ -1,11 +1,12 @@
 import React from 'react';
 import SchoolList from '@/components/Admin/Schools/SchoolList';
+import RoleGuard from '@/components/RoleGaurd';
 
 const Page = () => {
     return (
-        <div>
+        <RoleGuard role='Admin'>
             <SchoolList />
-        </div>
+        </RoleGuard>
     );
 };
 

@@ -51,7 +51,6 @@ export default function Attachments({
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { data: getBooksOverview } = useGetBookDetailsQuery(bookId);
-  console.log("data in resource", getBooksOverview);
 
   const getIconConfig = (type: "Audio" | "Video" | "Pdf") => {
     switch (type) {

@@ -1,19 +1,17 @@
 "use client";
 
+import { useState } from "react";
+import { useParams } from "next/navigation";
 import Attachments from "@/components/Student/Book/BooksOverview/Attachments";
 import GeneralOverview from "@/components/Student/Book/BooksOverview/GeneralOverview";
-import { Button } from "@/components/ui/button";
-import { useParams } from "next/navigation";
-import { useState } from "react";
 
 type ActiveTab = "general" | "resources";
 
 export default function BackToSchoolPage() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("general");
-
+  
   const params = useParams();
   const id = params.id as string;
-  console.log("id book", id);
 
   return (
     <main className="">
@@ -29,8 +27,8 @@ export default function BackToSchoolPage() {
             <button
               onClick={() => setActiveTab("general")}
               className={`pb-4 font-medium transition-all duration-500 ease-in-out cursor-pointer ${activeTab === "general"
-                  ? "border-b-2 border-blue-600 text-blue-600"
-                  : "text-gray-600 hover:text-gray-900"
+                ? "border-b-2 border-blue-600 text-blue-600"
+                : "text-gray-600 hover:text-gray-900"
                 }`}
             >
               General
@@ -38,8 +36,8 @@ export default function BackToSchoolPage() {
             <button
               onClick={() => setActiveTab("resources")}
               className={`pb-4 font-medium transition-all duration-500 ease-in-out cursor-pointer ${activeTab === "resources"
-                  ? "border-b-2 border-blue-600 text-blue-600"
-                  : "text-gray-600 hover:text-gray-900"
+                ? "border-b-2 border-blue-600 text-blue-600"
+                : "text-gray-600 hover:text-gray-900"
                 }`}
             >
               Resources
