@@ -47,7 +47,15 @@ export const studentApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: ["student"],
         }),
+        deleteSelectedStudents: builder.mutation({
+            query: (body) => ({
+                url: `/users/delete-multiple`,
+                method: "DELETE",
+                body: body
+            }),
+            invalidatesTags: ["student"],
+        }),
     }),
 });
 
-export const { useCreateStudentMutation, useCreateBulkStudentMutation, useGetStudentDetailsQuery, useUpdateStudentMutation, useDeleteAllStudentsMutation, useDeleteSingleStudentMutation } = studentApi;
+export const { useCreateStudentMutation, useCreateBulkStudentMutation, useGetStudentDetailsQuery, useUpdateStudentMutation, useDeleteAllStudentsMutation, useDeleteSingleStudentMutation, useDeleteSelectedStudentsMutation } = studentApi;
