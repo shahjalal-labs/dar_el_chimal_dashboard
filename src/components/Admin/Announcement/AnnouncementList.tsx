@@ -11,7 +11,7 @@ import { SyncLoader } from 'react-spinners';
 import { TfiAngleRight } from 'react-icons/tfi';
 
 const AnnouncementList = () => {
-    const { data } = useGetAllAnnouncementsQuery(undefined);
+    const { data, isLoading } = useGetAllAnnouncementsQuery(undefined);
 
     return (
         <div>
@@ -29,29 +29,31 @@ const AnnouncementList = () => {
 
             <div className='grid grid-cols-1 gap-4'>
                 {
-                    !data?.result?.length ?
+                    isLoading ?
                         <div className="flex justify-center items-center gap-4">
                             <span className="text-[#1E3A8A]">Data is Loading</span>
                             <SyncLoader color='#1E3A8A' />
                         </div> :
-                        data?.result?.map((announce: any, idx: number) => (
-                            <Link href={`/admin/announcements/${announce?.id}`} key={idx} className='bg-[#F7F9FF] border border-[#D8D8D8] rounded-2xl flex justify-between items-center p-5'>
-                                <div>
-                                    <div className='flex items-center gap-2'>
-                                        <SlCalender className='w-4 h-4' />
-                                        <p className='text-[#4C4C4C]'>{new Date(announce?.postdate).toLocaleString('en-US', {
-                                            year: 'numeric',
-                                            month: 'short',
-                                            day: 'numeric',
-                                            hour: '2-digit',
-                                            minute: '2-digit',
-                                        })}</p>
+                        !data?.result?.length ?
+                            <h1 className='text-center text-[#1E3A8A]'>No Announcements Found!</h1> :
+                            data?.result?.map((announce: any, idx: number) => (
+                                <Link href={`/admin/announcements/${announce?.id}`} key={idx} className='bg-[#F7F9FF] border border-[#D8D8D8] rounded-2xl flex justify-between items-center p-5'>
+                                    <div>
+                                        <div className='flex items-center gap-2'>
+                                            <SlCalender className='w-4 h-4' />
+                                            <p className='text-[#4C4C4C]'>{new Date(announce?.postdate).toLocaleString('en-US', {
+                                                year: 'numeric',
+                                                month: 'short',
+                                                day: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                            })}</p>
+                                        </div>
+                                        <h1 className='text-[#262626] font-semibold mt-2'>{announce?.anouncement}</h1>
                                     </div>
-                                    <h1 className='text-[#262626] font-semibold mt-2'>{announce?.anouncement}</h1>
-                                </div>
-                                <Button variant="ghost"><TfiAngleRight className='w-6 h-6' /></Button>
-                            </Link>
-                        ))
+                                    <Button variant="ghost"><TfiAngleRight className='w-6 h-6' /></Button>
+                                </Link>
+                            ))
                 }
             </div>
         </div>

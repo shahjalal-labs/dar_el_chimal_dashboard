@@ -198,7 +198,7 @@ const CreateTeacherModal = () => {
                                     {school && (
                                         <div className="flex items-center gap-2 mt-2 absolute top-[35%] left-4">
                                             <Image
-                                                src={school?.image ? school?.image : schoolImg}
+                                                src={school?.image || schoolImg}
                                                 height={32}
                                                 width={24}
                                                 alt={school?.schoolName}

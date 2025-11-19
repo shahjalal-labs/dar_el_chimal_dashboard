@@ -44,6 +44,8 @@ import { useDeleteSchoolMutation } from "@/redux/api/school";
 import ViewStudentModal from "../Admin/Students/ViewStudentModal";
 import UpdateStudentModal from "../Admin/Students/UpdateStudentModal";
 import { useDeleteBookMutation } from "@/redux/api/book";
+import { useDeleteSingleStudentMutation } from "@/redux/api/student";
+import { useDeleteSingleTeacherMutation } from "@/redux/api/teacher";
 
 const DataTable = ({
   title,
@@ -85,6 +87,8 @@ const DataTable = ({
 
   const [DeleteBook, { isLoading: isBookDeleting }] = useDeleteBookMutation();
   const [DeleteSchool, { isLoading: isSchoolDeleting }] = useDeleteSchoolMutation();
+  const [DeleteTeacher, { isLoading: isTeacherDeleting }] = useDeleteSingleTeacherMutation();
+  const [DeleteStudent, { isLoading: isStudentDeleting }] = useDeleteSingleStudentMutation();
 
   const handleDelete = async (id: string) => {
     try {
@@ -96,6 +100,18 @@ const DataTable = ({
       }
       if (pathname === "/admin/schools") {
         const response = await DeleteSchool(id).unwrap();
+        if (response.success) {
+          toast.success(response.message);
+        }
+      }
+      if (pathname === "/admin/teachers") {
+        const response = await DeleteTeacher(id).unwrap();
+        if (response.success) {
+          toast.success(response.message);
+        }
+      }
+      if (pathname === "/admin/students") {
+        const response = await DeleteStudent(id).unwrap();
         if (response.success) {
           toast.success(response.message);
         }
@@ -166,7 +182,7 @@ const DataTable = ({
           <SyncLoader color="#1E3A8A" />
         </div>
       ) : !filteredData.length ? (
-        <div className="text-center text-[#D00E11] my-10 w-full mx-auto">
+        <div className="text-center text-[#1E3A8A] my-10 w-full mx-auto">
           No match found!
         </div>
       ) : (
@@ -304,12 +320,12 @@ const DataTable = ({
                               ))}
                           </Dialog>
                           {
-                            (pathname !== '/admin/book-categories' && pathname !== '/admin/teachers' && pathname !== '/admin/students') &&
+                            (pathname !== '/admin/book-categories') &&
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
                                 <Button className="bg-[#FE4D4F33] hover:bg-[#FE4D4F26] text-[#FE4D4F] transition-colors ease-in-out duration-200 cursor-pointer">
                                   <span className="sr-only">Delete</span>
-                                  {(isSchoolDeleting || isBookDeleting) &&
+                                  {(isSchoolDeleting || isBookDeleting || isTeacherDeleting || isStudentDeleting) &&
                                     selectedId === singleData?.Id ? (
                                     <div className="animate-spin">
                                       <PiSpinner className="h-4 w-4" />

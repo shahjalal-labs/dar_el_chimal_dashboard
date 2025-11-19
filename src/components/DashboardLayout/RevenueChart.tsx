@@ -97,7 +97,7 @@ const RevenueChart = ({ data, revenueYear, setRevenueYear }: { data: any, revenu
                 stroke="#1E3A8A"
                 fill="url(#orangeGradient)"
                 strokeWidth={3}
-                dot={{ r: 4 }}
+                dot={{ r: 4, fill: "#1E3A8A" }}
                 activeDot={{ r: 6 }}
               />
             </AreaChart>

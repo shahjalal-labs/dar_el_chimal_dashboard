@@ -26,6 +26,7 @@ import {
     setStudentSchoolName,
 } from "@/redux/features/studentSlice";
 import ShowBulkStudentsModal from "./ShowBulkStudentsModal";
+import schoolImg from "@/assets/school.png";
 
 interface GradeOption {
     id: string;
@@ -138,15 +139,13 @@ const CreateStudentModal = () => {
                                     {/* Display selected school */}
                                     {school && (
                                         <div className="flex items-center gap-2 mt-2 absolute top-[35%] left-4">
-                                            {school.image && (
-                                                <Image
-                                                    src={school.image}
-                                                    height={32}
-                                                    width={24}
-                                                    alt={school.schoolName}
-                                                    className="rounded-xl"
-                                                />
-                                            )}
+                                            <Image
+                                                src={school?.image || schoolImg}
+                                                height={32}
+                                                width={24}
+                                                alt={school.schoolName}
+                                                className="rounded-xl"
+                                            />
                                             <span>{school.schoolName}</span>
                                         </div>
                                     )}

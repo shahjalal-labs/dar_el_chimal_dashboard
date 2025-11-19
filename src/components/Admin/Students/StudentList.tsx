@@ -88,12 +88,8 @@ const StudentList = () => {
         }));
 
     const handleRoute = (value: string) => {
-        if (value === 'manual') {
-            route.push('/admin/students/add-new-student')
-        }
-        else {
-            setOpen(true);
-        }
+        if (value === 'manual') return route.push('/admin/students/add-new-student');
+        else return setOpen(true);
     }
 
     const handleExportToGoogleSheets = () => {
@@ -168,6 +164,7 @@ const StudentList = () => {
                 currentPage={currentPage}
                 willSearch={true}
                 isLoading={isStudentLoading}
+                deleteItem="Student"
                 sort={(
                     <Select onValueChange={(value) => setSchoolId(value)}>
                         <SelectTrigger className="w-fit border border-[#1E3A8A] text-[#1E3A8A] bg-transparent hover:bg-transparent cursor-pointer flex items-center gap-2 px-3 py-2 rounded-md data-[placeholder]:text-[#1E3A8A]">

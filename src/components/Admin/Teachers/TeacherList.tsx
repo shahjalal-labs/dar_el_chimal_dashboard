@@ -34,7 +34,7 @@ const TeacherList = () => {
     const { data: allSchools, isLoading } = useGetAllSchoolsByAdminQuery({ currentPage: 1, limit: 10000 });
 
     const formattedData = data?.result?.meta?.result?.slice(((currentPage * 10) - 10), (currentPage * 10)).map(
-        (entry: { id: string, profileImage: string, fullName: string, email: string, gender: string, DOB: string, phone: string, status: string, joinedAt: string, updatedAt: string }) => ({
+        (entry: { id: string, profileImage: string, fullName: string, loginUserName: string, email: string, gender: string, DOB: string, phone: string, status: string, joinedAt: string, updatedAt: string }) => ({
             "Id": entry.id,
             "Profile Image": (
                 <Image
@@ -46,10 +46,9 @@ const TeacherList = () => {
                     priority
                 />
             ),
-            "Name": entry.fullName,
+            "Full Name": entry?.fullName,
+            "User Name": entry?.loginUserName,
             "Email": entry.email,
-            "Gender": entry.gender,
-            "Date of Birth": entry.DOB,
             "Phone Number": entry.phone,
             "Status": entry.status,
             "Joined At": new Date(entry.joinedAt).toLocaleString('en-US', {

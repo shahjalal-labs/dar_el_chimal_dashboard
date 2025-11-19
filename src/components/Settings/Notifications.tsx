@@ -54,7 +54,7 @@ const Notifications = () => {
               </div>
             ))
           ) : (
-            <div className="text-center text-gray-500 py-10">
+            <div className="text-center text-[#1E3A8A] py-10">
               No notifications found!
             </div>
           )}

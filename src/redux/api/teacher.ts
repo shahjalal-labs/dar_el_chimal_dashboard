@@ -33,7 +33,14 @@ export const teacherApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: ["teacher"]
         }),
+        deleteSingleTeacher: builder.mutation({
+            query: (id) => ({
+                url: `/users/delete-user/${id}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: ["teacher"],
+        }),
     }),
 });
 
-export const { useCreateTeacherMutation, useCreateBulkTeacherMutation, useGetTeacherDetailsQuery, useUpdateTeacherMutation } = teacherApi;
+export const { useCreateTeacherMutation, useCreateBulkTeacherMutation, useGetTeacherDetailsQuery, useUpdateTeacherMutation, useDeleteSingleTeacherMutation } = teacherApi;

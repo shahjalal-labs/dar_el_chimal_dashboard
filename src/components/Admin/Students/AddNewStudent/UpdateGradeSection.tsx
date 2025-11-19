@@ -192,7 +192,7 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                             {school && (
                                 <div className="flex items-center gap-2 mt-2 absolute top-[35%] left-4">
                                     <Image
-                                        src={defaultImg}
+                                        src={school?.image || defaultImg}
                                         height={32}
                                         width={24}
                                         alt={school?.schoolName}
