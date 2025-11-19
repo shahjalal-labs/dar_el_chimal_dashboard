@@ -19,6 +19,26 @@ interface Option {
     __isNew__?: boolean;
 }
 
+const initialOptions = [
+    { value: "All", label: "All" },
+    { value: "Preschool", label: "Preschool" },
+    { value: "KG1", label: "KG1" },
+    { value: "KG2", label: "KG2" },
+    { value: "KG3", label: "KG3" },
+    { value: "Grade 1", label: "Grade 1" },
+    { value: "Grade 2", label: "Grade 2" },
+    { value: "Grade 3", label: "Grade 3" },
+    { value: "Grade 4", label: "Grade 4" },
+    { value: "Grade 5", label: "Grade 5" },
+    { value: "Grade 6", label: "Grade 6" },
+    { value: "Grade 7", label: "Grade 7" },
+    { value: "Grade 8", label: "Grade 8" },
+    { value: "Grade 9", label: "Grade 9" },
+    { value: "Grade 10", label: "Grade 10" },
+    { value: "Grade 11", label: "Grade 11" },
+    { value: "Grade 12", label: "Grade 12" },
+];
+
 const UpdateGradeSection = ({ id }: { id: string }) => {
     const dispatch = useDispatch();
     const selectedFromRedux = useSelector((state: RootState) => state.school.options);
@@ -43,10 +63,50 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data])
 
-    const handleChange = (newValue: any) => {
-        const newOptions = newValue.filter((v: any) => !data.result.grades.some((g: any) => g.grade === v.value));
-        setSelectedOptions(newValue);
-        dispatch(setGradeOptions(newOptions));
+    console.log(data?.result?.grades);
+
+    const handleChange = (
+        newValue: readonly Option[],
+    ) => {
+        const selectedList = [...newValue]; // copy because it's readonly
+        const selectedValues = selectedList.map((opt) => opt.value);
+        const isAllSelected = selectedValues.includes("All");
+
+        // If "All" selected → select all options
+        if (isAllSelected) {
+            const allOptions = [...initialOptions];
+            setSelectedOptions(allOptions);
+            dispatch(setGradeOptions(allOptions));
+            return;
+        }
+
+        // Remove "All" if something else is changed
+        const withoutAll = selectedList.filter((opt) => opt.value !== "All");
+
+        setSelectedOptions(withoutAll);
+        dispatch(setGradeOptions(withoutAll));
+    };
+
+    const handleCreateOption = (inputValue: string) => {
+        if (!inputValue.trim()) return;
+
+        const newOption: Option = {
+            value: inputValue,
+            label: inputValue,
+            __isNew__: true,
+        };
+
+        // Add to initial options
+        initialOptions.push(newOption);
+
+        const isAllSelected = selectedOptions.some((opt) => opt.value === "All");
+
+        const updatedSelection = isAllSelected
+            ? [...initialOptions] // If All was selected → include new option automatically
+            : [...selectedOptions, newOption];
+
+        setSelectedOptions(updatedSelection);
+        dispatch(setGradeOptions(updatedSelection));
     };
 
     const handleRemoveClick = (option: Option) => {
@@ -82,11 +142,14 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
     };
 
     const handleSave = async () => {
+        let newAssignedGrades = [""];
+
+        const prevGrades = data?.result?.grades?.map((g: any) => String(g.grade));
+        newAssignedGrades = selectedFromRedux?.filter((sg: any) => !prevGrades.includes(sg?.value))?.map((sg: any) => sg?.value);
+
         const body = {
             schoolData: {},
-            grades: selectedFromRedux?.map((grade) => ({
-                gradeLevel: grade?.value
-            }))
+            grades: newAssignedGrades?.filter((grade: any) => grade !== 'All')?.map((grade: any) => ({ gradeLevel: grade }))
         }
 
         const formData = new FormData();
@@ -116,8 +179,10 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
             <Label>Grade Section Mapping</Label>
             <CreatableSelect
                 isMulti={true}
+                options={initialOptions}
                 value={selectedOptions}
                 onChange={handleChange}
+                onCreateOption={handleCreateOption}
                 components={{
                     MultiValueRemove: (props) => (
                         <div

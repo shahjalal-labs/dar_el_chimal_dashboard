@@ -28,6 +28,26 @@ interface Option {
     __isNew__?: boolean;
 }
 
+const initialOptions = [
+    { value: "All", label: "All" },
+    { value: "Preschool", label: "Preschool" },
+    { value: "KG1", label: "KG1" },
+    { value: "KG2", label: "KG2" },
+    { value: "KG3", label: "KG3" },
+    { value: "Grade 1", label: "Grade 1" },
+    { value: "Grade 2", label: "Grade 2" },
+    { value: "Grade 3", label: "Grade 3" },
+    { value: "Grade 4", label: "Grade 4" },
+    { value: "Grade 5", label: "Grade 5" },
+    { value: "Grade 6", label: "Grade 6" },
+    { value: "Grade 7", label: "Grade 7" },
+    { value: "Grade 8", label: "Grade 8" },
+    { value: "Grade 9", label: "Grade 9" },
+    { value: "Grade 10", label: "Grade 10" },
+    { value: "Grade 11", label: "Grade 11" },
+    { value: "Grade 12", label: "Grade 12" },
+];
+
 const AddGradeSection = () => {
     const route = useRouter();
     const dispatch = useDispatch();
@@ -49,17 +69,54 @@ const AddGradeSection = () => {
     const [selectedOptions, setSelectedOptions] = useState<Option[]>(selectedFromRedux || []);
     const [CreateSchool, { isLoading: isCreating }] = useCreateSchoolMutation();
 
-    const handleChange = (newValue: any) => {
-        setSelectedOptions(newValue);
-        dispatch(setGradeOptions(newValue));
+    const handleChange = (
+        newValue: readonly Option[],
+    ) => {
+        if (!newValue || newValue.length === 0) {
+            setSelectedOptions([]);
+            dispatch(setGradeOptions([]));
+            return;
+        }
+
+        const selectedList = [...newValue]; // copy because it's readonly
+        const selectedValues = selectedList.map((opt) => opt.value);
+        const isAllSelected = selectedValues.includes("All");
+
+        // If "All" selected → select all options
+        if (isAllSelected) {
+            const allOptions = [...initialOptions];
+            setSelectedOptions(allOptions);
+            dispatch(setGradeOptions(allOptions));
+            return;
+        }
+
+        // Remove "All" if something else is changed
+        const withoutAll = selectedList.filter((opt) => opt.value !== "All");
+
+        setSelectedOptions(withoutAll);
+        dispatch(setGradeOptions(withoutAll));
     };
 
     const handleCreateOption = (inputValue: string) => {
         if (!inputValue.trim()) return;
-        const newOption = { label: inputValue, value: inputValue, __isNew__: true };
-        const newOptions = [...selectedOptions, newOption];
-        setSelectedOptions(newOptions);
-        dispatch(setGradeOptions(newOptions));
+
+        const newOption: Option = {
+            value: inputValue,
+            label: inputValue,
+            __isNew__: true,
+        };
+
+        // Add to initial options
+        initialOptions.push(newOption);
+
+        const isAllSelected = selectedOptions.some((opt) => opt.value === "All");
+
+        const updatedSelection = isAllSelected
+            ? [...initialOptions] // If All was selected → include new option automatically
+            : [...selectedOptions, newOption];
+
+        setSelectedOptions(updatedSelection);
+        dispatch(setGradeOptions(updatedSelection));
     };
 
     const handleSave = async () => {
@@ -70,7 +127,7 @@ const AddGradeSection = () => {
             studentsCount: Number(studentCount),
             activeStudents: Number(activeStudents),
             activeTeachers: Number(activeTeachers),
-            grades: selectedFromRedux?.map((grade) => ({
+            grades: selectedFromRedux?.filter((opt) => opt.value !== "All")?.map((grade) => ({
                 gradeLevel: grade?.value,
             })),
             schoolDocuments: previewResourceFile
@@ -104,6 +161,7 @@ const AddGradeSection = () => {
             <Label>Grade Section Mapping</Label>
             <CreatableSelect
                 isMulti
+                options={initialOptions}
                 value={selectedOptions}
                 onChange={handleChange}
                 onCreateOption={handleCreateOption}
@@ -118,6 +176,7 @@ const AddGradeSection = () => {
                     }),
                 }}
             />
+
 
             <div className="flex justify-center gap-3 pt-3 mt-6">
                 <Button
