@@ -1,19 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import DataTable from '@/components/Common/DataTable';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { FaAngleDown, FaPlus } from 'react-icons/fa';
 import Image from 'next/image';
 import defaultImg from '@/assets/no-img.jpg';
-import { useGetAllSchoolsByAdminQuery, useGetAllStudentsByAdminQuery } from '@/redux/api/admin';
+import { useGetAllSchoolsByAdminQuery, useGetAllStudentsByAdminQuery, useGetSearchedStudentsQuery } from '@/redux/api/admin';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog } from '@/components/ui/dialog';
 import { useRouter } from 'next/navigation';
 import CreateStudentModal from './AddNewStudent/CreateStudentModal';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { FiLoader } from 'react-icons/fi';
 import { PiExport, PiSpinner } from 'react-icons/pi';
 import schoolImg from "@/assets/school.png";
@@ -22,6 +22,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import { useDeleteAllStudentsMutation } from '@/redux/api/student';
+import { Input } from '@/components/ui/input';
 
 interface PaginationProps {
     totalPage: number;
@@ -33,13 +34,36 @@ const StudentList = () => {
     const route = useRouter();
     const [open, setOpen] = useState(false);
     const [schoolId, setSchoolId] = useState("");
+    const [schoolName, setSchoolName] = useState("");
+    const [fullName, setFullName] = useState("");
+    const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
+    const [studentData, setStudentData] = useState([]);
 
     const { data, isLoading: isStudentLoading } = useGetAllStudentsByAdminQuery({ schoolId: schoolId ? schoolId : undefined });
+    const { data: searchedStudents, isLoading: isSearchedStudentLoading } = useGetSearchedStudentsQuery({ schoolName, fullName });
     const { data: allSchools, isLoading } = useGetAllSchoolsByAdminQuery({ currentPage: 1, limit: 10000 });
     const [DeleteAllStudents, { isLoading: isStudentDeleting }] = useDeleteAllStudentsMutation();
 
-    const formattedData = data?.result?.meta?.result?.slice(((currentPage * 10) - 10), (currentPage * 10)).map((entry:
+    useEffect(() => {
+        if (schoolName.length > 0) {
+            setSearchTerm(schoolName);
+        }
+        if (fullName.length > 0) {
+            setSearchTerm(fullName);
+        }
+    }, [schoolName, fullName]);
+
+    useEffect(() => {
+        if (searchTerm.length > 0) {
+            setStudentData(searchedStudents?.result?.meta?.result);
+        }
+        else if (data?.result) {
+            setStudentData(data?.result?.meta?.result);
+        }
+    }, [data, searchTerm, searchedStudents]);
+
+    const formattedData = studentData?.slice(((currentPage * 10) - 10), (currentPage * 10)).map((entry:
         {
             id: string,
             profileImage: string,
@@ -162,11 +186,54 @@ const StudentList = () => {
                 title="Student List"
                 data={formattedData}
                 currentPage={currentPage}
-                willSearch={true}
                 isLoading={isStudentLoading}
                 deleteItem="Student"
                 schoolId={schoolId}
                 sort={(
+                    <div className="relative w-64 pb-2">
+                        <Input
+                            placeholder="Search by School Name"
+                            value={schoolName}
+                            onChange={(e) => setSchoolName(e.target.value)}
+                            className="pr-8 bg-[#F9F9F9] border-none shadow-none"
+                        />
+                        {
+                            isSearchedStudentLoading ?
+                                <div className="absolute right-3 top-1 text-[#79767B] p-2 rounded-lg">
+                                    <span className='sr-only'>Deleting</span>
+                                    <div className="animate-spin">
+                                        <PiSpinner className="h-4 w-4" />
+                                    </div>
+                                </div> :
+                                <div className="absolute right-3 top-1 text-[#79767B] p-2 rounded-lg">
+                                    <Search className="h-4 w-4" />
+                                </div>
+                        }
+                    </div>
+                )}
+                sortTwo={(
+                    <div className="relative w-64 pb-2">
+                        <Input
+                            placeholder="Search by Full Name"
+                            value={fullName}
+                            onChange={(e) => setFullName(e.target.value)}
+                            className="pr-8 bg-[#F9F9F9] border-none shadow-none"
+                        />
+                        {
+                            isSearchedStudentLoading ?
+                                <div className="absolute right-3 top-1 text-[#79767B] p-2 rounded-lg">
+                                    <span className='sr-only'>Deleting</span>
+                                    <div className="animate-spin">
+                                        <PiSpinner className="h-4 w-4" />
+                                    </div>
+                                </div> :
+                                <div className="absolute right-3 top-1 text-[#79767B] p-2 rounded-lg">
+                                    <Search className="h-4 w-4" />
+                                </div>
+                        }
+                    </div>
+                )}
+                sortThree={(
                     <Select onValueChange={(value) => setSchoolId(value)}>
                         <SelectTrigger className="w-fit border border-[#1E3A8A] text-[#1E3A8A] bg-transparent hover:bg-transparent cursor-pointer flex items-center gap-2 px-3 py-2 rounded-md data-[placeholder]:text-[#1E3A8A]">
                             <SelectValue placeholder="Select School" />
@@ -193,10 +260,10 @@ const StudentList = () => {
                         </SelectContent>
                     </Select>
                 )}
-                sortTwo={(
+                sortFour={(
                     <Button onClick={handleExportToGoogleSheets} className='bg-transparent text-[#1E3A8A] border border-[#1E3A8A] hover:bg-transparent'>Export <PiExport /></Button>
                 )}
-                sortThree={(
+                sortFive={(
                     <AlertDialog>
                         <AlertDialogTrigger>
                             <Tooltip>

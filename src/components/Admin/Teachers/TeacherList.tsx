@@ -1,22 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import DataTable from '@/components/Common/DataTable';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { FaAngleDown, FaPlus } from 'react-icons/fa';
 import Image from 'next/image';
 import defaultImg from '@/assets/no-img.jpg';
-import { useGetAllSchoolsByAdminQuery, useGetAllTeachersByAdminQuery } from '@/redux/api/admin';
+import { useGetAllSchoolsByAdminQuery, useGetAllTeachersByAdminQuery, useGetSearchedTeachersQuery } from '@/redux/api/admin';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useRouter } from 'next/navigation';
 import { Dialog } from '@/components/ui/dialog';
 import CreateTeacherModal from './AddNewTeacher/CreateTeacherModal';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import schoolImg from "@/assets/school.png";
 import { FiLoader } from 'react-icons/fi';
-import { PiExport } from 'react-icons/pi';
+import { PiExport, PiSpinner } from 'react-icons/pi';
+import { Input } from '@/components/ui/input';
 
 interface PaginationProps {
     totalPage: number;
@@ -28,12 +29,35 @@ const TeacherList = () => {
     const route = useRouter();
     const [open, setOpen] = useState(false);
     const [schoolId, setSchoolId] = useState("");
+    const [schoolName, setSchoolName] = useState("");
+    const [fullName, setFullName] = useState("");
+    const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
+    const [teacherData, setTeacherData] = useState([]);
 
     const { data, isLoading: isTeacherLoading } = useGetAllTeachersByAdminQuery({ schoolId: schoolId ? schoolId : undefined });
+    const { data: searchedTeachers, isLoading: isSearchedTeacherLoading } = useGetSearchedTeachersQuery({ schoolName, fullName });
     const { data: allSchools, isLoading } = useGetAllSchoolsByAdminQuery({ currentPage: 1, limit: 10000 });
 
-    const formattedData = data?.result?.meta?.result?.slice(((currentPage * 10) - 10), (currentPage * 10)).map(
+    useEffect(() => {
+        if (schoolName.length > 0) {
+            setSearchTerm(schoolName);
+        }
+        if (fullName.length > 0) {
+            setSearchTerm(fullName);
+        }
+    }, [schoolName, fullName]);
+
+    useEffect(() => {
+        if (searchTerm.length > 0) {
+            setTeacherData(searchedTeachers?.result?.meta?.result);
+        }
+        else if (data?.result) {
+            setTeacherData(data?.result?.meta?.result);
+        }
+    }, [data, searchTerm, searchedTeachers]);
+
+    const formattedData = teacherData?.slice(((currentPage * 10) - 10), (currentPage * 10)).map(
         (entry: { id: string, profileImage: string, fullName: string, loginUserName: string, email: string, gender: string, DOB: string, phone: string, status: string, joinedAt: string, updatedAt: string }) => ({
             "Id": entry.id,
             "Profile Image": (
@@ -136,9 +160,52 @@ const TeacherList = () => {
                 title="Teacher List"
                 data={formattedData}
                 currentPage={currentPage}
-                willSearch={true}
                 isLoading={isTeacherLoading}
                 sort={(
+                    <div className="relative w-64 pb-2">
+                        <Input
+                            placeholder="Search by School Name"
+                            value={schoolName}
+                            onChange={(e) => setSchoolName(e.target.value)}
+                            className="pr-8 bg-[#F9F9F9] border-none shadow-none"
+                        />
+                        {
+                            isSearchedTeacherLoading ?
+                                <div className="absolute right-3 top-1 text-[#79767B] p-2 rounded-lg">
+                                    <span className='sr-only'>Deleting</span>
+                                    <div className="animate-spin">
+                                        <PiSpinner className="h-4 w-4" />
+                                    </div>
+                                </div> :
+                                <div className="absolute right-3 top-1 text-[#79767B] p-2 rounded-lg">
+                                    <Search className="h-4 w-4" />
+                                </div>
+                        }
+                    </div>
+                )}
+                sortTwo={(
+                    <div className="relative w-64 pb-2">
+                        <Input
+                            placeholder="Search by Full Name"
+                            value={fullName}
+                            onChange={(e) => setFullName(e.target.value)}
+                            className="pr-8 bg-[#F9F9F9] border-none shadow-none"
+                        />
+                        {
+                            isSearchedTeacherLoading ?
+                                <div className="absolute right-3 top-1 text-[#79767B] p-2 rounded-lg">
+                                    <span className='sr-only'>Deleting</span>
+                                    <div className="animate-spin">
+                                        <PiSpinner className="h-4 w-4" />
+                                    </div>
+                                </div> :
+                                <div className="absolute right-3 top-1 text-[#79767B] p-2 rounded-lg">
+                                    <Search className="h-4 w-4" />
+                                </div>
+                        }
+                    </div>
+                )}
+                sortThree={(
                     <Select onValueChange={(value) => setSchoolId(value)}>
                         <SelectTrigger className="w-fit border border-[#1E3A8A] text-[#1E3A8A] bg-transparent hover:bg-transparent cursor-pointer flex items-center gap-2 px-3 py-2 rounded-md data-[placeholder]:text-[#1E3A8A]">
                             <SelectValue placeholder="Select School" />
@@ -165,7 +232,7 @@ const TeacherList = () => {
                         </SelectContent>
                     </Select>
                 )}
-                sortTwo={(
+                sortFour={(
                     <Button onClick={handleExportToGoogleSheets} className='bg-transparent text-[#1E3A8A] border border-[#1E3A8A] hover:bg-transparent'>Export <PiExport /></Button>
                 )}
             />

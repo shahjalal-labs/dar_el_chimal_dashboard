@@ -23,9 +23,23 @@ export const adminApi = baseApi.injectEndpoints({
             }),
             providesTags: ["teacher"],
         }),
+        getSearchedTeachers: builder.query({
+            query: ({ schoolName, fullName }) => ({
+                url: `/users/get-teachers?schoolName=${schoolName}&searchTerm=${fullName}`,
+                method: "GET",
+            }),
+            providesTags: ["teacher"],
+        }),
         getAllStudentsByAdmin: builder.query({
             query: ({ schoolId }) => ({
                 url: `${schoolId !== undefined ? `/users/get-students?schoolId=${schoolId}` : '/users/get-students'}`,
+                method: "GET",
+            }),
+            providesTags: ["student"],
+        }),
+        getSearchedStudents: builder.query({
+            query: ({ schoolName, fullName }) => ({
+                url: `/users/get-students?schoolName=${schoolName}&searchTerm=${fullName}`,
                 method: "GET",
             }),
             providesTags: ["student"],
@@ -44,6 +58,8 @@ export const {
     useGetAdminStatQuery,
     useGetAdminOverviewQuery,
     useGetAllTeachersByAdminQuery,
+    useGetSearchedTeachersQuery,
     useGetAllStudentsByAdminQuery,
+    useGetSearchedStudentsQuery,
     useGetAllSchoolsByAdminQuery
 } = adminApi;

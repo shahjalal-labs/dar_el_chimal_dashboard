@@ -58,6 +58,8 @@ const DataTable = ({
   sort,
   sortTwo,
   sortThree,
+  sortFour,
+  sortFive,
   icon,
   iconTwo,
   willSearch,
@@ -75,6 +77,8 @@ const DataTable = ({
   sort?: React.ReactNode;
   sortTwo?: React.ReactNode;
   sortThree?: React.ReactNode;
+  sortFour?: React.ReactNode;
+  sortFive?: React.ReactNode;
   icon?: React.ReactNode;
   iconTwo?: React.ReactNode;
   willSearch?: boolean;
@@ -194,6 +198,8 @@ const DataTable = ({
           <div className="mt-4 md:mt-0">{sort}</div>
           <div className="mt-4 md:mt-0">{sortTwo}</div>
           <div className="mt-4 md:mt-0">{sortThree}</div>
+          <div className="mt-4 md:mt-0">{sortFour}</div>
+          <div className="mt-4 md:mt-0">{sortFive}</div>
           {isButton && (
             <Dialog>
               <DialogTrigger asChild>
