@@ -35,7 +35,7 @@ const Assignments = () => {
             <div className='space-y-4'>
                 {
                     !data?.result?.assignments?.length ?
-                        <div className='text-center'>No assignment created yet!</div> :
+                        <div className='text-center text-[#1E3A8A] my-10 w-full mx-auto'>No assignment created yet!</div> :
                         data?.result?.assignments?.map((assignment: any, idx: number) => (
                             <Link href={`/teacher/classes/${id}/assignments/${assignment?.id}`} key={idx} className='bg-[#F7F9FF] border border-[#E7E8EB] rounded-xl p-5 flex justify-between items-center hover:bg-gray-50 cursor-pointer'>
                                 <div>

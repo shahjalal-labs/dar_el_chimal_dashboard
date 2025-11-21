@@ -12,7 +12,7 @@ import { TfiAngleLeft } from "react-icons/tfi";
 const Books = () => {
     const route = useRouter();
     const { id } = useParams();
-    const { data } = useGetAllBooksByTeacherQuery(id);
+    const { data, isLoading } = useGetAllBooksByTeacherQuery(id);
 
     const formattedData = data?.result?.books?.map(
         (entry: {
@@ -80,6 +80,7 @@ const Books = () => {
             <DataTable
                 title="Book List"
                 data={formattedData}
+                isLoading={isLoading}
                 willSearch={true}
             />
         </div>

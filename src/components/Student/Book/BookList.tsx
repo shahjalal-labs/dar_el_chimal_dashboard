@@ -10,11 +10,11 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 const BookList = () => {
-  const pathname = usePathname(); 
-  const queryField = pathname.split("/").pop(); 
+  const pathname = usePathname();
+  const queryField = pathname.split("/").pop();
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { data } = useGetStudentDetailsQuery(queryField);
+  const { data, isLoading } = useGetStudentDetailsQuery(queryField);
 
   const formattedData = data?.result?.books?.map(
     (entry: {
@@ -55,6 +55,7 @@ const BookList = () => {
       <DataTable
         title="Book List"
         data={formattedData}
+        isLoading={isLoading}
         currentPage={currentPage}
         willSearch={true}
       />

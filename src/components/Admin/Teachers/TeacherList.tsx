@@ -160,7 +160,7 @@ const TeacherList = () => {
                 title="Teacher List"
                 data={formattedData}
                 currentPage={currentPage}
-                isLoading={isTeacherLoading}
+                isLoading={isTeacherLoading || isSearchedTeacherLoading}
                 sort={(
                     <div className="relative w-64 pb-2">
                         <Input

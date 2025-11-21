@@ -7,7 +7,7 @@ import defaultImg from '@/assets/no-img.jpg';
 import { useGetAllStudentsByAdminQuery } from '@/redux/api/admin';
 
 const StudentTable = () => {
-    const { data: allStudents } = useGetAllStudentsByAdminQuery({ schoolId: undefined });
+    const { data: allStudents, isLoading } = useGetAllStudentsByAdminQuery({ schoolId: undefined });
 
     const adminFormattedData = allStudents?.result?.meta?.result?.slice(0, 5).map((entry:
         {
@@ -49,7 +49,7 @@ const StudentTable = () => {
 
     return (
         <>
-            <DataTable title="Student List" data={adminFormattedData} currentPage={1} willSearch={false} />
+            <DataTable title="Student List" data={adminFormattedData} isLoading={isLoading} currentPage={1} willSearch={false} />
         </>
     );
 };

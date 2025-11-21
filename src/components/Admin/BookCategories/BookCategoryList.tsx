@@ -12,7 +12,7 @@ import { useGetAllBookCategoriesQuery } from '@/redux/api/bookCategory';
 
 const BookCategoryList = () => {
     const [currentPage, setCurrentPage] = useState(1);
-    const { data } = useGetAllBookCategoriesQuery({ currentPage, limit: 10 });
+    const { data, isLoading } = useGetAllBookCategoriesQuery({ currentPage, limit: 10 });
 
     const formattedData = data?.result?.result?.map(
         (entry: { id: string, image: string, name: string, description: string, createdAt: string, updatedAt: string }) => ({
@@ -64,7 +64,7 @@ const BookCategoryList = () => {
                 </Link>
             </div>
 
-            <DataTable title="Book Category List" data={formattedData} currentPage={currentPage} willSearch={true} />
+            <DataTable title="Book Category List" data={formattedData} isLoading={isLoading} currentPage={currentPage} willSearch={true} />
 
             <div className='flex flex-col md:flex-row justify-between items-center gap-6 mt-8'>
                 <div className='text-base text-[#4A4A4A] flex items-center justify-start gap-2'>

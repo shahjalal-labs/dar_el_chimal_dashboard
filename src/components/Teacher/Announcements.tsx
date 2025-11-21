@@ -34,7 +34,7 @@ const Announcements = () => {
             <div className='space-y-4'>
                 {
                     !data?.result?.announcments?.length ?
-                        <div className='text-center'>No announcements yet!</div> :
+                        <div className='text-center text-[#1E3A8A] my-10 w-full mx-auto'>No announcement yet!</div> :
                         data?.result?.announcments?.map((announce: any, idx: number) => (
                             <Link href={`/teacher/classes/${id}/announcements/${announce?.id}`} key={idx} className='bg-[#F7F9FF] border border-[#D8D8D8] rounded-2xl flex justify-between items-center p-5'>
                                 <div>

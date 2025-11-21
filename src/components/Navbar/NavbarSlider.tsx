@@ -78,7 +78,7 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
           },
           {
             label: "Book",
-            route: "",
+            route: `/teacher/classes/books/${id}`,
             iconPath: <LuBookOpenText className="w-5 lg:w-6 h-5 lg:h-6" />,
           },
         ]
@@ -270,7 +270,7 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
                     (showDropdown && item.label === "Classes") ?
                       (<div className="flex flex-col">
                         <Link
-                          href=""
+                          href={`/teacher/classes/${id}/students`}
                           className={`font-medium p-3 ${isOpen && "pl-8 ml-8"} 
                           ${(
                               path === "/teacher/students" ||
@@ -283,7 +283,7 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
                           {!isOpen ? <PiUsersThree /> : "Students"}
                         </Link>
                         <Link
-                          href=""
+                          href={`/teacher/classes/${id}/assignments`}
                           className={`font-medium p-3 ${isOpen && "pl-8 ml-8"} 
                           ${(
                               path === "" ||
@@ -301,7 +301,7 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
                           {!isOpen ? <MdOutlineAssignment /> : "Assignments"}
                         </Link>
                         <Link
-                          href=""
+                          href={`/teacher/classes/${id}/announcements`}
                           className={`font-medium p-3 ${isOpen && "pl-8 ml-8"} 
                           ${(
                               path === "/admin/books/add-new-book" ||

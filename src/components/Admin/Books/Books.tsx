@@ -14,10 +14,10 @@ import { FiLoader } from "react-icons/fi";
 import { useGetAllBookCategoriesQuery } from "@/redux/api/bookCategory";
 
 const Books = () => {
-  const [bookCategoryId, setBookCategoryId] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const { data } = useGetAllBooksQuery({ currentPage, bookCategoryId: bookCategoryId ? bookCategoryId : undefined });
+  const [bookCategoryId, setBookCategoryId] = useState("");
   const { data: allBookCategories, isLoading } = useGetAllBookCategoriesQuery({ currentPage: 1, limit: 1000 });
+  const { data, isLoading: isBookLoading } = useGetAllBooksQuery({ currentPage, bookCategoryId: bookCategoryId ? bookCategoryId : undefined });
 
   const formattedData = data?.result?.result?.map(
     (entry: {
@@ -86,6 +86,7 @@ const Books = () => {
         title="Book List"
         data={formattedData}
         currentPage={currentPage}
+        isLoading={isBookLoading}
         willSearch={true}
         deleteItem="Book"
         sort={(

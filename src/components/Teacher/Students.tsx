@@ -12,7 +12,7 @@ import { TfiAngleLeft } from 'react-icons/tfi';
 const Students = () => {
     const route = useRouter();
     const { id } = useParams();
-    const { data } = useGetAllStudentsByTeacherQuery(id);
+    const { data, isLoading } = useGetAllStudentsByTeacherQuery(id);
 
     const formattedData = data?.result?.students?.map((entry:
         {
@@ -45,7 +45,7 @@ const Students = () => {
     return (
         <div>
             <Button onClick={() => route.back()} className='mb-6 bg-white/80 text-black hover:text-white cursor-pointer'><TfiAngleLeft />Back</Button>
-            <DataTable title={`Students (${formattedData?.length})`} data={formattedData} willSearch={true} />
+            <DataTable title={`Students (${formattedData?.length})`} data={formattedData} isLoading={isLoading} willSearch={true} />
         </div>
     );
 };

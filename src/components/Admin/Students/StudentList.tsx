@@ -186,7 +186,7 @@ const StudentList = () => {
                 title="Student List"
                 data={formattedData}
                 currentPage={currentPage}
-                isLoading={isStudentLoading}
+                isLoading={isStudentLoading || isSearchedStudentLoading}
                 deleteItem="Student"
                 schoolId={schoolId}
                 sort={(

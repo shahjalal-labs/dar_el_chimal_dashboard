@@ -174,14 +174,16 @@ const DataTable = ({
     );
   });
 
+  console.log(filteredData);
+
   return (
     <div className="bg-white rounded-xl p-4">
-      <div className="md:flex justify-between items-center mb-6">
+      <div className="md:flex flex-wrap justify-between items-center mb-6">
         {/* Left - Title */}
         <h1 className="text-xl md:text-2xl font-semibold">{title}</h1>
 
         {/* Right - Sort + Button */}
-        <div className="md:flex items-center gap-3 ml-auto">
+        <div className="md:flex flex-wrap items-center gap-3 ml-auto">
           {willSearch && (
             <div className="relative w-64 pb-2">
               <Input
@@ -223,12 +225,16 @@ const DataTable = ({
         </div>
       </div>
 
-      {(!data || isLoading) ? (
+      {(isLoading) ? (
         <div className="flex justify-center items-center gap-4">
           <span className="text-[#1E3A8A]">Table Data is Loading</span>
           <SyncLoader color="#1E3A8A" />
         </div>
-      ) : !filteredData.length ? (
+      ) : (!data) ? (
+        <div className="text-center text-[#1E3A8A] my-10 w-full mx-auto">
+          No data found!
+        </div>
+      ) : (!filteredData?.length || filteredData === undefined) ? (
         <div className="text-center text-[#1E3A8A] my-10 w-full mx-auto">
           No match found!
         </div>
