@@ -174,8 +174,6 @@ const DataTable = ({
     );
   });
 
-  console.log(filteredData);
-
   return (
     <div className="bg-white rounded-xl p-4">
       <div className="md:flex flex-wrap justify-between items-center mb-6">
