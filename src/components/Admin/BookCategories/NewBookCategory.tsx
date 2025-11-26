@@ -60,7 +60,9 @@ const NewBookCategory = () => {
 
         try {
             const response = await CreateCategory(body).unwrap();
+            console.log(body);
             if (response.success) {
+
                 toast.success(response.message);
                 route.push('/admin/book-categories');
             }
@@ -115,7 +117,7 @@ const NewBookCategory = () => {
 
                     {/* Upload Image */}
                     <div>
-                        <Label className='text-[#30373D] font-medium mb-2.5'>Upload Picture<span className='text-red-600'>*</span></Label>
+                        <Label className='text-[#30373D] font-medium mb-2.5'>Upload Picture</Label>
                         {!previewUrl ? (
                             <label htmlFor='uploadImage'>
                                 <div className='border border-dashed border-[#CBD5E1] rounded-lg px-6 py-8 w-full cursor-pointer'>
@@ -128,7 +130,6 @@ const NewBookCategory = () => {
                                             updateChange('uploadImage', file);
                                         }}
                                         className='hidden'
-                                        required
                                     />
                                     <div className='flex flex-col items-center gap-2'>
                                         <Image src={uploadImg} height={40} width={40} alt="Upload" className="w-10 mx-auto" priority />

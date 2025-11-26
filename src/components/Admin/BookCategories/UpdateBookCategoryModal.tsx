@@ -191,7 +191,7 @@ const UpdateBookCategoryModal = ({ id }: { id: string }) => {
 
                 {/* Buttons */}
                 <div className='flex justify-center items-center gap-4'>
-                    <Button onClick={() => closeRef.current?.click()} type="button" className='font-medium text-[#636F85] border border-[#B8B8B8] rounded-xl bg-white hover:bg-gray-200 hover:bg-[#B8B8B8] transition-all duration-500 ease-in-out cursor-pointer px-4 py-2.5'>Cancel</Button>
+                    <Button onClick={() => closeRef.current?.click()} type="button" className='font-medium text-[#636F85] border border-[#B8B8B8] rounded-xl bg-white hover:bg-[#B8B8B8] transition-all duration-500 ease-in-out cursor-pointer px-4 py-2.5'>Cancel</Button>
 
                     <Button
                         type='submit'

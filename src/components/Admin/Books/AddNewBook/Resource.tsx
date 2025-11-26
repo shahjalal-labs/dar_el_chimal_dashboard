@@ -186,23 +186,17 @@ const Resource = ({ bookId }: { bookId: any }) => {
                 )}
             </div>
 
-            {
-                pathname !== `/admin/books/book-overview/${id}` && (
-                    <>
-                        {/* OR Link */}
-                        <div className="text-center text-[#D8D8D8]">────────── <span className="text-[#4C4C4C]">Or</span> ──────────</div>
+            {/* OR Link */}
+            <div className="text-center text-[#D8D8D8]">────────── <span className="text-[#4C4C4C]">Or</span> ──────────</div>
 
-                        <div>
-                            <Input
-                                type='url'
-                                placeholder="Paste your link"
-                                value={resourceLink}
-                                onChange={(e) => dispatch(setResourceLink(e.target.value))}
-                            />
-                        </div>
-                    </>
-                )
-            }
+            <div>
+                <Input
+                    type='url'
+                    placeholder="Paste your link"
+                    value={resourceLink}
+                    onChange={(e) => dispatch(setResourceLink(e.target.value))}
+                />
+            </div>
 
             {/* Buttons */}
             <div className="flex justify-center items-center gap-3 pt-3">
