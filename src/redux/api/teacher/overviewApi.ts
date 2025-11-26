@@ -118,6 +118,13 @@ export const overviewApi = baseApi.injectEndpoints({
             }),
             providesTags: ["teacher", "books"]
         }),
+        getAllBooksForTeacher: builder.query({
+            query: (currentPage) => ({
+                url: `/book/for-teacher?page=${currentPage}`,
+                method: "GET",
+            }),
+            providesTags: ["teacher", "books"]
+        }),
     }),
 });
 
@@ -137,5 +144,6 @@ export const {
     useGetSingleAnnouncementByTeacherQuery,
     useUpdateAnnouncementByTeacherMutation,
     useDeleteAnnouncementByTeacherMutation,
-    useGetAllBooksByTeacherQuery
+    useGetAllBooksByTeacherQuery,
+    useGetAllBooksForTeacherQuery
 } = overviewApi;

@@ -101,7 +101,7 @@ const General = ({ id }: { id: string }) => {
     };
 
     const isButtonDisabled =
-        !teacherName || !userName || !email || !password || !previewTeacherPhoto;
+        !userName || !password;
 
     return (
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -113,7 +113,6 @@ const General = ({ id }: { id: string }) => {
                     placeholder="Enter teacher name"
                     value={teacherName}
                     onChange={(e) => dispatch(setTeacherName(e.target.value))}
-                    required
                 />
             </div>
 
@@ -162,14 +161,13 @@ const General = ({ id }: { id: string }) => {
                     placeholder="Enter email"
                     value={email}
                     onChange={(e) => dispatch(setEmail(e.target.value))}
-                    required
                 />
             </div>
 
             {/* Upload Teacher Photo */}
             <div className="flex-1">
                 <Label className="font-medium mb-2.5">
-                    Upload Teacher Photo<span className="text-red-600">*</span>
+                    Upload Teacher Photo
                 </Label>
 
                 {!previewTeacherPhoto ? (

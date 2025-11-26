@@ -161,7 +161,7 @@ const General = ({ id }: { id: string }) => {
             {/* Upload Student Photo */}
             <div className="flex-1">
                 <Label className="font-medium mb-2.5">
-                    Upload Student Photo<span className="text-red-600">*</span>
+                    Upload Student Photo
                 </Label>
 
                 {!previewStudentPhoto ? (

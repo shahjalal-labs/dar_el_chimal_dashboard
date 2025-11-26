@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -152,11 +153,6 @@ const Grade = () => {
             const response = await CreateTeacher(formData).unwrap();
             if (response.success) {
                 toast.success(response.message);
-                dispatch(setTeacherName(''))
-                dispatch(setUserName(''))
-                dispatch(setEmail(''))
-                dispatch(setPassword(''))
-                dispatch(setPreviewTeacherPhoto(''))
                 route.push('/admin/teachers')
             }
         } catch (error) {
