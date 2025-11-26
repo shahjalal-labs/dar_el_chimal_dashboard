@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -30,6 +30,19 @@ const Resource = ({ bookId }: { bookId: any }) => {
         resourceFile,
         resourceLink,
     } = useSelector((state: RootState) => state.book);
+
+    useEffect(() => {
+        if (pathname === '/admin/books/add-new-book') {
+            dispatch(setResourceType(''));
+            dispatch(setResourceTitle(''));
+            dispatch(setResourceDescription(''));
+            dispatch(setPreviewResourceFile(''));
+            dispatch(setResourceFile(null));
+            dispatch(setResourceLink(''));
+        }
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     const [UploadResource, { isLoading }] = useUploadResourceMutation();
     const [CreateResource, { isLoading: isResourceLoading }] = useCreateResourceMutation();

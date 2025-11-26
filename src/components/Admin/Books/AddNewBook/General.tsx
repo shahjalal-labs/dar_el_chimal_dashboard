@@ -49,6 +49,15 @@ const General = ({ id }: { id: string }) => {
             dispatch(setPreviewImage(data?.result?.coverImg));
             dispatch(setPreviewPdf(data?.result?.file));
         }
+        if (pathname === '/admin/books/add-new-book') {
+            dispatch(setBookName(''));
+            dispatch(setDescription(''));
+            dispatch(setISBN(''));
+            dispatch(setAuthor(''));
+            dispatch(setCategory(''));
+            dispatch(setPreviewImage(''));
+            dispatch(setPreviewPdf(''));
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data])
 

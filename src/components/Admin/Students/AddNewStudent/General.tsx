@@ -42,6 +42,11 @@ const General = ({ id }: { id: string }) => {
             dispatch(setStudentUserName(data?.result?.loginUserName));
             dispatch(setPreviewStudentPhoto(data?.result?.profileImage));
         }
+        if (pathname === '/admin/students/add-new-student') {
+            dispatch(setStudentName(''));
+            dispatch(setStudentUserName(''));
+            dispatch(setPreviewStudentPhoto(''));
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data])
 

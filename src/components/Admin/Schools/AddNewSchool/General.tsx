@@ -52,6 +52,15 @@ const General = ({ id }: { id: string }) => {
             dispatch(setActiveStudents(data?.result?.activeStudents));
             dispatch(setPreviewSchoolPhoto(data?.result?.schoolLogo));
         }
+        if (pathname === '/admin/schools/add-new-school') {
+            dispatch(setSchoolName(''));
+            dispatch(setAddress(''));
+            dispatch(setTeacherCount(null));
+            dispatch(setActiveTeachers(null));
+            dispatch(setStudentCount(null));
+            dispatch(setActiveStudents(null));
+            dispatch(setPreviewSchoolPhoto(''));
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data])
 
@@ -149,8 +158,8 @@ const General = ({ id }: { id: string }) => {
                         type="number"
                         step={1}
                         placeholder="00"
-                        value={teacherCount}
-                        onChange={(e) => dispatch(setTeacherCount(Number(e.target.value)))}
+                        value={teacherCount ?? ''}
+                        onChange={(e) => dispatch(setTeacherCount(e.target.value === '' ? null : Number(e.target.value)))}
                     />
                 </div>
                 <div className="flex-1">
@@ -159,8 +168,8 @@ const General = ({ id }: { id: string }) => {
                         type="number"
                         step={1}
                         placeholder="00"
-                        value={activeTeachers}
-                        onChange={(e) => dispatch(setActiveTeachers(Number(e.target.value)))}
+                        value={activeTeachers ?? ''}
+                        onChange={(e) => dispatch(setActiveTeachers(e.target.value === '' ? null : Number(e.target.value)))}
                     />
                 </div>
             </div>
@@ -173,8 +182,8 @@ const General = ({ id }: { id: string }) => {
                         type="number"
                         step={1}
                         placeholder="00"
-                        value={studentCount}
-                        onChange={(e) => dispatch(setStudentCount(Number(e.target.value)))}
+                        value={studentCount ?? ''}
+                        onChange={(e) => dispatch(setStudentCount(e.target.value === '' ? null : Number(e.target.value)))}
                     />
                 </div>
                 <div className="flex-1">
@@ -183,8 +192,8 @@ const General = ({ id }: { id: string }) => {
                         type="number"
                         step={1}
                         placeholder="00"
-                        value={activeStudents}
-                        onChange={(e) => dispatch(setActiveStudents(Number(e.target.value)))}
+                        value={activeStudents ?? ''}
+                        onChange={(e) => dispatch(setActiveStudents(e.target.value === '' ? null : Number(e.target.value)))}
                     />
                 </div>
             </div>

@@ -66,7 +66,7 @@ const AddGradeSection = () => {
         (state: RootState) => state.school.options
     );
 
-    const [selectedOptions, setSelectedOptions] = useState<Option[]>(selectedFromRedux || []);
+    const [selectedOptions, setSelectedOptions] = useState<Option[]>([]);
     const [CreateSchool, { isLoading: isCreating }] = useCreateSchoolMutation();
 
     const handleChange = (

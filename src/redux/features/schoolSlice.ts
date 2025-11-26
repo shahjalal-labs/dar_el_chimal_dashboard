@@ -3,10 +3,10 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 interface SchoolFormState {
     schoolName: string
     address: string
-    teacherCount: number
-    activeTeachers: number
-    studentCount: number
-    activeStudents: number
+    teacherCount: number | null
+    activeTeachers: number | null
+    studentCount: number | null
+    activeStudents: number | null
     previewSchoolPhoto: string
     resourceFile: File | File[] | null;
     previewResourceFile: string[];
@@ -18,10 +18,10 @@ interface SchoolFormState {
 const initialState: SchoolFormState = {
     schoolName: '',
     address: '',
-    teacherCount: 0,
-    activeTeachers: 0,
-    studentCount: 0,
-    activeStudents: 0,
+    teacherCount: null,
+    activeTeachers: null,
+    studentCount: null,
+    activeStudents: null,
     previewSchoolPhoto: '',
     resourceFile: null,
     previewResourceFile: [],
@@ -40,16 +40,16 @@ const schoolSlice = createSlice({
         setAddress: (state, action: PayloadAction<string>) => {
             state.address = action.payload;
         },
-        setTeacherCount: (state, action: PayloadAction<number>) => {
+        setTeacherCount: (state, action: PayloadAction<number | null>) => {
             state.teacherCount = action.payload;
         },
-        setActiveTeachers: (state, action: PayloadAction<number>) => {
+        setActiveTeachers: (state, action: PayloadAction<number | null>) => {
             state.activeTeachers = action.payload;
         },
-        setStudentCount: (state, action: PayloadAction<number>) => {
+        setStudentCount: (state, action: PayloadAction<number | null>) => {
             state.studentCount = action.payload;
         },
-        setActiveStudents: (state, action: PayloadAction<number>) => {
+        setActiveStudents: (state, action: PayloadAction<number | null>) => {
             state.activeStudents = action.payload;
         },
         setSchoolPhoto: (state, action: PayloadAction<File | null>) => {

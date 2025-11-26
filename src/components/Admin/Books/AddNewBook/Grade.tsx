@@ -45,6 +45,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import schoolImg from "@/assets/school.png";
+import { set } from 'date-fns';
 
 interface GradeOption {
     id: string;
@@ -97,7 +98,11 @@ const Grade = ({ id, onClose }: { id: string, onClose?: () => void }) => {
         })) ?? [];
 
     useEffect(() => {
-        if (data?.result && Array.isArray(data?.result?.grades)) {
+        if (pathname === '/admin/books/add-new-book') {
+            setMappings([{ id: Date.now().toString(), school: null, grades: [] }]);
+            return;
+        }
+        if (pathname !== '/admin/books/add-new-book' && data?.result && Array.isArray(data?.result?.grades)) {
             const preloadedMappings: Mapping[] = data.result.grades.map(
                 (entry: any) => {
                     const school: SchoolOption | null = {
@@ -138,6 +143,7 @@ const Grade = ({ id, onClose }: { id: string, onClose?: () => void }) => {
 
     useEffect(() => {
         if (
+            pathname !== '/admin/books/add-new-book' &&
             Array.isArray(schoolGradeMappings) &&
             schoolGradeMappings.length > 0 &&
             gradesData

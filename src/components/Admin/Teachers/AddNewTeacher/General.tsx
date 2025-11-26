@@ -42,6 +42,12 @@ const General = ({ id }: { id: string }) => {
             dispatch(setEmail(data?.result?.email));
             dispatch(setPreviewTeacherPhoto(data?.result?.profileImage));
         }
+        if (pathname === '/admin/teachers/add-new-teacher') {
+            dispatch(setTeacherName(''));
+            dispatch(setUserName(''));
+            dispatch(setEmail(''));
+            dispatch(setPreviewTeacherPhoto(''));
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data])
 

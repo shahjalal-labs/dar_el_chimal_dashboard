@@ -6,7 +6,6 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
-import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import LeftSide from "./LeftSide";
 
