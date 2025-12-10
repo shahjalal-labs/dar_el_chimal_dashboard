@@ -46,6 +46,7 @@ import UpdateStudentModal from "../Admin/Students/UpdateStudentModal";
 import { useDeleteBookMutation } from "@/redux/api/book";
 import { useDeleteSelectedStudentsMutation, useDeleteSingleStudentMutation } from "@/redux/api/student";
 import { useDeleteSingleTeacherMutation } from "@/redux/api/teacher";
+import { useDeleteBookCategroyMutation } from "@/redux/api/bookCategory";
 
 const DataTable = ({
   title,
@@ -92,6 +93,7 @@ const DataTable = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
 
+  const [DeleteBookCategory, { isLoading: isBookCategroyDeleting }] = useDeleteBookCategroyMutation();
   const [DeleteBook, { isLoading: isBookDeleting }] = useDeleteBookMutation();
   const [DeleteSchool, { isLoading: isSchoolDeleting }] = useDeleteSchoolMutation();
   const [DeleteTeacher, { isLoading: isTeacherDeleting }] = useDeleteSingleTeacherMutation();
@@ -137,6 +139,12 @@ const DataTable = ({
 
   const handleDelete = async (id: string) => {
     try {
+      if (pathname === "/admin/book-categories") {
+        const response = await DeleteBookCategory(id).unwrap();
+        if (response.success) {
+          toast.success(response.message);
+        }
+      }
       if (pathname === "/admin/books") {
         const response = await DeleteBook(id).unwrap();
         if (response.success) {
@@ -389,49 +397,46 @@ const DataTable = ({
                                   <></>
                                 ))}
                             </Dialog>
-                            {
-                              (pathname !== '/admin/book-categories') &&
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <Button className="bg-[#FE4D4F33] hover:bg-[#FE4D4F26] text-[#FE4D4F] transition-colors ease-in-out duration-200 cursor-pointer">
-                                    <span className="sr-only">Delete</span>
-                                    {(isSchoolDeleting || isBookDeleting || isTeacherDeleting || isStudentDeleting || isStudentsDeleting) &&
-                                      selectedId === singleData?.Id ? (
-                                      <div className="animate-spin">
-                                        <PiSpinner className="h-4 w-4" />
-                                      </div>
-                                    ) : (
-                                      <RiDeleteBin6Line className="w-6 h-6" />
-                                    )}
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle className="text-[#30373D] text-3xl font-bold text-center">
-                                      Delete {deleteItem}?
-                                    </AlertDialogTitle>
-                                    <AlertDialogDescription className="text-[#636F85] text-center text-base mt-4">
-                                      Are you sure you want to permanently delete this{" "}
-                                      {deleteItem}?
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter className="flex justify-center items-center gap-4">
-                                    <AlertDialogCancel className="flex-1 font-bold text-[#636F85] cursor-pointer transition-all duration-500 ease-in-out">
-                                      No
-                                    </AlertDialogCancel>
-                                    <AlertDialogAction
-                                      className="bg-[#1E3A8A] text-white hover:bg-[#1E3A8A80] flex-1 cursor-pointer transition-all duration-500 ease-in-out"
-                                      onClick={() => {
-                                        setSelectedId(singleData?.Id);
-                                        handleDelete(singleData?.Id);
-                                      }}
-                                    >
-                                      Yes
-                                    </AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
-                            }
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button className="bg-[#FE4D4F33] hover:bg-[#FE4D4F26] text-[#FE4D4F] transition-colors ease-in-out duration-200 cursor-pointer">
+                                  <span className="sr-only">Delete</span>
+                                  {(isSchoolDeleting || isBookCategroyDeleting || isBookDeleting || isTeacherDeleting || isStudentDeleting || isStudentsDeleting) &&
+                                    selectedId === singleData?.Id ? (
+                                    <div className="animate-spin">
+                                      <PiSpinner className="h-4 w-4" />
+                                    </div>
+                                  ) : (
+                                    <RiDeleteBin6Line className="w-6 h-6" />
+                                  )}
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle className="text-[#30373D] text-3xl font-bold text-center">
+                                    Delete {deleteItem}?
+                                  </AlertDialogTitle>
+                                  <AlertDialogDescription className="text-[#636F85] text-center text-base mt-4">
+                                    Are you sure you want to permanently delete this{" "}
+                                    {deleteItem}?
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter className="flex justify-center items-center gap-4">
+                                  <AlertDialogCancel className="flex-1 font-bold text-[#636F85] cursor-pointer transition-all duration-500 ease-in-out">
+                                    No
+                                  </AlertDialogCancel>
+                                  <AlertDialogAction
+                                    className="bg-[#1E3A8A] text-white hover:bg-[#1E3A8A80] flex-1 cursor-pointer transition-all duration-500 ease-in-out"
+                                    onClick={() => {
+                                      setSelectedId(singleData?.Id);
+                                      handleDelete(singleData?.Id);
+                                    }}
+                                  >
+                                    Yes
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
                           </>
                         )}
                     </TableCell>
