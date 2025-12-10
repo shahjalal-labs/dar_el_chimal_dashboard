@@ -58,7 +58,7 @@ const TeacherList = () => {
     }, [data, searchTerm, searchedTeachers]);
 
     const formattedData = teacherData?.slice(((currentPage * 10) - 10), (currentPage * 10)).map(
-        (entry: { id: string, profileImage: string, fullName: string, loginUserName: string, email: string, gender: string, DOB: string, phone: string, status: string, joinedAt: string, updatedAt: string }) => ({
+        (entry: { id: string, profileImage: string, fullName: string, loginUserName: string, email: string, gender: string, DOB: string, phone: string, status: string, joinedAt: string, updatedAt: string, Teacher: { grade: { school: { name: string } } }[] }) => ({
             "Id": entry.id,
             "Profile Image": (
                 <Image
@@ -72,8 +72,7 @@ const TeacherList = () => {
             ),
             "Full Name": entry?.fullName,
             "User Name": entry?.loginUserName,
-            "Email": entry.email,
-            "Phone Number": entry.phone,
+            "School": entry.Teacher[0].grade.school.name,
             "Status": entry.status,
             "Joined At": new Date(entry.joinedAt).toLocaleString('en-US', {
                 year: 'numeric',

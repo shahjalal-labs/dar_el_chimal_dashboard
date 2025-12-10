@@ -40,9 +40,7 @@ const Books = () => {
           priority
         />
       ),
-      "Book Name": (entry?.bookName?.length > 30 ?
-        entry?.bookName?.slice(0, 30) + "..." :
-        entry?.bookName),
+      "Book Name": entry?.bookName,
       "Description": (entry?.description.length > 30 ?
         entry?.description.slice(0, 30) + "..." :
         entry?.description),
