@@ -95,7 +95,21 @@ type ColorName = "red" | "green" | "blue" | "purple";
 
 function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }: PdfReaderProps) {
   const router = useRouter();
-  const [currentPage, setCurrentPage] = useState<number>(1);
+  
+  // Initialize currentPage from localStorage if available
+  const [currentPage, setCurrentPage] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const savedPage = localStorage.getItem(`pdf-current-page-${pdfUrl}`);
+      if (savedPage) {
+        const pageNum = parseInt(savedPage, 10);
+        if (pageNum > 0 && !isNaN(pageNum)) {
+          return pageNum;
+        }
+      }
+    }
+    return 1;
+  });
+  
   const [zoom, setZoom] = useState<number>(100);
   const [selectedColor, setSelectedColor] = useState<ColorName>("red");
   const [selectedTool, setSelectedTool] = useState<ToolType>(null);
@@ -141,6 +155,8 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
   const [selectedText, setSelectedText] = useState<string>("");
   const [isFlipping, setIsFlipping] = useState<boolean>(false);
   const [flipDirection, setFlipDirection] = useState<"left" | "right" | null>(null);
+  const renderingPagesRef = useRef<Set<number>>(new Set());
+  const renderedPagesRef = useRef<Set<number>>(new Set());
 
   // Load bookmarks from localStorage on component mount
   useEffect(() => {
@@ -159,6 +175,13 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
   useEffect(() => {
     localStorage.setItem("pdf-bookmarks", JSON.stringify(bookmarks));
   }, [bookmarks]);
+
+  // Save current page to localStorage whenever it changes
+  useEffect(() => {
+    if (currentPage > 0) {
+      localStorage.setItem(`pdf-current-page-${pdfUrl}`, currentPage.toString());
+    }
+  }, [currentPage, pdfUrl]);
 
   // Initialize history
   useEffect(() => {
@@ -309,18 +332,26 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
     }
   }, [pdfUrl, useStreaming]);
 
-  // Render PDF pages
+  // Render PDF pages with caching to prevent duplicate renders
   const renderPage = useCallback(
     async (
       pageNum: number,
       canvasRef: React.RefObject<HTMLCanvasElement | null>
     ): Promise<void> => {
-      if (!pdfDocRef.current || !canvasRef.current || pageRendering) return;
+      if (!pdfDocRef.current || !canvasRef.current) return;
+      if (pageNum < 1 || pageNum > numPages) return;
+      
+      // Check if already rendering this page
+      if (renderingPagesRef.current.has(pageNum)) return;
+      
+      // Mark as rendering
+      renderingPagesRef.current.add(pageNum);
 
-      setPageRendering(true);
       try {
         const page: PDFPageProxy = await pdfDocRef.current.getPage(pageNum);
         const canvas = canvasRef.current;
+        if (!canvas) return;
+        
         const context = canvas.getContext("2d");
 
         if (!context) {
@@ -339,13 +370,17 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
         };
 
         await page.render(renderContext).promise;
+        
+        // Mark as successfully rendered
+        renderedPagesRef.current.add(pageNum);
       } catch (error) {
-        console.error("Error rendering page:", error);
+        console.error(`Error rendering page ${pageNum}:`, error);
       } finally {
-        setPageRendering(false);
+        // Remove from rendering set
+        renderingPagesRef.current.delete(pageNum);
       }
     },
-    [zoom, pageRendering]
+    [zoom, numPages]
   );
 
   const drawAnnotations = useCallback(
@@ -508,10 +543,16 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
 
   // Render pages when current page or zoom changes
   useEffect(() => {
-    if (pdfDocRef.current) {
+    if (pdfDocRef.current && !isFlipping) {
       const leftPage = currentPage;
       const rightPage = currentPage + 1;
 
+      // Clear cache on zoom change
+      if (zoom) {
+        renderedPagesRef.current.clear();
+      }
+
+      // Render current pages
       if (leftPage <= numPages) {
         renderPage(leftPage, canvasLeftRef);
       }
@@ -519,7 +560,7 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
         renderPage(rightPage, canvasRightRef);
       }
     }
-  }, [currentPage, zoom, numPages, renderPage]);
+  }, [currentPage, zoom, numPages, renderPage, isFlipping]);
 
   useEffect(() => {
     drawAnnotations(currentPage, overlayLeftRef);
@@ -873,16 +914,19 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
     newPage: number,
     direction: "left" | "right"
   ) => {
+    if (isFlipping) return; // Prevent rapid clicks causing shake
+    
     setIsFlipping(true);
     setFlipDirection(direction);
-
+    
+    // Immediately change page
+    setCurrentPage(newPage);
+    
+    // Short animation duration
     setTimeout(() => {
-      setCurrentPage(newPage);
-      setTimeout(() => {
-        setIsFlipping(false);
-        setFlipDirection(null);
-      }, 300);
-    }, 150);
+      setIsFlipping(false);
+      setFlipDirection(null);
+    }, 200);
   };
 
   const handlePrevPage = (): void => {
@@ -1133,21 +1177,14 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
           <ChevronLeft className="w-6 h-6 text-gray-700" />
         </Button>
 
-        {/* Book Pages Container with 3D Flip Effect */}
+        {/* Book Pages Container with Smooth Animation */}
         <div
-          className={`flex gap-8 max-w-7xl transition-all duration-500 ${isFlipping
-            ? flipDirection === "left"
-              ? "transform-gpu perspective-1000 rotate-y-10 scale-95"
-              : "transform-gpu perspective-1000 -rotate-y-10 scale-95"
-            : "transform-gpu perspective-1000 rotate-y-0 scale-100"
+          className={`flex gap-8 max-w-7xl transition-all duration-200 ease-out ${isFlipping ? "opacity-90 scale-[0.99]" : "opacity-100 scale-100"
             }`}
         >
           {/* Left Page */}
           <div
-            className={`bg-white shadow-2xl rounded-lg overflow-hidden flex items-center justify-center relative transition-all duration-500 ${isFlipping && flipDirection === "right"
-              ? "z-20 shadow-xl"
-              : "z-10"
-              }`}
+            className="bg-white shadow-2xl rounded-lg overflow-hidden flex items-center justify-center relative"
             style={{ minWidth: "450px", minHeight: "600px" }}
           >
             <canvas ref={canvasLeftRef} className="max-w-full max-h-full" />
@@ -1176,10 +1213,7 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
           {/* Right Page */}
           {rightPage <= numPages && (
             <div
-              className={`bg-white shadow-2xl rounded-lg overflow-hidden flex items-center justify-center relative transition-all duration-500 ${isFlipping && flipDirection === "left"
-                ? "z-20 shadow-xl"
-                : "z-10"
-                }`}
+              className="bg-white shadow-2xl rounded-lg overflow-hidden flex items-center justify-center relative"
               style={{ minWidth: "450px", minHeight: "600px" }}
             >
               <canvas ref={canvasRightRef} className="max-w-full max-h-full" />
@@ -1382,24 +1416,7 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
         )}
       </div>
 
-      {/* Add custom CSS for 3D flip effect */}
-      <style jsx>{`
-        .perspective-1000 {
-          perspective: 1000px;
-        }
-        .rotate-y-10 {
-          transform: rotateY(10deg);
-        }
-        .-rotate-y-10 {
-          transform: rotateY(-10deg);
-        }
-        .rotate-y-0 {
-          transform: rotateY(0deg);
-        }
-        .transform-gpu {
-          transform-style: preserve-3d;
-        }
-      `}</style>
+
     </div>
   );
 }
