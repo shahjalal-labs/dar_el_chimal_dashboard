@@ -58,6 +58,7 @@ interface PdfReaderProps {
   pdfUrl: string;
   totalPages?: number;
   isButton?: boolean;
+  useStreaming?: boolean;
 }
 
 interface Highlight {
@@ -92,7 +93,7 @@ type ToolType =
 
 type ColorName = "red" | "green" | "blue" | "purple";
 
-function PdfReader({ pdfUrl, totalPages = 120, isButton }: PdfReaderProps) {
+function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }: PdfReaderProps) {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [zoom, setZoom] = useState<number>(100);
@@ -274,11 +275,22 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton }: PdfReaderProps) {
           // Set worker source
           (pdfjsLib as any).GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
-          const loadingTask = (pdfjsLib as any).getDocument({
+          // Configure PDF loading with streaming support
+          const loadingTaskConfig: any = {
             url: pdfUrl,
             cMapUrl: "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/cmaps/",
             cMapPacked: true,
-          });
+          };
+
+          // Enable chunked loading for streaming
+          if (useStreaming) {
+            loadingTaskConfig.rangeChunkSize = 65536; // 64KB chunks for optimal streaming
+            loadingTaskConfig.disableAutoFetch = true; // Don't fetch entire PDF at once
+            loadingTaskConfig.disableStream = false; // Enable streaming
+            loadingTaskConfig.isEvalSupported = false; // Security best practice
+          }
+
+          const loadingTask = (pdfjsLib as any).getDocument(loadingTaskConfig);
 
           const pdf: PDFDocumentProxy = await loadingTask.promise;
           pdfDocRef.current = pdf;
@@ -295,7 +307,7 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton }: PdfReaderProps) {
     if (pdfUrl) {
       loadPdfJs();
     }
-  }, [pdfUrl]);
+  }, [pdfUrl, useStreaming]);
 
   // Render PDF pages
   const renderPage = useCallback(
