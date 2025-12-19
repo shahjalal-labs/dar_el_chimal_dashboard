@@ -32,6 +32,19 @@ export const bookApi = baseApi.injectEndpoints({
       }),
       providesTags: ["books", "resource"],
     }),
+    //! ------Roton----
+    getPDf : builder.query({
+      query: (fileUrl) => {
+        const encodedUrl = encodeURIComponent(fileUrl);
+        return {
+          url: `/book/test-pdf-reader/${encodedUrl}`,
+          method: "GET",
+          responseHandler: (response) => response.blob(),
+        };
+      }
+    })
+
+    ,
     updateBook: builder.mutation({
       query: ({ bookId, formData }) => ({
         url: `/book/update-book/${bookId}`,
@@ -55,6 +68,7 @@ export const {
   useUploadResourceMutation,
   useGetAllBooksQuery,
   useGetSingleBookQuery,
+  useGetPDfQuery,
   useUpdateBookMutation,
   useDeleteBookMutation,
 } = bookApi;
