@@ -291,6 +291,8 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
           setIsLoading(true);
           setError(null);
 
+          console.log('PdfReader - Loading PDF from URL:', pdfUrl);
+
           // Use dynamic imports with proper typing
           const pdfjsLib = await import("pdfjs-dist/build/pdf");
           const pdfjsWorker = await import("pdfjs-dist/build/pdf.worker.entry");
@@ -303,6 +305,7 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
             url: pdfUrl,
             cMapUrl: "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/cmaps/",
             cMapPacked: true,
+            withCredentials: false,
           };
 
           // Enable chunked loading for streaming
@@ -318,9 +321,27 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
           const pdf: PDFDocumentProxy = await loadingTask.promise;
           pdfDocRef.current = pdf;
           setNumPages(pdf.numPages);
+          console.log('PDF loaded successfully, pages:', pdf.numPages);
         } catch (error) {
           console.error("Error loading PDF:", error);
-          setError("Failed to load PDF. Please check the URL and try again.");
+          
+          let errorMessage = "Failed to load PDF. ";
+          
+          if (error instanceof Error) {
+            if (error.message.includes('500')) {
+              errorMessage += "The server encountered an error while fetching the PDF. Please check the PDF URL and try again.";
+            } else if (error.message.includes('404')) {
+              errorMessage += "The PDF file was not found. Please check if the file exists.";
+            } else if (error.message.includes('403')) {
+              errorMessage += "Access to the PDF is forbidden. Please check permissions.";
+            } else {
+              errorMessage += error.message;
+            }
+          } else {
+            errorMessage += "An unknown error occurred. Please try again.";
+          }
+          
+          setError(errorMessage);
         } finally {
           setIsLoading(false);
         }
@@ -1035,15 +1056,42 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-600">Loading PDF...</div>
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+          <div className="text-gray-600">Loading PDF...</div>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-600">Error: {error}</div>
+      <div className="min-h-screen flex items-center justify-center p-8">
+        <div className="max-w-md text-center">
+          <div className="text-red-600 mb-4">
+            <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <h3 className="text-lg font-semibold mb-2">Error Loading PDF</h3>
+          </div>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <div className="flex gap-2 justify-center">
+            {isButton && (
+              <Button
+                onClick={() => router.back()}
+                variant="outline"
+              >
+                Go Back
+              </Button>
+            )}
+            <Button
+              onClick={() => window.location.reload()}
+              variant="default"
+            >
+              Retry
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
