@@ -72,8 +72,8 @@ const TeacherList = () => {
             ),
             "Full Name": entry?.fullName,
             "User Name": entry?.loginUserName,
-            "School": entry.Teacher[0].grade.school.name,
-            "Status": entry.status,
+            "School": entry?.Teacher[0]?.grade?.school?.name,
+            "Status": entry?.status,
             "Joined At": new Date(entry.joinedAt).toLocaleString('en-US', {
                 year: 'numeric',
                 month: 'short',
