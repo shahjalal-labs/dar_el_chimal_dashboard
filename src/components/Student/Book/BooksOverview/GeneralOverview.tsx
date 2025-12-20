@@ -44,7 +44,7 @@ function GeneralOverview({ bookId }: GeneralOverviewProps) {
     ) || [];
 
   const handleOpenBook = () => {
-    router.push(`/student/books/read?pdfurl=${bookOverviewData?.file}`);
+    router.push(`/student/books/read?pdfurl=${encodeURIComponent(bookOverviewData?.file || '')}`);
   };
 
   const handleBack = () => {
