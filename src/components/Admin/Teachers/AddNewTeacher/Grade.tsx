@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useMemo, useState } from 'react';
+import React, { FormEvent, ReactEventHandler, ReactHTMLElement, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { RootState } from '@/redux/store/store';
@@ -131,7 +131,9 @@ const Grade = () => {
 
     const selectedSchoolIds = useMemo(() => mappings?.filter((m) => m?.school)?.map((m) => m?.school!.schoolId), [mappings]);
 
-    const handleSave = async () => {
+    const handleSave = async (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
         const body = {
             name: teacherName,
             userName: userName,
@@ -153,7 +155,7 @@ const Grade = () => {
             const response = await CreateTeacher(formData).unwrap();
             if (response.success) {
                 toast.success(response.message);
-                route.push('/admin/teachers')
+                route.push('/admin/teachers');
             }
         } catch (error) {
             toast.warning((error as any)?.data?.message || "Something went wrong");

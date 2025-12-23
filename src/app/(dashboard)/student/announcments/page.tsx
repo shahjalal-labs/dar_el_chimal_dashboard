@@ -1,7 +1,7 @@
 "use client";
 
 import { AnnouncementCard } from "@/components/Student/Announcments/AnnouncementCard";
-import { useGetStudentDetailsQuery } from "@/redux/api/student/overviewApi";
+import { useGetStudentBooksQuery } from "@/redux/api/student/overviewApi";
 import { usePathname } from "next/navigation";
 
 interface Announcement {
@@ -21,7 +21,7 @@ export default function AnnouncementPage() {
     data: getAnnouncments,
     isLoading,
     isError,
-  } = useGetStudentDetailsQuery(queryField);
+  } = useGetStudentBooksQuery(queryField);
 
   const announcmentsData: Announcement[] =
     getAnnouncments?.result?.announcments ?? [];

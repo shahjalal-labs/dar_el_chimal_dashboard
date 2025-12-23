@@ -90,11 +90,6 @@ const Grade = () => {
             return;
         }
 
-        if (!email) {
-            toast.warning("Please enter an email address.");
-            return;
-        }
-
         const body = {
             name: studentName,
             userName: studentUserName,
@@ -129,8 +124,7 @@ const Grade = () => {
         }
     };
 
-    const isButtonDisabled =
-        !mappings[0]?.school || !mappings[0]?.grade || !email;
+    const isButtonDisabled = !mappings[0]?.school || !mappings[0]?.grade;
 
     return (
         <form onSubmit={handleSave} className="space-y-6">

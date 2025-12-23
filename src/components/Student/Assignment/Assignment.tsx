@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useGetStudentDetailsQuery } from "@/redux/api/student/overviewApi";
+import { useGetStudentBooksQuery } from "@/redux/api/student/overviewApi";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -26,7 +26,7 @@ export default function Assignment() {
   const pathname = usePathname();
   const queryField = pathname.split("/").pop();
 
-  const { data: getAssignment, refetch } = useGetStudentDetailsQuery(queryField);
+  const { data: getAssignment, refetch } = useGetStudentBooksQuery(queryField);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const assignmentData: Assignment[] = getAssignment?.result?.assignments ?? [];
 
@@ -236,10 +236,10 @@ export default function Assignment() {
               onClick={() => typeof page === "number" && setCurrentPage(page)}
               disabled={page === "..."}
               className={`h-10 w-10 rounded-lg font-medium transition-colors ${page === currentPage
-                  ? "bg-[#1E3A8A] text-white"
-                  : page === "..."
-                    ? "cursor-default text-gray-600"
-                    : "border border-gray-300 text-gray-700 hover:bg-gray-50"
+                ? "bg-[#1E3A8A] text-white"
+                : page === "..."
+                  ? "cursor-default text-gray-600"
+                  : "border border-gray-300 text-gray-700 hover:bg-gray-50"
                 }`}
             >
               {page}

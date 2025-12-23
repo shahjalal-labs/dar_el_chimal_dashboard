@@ -4,7 +4,7 @@ import defaultImg from "@/assets/no-img.jpg";
 import DataTable from "@/components/Common/DataTable";
 import { Button } from "@/components/ui/button";
 import Pagination from "@/components/ui/pagination";
-import { useGetStudentDetailsQuery } from "@/redux/api/student/overviewApi";
+import { useGetStudentBooksQuery } from "@/redux/api/student/overviewApi";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -14,7 +14,7 @@ const BookList = () => {
   const queryField = pathname.split("/").pop();
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { data, isLoading } = useGetStudentDetailsQuery(queryField);
+  const { data, isLoading } = useGetStudentBooksQuery(queryField);
 
   const formattedData = data?.result?.books?.map(
     (entry: {

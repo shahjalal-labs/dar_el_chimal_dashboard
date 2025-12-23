@@ -9,7 +9,7 @@ export const AuthApi = baseApi.injectEndpoints({
       }),
     }),
 
-    getStudentDetails: builder.query({
+    getStudentBooks: builder.query({
       query: (queryField) => ({
         url: `/student/grade-details?queryField=${queryField}`,
         method: "GET",
@@ -26,6 +26,6 @@ export const AuthApi = baseApi.injectEndpoints({
 
 export const {
   useGetStudentOverviewQuery,
-  useGetStudentDetailsQuery,
+  useGetStudentBooksQuery,
   useGetAnnouncementDetailsQuery,
 } = AuthApi;
