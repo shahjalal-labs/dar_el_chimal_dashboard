@@ -2,37 +2,57 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { messaging } from "@/lib/firebase";
 import { useLoginMutation, useStudentLoginMutation } from "@/redux/api/authApi";
 import { setUserToken } from "@/redux/features/authSlice";
 import { AppDispatch } from "@/redux/store/store";
 import { LoadingOutlined } from "@ant-design/icons";
-import { Alert, Spin } from "antd";
+import { Alert, Modal, Spin } from "antd";
+import { getToken, Messaging } from "firebase/messaging";
 import Cookies from "js-cookie";
 import { Bell, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
 import { FaRegUser } from "react-icons/fa";
 import { LuLockKeyhole } from "react-icons/lu";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 import LeftSide from "./LeftSide";
-import { messaging } from "@/lib/firebase";
-import { Modal } from "antd";
-import { getToken, Messaging } from "firebase/messaging";
 
 const customIcon = (
   <LoadingOutlined style={{ fontSize: 24, color: "#fff" }} spin />
 );
 
+const isNotificationSupported = () => {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  return (
+    "Notification" in window &&
+    "serviceWorker" in navigator &&
+    "PushManager" in window
+  );
+};
+
 const requestPermission = async () => {
+  if (!isNotificationSupported()) {
+    throw new Error("Notifications are not supported on this device/browser");
+  }
+
   const permission = await Notification.requestPermission();
   if (permission === "granted") {
     try {
+      if (!messaging) {
+        throw new Error("Messaging service is unavailable");
+      }
+
       const token = await getToken(messaging as Messaging, {
-        vapidKey: "BE2GwQzKBZKyQUNC-QLCNXQY1pg_WfnlHyltdlT6EFaxdRi1mbEzowoUQd9k2Xx3fUw-CVH-9_9Qpv3EuGUOYjs",
+        vapidKey:
+          "BE2GwQzKBZKyQUNC-QLCNXQY1pg_WfnlHyltdlT6EFaxdRi1mbEzowoUQd9k2Xx3fUw-CVH-9_9Qpv3EuGUOYjs",
       });
       return token;
     } catch (err) {
@@ -54,10 +74,13 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [notificationModalVisible, setNotificationModalVisible] = useState(false);
+  const [notificationModalVisible, setNotificationModalVisible] =
+    useState(false);
   const [notificationEnabled, setNotificationEnabled] = useState(false);
   const [fcmToken, setFcmToken] = useState<string | null>(null);
-  const [notificationStatus, setNotificationStatus] = useState<"pending" | "granted" | "denied" | "skipped">("pending");
+  const [notificationStatus, setNotificationStatus] = useState<
+    "pending" | "granted" | "denied" | "skipped"
+  >("pending");
 
   const route = useRouter();
   const dispatch = useDispatch<AppDispatch>();
@@ -67,6 +90,13 @@ export default function Login() {
   const [studentLoginFn] = useStudentLoginMutation();
 
   useEffect(() => {
+    if (!isNotificationSupported()) {
+      setNotificationEnabled(false);
+      setNotificationStatus("skipped");
+      setNotificationModalVisible(false);
+      return;
+    }
+
     if (Notification.permission === "default") {
       setNotificationModalVisible(true);
       setNotificationStatus("pending");
@@ -81,8 +111,14 @@ export default function Login() {
 
   const getFcmToken = async () => {
     try {
+      if (!isNotificationSupported() || !messaging) {
+        setFcmToken(null);
+        return null;
+      }
+
       const token = await getToken(messaging as Messaging, {
-        vapidKey: "BM5LMmA2cx23HK13GdLZqkQEGz0wl7-NszqL6q08D1RnfCuKnkhExvQvPs64VVkVjUgME36mLbpXWpEFFpFEgnM",
+        vapidKey:
+          "BM5LMmA2cx23HK13GdLZqkQEGz0wl7-NszqL6q08D1RnfCuKnkhExvQvPs64VVkVjUgME36mLbpXWpEFFpFEgnM",
       });
       setFcmToken(token);
       return token;
@@ -107,7 +143,7 @@ export default function Login() {
       setFcmToken(null);
       setNotificationStatus("denied");
       toast.error(
-        "Failed to enable notifications. Please check your browser settings."
+        "Failed to enable notifications. Please check your browser settings.",
       );
     } finally {
       setNotificationModalVisible(false);
@@ -193,7 +229,10 @@ export default function Login() {
         toast.error(response?.data?.message || "Login failed!");
       }
     } catch (error) {
-      toast.error((error as any)?.data?.message || "Something went wrong. Please try again.");
+      toast.error(
+        (error as any)?.data?.message ||
+          "Something went wrong. Please try again.",
+      );
     }
   };
 
@@ -235,13 +274,17 @@ export default function Login() {
           <div className="flex items-start gap-3 bg-blue-50 p-3 rounded-md">
             <Bell className="h-5 w-5 text-[#54BB52] mt-0.5 flex-shrink-0" />
             <div>
-              <p className="text-sm font-medium text-[#54BB52]">What to expect:</p>
+              <p className="text-sm font-medium text-[#54BB52]">
+                What to expect:
+              </p>
               <ul className="text-xs text-[#54BB52] mt-1 list-disc pl-4">
                 <li>Important account notifications</li>
               </ul>
             </div>
           </div>
-          <p className="text-xs text-gray-500 mt-3">You can not get notify for any notification.</p>
+          <p className="text-xs text-gray-500 mt-3">
+            You can not get notify for any notification.
+          </p>
         </div>
       </Modal>
 
@@ -335,8 +378,9 @@ export default function Login() {
                     name="rememberMe"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className={`${rememberMe ? "accent-[#1E3A8A]" : "accent-white"
-                      } h-5 w-5`}
+                    className={`${
+                      rememberMe ? "accent-[#1E3A8A]" : "accent-white"
+                    } h-5 w-5`}
                   />
                   <Label
                     htmlFor="remember-me"
