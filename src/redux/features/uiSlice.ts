@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface UiState {
-    activeBookTab: "general" | "resources" | "grade";
+    activeBookTab: "general" | "resources" | "grade" | "assign";
 }
 
 const initialState: UiState = {
