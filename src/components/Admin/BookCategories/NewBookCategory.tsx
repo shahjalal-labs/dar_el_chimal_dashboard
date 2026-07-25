@@ -60,7 +60,7 @@ const NewBookCategory = () => {
 
         try {
             const response = await CreateCategory(body).unwrap();
-            console.log(body);
+       
             if (response.success) {
 
                 toast.success(response.message);

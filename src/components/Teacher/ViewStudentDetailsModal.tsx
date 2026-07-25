@@ -31,7 +31,7 @@ const ViewStudentDetailsModal = ({ id }: { id: string }) => {
         );
     }
 
-    const { loginUserName, email, profileImage, role, status, joinedAt, StudentGrades, assignments } = student;
+    const { loginUserName, email, profileImage, role, fullName, status, joinedAt, StudentGrades, assignments } = student;
 
     const studentGrade = StudentGrades?.[0]?.grade?.grade ?? "N/A";
     const school = StudentGrades?.[0]?.grade?.school;
@@ -49,7 +49,7 @@ const ViewStudentDetailsModal = ({ id }: { id: string }) => {
                     priority
                 />
                 <div>
-                    <h2 className="text-lg font-semibold">{loginUserName}</h2>
+                    <h2 className="text-lg font-semibold">{fullName}</h2>
                     <p className="text-sm text-gray-600">{email}</p>
                     <p className="text-sm text-gray-600">
                         <span className="font-medium">Role:</span> {role}

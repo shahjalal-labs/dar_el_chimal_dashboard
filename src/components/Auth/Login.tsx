@@ -174,6 +174,7 @@ export default function Login() {
 
         const response = await studentLoginFn(studentBody).unwrap();
         const token = response?.result?.accessToken;
+        
 
         if (response.success) {
           toast.success(response.message);
@@ -193,6 +194,7 @@ export default function Login() {
         };
 
         const response = await studentLoginFn(studentBody).unwrap();
+        
         const token = response?.result?.accessToken;
 
         if (response.success) {

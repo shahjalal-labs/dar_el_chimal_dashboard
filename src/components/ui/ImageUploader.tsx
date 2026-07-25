@@ -53,7 +53,7 @@ export function ImageUploader() {
     try {
       const formData = new FormData();
       files.forEach((file) => {
-        formData.append("avatar", file);
+        formData.append("profileImage", file);
       });
       const body = formData;
       const res = await uploadImage(body).unwrap();

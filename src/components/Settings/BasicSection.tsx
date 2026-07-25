@@ -78,8 +78,8 @@ const BasicSection = () => {
             const body = {
                 fullName: profile?.fullName,
                 phone: profile?.phone,
-                // gender: profile?.gender,
-                // DOB: profile?.DOB,
+                gender: profile?.gender,
+                DOB: profile?.DOB,
             }
 
             const response = await updateMyProfile(body).unwrap();
@@ -196,9 +196,8 @@ const BasicSection = () => {
                                                 <ChevronDownIcon />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="MALE">Male</SelectItem>
-                                                <SelectItem value="FEMALE">Female</SelectItem>
-                                                <SelectItem value="OTHER">Other</SelectItem>
+                                                <SelectItem value="Male">Male</SelectItem>
+                                                <SelectItem value="Female">Female</SelectItem>                                           
                                             </SelectContent>
                                         </Select>
                                     </div>

@@ -291,7 +291,7 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
           setIsLoading(true);
           setError(null);
 
-          console.log('PdfReader - Loading PDF from URL:', pdfUrl);
+       
 
           // Use dynamic imports with proper typing
           const pdfjsLib = await import("pdfjs-dist/build/pdf");
@@ -321,7 +321,7 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
           const pdf: PDFDocumentProxy = await loadingTask.promise;
           pdfDocRef.current = pdf;
           setNumPages(pdf.numPages);
-          console.log('PDF loaded successfully, pages:', pdf.numPages);
+       
         } catch (error) {
           console.error("Error loading PDF:", error);
           

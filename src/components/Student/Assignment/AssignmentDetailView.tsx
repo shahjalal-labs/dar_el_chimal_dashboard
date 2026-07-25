@@ -3,6 +3,13 @@ import { Button } from "@/components/ui/button";
 import { useGetassignmentDetailsQuery } from "@/redux/api/student/assignmentApi";
 import { ChevronLeft } from "lucide-react";
 import Image from "next/image";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface AssignmentDetailViewProps {
   assignments: {
@@ -26,7 +33,9 @@ export function AssignmentDetailView({
   const id = assignments?.id;
   const { data: assingmentDetails } = useGetassignmentDetailsQuery(id);
 
+
   const assignment = assingmentDetails?.result?.assignment;
+  
   const answer = assingmentDetails?.result?.answer;
   const isGraded = answer?.status === "Graded";
 
@@ -107,9 +116,42 @@ export function AssignmentDetailView({
         </div>
 
         {/* Open Books Button */}
-        <Button className="mb-8 w-full rounded-lg border border-gray-300 bg-white py-3 font-medium text-blue-600 hover:bg-gray-50">
-          Open Book
-        </Button>
+        {(assignment?.bookData?.bookPdf || assignment?.bookData?.coverImg) ? (
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button className="mb-8 w-full rounded-lg border border-gray-300 bg-white py-3 font-medium text-blue-600 hover:bg-gray-50">
+                Open Book
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-5xl h-[85vh] flex flex-col p-6" showCloseButton={true}>
+              <DialogHeader>
+                <DialogTitle>{assignment?.bookData?.bookName || "Book"}</DialogTitle>
+              </DialogHeader>
+              <div className="flex-1 w-full mt-4 overflow-hidden flex items-center justify-center bg-gray-100 rounded-md border">
+                {(assignment?.bookData?.bookPdf || assignment?.bookData?.coverImg)?.toLowerCase().endsWith(".pdf") ? (
+                  <iframe
+                    src={assignment?.bookData?.bookPdf || assignment?.bookData?.coverImg}
+                    className="w-full h-full"
+                    title="Book PDF"
+                  />
+                ) : (
+                  <div className="relative w-full h-full">
+                    <Image
+                      src={assignment?.bookData?.bookPdf || assignment?.bookData?.coverImg}
+                      alt="Book Cover"
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
+        ) : (
+          <Button disabled className="mb-8 w-full rounded-lg border border-gray-300 bg-white py-3 font-medium text-gray-400">
+            Book Not Available
+          </Button>
+        )}
       </div>
 
       {/* Answer Section */}

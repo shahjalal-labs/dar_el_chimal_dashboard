@@ -26,6 +26,7 @@ import { TbCategoryPlus } from "react-icons/tb";
 import { TfiAngleDown, TfiAngleUp, TfiAnnouncement } from "react-icons/tfi";
 import { useDispatch, useSelector } from "react-redux";
 import { Button } from "../ui/button";
+import { useGetMyProfileQuery } from "@/redux/api/settingsApi";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -37,7 +38,10 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
   const path = usePathname();
   const dispatch = useDispatch();
   const [showDropdown, setShowDropdown] = useState(false);
-  const { id, assignmentId, assignmentProgressId, announcmentId, bookId, resourceId } = useParams();
+  const { assignmentId, assignmentProgressId, announcmentId, bookId, resourceId } = useParams();
+     const { data: profileData } = useGetMyProfileQuery(undefined);
+     const id = profileData?.result?.gradeId
+
   const authState = useSelector((state: any) => state.auth.role);
 
   const navigation = [
@@ -78,7 +82,7 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
           },
           {
             label: "Book",
-            route: `/teacher/classes/books/${id}`,
+            route: `/teacher/classes/books/${id || 'all'}`,
             iconPath: <LuBookOpenText className="w-5 lg:w-6 h-5 lg:h-6" />,
           },
         ]
@@ -195,10 +199,10 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
                         ) && (item.label === "Book Management" || item.label === "Classes") ?
                           "bg-[#1E3A8A] text-white" :
                           (
-                            path === `/teacher/classes/books/${id}` ||
-                            path === `/teacher/classes/books/${id}/${bookId}` ||
-                            path === `/teacher/classes/books/${id}/${bookId}/pdf` ||
-                            path === `/teacher/classes/books/${id}/${bookId}/${resourceId}`
+                            path === `/teacher/classes/books/${id || 'all'}` ||
+                            path === `/teacher/classes/books/${id || 'all'}/${bookId}` ||
+                            path === `/teacher/classes/books/${id || 'all'}/${bookId}/pdf` ||
+                            path === `/teacher/classes/books/${id || 'all'}/${bookId}/${resourceId}`
                           ) && (item.label === "Book") ?
                             "bg-[#1E3A8A] text-white" :
                             (

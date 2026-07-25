@@ -9,6 +9,7 @@ export const AuthApi = baseApi.injectEndpoints({
         method: "POST",
         body: body,
       }),
+      invalidatesTags: ["profile"],
     }),
     studentLogin: builder.mutation({
       query: (body) => ({
@@ -16,6 +17,7 @@ export const AuthApi = baseApi.injectEndpoints({
         method: "POST",
         body: body,
       }),
+      invalidatesTags: ["profile"],
     }),
     forgotPassword: builder.mutation({
       query: (body) => {

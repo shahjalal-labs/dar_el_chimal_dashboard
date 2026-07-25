@@ -16,6 +16,8 @@ const Assignments = () => {
     const { id } = useParams();
     const { data } = useGetAllAssignmentsByTeacherQuery(id)
 
+   
+
     return (
         <div>
             <Button onClick={() => route.back()} className='mb-6 bg-white/80 text-black hover:text-white cursor-pointer'><TfiAngleLeft />Back</Button>

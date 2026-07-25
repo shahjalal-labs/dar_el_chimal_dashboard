@@ -119,8 +119,8 @@ export const overviewApi = baseApi.injectEndpoints({
             providesTags: ["teacher", "books"]
         }),
         getAllBooksForTeacher: builder.query({
-            query: (currentPage) => ({
-                url: `/book/for-teacher?page=${currentPage}`,
+            query: ({currentPage, limit}) => ({
+                url: `/book/for-teacher?page=${currentPage}&limit=${limit}`,
                 method: "GET",
             }),
             providesTags: ["teacher", "books"]
