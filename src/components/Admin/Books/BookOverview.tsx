@@ -93,50 +93,54 @@ const BookOverview = () => {
           {/* General Tab */}
           <TabsContent value="general">
             <div className="space-y-5">
-              {/* Cover Image */}
-              <div className="w-full">
-                <Image
-                  src={book?.coverImg}
-                  alt={book?.bookName || "Book Cover"}
-                  height={1000}
-                  width={2000}
-                  className="w-full h-full xl:h-[400px] object-cover rounded-lg border"
-                  priority
-                />
-              </div>
+              {/* Cover Image */}              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="col-span-1 border-r w-full xl:h-[400px] flex items-center justify-center overflow-hidden ">
+                  <Image
+                    src={book?.coverImg}
+                    alt={book?.bookName || "Book Cover"}
+                    height={1000}
+                    width={750}
+                    className="h-full w-auto rounded-[9px] object-contain"
+                    priority
+                  />
+                </div>
 
-              {/* Book Info */}
-              <div>
-                <h2 className="text-2xl xl:text-3xl font-bold">
-                  {book?.bookName}
-                </h2>
-                <p className="text-[#4C4C4C] text-xl xl:text-2xl mt-4">
-                  {book?.category?.name}
-                </p>
-              </div>
-
-              {/* Book Meta */}
-              <div className="bg-[#F7F9FF] rounded-xl">
-                <div className="p-6 w-full max-w-sm xl:text-xl">
-                  <div className="flex justify-between py-1">
-                    <span className="font-semibold">Author:</span>
-                    <span className="text-[#636F85]">{book?.author}</span>
-                  </div>
-                  <div className="flex justify-between py-1">
-                    <span className="font-semibold">Category:</span>
-                    <span className="text-[#636F85]">
+                <div className="col-span-1 lg:col-span-2">
+                  {/* Book Info */}
+                  <div>
+                    <h2 className="text-2xl xl:text-3xl font-bold">
+                      {book?.bookName}
+                    </h2>
+                    <p className="text-[#4C4C4C] text-xl xl:text-2xl mt-4">
                       {book?.category?.name}
-                    </span>
+                    </p>
                   </div>
-                  <div className="flex justify-between py-1">
-                    <span className="font-semibold">ISBN:</span>
-                    <span className="text-[#636F85]">{book?.ISBN}</span>
-                  </div>
-                  <div className="flex justify-between py-1">
-                    <span className="font-semibold">Created At:</span>
-                    <span className="text-[#636F85]">
-                      {new Date(book?.createdAt).toLocaleDateString()}
-                    </span>
+
+                  {/* Book Meta */}
+                  <div className="bg-[#F7F9FF] rounded-xl">
+                    <div className="p-6 w-full max-w-sm xl:text-xl">
+                      <div className="flex justify-between py-1">
+                        <span className="font-semibold">Author:</span>
+                        <span className="text-[#636F85]">{book?.author}</span>
+                      </div>
+                      <div className="flex justify-between py-1">
+                        <span className="font-semibold">Category:</span>
+                        <span className="text-[#636F85]">
+                          {book?.category?.name}
+                        </span>
+                      </div>
+                      <div className="flex justify-between py-1">
+                        <span className="font-semibold">ISBN:</span>
+                        <span className="text-[#636F85]">{book?.ISBN}</span>
+                      </div>
+                      <div className="flex justify-between py-1">
+                        <span className="font-semibold">Created At:</span>
+                        <span className="text-[#636F85]">
+                          {new Date(book?.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

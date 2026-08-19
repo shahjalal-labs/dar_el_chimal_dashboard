@@ -9,6 +9,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Copy,
+  Loader2,
   MessageSquare,
   Search,
   Underline,
@@ -31,6 +32,7 @@ interface PDFPageProxy {
 interface PDFPageViewport {
   width: number;
   height: number;
+  convertToViewportRectangle: (rectangle: number[]) => number[];
 }
 
 interface PDFDocumentProxy {
@@ -93,12 +95,17 @@ type ToolType =
 
 type ColorName = "red" | "green" | "blue" | "purple";
 
-function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }: PdfReaderProps) {
+function PdfReader({
+  pdfUrl,
+  totalPages = 120,
+  isButton,
+  useStreaming = false,
+}: PdfReaderProps) {
   const router = useRouter();
-  
+
   // Initialize currentPage from localStorage if available
   const [currentPage, setCurrentPage] = useState<number>(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       const savedPage = localStorage.getItem(`pdf-current-page-${pdfUrl}`);
       if (savedPage) {
         const pageNum = parseInt(savedPage, 10);
@@ -109,7 +116,7 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
     }
     return 1;
   });
-  
+
   const [zoom, setZoom] = useState<number>(100);
   const [selectedColor, setSelectedColor] = useState<ColorName>("red");
   const [selectedTool, setSelectedTool] = useState<ToolType>(null);
@@ -124,10 +131,16 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
   const overlayRightRef = useRef<HTMLCanvasElement>(null);
   const pdfDocRef = useRef<PDFDocumentProxy | null>(null);
 
-  const [highlights, setHighlights] = useState<{ [key: number]: Highlight[] }>({});
-  const [underlines, setUnderlines] = useState<{ [key: number]: Highlight[] }>({});
+  const [highlights, setHighlights] = useState<{ [key: number]: Highlight[] }>(
+    {},
+  );
+  const [underlines, setUnderlines] = useState<{ [key: number]: Highlight[] }>(
+    {},
+  );
   const [comments, setComments] = useState<{ [key: number]: Highlight[] }>({});
-  const [bookmarks, setBookmarks] = useState<{ [key: number]: Highlight[] }>({});
+  const [bookmarks, setBookmarks] = useState<{ [key: number]: Highlight[] }>(
+    {},
+  );
   const [isSelecting, setIsSelecting] = useState<boolean>(false);
   const [selectionStart, setSelectionStart] = useState<{
     x: number;
@@ -146,7 +159,11 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
   const [historyIndex, setHistoryIndex] = useState<number>(-1);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [showSearchBar, setShowSearchBar] = useState<boolean>(false);
-  const [searchResults, setSearchResults] = useState<{ [key: number]: Highlight[] }>({});
+  const [searchResults, setSearchResults] = useState<{
+    [key: number]: Highlight[];
+  }>({});
+  const [searchResultIndex, setSearchResultIndex] = useState<number>(0);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
   const [copiedText, setCopiedText] = useState<string>("");
   const [showCommentPopup, setShowCommentPopup] = useState<boolean>(false);
   const [showBookmarkPopup, setShowBookmarkPopup] = useState<boolean>(false);
@@ -154,9 +171,16 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
   const [bookmarkName, setBookmarkName] = useState<string>("");
   const [selectedText, setSelectedText] = useState<string>("");
   const [isFlipping, setIsFlipping] = useState<boolean>(false);
-  const [flipDirection, setFlipDirection] = useState<"left" | "right" | null>(null);
+  const [flipDirection, setFlipDirection] = useState<"left" | "right" | null>(
+    null,
+  );
   const renderingPagesRef = useRef<Set<number>>(new Set());
   const renderedPagesRef = useRef<Set<number>>(new Set());
+  const searchRequestRef = useRef(0);
+
+  const flattenedSearchResults = Object.entries(searchResults)
+    .sort(([pageA], [pageB]) => Number(pageA) - Number(pageB))
+    .flatMap(([, pageResults]) => pageResults);
 
   // Load bookmarks from localStorage on component mount
   useEffect(() => {
@@ -179,7 +203,10 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
   // Save current page to localStorage whenever it changes
   useEffect(() => {
     if (currentPage > 0) {
-      localStorage.setItem(`pdf-current-page-${pdfUrl}`, currentPage.toString());
+      localStorage.setItem(
+        `pdf-current-page-${pdfUrl}`,
+        currentPage.toString(),
+      );
     }
   }, [currentPage, pdfUrl]);
 
@@ -194,7 +221,7 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
       newHighlights: { [key: number]: Highlight[] },
       newUnderlines: { [key: number]: Highlight[] },
       newComments: { [key: number]: Highlight[] },
-      newBookmarks: { [key: number]: Highlight[] }
+      newBookmarks: { [key: number]: Highlight[] },
     ) => {
       const newHistory = history.slice(0, historyIndex + 1);
       newHistory.push({
@@ -206,7 +233,7 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
       setHistory(newHistory);
       setHistoryIndex(newHistory.length - 1);
     },
-    [history, historyIndex]
+    [history, historyIndex],
   );
 
   // Extract text from PDF selection
@@ -215,7 +242,7 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
     x: number,
     y: number,
     width: number,
-    height: number
+    height: number,
   ): Promise<string> => {
     if (!pdfDocRef.current) return "";
 
@@ -254,7 +281,7 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
           const isInY = itemY <= pdfY && itemY >= pdfY - pdfHeight;
 
           return isInX && isInY;
-        }
+        },
       );
 
       // Sort text items by position (top to bottom, left to right)
@@ -291,8 +318,6 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
           setIsLoading(true);
           setError(null);
 
-       
-
           // Use dynamic imports with proper typing
           const pdfjsLib = await import("pdfjs-dist/build/pdf");
           const pdfjsWorker = await import("pdfjs-dist/build/pdf.worker.entry");
@@ -321,26 +346,28 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
           const pdf: PDFDocumentProxy = await loadingTask.promise;
           pdfDocRef.current = pdf;
           setNumPages(pdf.numPages);
-       
         } catch (error) {
           console.error("Error loading PDF:", error);
-          
+
           let errorMessage = "Failed to load PDF. ";
-          
+
           if (error instanceof Error) {
-            if (error.message.includes('500')) {
-              errorMessage += "The server encountered an error while fetching the PDF. Please check the PDF URL and try again.";
-            } else if (error.message.includes('404')) {
-              errorMessage += "The PDF file was not found. Please check if the file exists.";
-            } else if (error.message.includes('403')) {
-              errorMessage += "Access to the PDF is forbidden. Please check permissions.";
+            if (error.message.includes("500")) {
+              errorMessage +=
+                "The server encountered an error while fetching the PDF. Please check the PDF URL and try again.";
+            } else if (error.message.includes("404")) {
+              errorMessage +=
+                "The PDF file was not found. Please check if the file exists.";
+            } else if (error.message.includes("403")) {
+              errorMessage +=
+                "Access to the PDF is forbidden. Please check permissions.";
             } else {
               errorMessage += error.message;
             }
           } else {
             errorMessage += "An unknown error occurred. Please try again.";
           }
-          
+
           setError(errorMessage);
         } finally {
           setIsLoading(false);
@@ -357,14 +384,14 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
   const renderPage = useCallback(
     async (
       pageNum: number,
-      canvasRef: React.RefObject<HTMLCanvasElement | null>
+      canvasRef: React.RefObject<HTMLCanvasElement | null>,
     ): Promise<void> => {
       if (!pdfDocRef.current || !canvasRef.current) return;
       if (pageNum < 1 || pageNum > numPages) return;
-      
+
       // Check if already rendering this page
       if (renderingPagesRef.current.has(pageNum)) return;
-      
+
       // Mark as rendering
       renderingPagesRef.current.add(pageNum);
 
@@ -372,7 +399,7 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
         const page: PDFPageProxy = await pdfDocRef.current.getPage(pageNum);
         const canvas = canvasRef.current;
         if (!canvas) return;
-        
+
         const context = canvas.getContext("2d");
 
         if (!context) {
@@ -391,7 +418,7 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
         };
 
         await page.render(renderContext).promise;
-        
+
         // Mark as successfully rendered
         renderedPagesRef.current.add(pageNum);
       } catch (error) {
@@ -401,13 +428,13 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
         renderingPagesRef.current.delete(pageNum);
       }
     },
-    [zoom, numPages]
+    [zoom, numPages],
   );
 
   const drawAnnotations = useCallback(
     (
       pageNum: number,
-      overlayRef: React.RefObject<HTMLCanvasElement | null>
+      overlayRef: React.RefObject<HTMLCanvasElement | null>,
     ): void => {
       if (!overlayRef.current) return;
 
@@ -442,7 +469,7 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
           highlight.x,
           highlight.y,
           highlight.width,
-          highlight.height
+          highlight.height,
         );
       });
 
@@ -462,7 +489,7 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
         context.moveTo(underline.x, underline.y + underline.height);
         context.lineTo(
           underline.x + underline.width,
-          underline.y + underline.height
+          underline.y + underline.height,
         );
         context.stroke();
       });
@@ -475,7 +502,7 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
           bookmark.x,
           bookmark.y,
           bookmark.width,
-          bookmark.height
+          bookmark.height,
         );
 
         // Bookmark icon
@@ -509,7 +536,7 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
           comment.y + 5,
           5,
           0,
-          2 * Math.PI
+          2 * Math.PI,
         );
         context.fill();
 
@@ -528,7 +555,11 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
       // Draw search results
       const pageSearchResults = searchResults[pageNum] || [];
       pageSearchResults.forEach((result) => {
-        context.fillStyle = "rgba(255, 255, 0, 0.4)";
+        const isActive =
+          flattenedSearchResults[searchResultIndex]?.id === result.id;
+        context.fillStyle = isActive
+          ? "rgba(255, 165, 0, 0.65)"
+          : "rgba(255, 255, 0, 0.4)";
         context.fillRect(result.x, result.y, result.width, result.height);
       });
 
@@ -546,7 +577,7 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
           currentSelection.x,
           currentSelection.y,
           currentSelection.width,
-          currentSelection.height
+          currentSelection.height,
         );
       }
     },
@@ -556,10 +587,12 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
       comments,
       bookmarks,
       searchResults,
+      flattenedSearchResults,
+      searchResultIndex,
       currentSelection,
       currentPage,
       selectedColor,
-    ]
+    ],
   );
 
   // Render pages when current page or zoom changes
@@ -598,7 +631,7 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
 
   const handleMouseDown = (
     e: React.MouseEvent<HTMLCanvasElement>,
-    pageNum: number
+    pageNum: number,
   ): void => {
     if (selectedTool === "eraser") {
       // Handle eraser tool
@@ -635,7 +668,7 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
   const removeAnnotationAtPosition = (
     x: number,
     y: number,
-    pageNum: number
+    pageNum: number,
   ) => {
     const checkAnnotation = (annotations: Highlight[]) => {
       return annotations.filter(
@@ -645,7 +678,7 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
             x <= annotation.x + annotation.width &&
             y >= annotation.y &&
             y <= annotation.y + annotation.height
-          )
+          ),
       );
     };
 
@@ -676,7 +709,7 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
 
   const handleMouseMove = (
     e: React.MouseEvent<HTMLCanvasElement>,
-    pageNum: number
+    pageNum: number,
   ): void => {
     if (!isSelecting || !selectionStart || !selectedTool) return;
 
@@ -701,13 +734,13 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
     // Update overlay
     drawAnnotations(
       pageNum,
-      pageNum === currentPage ? overlayLeftRef : overlayRightRef
+      pageNum === currentPage ? overlayLeftRef : overlayRightRef,
     );
   };
 
   const handleMouseUp = async (
     e: React.MouseEvent<HTMLCanvasElement>,
-    pageNum: number
+    pageNum: number,
   ): Promise<void> => {
     if (selectedTool === "eraser") {
       setIsSelecting(false);
@@ -741,7 +774,7 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
           startX,
           startY,
           width,
-          height
+          height,
         );
       }
 
@@ -862,12 +895,12 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
         } else {
           // Other browsers - show instructions
           alert(
-            `To bookmark this PDF:\n1. Press Ctrl+D (Cmd+D on Mac)\n2. Name: ${name}\n3. URL: ${pdfUrl}\n4. Click "Save"`
+            `To bookmark this PDF:\n1. Press Ctrl+D (Cmd+D on Mac)\n2. Name: ${name}\n3. URL: ${pdfUrl}\n4. Click "Save"`,
           );
         }
       } catch (error) {
         alert(
-          `Bookmark this PDF:\nName: ${name}\nURL: ${pdfUrl}\n\nYou can copy this URL and add it to your bookmarks manually.`
+          `Bookmark this PDF:\nName: ${name}\nURL: ${pdfUrl}\n\nYou can copy this URL and add it to your bookmarks manually.`,
         );
       }
     }
@@ -933,16 +966,16 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
 
   const handlePageChangeWithAnimation = (
     newPage: number,
-    direction: "left" | "right"
+    direction: "left" | "right",
   ) => {
     if (isFlipping) return; // Prevent rapid clicks causing shake
-    
+
     setIsFlipping(true);
     setFlipDirection(direction);
-    
+
     // Immediately change page
     setCurrentPage(newPage);
-    
+
     // Short animation duration
     setTimeout(() => {
       setIsFlipping(false);
@@ -960,7 +993,7 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
     if (currentPage < numPages - 1 && !isFlipping) {
       handlePageChangeWithAnimation(
         Math.min(numPages - 1, currentPage + 2),
-        "left"
+        "left",
       );
     }
   };
@@ -999,31 +1032,107 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
     }
   };
 
-  const handleSearch = (query: string): void => {
+  const handleSearch = async (query: string): Promise<void> => {
     setSearchQuery(query);
+    const requestId = ++searchRequestRef.current;
+
     if (query.trim() === "") {
+      setIsSearching(false);
       setSearchResults({});
+      setSearchResultIndex(0);
+      return;
+    }
+
+    setIsSearching(true);
+
+    if (!pdfDocRef.current) {
+      setIsSearching(false);
       return;
     }
 
     const results: { [key: number]: Highlight[] } = {};
-    // Simulate search results - in a real app, you'd extract text from PDF
-    for (let page = 1; page <= numPages; page++) {
-      if (query.toLowerCase().includes("example") || Math.random() > 0.7) {
-        results[page] = [
-          {
-            id: `search-${page}`,
-            x: 50 + Math.random() * 300,
-            y: 100 + Math.random() * 300,
-            width: 150,
-            height: 20,
+    const normalizedQuery = query.trim().toLocaleLowerCase();
+
+    for (let pageNumber = 1; pageNumber <= numPages; pageNumber += 1) {
+      const page = await pdfDocRef.current.getPage(pageNumber);
+      const viewport = page.getViewport({ scale: (zoom / 100) * 1.5 });
+      const textContent = await page.getTextContent();
+      const pageResults: Highlight[] = [];
+
+      textContent.items.forEach((item: PDFTextItem, itemIndex: number) => {
+        const text = item.str || "";
+        const lowerText = text.toLocaleLowerCase();
+        let matchStart = lowerText.indexOf(normalizedQuery);
+
+        while (matchStart !== -1) {
+          const matchEnd = matchStart + normalizedQuery.length;
+          const itemX = item.transform[4] || 0;
+          const itemY = item.transform[5] || 0;
+          const itemWidth = item.width || 0;
+          const itemHeight = item.height || Math.abs(item.transform[3] || 10);
+          const startX = itemX + itemWidth * (matchStart / text.length);
+          const endX = itemX + itemWidth * (matchEnd / text.length);
+          const rectangle = viewport.convertToViewportRectangle([
+            startX,
+            itemY,
+            endX,
+            itemY + itemHeight,
+          ]);
+          const x = Math.min(rectangle[0], rectangle[2]);
+          const y = Math.min(rectangle[1], rectangle[3]);
+
+          pageResults.push({
+            id: `search-${pageNumber}-${itemIndex}-${matchStart}`,
+            x,
+            y,
+            width: Math.abs(rectangle[2] - rectangle[0]),
+            height: Math.abs(rectangle[3] - rectangle[1]),
             color: "yellow",
             type: "highlight",
-          },
-        ];
+            text: text.slice(matchStart, matchEnd),
+          });
+
+          matchStart = lowerText.indexOf(normalizedQuery, matchEnd);
+        }
+      });
+
+      if (pageResults.length > 0) {
+        results[pageNumber] = pageResults;
       }
     }
+
+    if (requestId !== searchRequestRef.current) return;
+    setIsSearching(false);
     setSearchResults(results);
+    setSearchResultIndex(0);
+
+    const firstPage = Number(Object.keys(results)[0]);
+    if (firstPage) {
+      const spreadStart = firstPage % 2 === 0 ? firstPage - 1 : firstPage;
+      if (spreadStart !== currentPage) {
+        handlePageChangeWithAnimation(
+          spreadStart,
+          spreadStart < currentPage ? "right" : "left",
+        );
+      }
+    }
+  };
+
+  const goToSearchResult = (index: number): void => {
+    const result = flattenedSearchResults[index];
+    if (!result) return;
+
+    const pageMatch = result.id.match(/^search-(\d+)-/);
+    const pageNumber = pageMatch ? Number(pageMatch[1]) : currentPage;
+    const spreadStart = pageNumber % 2 === 0 ? pageNumber - 1 : pageNumber;
+
+    setSearchResultIndex(index);
+    if (spreadStart !== currentPage) {
+      handlePageChangeWithAnimation(
+        spreadStart,
+        spreadStart < currentPage ? "right" : "left",
+      );
+    }
   };
 
   const colors: Array<{ name: ColorName; class: string; hex: string }> = [
@@ -1069,25 +1178,29 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
       <div className="min-h-screen flex items-center justify-center p-8">
         <div className="max-w-md text-center">
           <div className="text-red-600 mb-4">
-            <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            <svg
+              className="w-16 h-16 mx-auto mb-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              />
             </svg>
             <h3 className="text-lg font-semibold mb-2">Error Loading PDF</h3>
           </div>
           <p className="text-gray-600 mb-6">{error}</p>
           <div className="flex gap-2 justify-center">
             {isButton && (
-              <Button
-                onClick={() => router.back()}
-                variant="outline"
-              >
+              <Button onClick={() => router.back()} variant="outline">
                 Go Back
               </Button>
             )}
-            <Button
-              onClick={() => window.location.reload()}
-              variant="default"
-            >
+            <Button onClick={() => window.location.reload()} variant="default">
               Retry
             </Button>
           </div>
@@ -1103,8 +1216,7 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
     <div className="flex flex-col min-h-screen">
       {/* Header */}
       <div className="px-4 py-3 flex items-center mt-20">
-        {
-          isButton &&
+        {isButton && (
           <Button
             variant="ghost"
             onClick={() => router.back()}
@@ -1113,7 +1225,7 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
             <ChevronLeft className="w-5 h-5" />
             Back
           </Button>
-        }
+        )}
       </div>
 
       {/* Search Bar */}
@@ -1127,6 +1239,59 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
             className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             autoFocus
           />
+          {searchQuery.trim() && (
+            <div className="flex items-center gap-1 text-sm text-gray-600 whitespace-nowrap">
+              {isSearching ? (
+                <span className="flex items-center gap-1.5 px-1">
+                  <Loader2
+                    className="w-4 h-4 animate-spin"
+                    aria-hidden="true"
+                  />
+                  <span>Searching...</span>
+                </span>
+              ) : (
+                <span>
+                  {flattenedSearchResults.length > 0
+                    ? searchResultIndex + 1
+                    : 0}{" "}
+                  of {flattenedSearchResults.length}
+                </span>
+              )}
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  if (flattenedSearchResults.length > 0) {
+                    goToSearchResult(
+                      (searchResultIndex - 1 + flattenedSearchResults.length) %
+                        flattenedSearchResults.length,
+                    );
+                  }
+                }}
+                disabled={isSearching || flattenedSearchResults.length === 0}
+                className="p-1"
+                aria-label="Previous search result"
+                title="Previous match"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  if (flattenedSearchResults.length > 0) {
+                    goToSearchResult(
+                      (searchResultIndex + 1) % flattenedSearchResults.length,
+                    );
+                  }
+                }}
+                disabled={isSearching || flattenedSearchResults.length === 0}
+                className="p-1"
+                aria-label="Next search result"
+                title="Next match"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
           <Button
             variant="default"
             onClick={() => {
@@ -1168,7 +1333,9 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
               >
                 Cancel
               </Button>
-              <Button variant="default" onClick={handleAddComment}>Add Comment</Button>
+              <Button variant="default" onClick={handleAddComment}>
+                Add Comment
+              </Button>
             </div>
           </div>
         </div>
@@ -1216,9 +1383,10 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
           onClick={handlePrevPage}
           disabled={currentPage <= 1 || isFlipping}
           className={`absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center transition-all z-10
-            ${currentPage <= 1 || isFlipping
-              ? "opacity-30 cursor-not-allowed"
-              : "hover:bg-gray-50 hover:shadow-xl cursor-pointer"
+            ${
+              currentPage <= 1 || isFlipping
+                ? "opacity-30 cursor-not-allowed"
+                : "hover:bg-gray-50 hover:shadow-xl cursor-pointer"
             }`}
           aria-label="Previous page"
         >
@@ -1227,8 +1395,9 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
 
         {/* Book Pages Container with Smooth Animation */}
         <div
-          className={`flex gap-8 max-w-7xl transition-all duration-200 ease-out ${isFlipping ? "opacity-90 scale-[0.99]" : "opacity-100 scale-100"
-            }`}
+          className={`flex gap-8 max-w-7xl transition-all duration-200 ease-out ${
+            isFlipping ? "opacity-90 scale-[0.99]" : "opacity-100 scale-100"
+          }`}
         >
           {/* Left Page */}
           <div
@@ -1238,7 +1407,7 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
             <canvas ref={canvasLeftRef} className="max-w-full max-h-full" />
             <canvas
               ref={overlayLeftRef}
-              className="absolute top-0 left-0 cursor-crosshair"
+              className="absolute inset-0 m-auto max-w-full max-h-full cursor-crosshair"
               onMouseDown={(e) => handleMouseDown(e, leftPage)}
               onMouseMove={(e) => handleMouseMove(e, leftPage)}
               onMouseUp={(e) => handleMouseUp(e, leftPage)}
@@ -1267,7 +1436,7 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
               <canvas ref={canvasRightRef} className="max-w-full max-h-full" />
               <canvas
                 ref={overlayRightRef}
-                className="absolute top-0 left-0 cursor-crosshair"
+                className="absolute inset-0 m-auto max-w-full max-h-full cursor-crosshair"
                 onMouseDown={(e) => handleMouseDown(e, rightPage)}
                 onMouseMove={(e) => handleMouseMove(e, rightPage)}
                 onMouseUp={(e) => handleMouseUp(e, rightPage)}
@@ -1295,9 +1464,10 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
           onClick={handleNextPage}
           disabled={currentPage >= numPages - 1 || isFlipping}
           className={`absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center transition-all z-10
-            ${currentPage >= numPages - 1 || isFlipping
-              ? "opacity-30 cursor-not-allowed"
-              : "hover:bg-gray-50 hover:shadow-xl cursor-pointer"
+            ${
+              currentPage >= numPages - 1 || isFlipping
+                ? "opacity-30 cursor-not-allowed"
+                : "hover:bg-gray-50 hover:shadow-xl cursor-pointer"
             }`}
           aria-label="Next page"
         >
@@ -1315,10 +1485,11 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
                 variant="default"
                 key={color.name}
                 onClick={() => setSelectedColor(color.name)}
-                className={`w-8 h-8 rounded-full bg-white ${color.class} ${selectedColor === color.name
-                  ? "ring-2 ring-offset-2 ring-gray-400"
-                  : ""
-                  } transition-all hover:scale-110`}
+                className={`w-8 h-8 rounded-full bg-white ${color.class} ${
+                  selectedColor === color.name
+                    ? "ring-2 ring-offset-2 ring-gray-400"
+                    : ""
+                } transition-all hover:scale-110`}
                 aria-label={`Select ${color.name} color`}
               />
             ))}
@@ -1330,10 +1501,11 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
               variant="default"
               onClick={handleUndo}
               disabled={historyIndex <= 0}
-              className={`p-2 rounded-lg transition-colors bg-white ${historyIndex <= 0
-                ? "opacity-30 cursor-not-allowed"
-                : "hover:bg-gray-100"
-                }`}
+              className={`p-2 rounded-lg transition-colors bg-white ${
+                historyIndex <= 0
+                  ? "opacity-30 cursor-not-allowed"
+                  : "hover:bg-gray-100"
+              }`}
               aria-label="Undo"
               title="Undo last action"
             >
@@ -1342,8 +1514,9 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
             <Button
               variant="default"
               onClick={() => handleToolClick("eraser")}
-              className={`p-2 rounded-lg transition-colors bg-white ${selectedTool === "eraser" ? "bg-gray-200" : "hover:bg-gray-100"
-                }`}
+              className={`p-2 rounded-lg transition-colors bg-white ${
+                selectedTool === "eraser" ? "bg-gray-200" : "hover:bg-gray-100"
+              }`}
               aria-label="Eraser"
               title="Click to enable eraser mode"
             >
@@ -1352,10 +1525,11 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
             <Button
               variant="default"
               onClick={() => handleToolClick("underline")}
-              className={`p-2 rounded-lg transition-colors bg-white ${selectedTool === "underline"
-                ? "bg-gray-200"
-                : "hover:bg-gray-100"
-                }`}
+              className={`p-2 rounded-lg transition-colors bg-white ${
+                selectedTool === "underline"
+                  ? "bg-gray-200"
+                  : "hover:bg-gray-100"
+              }`}
               aria-label="Underline"
               title="Click to enable underline mode"
             >
@@ -1364,8 +1538,9 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
             <Button
               variant="default"
               onClick={() => handleToolClick("search")}
-              className={`p-2 rounded-lg transition-colors bg-white ${showSearchBar ? "bg-gray-200" : "hover:bg-gray-100"
-                }`}
+              className={`p-2 rounded-lg transition-colors bg-white ${
+                showSearchBar ? "bg-gray-200" : "hover:bg-gray-100"
+              }`}
               aria-label="Search"
               title="Search in PDF"
             >
@@ -1374,8 +1549,9 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
             <Button
               variant="default"
               onClick={() => handleToolClick("pen")}
-              className={`p-2 rounded-lg transition-colors bg-white ${selectedTool === "pen" ? "bg-gray-200" : "hover:bg-gray-100"
-                }`}
+              className={`p-2 rounded-lg transition-colors bg-white ${
+                selectedTool === "pen" ? "bg-gray-200" : "hover:bg-gray-100"
+              }`}
               aria-label="Highlight"
               title="Click to enable highlighting mode"
             >
@@ -1384,8 +1560,9 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
             <Button
               variant="default"
               onClick={() => handleToolClick("comment")}
-              className={`p-2 rounded-lg transition-colors bg-white ${selectedTool === "comment" ? "bg-gray-200" : "hover:bg-gray-100"
-                }`}
+              className={`p-2 rounded-lg transition-colors bg-white ${
+                selectedTool === "comment" ? "bg-gray-200" : "hover:bg-gray-100"
+              }`}
               aria-label="Comment"
               title="Add comment to selected text"
             >
@@ -1394,8 +1571,9 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
             <Button
               variant="default"
               onClick={() => handleToolClick("copy")}
-              className={`p-2 rounded-lg transition-colors bg-white ${copiedText ? "bg-green-100" : "hover:bg-gray-100"
-                }`}
+              className={`p-2 rounded-lg transition-colors bg-white ${
+                copiedText ? "bg-green-100" : "hover:bg-gray-100"
+              }`}
               aria-label="Copy"
               title="Copy selected text"
             >
@@ -1404,10 +1582,11 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
             <Button
               variant="default"
               onClick={() => handleToolClick("bookmark")}
-              className={`p-2 rounded-lg transition-colors bg-white ${selectedTool === "bookmark"
-                ? "bg-gray-200"
-                : "hover:bg-gray-100"
-                }`}
+              className={`p-2 rounded-lg transition-colors bg-white ${
+                selectedTool === "bookmark"
+                  ? "bg-gray-200"
+                  : "hover:bg-gray-100"
+              }`}
               aria-label="Bookmark"
               title="Bookmark this PDF"
             >
@@ -1463,8 +1642,6 @@ function PdfReader({ pdfUrl, totalPages = 120, isButton, useStreaming = false }:
           </div>
         )}
       </div>
-
-
     </div>
   );
 }

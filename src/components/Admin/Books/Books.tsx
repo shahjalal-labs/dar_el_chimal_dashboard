@@ -16,8 +16,9 @@ import { useGetAllBookCategoriesQuery } from "@/redux/api/bookCategory";
 const Books = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [bookCategoryId, setBookCategoryId] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const { data: allBookCategories, isLoading } = useGetAllBookCategoriesQuery({ currentPage: 1, limit: 1000 });
-  const { data, isLoading: isBookLoading } = useGetAllBooksQuery({ currentPage, bookCategoryId: bookCategoryId ? bookCategoryId : undefined });
+  const { data, isLoading: isBookLoading } = useGetAllBooksQuery({ currentPage, bookCategoryId: bookCategoryId ? bookCategoryId : undefined, searchTerm });
 
   const formattedData = data?.result?.result?.map(
     (entry: {
@@ -85,8 +86,9 @@ const Books = () => {
         data={formattedData}
         currentPage={currentPage}
         isLoading={isBookLoading}
-        willSearch={true}
+        willSearch={false}
         deleteItem="Book"
+        setSearchTerm={setSearchTerm}
         sort={(
           <Select onValueChange={(value) => setBookCategoryId(value)}>
             <SelectTrigger className="w-fit border border-[#1E3A8A] text-[#1E3A8A] bg-transparent hover:bg-transparent cursor-pointer flex items-center gap-2 px-3 py-2 rounded-md data-[placeholder]:text-[#1E3A8A]">
