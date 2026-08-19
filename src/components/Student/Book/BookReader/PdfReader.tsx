@@ -158,7 +158,7 @@ function PdfReader({
   const [history, setHistory] = useState<HistoryState[]>([]);
   const [historyIndex, setHistoryIndex] = useState<number>(-1);
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [showSearchBar, setShowSearchBar] = useState<boolean>(false);
+  const [showSearchBar, setShowSearchBar] = useState<boolean>(true);
   const [searchResults, setSearchResults] = useState<{
     [key: number]: Highlight[];
   }>({});
@@ -1052,8 +1052,16 @@ function PdfReader({
 
     const results: { [key: number]: Highlight[] } = {};
     const normalizedQuery = query.trim().toLocaleLowerCase();
+    const pagesToSearch = [currentPage];
+    const measurementContext = canvasLeftRef.current?.getContext("2d");
 
-    for (let pageNumber = 1; pageNumber <= numPages; pageNumber += 1) {
+    if (currentPage + 1 <= numPages) {
+      pagesToSearch.push(currentPage + 1);
+    }
+
+    for (const pageNumber of pagesToSearch) {
+      if (requestId !== searchRequestRef.current) return;
+
       const page = await pdfDocRef.current.getPage(pageNumber);
       const viewport = page.getViewport({ scale: (zoom / 100) * 1.5 });
       const textContent = await page.getTextContent();
@@ -1070,8 +1078,30 @@ function PdfReader({
           const itemY = item.transform[5] || 0;
           const itemWidth = item.width || 0;
           const itemHeight = item.height || Math.abs(item.transform[3] || 10);
-          const startX = itemX + itemWidth * (matchStart / text.length);
-          const endX = itemX + itemWidth * (matchEnd / text.length);
+          let startOffset = itemWidth * (matchStart / text.length);
+          let endOffset = itemWidth * (matchEnd / text.length);
+
+          const fontStyle = textContent.styles[item.fontName];
+          if (measurementContext && fontStyle?.fontFamily) {
+            const fontSize =
+              Math.hypot(item.transform[0], item.transform[1]) || itemHeight;
+            measurementContext.font = `${fontSize}px ${fontStyle.fontFamily}`;
+            const measuredTextWidth =
+              measurementContext.measureText(text).width;
+
+            if (measuredTextWidth > 0) {
+              const widthScale = itemWidth / measuredTextWidth;
+              startOffset =
+                measurementContext.measureText(text.slice(0, matchStart))
+                  .width * widthScale;
+              endOffset =
+                measurementContext.measureText(text.slice(0, matchEnd)).width *
+                widthScale;
+            }
+          }
+
+          const startX = itemX + startOffset;
+          const endX = itemX + endOffset;
           const rectangle = viewport.convertToViewportRectangle([
             startX,
             itemY,
@@ -1105,35 +1135,21 @@ function PdfReader({
     setIsSearching(false);
     setSearchResults(results);
     setSearchResultIndex(0);
-
-    const firstPage = Number(Object.keys(results)[0]);
-    if (firstPage) {
-      const spreadStart = firstPage % 2 === 0 ? firstPage - 1 : firstPage;
-      if (spreadStart !== currentPage) {
-        handlePageChangeWithAnimation(
-          spreadStart,
-          spreadStart < currentPage ? "right" : "left",
-        );
-      }
-    }
   };
 
   const goToSearchResult = (index: number): void => {
     const result = flattenedSearchResults[index];
     if (!result) return;
 
-    const pageMatch = result.id.match(/^search-(\d+)-/);
-    const pageNumber = pageMatch ? Number(pageMatch[1]) : currentPage;
-    const spreadStart = pageNumber % 2 === 0 ? pageNumber - 1 : pageNumber;
-
     setSearchResultIndex(index);
-    if (spreadStart !== currentPage) {
-      handlePageChangeWithAnimation(
-        spreadStart,
-        spreadStart < currentPage ? "right" : "left",
-      );
-    }
   };
+
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      void handleSearch(searchQuery);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage]);
 
   const colors: Array<{ name: ColorName; class: string; hex: string }> = [
     { name: "red", class: "bg-red-400", hex: "#f87171" },
