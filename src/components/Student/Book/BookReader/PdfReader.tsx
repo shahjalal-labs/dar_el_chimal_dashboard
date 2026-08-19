@@ -904,6 +904,10 @@ function PdfReader({
         );
       }
     }
+    const toolInstructions = {
+      eraser: "erase",
+      pen: "mark", // change this based on what the pen actually does
+    };
 
     // Also save to local storage for in-app bookmarks
     const bookmarkId = `pdf-${Date.now()}`;
@@ -1653,8 +1657,11 @@ function PdfReader({
         {/* Tool Indicator */}
         {selectedTool && selectedTool !== "bookmark" && (
           <div className="text-center mt-2 text-sm text-blue-600 font-medium">
-            {selectedTool.charAt(0).toUpperCase() + selectedTool.slice(1)} mode
-            active - Select text to {selectedTool}
+            {selectedTool === "eraser"
+              ? "Eraser mode active – select text to erase"
+              : selectedTool === "pen"
+                ? "Highlight mode active – select text to highlight"
+                : `${selectedTool.charAt(0).toUpperCase() + selectedTool.slice(1)} mode active – select text to ${selectedTool}`}
           </div>
         )}
       </div>
