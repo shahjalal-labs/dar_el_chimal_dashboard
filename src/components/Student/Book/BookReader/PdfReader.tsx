@@ -22,11 +22,17 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { BiHighlight } from "react-icons/bi";
 import { LuUndo2 } from "react-icons/lu";
 import { PiEraser } from "react-icons/pi";
+import { toast } from "sonner";
 
 interface PDFPageProxy {
   getViewport: (options: { scale: number }) => PDFPageViewport;
-  render: (renderContext: any) => { promise: Promise<void> };
+  render: (renderContext: any) => PDFRenderTask;
   getTextContent: () => Promise<PDFTextContent>;
+}
+
+interface PDFRenderTask {
+  promise: Promise<void>;
+  cancel: () => void;
 }
 
 interface PDFPageViewport {
@@ -118,6 +124,10 @@ function PdfReader({
   });
 
   const [zoom, setZoom] = useState<number>(100);
+  const [panOffsets, setPanOffsets] = useState({
+    left: { x: 0, y: 0 },
+    right: { x: 0, y: 0 },
+  });
   const [selectedColor, setSelectedColor] = useState<ColorName>("red");
   const [selectedTool, setSelectedTool] = useState<ToolType>(null);
   const [numPages, setNumPages] = useState<number>(totalPages);
@@ -141,6 +151,9 @@ function PdfReader({
   const [bookmarks, setBookmarks] = useState<{ [key: number]: Highlight[] }>(
     {},
   );
+  const [erasedAreas, setErasedAreas] = useState<{
+    [key: number]: Array<{ x: number; y: number; radius: number }>;
+  }>({});
   const [isSelecting, setIsSelecting] = useState<boolean>(false);
   const [selectionStart, setSelectionStart] = useState<{
     x: number;
@@ -174,9 +187,25 @@ function PdfReader({
   const [flipDirection, setFlipDirection] = useState<"left" | "right" | null>(
     null,
   );
-  const renderingPagesRef = useRef<Set<number>>(new Set());
-  const renderedPagesRef = useRef<Set<number>>(new Set());
+  const renderTasksRef = useRef<Record<"left" | "right", PDFRenderTask | null>>(
+    {
+      left: null,
+      right: null,
+    },
+  );
+  const renderRequestIdsRef = useRef<Record<"left" | "right", number>>({
+    left: 0,
+    right: 0,
+  });
   const searchRequestRef = useRef(0);
+  const panDragRef = useRef<{
+    side: "left" | "right";
+    startX: number;
+    startY: number;
+    originX: number;
+    originY: number;
+  } | null>(null);
+  const isErasingRef = useRef(false);
 
   const flattenedSearchResults = Object.entries(searchResults)
     .sort(([pageA], [pageB]) => Number(pageA) - Number(pageB))
@@ -199,6 +228,25 @@ function PdfReader({
   useEffect(() => {
     localStorage.setItem("pdf-bookmarks", JSON.stringify(bookmarks));
   }, [bookmarks]);
+
+  useEffect(() => {
+    const savedComments = localStorage.getItem(`pdf-comments-${pdfUrl}`);
+    if (!savedComments) {
+      setComments({});
+      return;
+    }
+
+    try {
+      setComments(JSON.parse(savedComments));
+    } catch (error) {
+      console.error("Error loading comments from localStorage:", error);
+      setComments({});
+    }
+  }, [pdfUrl]);
+
+  useEffect(() => {
+    localStorage.setItem(`pdf-comments-${pdfUrl}`, JSON.stringify(comments));
+  }, [comments, pdfUrl]);
 
   // Save current page to localStorage whenever it changes
   useEffect(() => {
@@ -380,7 +428,7 @@ function PdfReader({
     }
   }, [pdfUrl, useStreaming]);
 
-  // Render PDF pages with caching to prevent duplicate renders
+  // Render one of the two visible pages, cancelling its previous render first.
   const renderPage = useCallback(
     async (
       pageNum: number,
@@ -389,14 +437,15 @@ function PdfReader({
       if (!pdfDocRef.current || !canvasRef.current) return;
       if (pageNum < 1 || pageNum > numPages) return;
 
-      // Check if already rendering this page
-      if (renderingPagesRef.current.has(pageNum)) return;
-
-      // Mark as rendering
-      renderingPagesRef.current.add(pageNum);
+      const side = canvasRef === canvasLeftRef ? "left" : "right";
+      const requestId = ++renderRequestIdsRef.current[side];
+      renderTasksRef.current[side]?.cancel();
+      renderTasksRef.current[side] = null;
+      let renderTask: PDFRenderTask | null = null;
 
       try {
         const page: PDFPageProxy = await pdfDocRef.current.getPage(pageNum);
+        if (requestId !== renderRequestIdsRef.current[side]) return;
         const canvas = canvasRef.current;
         if (!canvas) return;
 
@@ -407,28 +456,34 @@ function PdfReader({
         }
 
         const viewport: PDFPageViewport = page.getViewport({
-          scale: (zoom / 100) * 1.5,
+          scale: 1.5,
         });
         canvas.height = viewport.height;
         canvas.width = viewport.width;
 
-        const renderContext = {
+        renderTask = page.render({
           canvasContext: context,
           viewport: viewport,
-        };
+        });
+        renderTasksRef.current[side] = renderTask;
 
-        await page.render(renderContext).promise;
-
-        // Mark as successfully rendered
-        renderedPagesRef.current.add(pageNum);
+        await renderTask.promise;
       } catch (error) {
-        console.error(`Error rendering page ${pageNum}:`, error);
+        if (
+          !(
+            error instanceof Error &&
+            error.name === "RenderingCancelledException"
+          )
+        ) {
+          console.error(`Error rendering page ${pageNum}:`, error);
+        }
       } finally {
-        // Remove from rendering set
-        renderingPagesRef.current.delete(pageNum);
+        if (renderTasksRef.current[side] === renderTask) {
+          renderTasksRef.current[side] = null;
+        }
       }
     },
-    [zoom, numPages],
+    [numPages],
   );
 
   const drawAnnotations = useCallback(
@@ -525,11 +580,14 @@ function PdfReader({
       // Draw comments
       const pageComments = comments[pageNum] || [];
       pageComments.forEach((comment) => {
-        context.fillStyle = "rgba(255, 193, 7, 0.3)";
+        context.fillStyle = "rgba(250, 204, 21, 0.24)";
         context.fillRect(comment.x, comment.y, comment.width, comment.height);
+        context.strokeStyle = "rgba(202, 138, 4, 0.8)";
+        context.lineWidth = 2;
+        context.strokeRect(comment.x, comment.y, comment.width, comment.height);
 
         // Comment indicator
-        context.fillStyle = "rgb(255, 193, 7)";
+        context.fillStyle = "rgb(202, 138, 4)";
         context.beginPath();
         context.arc(
           comment.x + comment.width - 5,
@@ -542,13 +600,76 @@ function PdfReader({
 
         // Comment text preview
         if (comment.comment) {
-          context.fillStyle = "rgb(0, 0, 0)";
-          context.font = "10px Arial";
-          const preview =
-            comment.comment.length > 20
-              ? comment.comment.substring(0, 20) + "..."
-              : comment.comment;
-          context.fillText(preview, comment.x, comment.y - 5);
+          const maxBubbleWidth = 220;
+          const lineHeight = 18;
+          const padding = 10;
+          context.font = "14px Arial";
+          const words = comment.comment.trim().split(/\s+/);
+          const lines: string[] = [];
+          let line = "";
+
+          words.forEach((word) => {
+            const nextLine = line ? `${line} ${word}` : word;
+            if (
+              line &&
+              context.measureText(nextLine).width > maxBubbleWidth - padding * 2
+            ) {
+              lines.push(line);
+              line = word;
+            } else {
+              line = nextLine;
+            }
+          });
+          if (line) lines.push(line);
+
+          const visibleLines = lines.slice(0, 3);
+          if (lines.length > 3) {
+            visibleLines[2] = `${visibleLines[2].slice(0, -3)}...`;
+          }
+
+          const bubbleWidth = maxBubbleWidth;
+          const bubbleHeight = visibleLines.length * lineHeight + padding * 2;
+          let bubbleX = comment.x + comment.width + 14;
+          if (bubbleX + bubbleWidth > canvas.width - 4) {
+            bubbleX = comment.x - bubbleWidth - 14;
+          }
+          bubbleX = Math.max(
+            4,
+            Math.min(bubbleX, canvas.width - bubbleWidth - 4),
+          );
+          const bubbleY = Math.max(
+            4,
+            Math.min(comment.y, canvas.height - bubbleHeight - 4),
+          );
+
+          context.strokeStyle = "rgba(202, 138, 4, 0.75)";
+          context.lineWidth = 2;
+          context.beginPath();
+          context.moveTo(
+            bubbleX > comment.x ? comment.x + comment.width : comment.x,
+            comment.y + comment.height / 2,
+          );
+          context.lineTo(
+            bubbleX > comment.x ? bubbleX : bubbleX + bubbleWidth,
+            bubbleY + bubbleHeight / 2,
+          );
+          context.stroke();
+
+          context.fillStyle = "rgba(255, 251, 235, 0.98)";
+          context.beginPath();
+          context.roundRect(bubbleX, bubbleY, bubbleWidth, bubbleHeight, 8);
+          context.fill();
+          context.strokeStyle = "rgb(202, 138, 4)";
+          context.stroke();
+
+          context.fillStyle = "rgb(55, 65, 81)";
+          visibleLines.forEach((visibleLine, index) => {
+            context.fillText(
+              visibleLine,
+              bubbleX + padding,
+              bubbleY + padding + lineHeight * (index + 1) - 3,
+            );
+          });
         }
       });
 
@@ -580,6 +701,15 @@ function PdfReader({
           currentSelection.height,
         );
       }
+
+      // Paint erased areas last so they cover the PDF and every annotation.
+      const pageErasedAreas = erasedAreas[pageNum] || [];
+      pageErasedAreas.forEach((area) => {
+        context.fillStyle = "rgb(255, 255, 255)";
+        context.beginPath();
+        context.arc(area.x, area.y, area.radius, 0, 2 * Math.PI);
+        context.fill();
+      });
     },
     [
       highlights,
@@ -592,19 +722,15 @@ function PdfReader({
       currentSelection,
       currentPage,
       selectedColor,
+      erasedAreas,
     ],
   );
 
-  // Render pages when current page or zoom changes
+  // Render only the visible pages when the spread changes.
   useEffect(() => {
     if (pdfDocRef.current && !isFlipping) {
       const leftPage = currentPage;
       const rightPage = currentPage + 1;
-
-      // Clear cache on zoom change
-      if (zoom) {
-        renderedPagesRef.current.clear();
-      }
 
       // Render current pages
       if (leftPage <= numPages) {
@@ -614,7 +740,7 @@ function PdfReader({
         renderPage(rightPage, canvasRightRef);
       }
     }
-  }, [currentPage, zoom, numPages, renderPage, isFlipping]);
+  }, [currentPage, numPages, renderPage, isFlipping]);
 
   useEffect(() => {
     drawAnnotations(currentPage, overlayLeftRef);
@@ -626,6 +752,7 @@ function PdfReader({
     bookmarks,
     currentPage,
     searchResults,
+    zoom,
     drawAnnotations,
   ]);
 
@@ -633,15 +760,29 @@ function PdfReader({
     e: React.MouseEvent<HTMLCanvasElement>,
     pageNum: number,
   ): void => {
-    if (selectedTool === "eraser") {
-      // Handle eraser tool
-      const canvas = e.currentTarget;
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+    const side = pageNum === currentPage ? "left" : "right";
 
-      // Find and remove annotation at this position
+    if (!selectedTool && zoom > 100) {
+      const offset = panOffsets[side];
+      panDragRef.current = {
+        side,
+        startX: e.clientX,
+        startY: e.clientY,
+        originX: offset.x,
+        originY: offset.y,
+      };
+      e.currentTarget.style.cursor = "grabbing";
+      return;
+    }
+
+    if (selectedTool === "eraser") {
+      const { x, y } = getCanvasCoordinates(e, pageNum);
+
+      isErasingRef.current = true;
       removeAnnotationAtPosition(x, y, pageNum);
+      addEraseMark(x, y, pageNum);
+      setIsSelecting(true);
+      setSelectionStart({ x, y, page: pageNum });
       return;
     }
 
@@ -656,20 +797,85 @@ function PdfReader({
       return;
     }
 
-    const canvas = e.currentTarget;
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const { x, y } = getCanvasCoordinates(e, pageNum);
 
     setIsSelecting(true);
     setSelectionStart({ x, y, page: pageNum });
+  };
+
+  const getCanvasCoordinates = (
+    e: React.MouseEvent<HTMLCanvasElement>,
+    pageNum: number,
+  ): { x: number; y: number } => {
+    const canvas = e.currentTarget;
+    const rect = canvas.getBoundingClientRect();
+    const pageCanvas =
+      pageNum === currentPage ? canvasLeftRef.current : canvasRightRef.current;
+    const zoomScale = zoom / 100;
+    const unscaledWidth = rect.width / zoomScale;
+    const unscaledHeight = rect.height / zoomScale;
+
+    return {
+      x:
+        ((e.clientX - rect.left) / zoomScale) *
+        (pageCanvas ? canvas.width / unscaledWidth : 1),
+      y:
+        ((e.clientY - rect.top) / zoomScale) *
+        (pageCanvas ? canvas.height / unscaledHeight : 1),
+    };
+  };
+
+  const handlePanMove = (e: React.MouseEvent<HTMLCanvasElement>): void => {
+    const drag = panDragRef.current;
+    if (!drag) return;
+
+    const maxX = (450 * (zoom / 100 - 1)) / 2;
+    const maxY = (600 * (zoom / 100 - 1)) / 2;
+    const nextX = drag.originX + e.clientX - drag.startX;
+    const nextY = drag.originY + e.clientY - drag.startY;
+
+    setPanOffsets((current) => ({
+      ...current,
+      [drag.side]: {
+        x: Math.max(-maxX, Math.min(maxX, nextX)),
+        y: Math.max(-maxY, Math.min(maxY, nextY)),
+      },
+    }));
+  };
+
+  const handlePanEnd = (): void => {
+    panDragRef.current = null;
+  };
+
+  const finishCommentSelection = async (pageNum: number): Promise<void> => {
+    if (
+      selectedTool !== "comment" ||
+      !isSelecting ||
+      !currentSelection ||
+      currentSelection.page !== pageNum
+    ) {
+      return;
+    }
+
+    const extractedText = await extractTextFromSelection(
+      pageNum,
+      currentSelection.x,
+      currentSelection.y,
+      currentSelection.width,
+      currentSelection.height,
+    );
+    setSelectedText(extractedText);
+    setCurrentSelection({ ...currentSelection, text: extractedText });
+    setShowCommentPopup(true);
+    setIsSelecting(false);
+    setSelectionStart(null);
   };
 
   const removeAnnotationAtPosition = (
     x: number,
     y: number,
     pageNum: number,
-  ) => {
+  ): boolean => {
     const checkAnnotation = (annotations: Highlight[]) => {
       return annotations.filter(
         (annotation) =>
@@ -686,37 +892,65 @@ function PdfReader({
     const newUnderlines = { ...underlines };
     const newComments = { ...comments };
     const newBookmarks = { ...bookmarks };
+    let removed = false;
 
     if (newHighlights[pageNum]) {
+      const previousLength = newHighlights[pageNum].length;
       newHighlights[pageNum] = checkAnnotation(newHighlights[pageNum]);
+      removed ||= newHighlights[pageNum].length !== previousLength;
     }
     if (newUnderlines[pageNum]) {
+      const previousLength = newUnderlines[pageNum].length;
       newUnderlines[pageNum] = checkAnnotation(newUnderlines[pageNum]);
+      removed ||= newUnderlines[pageNum].length !== previousLength;
     }
     if (newComments[pageNum]) {
+      const previousLength = newComments[pageNum].length;
       newComments[pageNum] = checkAnnotation(newComments[pageNum]);
+      removed ||= newComments[pageNum].length !== previousLength;
     }
     if (newBookmarks[pageNum]) {
+      const previousLength = newBookmarks[pageNum].length;
       newBookmarks[pageNum] = checkAnnotation(newBookmarks[pageNum]);
+      removed ||= newBookmarks[pageNum].length !== previousLength;
     }
+
+    if (!removed) return false;
 
     setHighlights(newHighlights);
     setUnderlines(newUnderlines);
     setComments(newComments);
     setBookmarks(newBookmarks);
     addToHistory(newHighlights, newUnderlines, newComments, newBookmarks);
+    return true;
+  };
+
+  const addEraseMark = (x: number, y: number, pageNum: number): void => {
+    setErasedAreas((current) => ({
+      ...current,
+      [pageNum]: [...(current[pageNum] || []), { x, y, radius: 24 }],
+    }));
   };
 
   const handleMouseMove = (
     e: React.MouseEvent<HTMLCanvasElement>,
     pageNum: number,
   ): void => {
+    if (panDragRef.current) {
+      handlePanMove(e);
+      return;
+    }
+
+    if (selectedTool === "eraser" && isErasingRef.current) {
+      const { x, y } = getCanvasCoordinates(e, pageNum);
+      removeAnnotationAtPosition(x, y, pageNum);
+      addEraseMark(x, y, pageNum);
+      return;
+    }
+
     if (!isSelecting || !selectionStart || !selectedTool) return;
 
-    const canvas = e.currentTarget;
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const { x, y } = getCanvasCoordinates(e, pageNum);
 
     const width = Math.abs(x - selectionStart.x);
     const height = Math.abs(y - selectionStart.y);
@@ -742,7 +976,13 @@ function PdfReader({
     e: React.MouseEvent<HTMLCanvasElement>,
     pageNum: number,
   ): Promise<void> => {
+    if (panDragRef.current) {
+      handlePanEnd();
+      return;
+    }
+
     if (selectedTool === "eraser") {
+      isErasingRef.current = false;
       setIsSelecting(false);
       setSelectionStart(null);
       setCurrentSelection(null);
@@ -754,10 +994,7 @@ function PdfReader({
       return;
     }
 
-    const canvas = e.currentTarget;
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const { x, y } = getCanvasCoordinates(e, pageNum);
 
     const width = Math.abs(x - selectionStart.x);
     const height = Math.abs(y - selectionStart.y);
@@ -825,17 +1062,7 @@ function PdfReader({
           text: extractedText,
         });
       } else if (selectedTool === "copy") {
-        // Store the extracted text for copying
-        setCurrentSelection({
-          x: startX,
-          y: startY,
-          width,
-          height,
-          page: pageNum,
-          text: extractedText,
-        });
-        // Copy the actual extracted text
-        handleCopyText();
+        await handleCopyText(extractedText);
       }
     }
 
@@ -870,6 +1097,10 @@ function PdfReader({
       setCommentText("");
       setSelectedText("");
       setCurrentSelection(null);
+      setSelectedTool(null);
+      toast.success("Comment added", {
+        description: "Your comment was saved to this page.",
+      });
     }
   };
 
@@ -936,34 +1167,39 @@ function PdfReader({
     setTimeout(() => setCopiedText(""), 3000);
   };
 
-  const handleCopyText = () => {
-    if (currentSelection && currentSelection.text) {
-      const textToCopy = currentSelection.text;
-      navigator.clipboard
-        .writeText(textToCopy)
-        .then(() => {
-          setCopiedText("Text copied to clipboard!");
-          setTimeout(() => setCopiedText(""), 2000);
-        })
-        .catch((err) => {
-          console.error("Failed to copy text: ", err);
-          setCopiedText("Failed to copy text");
-          setTimeout(() => setCopiedText(""), 2000);
+  const handleCopyText = async (text?: string): Promise<void> => {
+    const textToCopy = text ?? currentSelection?.text;
+
+    if (textToCopy?.trim()) {
+      const copiedValue = textToCopy.trim();
+
+      try {
+        await navigator.clipboard.writeText(copiedValue);
+        const preview =
+          copiedValue.length > 180
+            ? `${copiedValue.slice(0, 180)}...`
+            : copiedValue;
+        toast.success("Text copied to clipboard", {
+          duration: 1000,
         });
+        setCopiedText("Text copied to clipboard!");
+        setTimeout(() => setCopiedText(""), 2000);
+      } catch (error) {
+        console.error("Failed to copy text: ", error);
+        toast.error("Could not copy text", {
+          description:
+            "Please check your browser clipboard permission and try again.",
+        });
+        setCopiedText("Failed to copy text");
+        setTimeout(() => setCopiedText(""), 2000);
+      }
       setCurrentSelection(null);
-    } else if (currentSelection) {
-      // Fallback if no text was extracted
-      navigator.clipboard
-        .writeText("Selected text from PDF")
-        .then(() => {
-          setCopiedText("Text copied to clipboard!");
-          setTimeout(() => setCopiedText(""), 2000);
-        })
-        .catch((err) => {
-          console.error("Failed to copy text: ", err);
-          setCopiedText("Failed to copy text");
-          setTimeout(() => setCopiedText(""), 2000);
-        });
+    } else if (text !== undefined || currentSelection) {
+      toast.warning("No text found", {
+        description: "Select an area containing text and try again.",
+      });
+      setCopiedText("No text found in selected area");
+      setTimeout(() => setCopiedText(""), 2000);
       setCurrentSelection(null);
     }
   };
@@ -1023,6 +1259,29 @@ function PdfReader({
   const handleZoomOut = (): void => {
     setZoom((prev) => Math.max(50, prev - 10));
   };
+
+  useEffect(() => {
+    if (zoom <= 100) {
+      setPanOffsets({
+        left: { x: 0, y: 0 },
+        right: { x: 0, y: 0 },
+      });
+      return;
+    }
+
+    const maxX = (450 * (zoom / 100 - 1)) / 2;
+    const maxY = (600 * (zoom / 100 - 1)) / 2;
+    setPanOffsets((current) => ({
+      left: {
+        x: Math.max(-maxX, Math.min(maxX, current.left.x)),
+        y: Math.max(-maxY, Math.min(maxY, current.left.y)),
+      },
+      right: {
+        x: Math.max(-maxX, Math.min(maxX, current.right.x)),
+        y: Math.max(-maxY, Math.min(maxY, current.right.y)),
+      },
+    }));
+  }, [zoom]);
 
   const handleUndo = (): void => {
     if (historyIndex > 0) {
@@ -1235,7 +1494,7 @@ function PdfReader({
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header */}
-      <div className="px-4 py-3 flex items-center mt-20">
+      <div className="px-4 py-3 flex items-center">
         {isButton && (
           <Button
             variant="ghost"
@@ -1420,60 +1679,94 @@ function PdfReader({
           }`}
         >
           {/* Left Page */}
-          <div
-            className="bg-white shadow-2xl rounded-lg overflow-hidden flex items-center justify-center relative"
-            style={{ minWidth: "450px", minHeight: "600px" }}
-          >
-            <canvas ref={canvasLeftRef} className="max-w-full max-h-full" />
-            <canvas
-              ref={overlayLeftRef}
-              className="absolute inset-0 m-auto max-w-full max-h-full cursor-crosshair"
-              onMouseDown={(e) => handleMouseDown(e, leftPage)}
-              onMouseMove={(e) => handleMouseMove(e, leftPage)}
-              onMouseUp={(e) => handleMouseUp(e, leftPage)}
-              onMouseLeave={() => {
-                setIsSelecting(false);
-                setSelectionStart(null);
-                setCurrentSelection(null);
-              }}
-              style={{
-                cursor:
-                  selectedTool === "eraser"
-                    ? "not-allowed"
-                    : selectedTool
-                      ? "crosshair"
-                      : "default",
-              }}
-            />
-          </div>
-
-          {/* Right Page */}
-          {rightPage <= numPages && (
+          <div className="bg-white shadow-2xl rounded-lg overflow-hidden flex items-center justify-center relative w-[450px] h-[600px] shrink-0 lg:w-[min(520px,calc((100vw-160px)/2))] lg:h-auto lg:aspect-[3/4]">
             <div
-              className="bg-white shadow-2xl rounded-lg overflow-hidden flex items-center justify-center relative"
-              style={{ minWidth: "450px", minHeight: "600px" }}
+              className="relative w-full h-full shrink-0 transition-transform duration-200"
+              style={{
+                transform: `translate(${panOffsets.left.x}px, ${panOffsets.left.y}px) scale(${zoom / 100})`,
+              }}
             >
-              <canvas ref={canvasRightRef} className="max-w-full max-h-full" />
+              <canvas ref={canvasLeftRef} className="block w-full h-full" />
               <canvas
-                ref={overlayRightRef}
-                className="absolute inset-0 m-auto max-w-full max-h-full cursor-crosshair"
-                onMouseDown={(e) => handleMouseDown(e, rightPage)}
-                onMouseMove={(e) => handleMouseMove(e, rightPage)}
-                onMouseUp={(e) => handleMouseUp(e, rightPage)}
+                ref={overlayLeftRef}
+                className="absolute inset-0 w-full h-full cursor-crosshair"
+                onMouseDown={(e) => handleMouseDown(e, leftPage)}
+                onMouseMove={(e) => handleMouseMove(e, leftPage)}
+                onMouseUp={(e) => handleMouseUp(e, leftPage)}
                 onMouseLeave={() => {
+                  isErasingRef.current = false;
+                  if (
+                    selectedTool === "comment" &&
+                    currentSelection &&
+                    currentSelection.width > 5 &&
+                    currentSelection.height > 5
+                  ) {
+                    void finishCommentSelection(leftPage);
+                    return;
+                  }
+                  handlePanEnd();
                   setIsSelecting(false);
                   setSelectionStart(null);
                   setCurrentSelection(null);
                 }}
                 style={{
                   cursor:
-                    selectedTool === "eraser"
-                      ? "not-allowed"
-                      : selectedTool
+                    !selectedTool && zoom > 100
+                      ? "grab"
+                      : selectedTool === "eraser"
                         ? "crosshair"
-                        : "default",
+                        : selectedTool
+                          ? "crosshair"
+                          : "default",
                 }}
               />
+            </div>
+          </div>
+
+          {/* Right Page */}
+          {rightPage <= numPages && (
+            <div className="bg-white shadow-2xl rounded-lg overflow-hidden flex items-center justify-center relative w-[450px] h-[600px] shrink-0 lg:w-[min(520px,calc((100vw-160px)/2))] lg:h-auto lg:aspect-[3/4]">
+              <div
+                className="relative w-full h-full shrink-0 transition-transform duration-200"
+                style={{
+                  transform: `translate(${panOffsets.right.x}px, ${panOffsets.right.y}px) scale(${zoom / 100})`,
+                }}
+              >
+                <canvas ref={canvasRightRef} className="block w-full h-full" />
+                <canvas
+                  ref={overlayRightRef}
+                  className="absolute inset-0 w-full h-full cursor-crosshair"
+                  onMouseDown={(e) => handleMouseDown(e, rightPage)}
+                  onMouseMove={(e) => handleMouseMove(e, rightPage)}
+                  onMouseUp={(e) => handleMouseUp(e, rightPage)}
+                  onMouseLeave={() => {
+                    isErasingRef.current = false;
+                    if (
+                      selectedTool === "comment" &&
+                      currentSelection &&
+                      currentSelection.width > 5 &&
+                      currentSelection.height > 5
+                    ) {
+                      void finishCommentSelection(rightPage);
+                      return;
+                    }
+                    handlePanEnd();
+                    setIsSelecting(false);
+                    setSelectionStart(null);
+                    setCurrentSelection(null);
+                  }}
+                  style={{
+                    cursor:
+                      !selectedTool && zoom > 100
+                        ? "grab"
+                        : selectedTool === "eraser"
+                          ? "crosshair"
+                          : selectedTool
+                            ? "crosshair"
+                            : "default",
+                  }}
+                />
+              </div>
             </div>
           )}
         </div>

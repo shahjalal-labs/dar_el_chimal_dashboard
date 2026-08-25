@@ -31,7 +31,7 @@ export default function ReadBookPage() {
 
   return (
     <div>
-      <Button onClick={() => route.back()} className='mb-6 bg-white/80 text-black hover:text-white cursor-pointer'><TfiAngleLeft />Back</Button>
+      <Button onClick={() => route.back()} className='mb-2 bg-white/80 text-black hover:text-white cursor-pointer'><TfiAngleLeft />Back</Button>
       {streamingUrl ? (
         <PdfReader
           bookId="default-book-id"
