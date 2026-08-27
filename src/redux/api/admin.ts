@@ -24,8 +24,8 @@ export const adminApi = baseApi.injectEndpoints({
             providesTags: ["teacher"],
         }),
         getSearchedTeachers: builder.query({
-            query: ({ schoolName, fullName }) => ({
-                url: `/users/get-teachers?schoolName=${schoolName}&searchTerm=${fullName}`,
+            query: (searchTerm) => ({
+                url: `/users/get-teachers?searchTerm=${searchTerm}`,
                 method: "GET",
             }),
             providesTags: ["teacher"],
@@ -38,15 +38,15 @@ export const adminApi = baseApi.injectEndpoints({
             providesTags: ["student"],
         }),
         getSearchedStudents: builder.query({
-            query: ({ schoolName, fullName }) => ({
-                url: `/users/get-students?schoolName=${schoolName}&searchTerm=${fullName}`,
+            query: ( searchTerm) => ({
+                url: `/users/get-students?searchTerm=${searchTerm}`,
                 method: "GET",
             }),
             providesTags: ["student"],
         }),
         getAllSchoolsByAdmin: builder.query({
-            query: ({ currentPage, limit }) => ({
-                url: `/school?page=${currentPage}&limit=${limit}`,
+            query: ({ currentPage, limit, searchTerm }) => ({
+                url: `/school?page=${currentPage}&limit=${limit}&searchTerm=${searchTerm}`,
                 method: "GET",
             }),
             providesTags: ["school"],

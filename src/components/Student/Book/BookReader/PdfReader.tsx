@@ -124,6 +124,7 @@ function PdfReader({
   });
 
   const [zoom, setZoom] = useState<number>(100);
+  const [pageInput, setPageInput] = useState<string>("1");
   const [panOffsets, setPanOffsets] = useState({
     left: { x: 0, y: 0 },
     right: { x: 0, y: 0 },
@@ -257,6 +258,10 @@ function PdfReader({
       );
     }
   }, [currentPage, pdfUrl]);
+
+  useEffect(() => {
+    setPageInput(currentPage.toString());
+  }, [currentPage]);
 
   // Initialize history
   useEffect(() => {
@@ -1414,6 +1419,22 @@ function PdfReader({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage]);
 
+  const handleGoToPage = (): void => {
+    const requestedPage = Number.parseInt(pageInput, 10);
+    if (Number.isNaN(requestedPage)) {
+      toast.error("Enter a valid page number");
+      setPageInput(currentPage.toString());
+      return;
+    }
+
+    const targetPage = Math.min(Math.max(requestedPage, 1), numPages);
+    setCurrentPage(targetPage);
+    setPanOffsets({
+      left: { x: 0, y: 0 },
+      right: { x: 0, y: 0 },
+    });
+  };
+
   const colors: Array<{ name: ColorName; class: string; hex: string }> = [
     { name: "red", class: "bg-red-400", hex: "#f87171" },
     { name: "green", class: "bg-green-400", hex: "#4ade80" },
@@ -1518,6 +1539,29 @@ function PdfReader({
             className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             autoFocus
           />
+          <div className="flex items-center gap-1 shrink-0">
+            <input
+              type="number"
+              min={1}
+              max={numPages}
+              value={pageInput}
+              onChange={(e) => setPageInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleGoToPage();
+              }}
+              className="w-16 px-2 py-2 border rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+              aria-label="Page number"
+              title="Go to page"
+            />
+            <Button
+              variant="outline"
+              onClick={handleGoToPage}
+              className="px-3 py-2 rounded-lg"
+              aria-label="Go to page"
+            >
+              Go to page
+            </Button>
+          </div>
           {searchQuery.trim() && (
             <div className="flex items-center gap-1 text-sm text-gray-600 whitespace-nowrap">
               {isSearching ? (

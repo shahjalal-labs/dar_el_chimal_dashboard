@@ -66,7 +66,9 @@ const DataTable = ({
   sortFive,
   icon,
   iconTwo,
+  willSearch = true,
   setSearchTerm,
+  searchPlaceholder = "Search",
   deleteItem,
   schoolId,
   isLoading,
@@ -87,6 +89,7 @@ const DataTable = ({
   iconTwo?: React.ReactNode;
   willSearch?: boolean;
   setSearchTerm?: (value: string) => void;
+  searchPlaceholder?: string;
   deleteItem?: string;
   schoolId?: string;
   isLoading?: boolean;
@@ -188,19 +191,21 @@ const DataTable = ({
 
         {/* Right - Sort + Button */}
         <div className="md:flex flex-wrap items-center gap-3 ml-auto">
-          <div className="relative w-64 pb-2">
-            <Input
-              placeholder="Search"
-              onChange={(e) => {
-                const value = e.target.value;
-                setSearchTerm?.(value);
-              }}
-              className="pr-8 bg-[#F9F9F9] border-none shadow-none"
-            />
-            <div className="absolute right-3 top-3 text-[#79767B] p-2 rounded-lg">
-              <Search className="h-4 w-4" />
+          {willSearch && (
+            <div className="relative w-80 pb-2">
+              <Input
+                placeholder={searchPlaceholder}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setSearchTerm?.(value);
+                }}
+                className="pr-8 bg-[#F9F9F9] border-none shadow-none"
+              />
+              <div className="absolute right-3 top-3 text-[#79767B] p-2 rounded-lg">
+                <Search className="h-4 w-4" />
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="mt-4 md:mt-0">{sort}</div>
           <div className="mt-4 md:mt-0">{sortTwo}</div>

@@ -19,7 +19,7 @@ export interface GetSchoolProps {
 }
 
 export const GetSchools: React.FC<GetSchoolProps> = ({ onChange, excludeIds = [] }) => {
-    const { data } = useGetAllSchoolsByAdminQuery({ currentPage: 1, limit: 10000 });
+    const { data } = useGetAllSchoolsByAdminQuery({ currentPage: 1, limit: 10000, searchTerm: "" });
 
     const schoolOptions: readonly SchoolOption[] =
         data?.result?.schools
