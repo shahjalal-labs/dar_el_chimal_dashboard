@@ -86,9 +86,13 @@ const Books = () => {
         data={formattedData}
         currentPage={currentPage}
         isLoading={isBookLoading}
-        willSearch={false}
+        searchPlaceholder="Search by book name or description"
+        willSearch={true}
         deleteItem="Book"
-        setSearchTerm={setSearchTerm}
+          setSearchTerm={(value) => {
+          setSearchTerm(value);
+          setCurrentPage(1);
+        }}
         sort={(
           <Select onValueChange={(value) => setBookCategoryId(value)}>
             <SelectTrigger className="w-fit border border-[#1E3A8A] text-[#1E3A8A] bg-transparent hover:bg-transparent cursor-pointer flex items-center gap-2 px-3 py-2 rounded-md data-[placeholder]:text-[#1E3A8A]">

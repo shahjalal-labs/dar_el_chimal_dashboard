@@ -14,6 +14,7 @@ const SchoolList = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState("");
     const { data, isLoading } = useGetAllSchoolsByAdminQuery({ currentPage, limit: 10, searchTerm });
+    console.log("School List Data:", data);
 
     const formattedData = data?.result?.schools?.map(
         (entry: {
