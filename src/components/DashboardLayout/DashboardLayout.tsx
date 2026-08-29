@@ -98,7 +98,7 @@ const DashboardLayout = () => {
               </Link>
             </div>
 
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {teacherOverviewData?.result?.grades?.slice(0, 5).map((grade: any) => (
                 <Link
                   href={`/teacher/classes/${grade?.id}`}

@@ -43,7 +43,7 @@ const Classes = () => {
                     </div>
                 </div>
 
-                <div className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {filteredData?.map((grade: any) => (
                         <Link
                             href={`/teacher/classes/${grade?.id}`}
