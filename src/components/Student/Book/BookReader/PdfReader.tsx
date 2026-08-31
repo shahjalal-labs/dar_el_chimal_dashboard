@@ -125,10 +125,7 @@ function PdfReader({
 
   const [zoom, setZoom] = useState<number>(100);
   const [pageInput, setPageInput] = useState<string>("1");
-  const [panOffsets, setPanOffsets] = useState({
-    left: { x: 0, y: 0 },
-    right: { x: 0, y: 0 },
-  });
+  const [panOffsets, setPanOffsets] = useState({ x: 0, y: 0 });
   const [selectedColor, setSelectedColor] = useState<ColorName>("red");
   const [selectedTool, setSelectedTool] = useState<ToolType>(null);
   const [numPages, setNumPages] = useState<number>(totalPages);
@@ -136,10 +133,8 @@ function PdfReader({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const canvasLeftRef = useRef<HTMLCanvasElement>(null);
-  const canvasRightRef = useRef<HTMLCanvasElement>(null);
-  const overlayLeftRef = useRef<HTMLCanvasElement>(null);
-  const overlayRightRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const overlayRef = useRef<HTMLCanvasElement>(null);
   const pdfDocRef = useRef<PDFDocumentProxy | null>(null);
 
   const [highlights, setHighlights] = useState<{ [key: number]: Highlight[] }>(
@@ -188,19 +183,10 @@ function PdfReader({
   const [flipDirection, setFlipDirection] = useState<"left" | "right" | null>(
     null,
   );
-  const renderTasksRef = useRef<Record<"left" | "right", PDFRenderTask | null>>(
-    {
-      left: null,
-      right: null,
-    },
-  );
-  const renderRequestIdsRef = useRef<Record<"left" | "right", number>>({
-    left: 0,
-    right: 0,
-  });
+  const renderTaskRef = useRef<PDFRenderTask | null>(null);
+  const renderRequestIdRef = useRef<number>(0);
   const searchRequestRef = useRef(0);
   const panDragRef = useRef<{
-    side: "left" | "right";
     startX: number;
     startY: number;
     originX: number;
@@ -303,18 +289,13 @@ function PdfReader({
       const page = await pdfDocRef.current.getPage(pageNum);
       const viewport = page.getViewport({ scale: 1 });
 
-      // Get the current canvas dimensions
-      const currentCanvas =
-        pageNum === currentPage
-          ? canvasLeftRef.current
-          : canvasRightRef.current;
+      const currentCanvas = canvasRef.current;
       if (!currentCanvas) return "";
 
       // Convert canvas coordinates to PDF coordinates
-      const scale = (zoom / 100) * 1.5;
       const pdfX = (x / currentCanvas.width) * viewport.width;
       const pdfY =
-        viewport.height - (y / currentCanvas.height) * viewport.height; // Invert Y axis
+        viewport.height - (y / currentCanvas.height) * viewport.height;
       const pdfWidth = (width / currentCanvas.width) * viewport.width;
       const pdfHeight = (height / currentCanvas.height) * viewport.height;
 
@@ -326,8 +307,6 @@ function PdfReader({
         (item: PDFTextItem) => {
           const itemX = item.transform[4];
           const itemY = item.transform[5];
-          const itemWidth = item.width || 0;
-          const itemHeight = item.height || 10;
 
           // Check if text item is within selection bounds
           const isInX = itemX >= pdfX && itemX <= pdfX + pdfWidth;
@@ -344,11 +323,9 @@ function PdfReader({
         const aX = a.transform[4];
         const bX = b.transform[4];
 
-        // First by Y coordinate (descending - higher Y is visually lower on page)
         if (Math.abs(aY - bY) > 5) {
           return bY - aY;
         }
-        // Then by X coordinate
         return aX - bX;
       });
 
@@ -371,14 +348,11 @@ function PdfReader({
           setIsLoading(true);
           setError(null);
 
-          // Use dynamic imports with proper typing
           const pdfjsLib = await import("pdfjs-dist/build/pdf");
           const pdfjsWorker = await import("pdfjs-dist/build/pdf.worker.entry");
 
-          // Set worker source
           (pdfjsLib as any).GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
-          // Configure PDF loading with streaming support
           const loadingTaskConfig: any = {
             url: pdfUrl,
             cMapUrl: "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/cmaps/",
@@ -386,12 +360,11 @@ function PdfReader({
             withCredentials: false,
           };
 
-          // Enable chunked loading for streaming
           if (useStreaming) {
-            loadingTaskConfig.rangeChunkSize = 65536; // 64KB chunks for optimal streaming
-            loadingTaskConfig.disableAutoFetch = true; // Don't fetch entire PDF at once
-            loadingTaskConfig.disableStream = false; // Enable streaming
-            loadingTaskConfig.isEvalSupported = false; // Security best practice
+            loadingTaskConfig.rangeChunkSize = 65536;
+            loadingTaskConfig.disableAutoFetch = true;
+            loadingTaskConfig.disableStream = false;
+            loadingTaskConfig.isEvalSupported = false;
           }
 
           const loadingTask = (pdfjsLib as any).getDocument(loadingTaskConfig);
@@ -433,24 +406,20 @@ function PdfReader({
     }
   }, [pdfUrl, useStreaming]);
 
-  // Render one of the two visible pages, cancelling its previous render first.
+  // Render visible page
   const renderPage = useCallback(
-    async (
-      pageNum: number,
-      canvasRef: React.RefObject<HTMLCanvasElement | null>,
-    ): Promise<void> => {
+    async (pageNum: number): Promise<void> => {
       if (!pdfDocRef.current || !canvasRef.current) return;
       if (pageNum < 1 || pageNum > numPages) return;
 
-      const side = canvasRef === canvasLeftRef ? "left" : "right";
-      const requestId = ++renderRequestIdsRef.current[side];
-      renderTasksRef.current[side]?.cancel();
-      renderTasksRef.current[side] = null;
+      const requestId = ++renderRequestIdRef.current;
+      renderTaskRef.current?.cancel();
+      renderTaskRef.current = null;
       let renderTask: PDFRenderTask | null = null;
 
       try {
         const page: PDFPageProxy = await pdfDocRef.current.getPage(pageNum);
-        if (requestId !== renderRequestIdsRef.current[side]) return;
+        if (requestId !== renderRequestIdRef.current) return;
         const canvas = canvasRef.current;
         if (!canvas) return;
 
@@ -470,7 +439,7 @@ function PdfReader({
           canvasContext: context,
           viewport: viewport,
         });
-        renderTasksRef.current[side] = renderTask;
+        renderTaskRef.current = renderTask;
 
         await renderTask.promise;
       } catch (error) {
@@ -483,8 +452,8 @@ function PdfReader({
           console.error(`Error rendering page ${pageNum}:`, error);
         }
       } finally {
-        if (renderTasksRef.current[side] === renderTask) {
-          renderTasksRef.current[side] = null;
+        if (renderTaskRef.current === renderTask) {
+          renderTaskRef.current = null;
         }
       }
     },
@@ -492,21 +461,14 @@ function PdfReader({
   );
 
   const drawAnnotations = useCallback(
-    (
-      pageNum: number,
-      overlayRef: React.RefObject<HTMLCanvasElement | null>,
-    ): void => {
+    (pageNum: number): void => {
       if (!overlayRef.current) return;
 
       const canvas = overlayRef.current;
       const context = canvas.getContext("2d");
       if (!context) return;
 
-      // Match canvas size to PDF canvas
-      const pdfCanvas =
-        pageNum === currentPage
-          ? canvasLeftRef.current
-          : canvasRightRef.current;
+      const pdfCanvas = canvasRef.current;
       if (pdfCanvas) {
         canvas.width = pdfCanvas.width;
         canvas.height = pdfCanvas.height;
@@ -707,7 +669,7 @@ function PdfReader({
         );
       }
 
-      // Paint erased areas last so they cover the PDF and every annotation.
+      // Paint erased areas last
       const pageErasedAreas = erasedAreas[pageNum] || [];
       pageErasedAreas.forEach((area) => {
         context.fillStyle = "rgb(255, 255, 255)";
@@ -725,31 +687,22 @@ function PdfReader({
       flattenedSearchResults,
       searchResultIndex,
       currentSelection,
-      currentPage,
       selectedColor,
       erasedAreas,
     ],
   );
 
-  // Render only the visible pages when the spread changes.
+  // Render visible page when currentPage changes
   useEffect(() => {
     if (pdfDocRef.current && !isFlipping) {
-      const leftPage = currentPage;
-      const rightPage = currentPage + 1;
-
-      // Render current pages
-      if (leftPage <= numPages) {
-        renderPage(leftPage, canvasLeftRef);
-      }
-      if (rightPage <= numPages) {
-        renderPage(rightPage, canvasRightRef);
+      if (currentPage <= numPages) {
+        renderPage(currentPage);
       }
     }
   }, [currentPage, numPages, renderPage, isFlipping]);
 
   useEffect(() => {
-    drawAnnotations(currentPage, overlayLeftRef);
-    drawAnnotations(currentPage + 1, overlayRightRef);
+    drawAnnotations(currentPage);
   }, [
     highlights,
     underlines,
@@ -765,16 +718,12 @@ function PdfReader({
     e: React.MouseEvent<HTMLCanvasElement>,
     pageNum: number,
   ): void => {
-    const side = pageNum === currentPage ? "left" : "right";
-
     if (!selectedTool && zoom > 100) {
-      const offset = panOffsets[side];
       panDragRef.current = {
-        side,
         startX: e.clientX,
         startY: e.clientY,
-        originX: offset.x,
-        originY: offset.y,
+        originX: panOffsets.x,
+        originY: panOffsets.y,
       };
       e.currentTarget.style.cursor = "grabbing";
       return;
@@ -814,8 +763,7 @@ function PdfReader({
   ): { x: number; y: number } => {
     const canvas = e.currentTarget;
     const rect = canvas.getBoundingClientRect();
-    const pageCanvas =
-      pageNum === currentPage ? canvasLeftRef.current : canvasRightRef.current;
+    const pageCanvas = canvasRef.current;
     const zoomScale = zoom / 100;
     const unscaledWidth = rect.width / zoomScale;
     const unscaledHeight = rect.height / zoomScale;
@@ -834,18 +782,15 @@ function PdfReader({
     const drag = panDragRef.current;
     if (!drag) return;
 
-    const maxX = (450 * (zoom / 100 - 1)) / 2;
-    const maxY = (600 * (zoom / 100 - 1)) / 2;
+    const maxX = (550 * (zoom / 100 - 1)) / 2;
+    const maxY = (750 * (zoom / 100 - 1)) / 2;
     const nextX = drag.originX + e.clientX - drag.startX;
     const nextY = drag.originY + e.clientY - drag.startY;
 
-    setPanOffsets((current) => ({
-      ...current,
-      [drag.side]: {
-        x: Math.max(-maxX, Math.min(maxX, nextX)),
-        y: Math.max(-maxY, Math.min(maxY, nextY)),
-      },
-    }));
+    setPanOffsets({
+      x: Math.max(-maxX, Math.min(maxX, nextX)),
+      y: Math.max(-maxY, Math.min(maxY, nextY)),
+    });
   };
 
   const handlePanEnd = (): void => {
@@ -971,10 +916,7 @@ function PdfReader({
     });
 
     // Update overlay
-    drawAnnotations(
-      pageNum,
-      pageNum === currentPage ? overlayLeftRef : overlayRightRef,
-    );
+    drawAnnotations(pageNum);
   };
 
   const handleMouseUp = async (
@@ -1110,26 +1052,21 @@ function PdfReader({
   };
 
   const handleAddBookmark = () => {
-    // Bookmark the entire PDF URL instead of selected text
     const name =
       bookmarkName.trim() || `Bookmark ${new Date().toLocaleDateString()}`;
 
     if (typeof window !== "undefined") {
       try {
-        // For modern browsers
         const sidebar = (window as any).sidebar;
 
         if (sidebar && sidebar.addPanel) {
-          // Firefox
           sidebar.addPanel(name, pdfUrl, "");
         } else if (
           (window as any).external &&
           "AddFavorite" in (window as any).external
         ) {
-          // IE
           (window as any).external.AddFavorite(pdfUrl, name);
         } else {
-          // Other browsers - show instructions
           alert(
             `To bookmark this PDF:\n1. Press Ctrl+D (Cmd+D on Mac)\n2. Name: ${name}\n3. URL: ${pdfUrl}\n4. Click "Save"`,
           );
@@ -1140,16 +1077,11 @@ function PdfReader({
         );
       }
     }
-    const toolInstructions = {
-      eraser: "erase",
-      pen: "mark", // change this based on what the pen actually does
-    };
 
-    // Also save to local storage for in-app bookmarks
     const bookmarkId = `pdf-${Date.now()}`;
     const newBookmark: Highlight = {
       id: bookmarkId,
-      x: 50, // Default position
+      x: 50,
       y: 50,
       width: 100,
       height: 30,
@@ -1180,10 +1112,6 @@ function PdfReader({
 
       try {
         await navigator.clipboard.writeText(copiedValue);
-        const preview =
-          copiedValue.length > 180
-            ? `${copiedValue.slice(0, 180)}...`
-            : copiedValue;
         toast.success("Text copied to clipboard", {
           duration: 1000,
         });
@@ -1213,15 +1141,13 @@ function PdfReader({
     newPage: number,
     direction: "left" | "right",
   ) => {
-    if (isFlipping) return; // Prevent rapid clicks causing shake
+    if (isFlipping) return;
 
     setIsFlipping(true);
     setFlipDirection(direction);
 
-    // Immediately change page
     setCurrentPage(newPage);
 
-    // Short animation duration
     setTimeout(() => {
       setIsFlipping(false);
       setFlipDirection(null);
@@ -1230,14 +1156,14 @@ function PdfReader({
 
   const handlePrevPage = (): void => {
     if (currentPage > 1 && !isFlipping) {
-      handlePageChangeWithAnimation(Math.max(1, currentPage - 2), "right");
+      handlePageChangeWithAnimation(Math.max(1, currentPage - 1), "right");
     }
   };
 
   const handleNextPage = (): void => {
-    if (currentPage < numPages - 1 && !isFlipping) {
+    if (currentPage < numPages && !isFlipping) {
       handlePageChangeWithAnimation(
-        Math.min(numPages - 1, currentPage + 2),
+        Math.min(numPages, currentPage + 1),
         "left",
       );
     }
@@ -1267,24 +1193,15 @@ function PdfReader({
 
   useEffect(() => {
     if (zoom <= 100) {
-      setPanOffsets({
-        left: { x: 0, y: 0 },
-        right: { x: 0, y: 0 },
-      });
+      setPanOffsets({ x: 0, y: 0 });
       return;
     }
 
-    const maxX = (450 * (zoom / 100 - 1)) / 2;
-    const maxY = (600 * (zoom / 100 - 1)) / 2;
+    const maxX = (550 * (zoom / 100 - 1)) / 2;
+    const maxY = (750 * (zoom / 100 - 1)) / 2;
     setPanOffsets((current) => ({
-      left: {
-        x: Math.max(-maxX, Math.min(maxX, current.left.x)),
-        y: Math.max(-maxY, Math.min(maxY, current.left.y)),
-      },
-      right: {
-        x: Math.max(-maxX, Math.min(maxX, current.right.x)),
-        y: Math.max(-maxY, Math.min(maxY, current.right.y)),
-      },
+      x: Math.max(-maxX, Math.min(maxX, current.x)),
+      y: Math.max(-maxY, Math.min(maxY, current.y)),
     }));
   }, [zoom]);
 
@@ -1321,11 +1238,7 @@ function PdfReader({
     const results: { [key: number]: Highlight[] } = {};
     const normalizedQuery = query.trim().toLocaleLowerCase();
     const pagesToSearch = [currentPage];
-    const measurementContext = canvasLeftRef.current?.getContext("2d");
-
-    if (currentPage + 1 <= numPages) {
-      pagesToSearch.push(currentPage + 1);
-    }
+    const measurementContext = canvasRef.current?.getContext("2d");
 
     for (const pageNumber of pagesToSearch) {
       if (requestId !== searchRequestRef.current) return;
@@ -1429,10 +1342,7 @@ function PdfReader({
 
     const targetPage = Math.min(Math.max(requestedPage, 1), numPages);
     setCurrentPage(targetPage);
-    setPanOffsets({
-      left: { x: 0, y: 0 },
-      right: { x: 0, y: 0 },
-    });
+    setPanOffsets({ x: 0, y: 0 });
   };
 
   const colors: Array<{ name: ColorName; class: string; hex: string }> = [
@@ -1448,12 +1358,9 @@ function PdfReader({
       setSelectedTool(null);
     } else if (tool === "copy") {
       setSelectedTool("copy");
-      // Copy will be handled when selection is made
     } else if (tool === "comment") {
       setSelectedTool("comment");
-      // Comment will be added when selection is made
     } else if (tool === "bookmark") {
-      // For bookmark tool, directly show the popup without requiring selection
       setShowBookmarkPopup(true);
       setSelectedTool(null);
     } else {
@@ -1509,9 +1416,6 @@ function PdfReader({
     );
   }
 
-  const leftPage = currentPage;
-  const rightPage = currentPage + 1;
-
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header */}
@@ -1530,7 +1434,7 @@ function PdfReader({
 
       {/* Search Bar */}
       {showSearchBar && (
-        <div className="bg-white border-b rounded-2xl px-4 py-3 flex items-center gap-2 w-[50%] mx-auto">
+        <div className="bg-white border-b rounded-2xl px-4 py-3 flex items-center gap-2 w-[80%] mx-auto">
           <input
             type="text"
             placeholder="Search in PDF..."
@@ -1586,7 +1490,7 @@ function PdfReader({
                   if (flattenedSearchResults.length > 0) {
                     goToSearchResult(
                       (searchResultIndex - 1 + flattenedSearchResults.length) %
-                        flattenedSearchResults.length,
+                      flattenedSearchResults.length,
                     );
                   }
                 }}
@@ -1706,37 +1610,34 @@ function PdfReader({
           onClick={handlePrevPage}
           disabled={currentPage <= 1 || isFlipping}
           className={`absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center transition-all z-10
-            ${
-              currentPage <= 1 || isFlipping
-                ? "opacity-30 cursor-not-allowed"
-                : "hover:bg-gray-50 hover:shadow-xl cursor-pointer"
+            ${currentPage <= 1 || isFlipping
+              ? "opacity-30 cursor-not-allowed"
+              : "hover:bg-gray-50 hover:shadow-xl cursor-pointer"
             }`}
           aria-label="Previous page"
         >
           <ChevronLeft className="w-6 h-6 text-gray-700" />
         </Button>
 
-        {/* Book Pages Container with Smooth Animation */}
+        {/* Book Page Container with Smooth Animation */}
         <div
-          className={`flex gap-8 max-w-7xl transition-all duration-200 ease-out ${
-            isFlipping ? "opacity-90 scale-[0.99]" : "opacity-100 scale-100"
-          }`}
+          className={`transition-all duration-200 ease-out ${isFlipping ? "opacity-90 scale-[0.99]" : "opacity-100 scale-100"
+            }`}
         >
-          {/* Left Page */}
-          <div className="bg-white shadow-2xl rounded-lg overflow-hidden flex items-center justify-center relative w-[450px] h-[600px] shrink-0 lg:w-[min(520px,calc((100vw-160px)/2))] lg:h-auto lg:aspect-[3/4]">
+          <div className="bg-white shadow-2xl rounded-lg overflow-hidden flex items-center justify-center relative w-[520px] sm:w-[600px] md:w-[680px] aspect-[3/4] max-h-[calc(100vh-220px)]">
             <div
               className="relative w-full h-full shrink-0 transition-transform duration-200"
               style={{
-                transform: `translate(${panOffsets.left.x}px, ${panOffsets.left.y}px) scale(${zoom / 100})`,
+                transform: `translate(${panOffsets.x}px, ${panOffsets.y}px) scale(${zoom / 100})`,
               }}
             >
-              <canvas ref={canvasLeftRef} className="block w-full h-full" />
+              <canvas ref={canvasRef} className="block w-full h-full" />
               <canvas
-                ref={overlayLeftRef}
+                ref={overlayRef}
                 className="absolute inset-0 w-full h-full cursor-crosshair"
-                onMouseDown={(e) => handleMouseDown(e, leftPage)}
-                onMouseMove={(e) => handleMouseMove(e, leftPage)}
-                onMouseUp={(e) => handleMouseUp(e, leftPage)}
+                onMouseDown={(e) => handleMouseDown(e, currentPage)}
+                onMouseMove={(e) => handleMouseMove(e, currentPage)}
+                onMouseUp={(e) => handleMouseUp(e, currentPage)}
                 onMouseLeave={() => {
                   isErasingRef.current = false;
                   if (
@@ -1745,7 +1646,7 @@ function PdfReader({
                     currentSelection.width > 5 &&
                     currentSelection.height > 5
                   ) {
-                    void finishCommentSelection(leftPage);
+                    void finishCommentSelection(currentPage);
                     return;
                   }
                   handlePanEnd();
@@ -1766,65 +1667,17 @@ function PdfReader({
               />
             </div>
           </div>
-
-          {/* Right Page */}
-          {rightPage <= numPages && (
-            <div className="bg-white shadow-2xl rounded-lg overflow-hidden flex items-center justify-center relative w-[450px] h-[600px] shrink-0 lg:w-[min(520px,calc((100vw-160px)/2))] lg:h-auto lg:aspect-[3/4]">
-              <div
-                className="relative w-full h-full shrink-0 transition-transform duration-200"
-                style={{
-                  transform: `translate(${panOffsets.right.x}px, ${panOffsets.right.y}px) scale(${zoom / 100})`,
-                }}
-              >
-                <canvas ref={canvasRightRef} className="block w-full h-full" />
-                <canvas
-                  ref={overlayRightRef}
-                  className="absolute inset-0 w-full h-full cursor-crosshair"
-                  onMouseDown={(e) => handleMouseDown(e, rightPage)}
-                  onMouseMove={(e) => handleMouseMove(e, rightPage)}
-                  onMouseUp={(e) => handleMouseUp(e, rightPage)}
-                  onMouseLeave={() => {
-                    isErasingRef.current = false;
-                    if (
-                      selectedTool === "comment" &&
-                      currentSelection &&
-                      currentSelection.width > 5 &&
-                      currentSelection.height > 5
-                    ) {
-                      void finishCommentSelection(rightPage);
-                      return;
-                    }
-                    handlePanEnd();
-                    setIsSelecting(false);
-                    setSelectionStart(null);
-                    setCurrentSelection(null);
-                  }}
-                  style={{
-                    cursor:
-                      !selectedTool && zoom > 100
-                        ? "grab"
-                        : selectedTool === "eraser"
-                          ? "crosshair"
-                          : selectedTool
-                            ? "crosshair"
-                            : "default",
-                  }}
-                />
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Right Arrow */}
         <Button
           variant="default"
           onClick={handleNextPage}
-          disabled={currentPage >= numPages - 1 || isFlipping}
+          disabled={currentPage >= numPages || isFlipping}
           className={`absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center transition-all z-10
-            ${
-              currentPage >= numPages - 1 || isFlipping
-                ? "opacity-30 cursor-not-allowed"
-                : "hover:bg-gray-50 hover:shadow-xl cursor-pointer"
+            ${currentPage >= numPages || isFlipping
+              ? "opacity-30 cursor-not-allowed"
+              : "hover:bg-gray-50 hover:shadow-xl cursor-pointer"
             }`}
           aria-label="Next page"
         >
@@ -1842,11 +1695,10 @@ function PdfReader({
                 variant="default"
                 key={color.name}
                 onClick={() => setSelectedColor(color.name)}
-                className={`w-8 h-8 rounded-full bg-white ${color.class} ${
-                  selectedColor === color.name
+                className={`w-8 h-8 rounded-full bg-white ${color.class} ${selectedColor === color.name
                     ? "ring-2 ring-offset-2 ring-gray-400"
                     : ""
-                } transition-all hover:scale-110`}
+                  } transition-all hover:scale-110`}
                 aria-label={`Select ${color.name} color`}
               />
             ))}
@@ -1858,11 +1710,10 @@ function PdfReader({
               variant="default"
               onClick={handleUndo}
               disabled={historyIndex <= 0}
-              className={`p-2 rounded-lg transition-colors bg-white ${
-                historyIndex <= 0
+              className={`p-2 rounded-lg transition-colors bg-white ${historyIndex <= 0
                   ? "opacity-30 cursor-not-allowed"
                   : "hover:bg-gray-100"
-              }`}
+                }`}
               aria-label="Undo"
               title="Undo last action"
             >
@@ -1871,9 +1722,8 @@ function PdfReader({
             <Button
               variant="default"
               onClick={() => handleToolClick("eraser")}
-              className={`p-2 rounded-lg transition-colors bg-white ${
-                selectedTool === "eraser" ? "bg-gray-200" : "hover:bg-gray-100"
-              }`}
+              className={`p-2 rounded-lg transition-colors bg-white ${selectedTool === "eraser" ? "bg-gray-200" : "hover:bg-gray-100"
+                }`}
               aria-label="Eraser"
               title="Click to enable eraser mode"
             >
@@ -1882,11 +1732,10 @@ function PdfReader({
             <Button
               variant="default"
               onClick={() => handleToolClick("underline")}
-              className={`p-2 rounded-lg transition-colors bg-white ${
-                selectedTool === "underline"
+              className={`p-2 rounded-lg transition-colors bg-white ${selectedTool === "underline"
                   ? "bg-gray-200"
                   : "hover:bg-gray-100"
-              }`}
+                }`}
               aria-label="Underline"
               title="Click to enable underline mode"
             >
@@ -1895,9 +1744,8 @@ function PdfReader({
             <Button
               variant="default"
               onClick={() => handleToolClick("search")}
-              className={`p-2 rounded-lg transition-colors bg-white ${
-                showSearchBar ? "bg-gray-200" : "hover:bg-gray-100"
-              }`}
+              className={`p-2 rounded-lg transition-colors bg-white ${showSearchBar ? "bg-gray-200" : "hover:bg-gray-100"
+                }`}
               aria-label="Search"
               title="Search in PDF"
             >
@@ -1906,9 +1754,8 @@ function PdfReader({
             <Button
               variant="default"
               onClick={() => handleToolClick("pen")}
-              className={`p-2 rounded-lg transition-colors bg-white ${
-                selectedTool === "pen" ? "bg-gray-200" : "hover:bg-gray-100"
-              }`}
+              className={`p-2 rounded-lg transition-colors bg-white ${selectedTool === "pen" ? "bg-gray-200" : "hover:bg-gray-100"
+                }`}
               aria-label="Highlight"
               title="Click to enable highlighting mode"
             >
@@ -1917,9 +1764,8 @@ function PdfReader({
             <Button
               variant="default"
               onClick={() => handleToolClick("comment")}
-              className={`p-2 rounded-lg transition-colors bg-white ${
-                selectedTool === "comment" ? "bg-gray-200" : "hover:bg-gray-100"
-              }`}
+              className={`p-2 rounded-lg transition-colors bg-white ${selectedTool === "comment" ? "bg-gray-200" : "hover:bg-gray-100"
+                }`}
               aria-label="Comment"
               title="Add comment to selected text"
             >
@@ -1928,9 +1774,8 @@ function PdfReader({
             <Button
               variant="default"
               onClick={() => handleToolClick("copy")}
-              className={`p-2 rounded-lg transition-colors bg-white ${
-                copiedText ? "bg-green-100" : "hover:bg-gray-100"
-              }`}
+              className={`p-2 rounded-lg transition-colors bg-white ${copiedText ? "bg-green-100" : "hover:bg-gray-100"
+                }`}
               aria-label="Copy"
               title="Copy selected text"
             >
@@ -1939,11 +1784,10 @@ function PdfReader({
             <Button
               variant="default"
               onClick={() => handleToolClick("bookmark")}
-              className={`p-2 rounded-lg transition-colors bg-white ${
-                selectedTool === "bookmark"
+              className={`p-2 rounded-lg transition-colors bg-white ${selectedTool === "bookmark"
                   ? "bg-gray-200"
                   : "hover:bg-gray-100"
-              }`}
+                }`}
               aria-label="Bookmark"
               title="Bookmark this PDF"
             >
@@ -1980,7 +1824,7 @@ function PdfReader({
         {/* Page Counter */}
         <div className="text-center mt-4">
           <span className="text-sm text-gray-600 font-medium">
-            {currentPage} - {Math.min(currentPage + 1, numPages)} of {numPages}
+            {currentPage} of {numPages}
           </span>
         </div>
 
