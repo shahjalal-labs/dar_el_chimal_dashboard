@@ -87,6 +87,7 @@ interface HistoryState {
   underlines: { [key: number]: Highlight[] };
   comments: { [key: number]: Highlight[] };
   bookmarks: { [key: number]: Highlight[] };
+  erasedAreas: { [key: number]: Array<{ x: number; y: number; radius: number }> };
 }
 
 type ToolType =
@@ -193,6 +194,22 @@ function PdfReader({
     originY: number;
   } | null>(null);
   const isErasingRef = useRef(false);
+  const hasErasedInCurrentStrokeRef = useRef(false);
+
+  const highlightsRef = useRef(highlights);
+  highlightsRef.current = highlights;
+
+  const underlinesRef = useRef(underlines);
+  underlinesRef.current = underlines;
+
+  const commentsRef = useRef(comments);
+  commentsRef.current = comments;
+
+  const bookmarksRef = useRef(bookmarks);
+  bookmarksRef.current = bookmarks;
+
+  const erasedAreasRef = useRef(erasedAreas);
+  erasedAreasRef.current = erasedAreas;
 
   const flattenedSearchResults = Object.entries(searchResults)
     .sort(([pageA], [pageB]) => Number(pageA) - Number(pageB))
@@ -251,7 +268,7 @@ function PdfReader({
 
   // Initialize history
   useEffect(() => {
-    addToHistory(highlights, underlines, comments, bookmarks);
+    addToHistory(highlights, underlines, comments, bookmarks, erasedAreas);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -261,6 +278,7 @@ function PdfReader({
       newUnderlines: { [key: number]: Highlight[] },
       newComments: { [key: number]: Highlight[] },
       newBookmarks: { [key: number]: Highlight[] },
+      newErasedAreas: { [key: number]: Array<{ x: number; y: number; radius: number }> },
     ) => {
       const newHistory = history.slice(0, historyIndex + 1);
       newHistory.push({
@@ -268,6 +286,7 @@ function PdfReader({
         underlines: JSON.parse(JSON.stringify(newUnderlines)),
         comments: JSON.parse(JSON.stringify(newComments)),
         bookmarks: JSON.parse(JSON.stringify(newBookmarks)),
+        erasedAreas: JSON.parse(JSON.stringify(newErasedAreas)),
       });
       setHistory(newHistory);
       setHistoryIndex(newHistory.length - 1);
@@ -733,6 +752,7 @@ function PdfReader({
       const { x, y } = getCanvasCoordinates(e, pageNum);
 
       isErasingRef.current = true;
+      hasErasedInCurrentStrokeRef.current = true;
       removeAnnotationAtPosition(x, y, pageNum);
       addEraseMark(x, y, pageNum);
       setIsSelecting(true);
@@ -838,10 +858,10 @@ function PdfReader({
       );
     };
 
-    const newHighlights = { ...highlights };
-    const newUnderlines = { ...underlines };
-    const newComments = { ...comments };
-    const newBookmarks = { ...bookmarks };
+    const newHighlights = { ...highlightsRef.current };
+    const newUnderlines = { ...underlinesRef.current };
+    const newComments = { ...commentsRef.current };
+    const newBookmarks = { ...bookmarksRef.current };
     let removed = false;
 
     if (newHighlights[pageNum]) {
@@ -871,15 +891,16 @@ function PdfReader({
     setUnderlines(newUnderlines);
     setComments(newComments);
     setBookmarks(newBookmarks);
-    addToHistory(newHighlights, newUnderlines, newComments, newBookmarks);
     return true;
   };
 
   const addEraseMark = (x: number, y: number, pageNum: number): void => {
-    setErasedAreas((current) => ({
-      ...current,
-      [pageNum]: [...(current[pageNum] || []), { x, y, radius: 24 }],
-    }));
+    const pageMarks = erasedAreasRef.current[pageNum] || [];
+    const newErased = {
+      ...erasedAreasRef.current,
+      [pageNum]: [...pageMarks, { x, y, radius: 24 }],
+    };
+    setErasedAreas(newErased);
   };
 
   const handleMouseMove = (
@@ -893,6 +914,7 @@ function PdfReader({
 
     if (selectedTool === "eraser" && isErasingRef.current) {
       const { x, y } = getCanvasCoordinates(e, pageNum);
+      hasErasedInCurrentStrokeRef.current = true;
       removeAnnotationAtPosition(x, y, pageNum);
       addEraseMark(x, y, pageNum);
       return;
@@ -929,6 +951,16 @@ function PdfReader({
     }
 
     if (selectedTool === "eraser") {
+      if (isErasingRef.current && hasErasedInCurrentStrokeRef.current) {
+        addToHistory(
+          highlightsRef.current,
+          underlinesRef.current,
+          commentsRef.current,
+          bookmarksRef.current,
+          erasedAreasRef.current,
+        );
+        hasErasedInCurrentStrokeRef.current = false;
+      }
       isErasingRef.current = false;
       setIsSelecting(false);
       setSelectionStart(null);
@@ -986,14 +1018,14 @@ function PdfReader({
           [pageNum]: [...(highlights[pageNum] || []), newAnnotation],
         };
         setHighlights(newHighlights);
-        addToHistory(newHighlights, underlines, comments, bookmarks);
+        addToHistory(newHighlights, underlines, comments, bookmarks, erasedAreas);
       } else if (selectedTool === "underline") {
         const newUnderlines = {
           ...underlines,
           [pageNum]: [...(underlines[pageNum] || []), newAnnotation],
         };
         setUnderlines(newUnderlines);
-        addToHistory(highlights, newUnderlines, comments, bookmarks);
+        addToHistory(highlights, newUnderlines, comments, bookmarks, erasedAreas);
       } else if (selectedTool === "bookmark") {
         setShowBookmarkPopup(true);
         setCurrentSelection(null);
@@ -1039,7 +1071,7 @@ function PdfReader({
         ],
       };
       setComments(newComments);
-      addToHistory(highlights, underlines, newComments, bookmarks);
+      addToHistory(highlights, underlines, newComments, bookmarks, erasedAreas);
       setShowCommentPopup(false);
       setCommentText("");
       setSelectedText("");
@@ -1096,7 +1128,7 @@ function PdfReader({
       [currentPage]: [...(bookmarks[currentPage] || []), newBookmark],
     };
     setBookmarks(newBookmarks);
-    addToHistory(highlights, underlines, comments, newBookmarks);
+    addToHistory(highlights, underlines, comments, newBookmarks, erasedAreas);
 
     setShowBookmarkPopup(false);
     setBookmarkName("");
@@ -1213,6 +1245,7 @@ function PdfReader({
       setUnderlines(state.underlines);
       setComments(state.comments);
       setBookmarks(state.bookmarks);
+      setErasedAreas(state.erasedAreas || {});
       setHistoryIndex(newIndex);
     }
   };
@@ -1639,7 +1672,19 @@ function PdfReader({
                 onMouseMove={(e) => handleMouseMove(e, currentPage)}
                 onMouseUp={(e) => handleMouseUp(e, currentPage)}
                 onMouseLeave={() => {
-                  isErasingRef.current = false;
+                  if (selectedTool === "eraser" && isErasingRef.current) {
+                    if (hasErasedInCurrentStrokeRef.current) {
+                      addToHistory(
+                        highlightsRef.current,
+                        underlinesRef.current,
+                        commentsRef.current,
+                        bookmarksRef.current,
+                        erasedAreasRef.current,
+                      );
+                      hasErasedInCurrentStrokeRef.current = false;
+                    }
+                    isErasingRef.current = false;
+                  }
                   if (
                     selectedTool === "comment" &&
                     currentSelection &&
