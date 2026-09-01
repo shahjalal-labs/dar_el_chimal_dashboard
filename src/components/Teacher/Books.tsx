@@ -6,7 +6,7 @@ import {
   useGetAllBooksForTeacherQuery,
 } from "@/redux/api/teacher/overviewApi";
 import Image from "next/image";
-import { useParams, usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Button } from "../ui/button";
 import { TfiAngleLeft } from "react-icons/tfi";
 import { useState } from "react";

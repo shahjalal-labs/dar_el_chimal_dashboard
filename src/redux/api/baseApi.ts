@@ -1,8 +1,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { RootState } from "../store/store";
 
-const baseUrl = "http://localhost:5555/api/v1";
-// const baseUrl = "https://api.darelchimalapp.com/api/v1";
+// const baseUrl = "http://localhost:5555/api/v1";
+const baseUrl = "https://api.darelchimalapp.com/api/v1";
 
 export const baseApi = createApi({
   reducerPath: "api",
