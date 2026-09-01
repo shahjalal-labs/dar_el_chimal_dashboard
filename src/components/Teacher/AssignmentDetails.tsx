@@ -57,7 +57,7 @@ const AssignmentDetails = () => {
                 {/* Book Info */}
                 <div className="flex items-center gap-4 bg-[#F7F9FF] border border-[#D8D8D8] p-4 rounded-lg cursor-pointer hover:bg-gray-100 transition">
                     <Image
-                        src={bookData?.coverImg}
+                        src={bookData?.coverImg || "https://res.cloudinary.com/dddrm7ep8/image/upload/v1788255470/n2tfqinlzgwpdkittexh.jpg"}
                         alt={bookData?.bookName || "Book Cover"}
                         width={50}
                         height={50}

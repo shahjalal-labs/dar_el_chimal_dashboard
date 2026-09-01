@@ -19,6 +19,7 @@ const Books = () => {
   const { data: allBooks, isLoading: isBookLoading } =
     useGetAllBooksForTeacherQuery({ currentPage, limit: 10 });
 
+
   const formattedData = allBooks?.result?.data?.map(
     (entry: {
       id: string;
@@ -35,7 +36,7 @@ const Books = () => {
       Id: entry.id,
       Picture: (
         <Image
-          src={entry.coverImg || defaultImg}
+          src={entry.coverImg || "https://res.cloudinary.com/dddrm7ep8/image/upload/v1788255470/n2tfqinlzgwpdkittexh.jpg"}
           height={50}
           width={50}
           alt={entry.bookName}
@@ -86,7 +87,7 @@ const Books = () => {
 
       <div className="mt-6">
         <Pagination
-          totalPage={Math.ceil((allBooks?.result?.meta?.total ?? 0) / 5)}
+          totalPage={Math.ceil((allBooks?.result?.meta?.total ?? 0) / 10)}
           setCurrentPage={setCurrentPage}
           currentPage={currentPage}
         />

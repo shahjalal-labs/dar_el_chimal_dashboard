@@ -68,22 +68,20 @@ const BookOverview = () => {
           <TabsList className="flex gap-2 border-b border-gray-200 pb-2 mb-4">
             <TabsTrigger
               value="general"
-              className={`px-4 py-2 rounded-md text-sm font-medium ${
-                tab === "general"
+              className={`px-4 py-2 rounded-md text-sm font-medium ${tab === "general"
                   ? "bg-[#F8F8F8] text-[#1E3A8A]"
                   : "bg-white text-black hover:bg-gray-200"
-              }`}
+                }`}
             >
               <MdOutlineDataset />
               General
             </TabsTrigger>
             <TabsTrigger
               value="resources"
-              className={`px-4 py-2 rounded-md text-sm font-medium ${
-                tab === "resources"
+              className={`px-4 py-2 rounded-md text-sm font-medium ${tab === "resources"
                   ? "bg-[#F8F8F8] text-[#1E3A8A]"
                   : "bg-white text-black hover:bg-gray-200"
-              }`}
+                }`}
             >
               <GoLink />
               Resources
@@ -93,11 +91,11 @@ const BookOverview = () => {
           {/* General Tab */}
           <TabsContent value="general">
             <div className="space-y-5">
-              {/* Cover Image */}              
+              {/* Cover Image */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="col-span-1 border-r w-full xl:h-[400px] flex items-center justify-center overflow-hidden ">
                   <Image
-                    src={book?.coverImg}
+                    src={book?.coverImg || "https://res.cloudinary.com/dddrm7ep8/image/upload/v1788255470/n2tfqinlzgwpdkittexh.jpg"}
                     alt={book?.bookName || "Book Cover"}
                     height={1000}
                     width={750}

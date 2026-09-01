@@ -89,7 +89,7 @@ const BookOverview = () => {
                             {/* Cover Image */}
                             <div className="w-full">
                                 <Image
-                                    src={book.coverImg}
+                                    src={book.coverImg || "https://res.cloudinary.com/dddrm7ep8/image/upload/v1788255470/n2tfqinlzgwpdkittexh.jpg"}
                                     alt={book.bookName}
                                     height={1000}
                                     width={2000}
