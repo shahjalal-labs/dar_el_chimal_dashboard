@@ -247,6 +247,7 @@ function PdfReader({
   } | null>(null);
   const isErasingRef = useRef(false);
   const hasErasedInCurrentStrokeRef = useRef(false);
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
 
   const highlightsRef = useRef(highlights);
   highlightsRef.current = highlights;
@@ -1749,7 +1750,25 @@ function PdfReader({
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div
+      className={`flex flex-col ${
+        isFullscreen
+          ? "fixed inset-0 z-[9999] bg-white overflow-auto"
+          : "min-h-screen"
+      }`}
+    >
+      {/* Fullscreen Exit Button (floating) */}
+      {isFullscreen && (
+        <button
+          onClick={() => setIsFullscreen(false)}
+          className="fixed top-4 right-4 z-[10000] flex items-center gap-2 bg-gray-900 hover:bg-gray-700 text-white px-4 py-2 rounded-full shadow-xl transition-all text-sm font-medium"
+          aria-label="Exit fullscreen"
+          title="Exit fullscreen"
+        >
+          <Minimize2 className="w-4 h-4" />
+          Exit Fullscreen
+        </button>
+      )}
       {/* Header */}
       <div className="px-4 py-3 flex items-center">
         {isButton && (
@@ -2341,7 +2360,7 @@ function PdfReader({
             </Button>
           </div>
 
-          {/* Right Section - Zoom Controls */}
+          {/* Right Section - Zoom Controls + Fullscreen */}
           <div className="flex items-center gap-3">
             <Button
               variant="default"
@@ -2363,6 +2382,20 @@ function PdfReader({
               aria-label="Zoom in"
             >
               <ZoomIn className="w-5 h-5 text-gray-600" />
+            </Button>
+            <div className="w-px h-5 bg-gray-200 mx-1" />
+            <Button
+              variant="default"
+              onClick={() => setIsFullscreen((prev) => !prev)}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors bg-white"
+              aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+              title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+            >
+              {isFullscreen ? (
+                <Minimize2 className="w-5 h-5 text-gray-600" />
+              ) : (
+                <Maximize2 className="w-5 h-5 text-gray-600" />
+              )}
             </Button>
           </div>
         </div>
