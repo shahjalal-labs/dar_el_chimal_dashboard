@@ -5,13 +5,19 @@
 import type React from "react";
 import { Button } from "@/components/ui/button";
 import {
+  Bold,
   Bookmark,
   ChevronLeft,
   ChevronRight,
   Copy,
+  Italic,
   Loader2,
+  Maximize2,
   MessageSquare,
+  Minimize2,
+  Pencil,
   Search,
+  Type,
   Underline,
   X,
   ZoomIn,
@@ -82,11 +88,32 @@ interface Highlight {
   bookmarkName?: string;
 }
 
+export interface TextAnnotation {
+  id: string;
+  x: number;
+  y: number;
+  text: string;
+  color: string;
+  fontSize: number;
+  fontFamily: string;
+  isBold: boolean;
+  isItalic: boolean;
+}
+
+export interface FreehandStroke {
+  id: string;
+  points: Array<{ x: number; y: number }>;
+  color?: string;
+  lineWidth?: number;
+}
+
 interface HistoryState {
   highlights: { [key: number]: Highlight[] };
   underlines: { [key: number]: Highlight[] };
   comments: { [key: number]: Highlight[] };
   bookmarks: { [key: number]: Highlight[] };
+  textAnnotations: { [key: number]: TextAnnotation[] };
+  freehandStrokes: { [key: number]: FreehandStroke[] };
   erasedAreas: { [key: number]: Array<{ x: number; y: number; radius: number }> };
 }
 
@@ -98,6 +125,8 @@ type ToolType =
   | "copy"
   | "bookmark"
   | "search"
+  | "text"
+  | "draw"
   | null;
 
 type ColorName = "red" | "green" | "blue" | "purple";
@@ -148,9 +177,32 @@ function PdfReader({
   const [bookmarks, setBookmarks] = useState<{ [key: number]: Highlight[] }>(
     {},
   );
+  const [textAnnotations, setTextAnnotations] = useState<{
+    [key: number]: TextAnnotation[];
+  }>({});
+  const [freehandStrokes, setFreehandStrokes] = useState<{
+    [key: number]: FreehandStroke[];
+  }>({});
   const [erasedAreas, setErasedAreas] = useState<{
     [key: number]: Array<{ x: number; y: number; radius: number }>;
   }>({});
+  const isDrawingRef = useRef(false);
+  const currentStrokePointsRef = useRef<Array<{ x: number; y: number }>>([]);
+  const [currentStroke, setCurrentStroke] = useState<
+    Array<{ x: number; y: number }> | null
+  >(null);
+  const [showTextModal, setShowTextModal] = useState<boolean>(false);
+  const [textInput, setTextInput] = useState<string>("");
+  const [textPosition, setTextPosition] = useState<{
+    x: number;
+    y: number;
+    page: number;
+  } | null>(null);
+  const [textFontSize, setTextFontSize] = useState<number>(20);
+  const [textFontFamily, setTextFontFamily] = useState<string>("Arial");
+  const [textIsBold, setTextIsBold] = useState<boolean>(false);
+  const [textIsItalic, setTextIsItalic] = useState<boolean>(false);
+  const [textColor, setTextColor] = useState<string>("red");
   const [isSelecting, setIsSelecting] = useState<boolean>(false);
   const [selectionStart, setSelectionStart] = useState<{
     x: number;
@@ -207,6 +259,12 @@ function PdfReader({
 
   const bookmarksRef = useRef(bookmarks);
   bookmarksRef.current = bookmarks;
+
+  const textAnnotationsRef = useRef(textAnnotations);
+  textAnnotationsRef.current = textAnnotations;
+
+  const freehandStrokesRef = useRef(freehandStrokes);
+  freehandStrokesRef.current = freehandStrokes;
 
   const erasedAreasRef = useRef(erasedAreas);
   erasedAreasRef.current = erasedAreas;
@@ -268,7 +326,15 @@ function PdfReader({
 
   // Initialize history
   useEffect(() => {
-    addToHistory(highlights, underlines, comments, bookmarks, erasedAreas);
+    addToHistory(
+      highlights,
+      underlines,
+      comments,
+      bookmarks,
+      textAnnotations,
+      freehandStrokes,
+      erasedAreas,
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -278,6 +344,8 @@ function PdfReader({
       newUnderlines: { [key: number]: Highlight[] },
       newComments: { [key: number]: Highlight[] },
       newBookmarks: { [key: number]: Highlight[] },
+      newTextAnnotations: { [key: number]: TextAnnotation[] },
+      newFreehandStrokes: { [key: number]: FreehandStroke[] },
       newErasedAreas: { [key: number]: Array<{ x: number; y: number; radius: number }> },
     ) => {
       const newHistory = history.slice(0, historyIndex + 1);
@@ -286,6 +354,8 @@ function PdfReader({
         underlines: JSON.parse(JSON.stringify(newUnderlines)),
         comments: JSON.parse(JSON.stringify(newComments)),
         bookmarks: JSON.parse(JSON.stringify(newBookmarks)),
+        textAnnotations: JSON.parse(JSON.stringify(newTextAnnotations)),
+        freehandStrokes: JSON.parse(JSON.stringify(newFreehandStrokes)),
         erasedAreas: JSON.parse(JSON.stringify(newErasedAreas)),
       });
       setHistory(newHistory);
@@ -587,9 +657,9 @@ function PdfReader({
         // Comment text preview
         if (comment.comment) {
           const maxBubbleWidth = 220;
-          const lineHeight = 18;
+          const lineHeight = 22;
           const padding = 10;
-          context.font = "14px Arial";
+          context.font = "20px Arial";
           const words = comment.comment.trim().split(/\s+/);
           const lines: string[] = [];
           let line = "";
@@ -659,6 +729,67 @@ function PdfReader({
         }
       });
 
+      // Draw text annotations
+      const pageTextAnnos = textAnnotations[pageNum] || [];
+      pageTextAnnos.forEach((anno) => {
+        const fontStyle = anno.isItalic ? "italic " : "";
+        const fontWeight = anno.isBold ? "bold " : "normal ";
+        const fontSize = anno.fontSize || 20;
+        const fontFamily = anno.fontFamily || "Arial";
+
+        context.font = `${fontStyle}${fontWeight}${fontSize}px ${fontFamily}, sans-serif`;
+
+        const colorMap: Record<ColorName | string, string> = {
+          red: "rgb(248, 113, 113)",
+          green: "rgb(74, 222, 128)",
+          blue: "rgb(96, 165, 250)",
+          purple: "rgb(192, 132, 252)",
+          black: "rgb(0, 0, 0)",
+        };
+
+        context.fillStyle = colorMap[anno.color] || anno.color || "rgb(0, 0, 0)";
+        context.textBaseline = "top";
+
+        const lines = anno.text.split("\n");
+        lines.forEach((line, index) => {
+          context.fillText(line, anno.x, anno.y + index * (fontSize * 1.2));
+        });
+      });
+
+      // Draw freehand strokes
+      const pageStrokes = freehandStrokes[pageNum] || [];
+      pageStrokes.forEach((stroke) => {
+        if (stroke.points.length < 2) return;
+        context.strokeStyle = stroke.color || "#000000";
+        context.lineWidth = stroke.lineWidth || 2;
+        context.lineCap = "round";
+        context.lineJoin = "round";
+        context.beginPath();
+        context.moveTo(stroke.points[0].x, stroke.points[0].y);
+        for (let i = 1; i < stroke.points.length; i++) {
+          context.lineTo(stroke.points[i].x, stroke.points[i].y);
+        }
+        context.stroke();
+      });
+
+      // Draw current live stroke
+      if (
+        currentStroke &&
+        currentStroke.length >= 2 &&
+        pageNum === currentPage
+      ) {
+        context.strokeStyle = "#000000";
+        context.lineWidth = 2;
+        context.lineCap = "round";
+        context.lineJoin = "round";
+        context.beginPath();
+        context.moveTo(currentStroke[0].x, currentStroke[0].y);
+        for (let i = 1; i < currentStroke.length; i++) {
+          context.lineTo(currentStroke[i].x, currentStroke[i].y);
+        }
+        context.stroke();
+      }
+
       // Draw search results
       const pageSearchResults = searchResults[pageNum] || [];
       pageSearchResults.forEach((result) => {
@@ -702,6 +833,9 @@ function PdfReader({
       underlines,
       comments,
       bookmarks,
+      textAnnotations,
+      freehandStrokes,
+      currentStroke,
       searchResults,
       flattenedSearchResults,
       searchResultIndex,
@@ -727,6 +861,9 @@ function PdfReader({
     underlines,
     comments,
     bookmarks,
+    textAnnotations,
+    freehandStrokes,
+    currentStroke,
     currentPage,
     searchResults,
     zoom,
@@ -745,6 +882,23 @@ function PdfReader({
         originY: panOffsets.y,
       };
       e.currentTarget.style.cursor = "grabbing";
+      return;
+    }
+
+    if (selectedTool === "draw") {
+      const { x, y } = getCanvasCoordinates(e, pageNum);
+      isDrawingRef.current = true;
+      currentStrokePointsRef.current = [{ x, y }];
+      setCurrentStroke([{ x, y }]);
+      return;
+    }
+
+    if (selectedTool === "text") {
+      const { x, y } = getCanvasCoordinates(e, pageNum);
+      setTextPosition({ x, y, page: pageNum });
+      setTextInput("");
+      setTextColor(selectedColor);
+      setShowTextModal(true);
       return;
     }
 
@@ -862,6 +1016,8 @@ function PdfReader({
     const newUnderlines = { ...underlinesRef.current };
     const newComments = { ...commentsRef.current };
     const newBookmarks = { ...bookmarksRef.current };
+    const newTextAnnos = { ...textAnnotationsRef.current };
+    const newFreehandStrokes = { ...freehandStrokesRef.current };
     let removed = false;
 
     if (newHighlights[pageNum]) {
@@ -884,6 +1040,36 @@ function PdfReader({
       newBookmarks[pageNum] = checkAnnotation(newBookmarks[pageNum]);
       removed ||= newBookmarks[pageNum].length !== previousLength;
     }
+    if (newTextAnnos[pageNum]) {
+      const previousLength = newTextAnnos[pageNum].length;
+      newTextAnnos[pageNum] = newTextAnnos[pageNum].filter((anno) => {
+        const fontSize = anno.fontSize || 20;
+        const lines = anno.text.split("\n");
+        const maxLineWidth = Math.max(
+          ...lines.map((l) => l.length * (fontSize * 0.6)),
+        );
+        const totalHeight = lines.length * (fontSize * 1.2);
+        const isHit =
+          x >= anno.x - 5 &&
+          x <= anno.x + maxLineWidth + 5 &&
+          y >= anno.y - 5 &&
+          y <= anno.y + totalHeight + 5;
+        return !isHit;
+      });
+      removed ||= newTextAnnos[pageNum].length !== previousLength;
+    }
+    if (newFreehandStrokes[pageNum]) {
+      const previousLength = newFreehandStrokes[pageNum].length;
+      newFreehandStrokes[pageNum] = newFreehandStrokes[pageNum].filter(
+        (stroke) => {
+          const isHit = stroke.points.some(
+            (p) => Math.hypot(p.x - x, p.y - y) <= 16,
+          );
+          return !isHit;
+        },
+      );
+      removed ||= newFreehandStrokes[pageNum].length !== previousLength;
+    }
 
     if (!removed) return false;
 
@@ -891,6 +1077,8 @@ function PdfReader({
     setUnderlines(newUnderlines);
     setComments(newComments);
     setBookmarks(newBookmarks);
+    setTextAnnotations(newTextAnnos);
+    setFreehandStrokes(newFreehandStrokes);
     return true;
   };
 
@@ -909,6 +1097,13 @@ function PdfReader({
   ): void => {
     if (panDragRef.current) {
       handlePanMove(e);
+      return;
+    }
+
+    if (selectedTool === "draw" && isDrawingRef.current) {
+      const { x, y } = getCanvasCoordinates(e, pageNum);
+      currentStrokePointsRef.current = [...currentStrokePointsRef.current, { x, y }];
+      setCurrentStroke([...currentStrokePointsRef.current]);
       return;
     }
 
@@ -950,6 +1145,36 @@ function PdfReader({
       return;
     }
 
+    if (selectedTool === "draw" && isDrawingRef.current) {
+      isDrawingRef.current = false;
+      const points = currentStrokePointsRef.current;
+      if (points.length >= 2) {
+        const newStroke: FreehandStroke = {
+          id: `stroke-${Date.now()}`,
+          points,
+          color: "#000000",
+          lineWidth: 2,
+        };
+        const newFreehandStrokes = {
+          ...freehandStrokesRef.current,
+          [pageNum]: [...(freehandStrokesRef.current[pageNum] || []), newStroke],
+        };
+        setFreehandStrokes(newFreehandStrokes);
+        addToHistory(
+          highlightsRef.current,
+          underlinesRef.current,
+          commentsRef.current,
+          bookmarksRef.current,
+          textAnnotationsRef.current,
+          newFreehandStrokes,
+          erasedAreasRef.current,
+        );
+      }
+      currentStrokePointsRef.current = [];
+      setCurrentStroke(null);
+      return;
+    }
+
     if (selectedTool === "eraser") {
       if (isErasingRef.current && hasErasedInCurrentStrokeRef.current) {
         addToHistory(
@@ -957,6 +1182,8 @@ function PdfReader({
           underlinesRef.current,
           commentsRef.current,
           bookmarksRef.current,
+          textAnnotationsRef.current,
+          freehandStrokesRef.current,
           erasedAreasRef.current,
         );
         hasErasedInCurrentStrokeRef.current = false;
@@ -1018,14 +1245,30 @@ function PdfReader({
           [pageNum]: [...(highlights[pageNum] || []), newAnnotation],
         };
         setHighlights(newHighlights);
-        addToHistory(newHighlights, underlines, comments, bookmarks, erasedAreas);
+        addToHistory(
+          newHighlights,
+          underlines,
+          comments,
+          bookmarks,
+          textAnnotations,
+          freehandStrokes,
+          erasedAreas,
+        );
       } else if (selectedTool === "underline") {
         const newUnderlines = {
           ...underlines,
           [pageNum]: [...(underlines[pageNum] || []), newAnnotation],
         };
         setUnderlines(newUnderlines);
-        addToHistory(highlights, newUnderlines, comments, bookmarks, erasedAreas);
+        addToHistory(
+          highlights,
+          newUnderlines,
+          comments,
+          bookmarks,
+          textAnnotations,
+          freehandStrokes,
+          erasedAreas,
+        );
       } else if (selectedTool === "bookmark") {
         setShowBookmarkPopup(true);
         setCurrentSelection(null);
@@ -1071,7 +1314,15 @@ function PdfReader({
         ],
       };
       setComments(newComments);
-      addToHistory(highlights, underlines, newComments, bookmarks, erasedAreas);
+      addToHistory(
+        highlights,
+        underlines,
+        newComments,
+        bookmarks,
+        textAnnotations,
+        freehandStrokes,
+        erasedAreas,
+      );
       setShowCommentPopup(false);
       setCommentText("");
       setSelectedText("");
@@ -1128,12 +1379,58 @@ function PdfReader({
       [currentPage]: [...(bookmarks[currentPage] || []), newBookmark],
     };
     setBookmarks(newBookmarks);
-    addToHistory(highlights, underlines, comments, newBookmarks, erasedAreas);
+    addToHistory(
+      highlights,
+      underlines,
+      comments,
+      newBookmarks,
+      textAnnotations,
+      freehandStrokes,
+      erasedAreas,
+    );
 
     setShowBookmarkPopup(false);
     setBookmarkName("");
     setCopiedText("Bookmark added successfully!");
     setTimeout(() => setCopiedText(""), 3000);
+  };
+
+  const handleAddTextAnnotation = () => {
+    if (!textPosition || !textInput.trim()) return;
+
+    const newTextAnno: TextAnnotation = {
+      id: `text-${Date.now()}`,
+      x: textPosition.x,
+      y: textPosition.y,
+      text: textInput,
+      color: textColor,
+      fontSize: textFontSize,
+      fontFamily: textFontFamily,
+      isBold: textIsBold,
+      isItalic: textIsItalic,
+    };
+
+    const pageNum = textPosition.page;
+    const newTextAnnos = {
+      ...textAnnotations,
+      [pageNum]: [...(textAnnotations[pageNum] || []), newTextAnno],
+    };
+
+    setTextAnnotations(newTextAnnos);
+    addToHistory(
+      highlights,
+      underlines,
+      comments,
+      bookmarks,
+      newTextAnnos,
+      freehandStrokes,
+      erasedAreas,
+    );
+
+    setShowTextModal(false);
+    setTextInput("");
+    setTextPosition(null);
+    toast.success("Text added to PDF");
   };
 
   const handleCopyText = async (text?: string): Promise<void> => {
@@ -1245,6 +1542,8 @@ function PdfReader({
       setUnderlines(state.underlines);
       setComments(state.comments);
       setBookmarks(state.bookmarks);
+      setTextAnnotations(state.textAnnotations || {});
+      setFreehandStrokes(state.freehandStrokes || {});
       setErasedAreas(state.erasedAreas || {});
       setHistoryIndex(newIndex);
     }
@@ -1635,6 +1934,166 @@ function PdfReader({
         </div>
       )}
 
+      {/* Write / Add Text Modal */}
+      {showTextModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl p-6 w-[450px] max-w-full">
+            <h3 className="text-lg font-semibold mb-4 text-gray-800 flex items-center gap-2">
+              <Type className="w-5 h-5 text-blue-600" />
+              Write on PDF
+            </h3>
+
+            {/* Text Input */}
+            <div className="mb-4">
+              <label className="block text-xs font-medium text-gray-600 mb-1">
+                Text Content
+              </label>
+              <textarea
+                value={textInput}
+                onChange={(e) => setTextInput(e.target.value)}
+                placeholder="Type anything to place on PDF..."
+                className="w-full h-24 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                autoFocus
+              />
+            </div>
+
+            {/* Formatting Options Grid */}
+            <div className="space-y-3 mb-5">
+              {/* Row 1: Font Family & Font Size */}
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    Font Family
+                  </label>
+                  <select
+                    value={textFontFamily}
+                    onChange={(e) => setTextFontFamily(e.target.value)}
+                    className="w-full p-2 border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="Arial">Arial (Sans-serif)</option>
+                    <option value="Times New Roman">Times New Roman (Serif)</option>
+                    <option value="Courier New">Courier New (Monospace)</option>
+                    <option value="Georgia">Georgia (Serif)</option>
+                    <option value="Impact">Impact (Display)</option>
+                    <option value="Comic Sans MS">Comic Sans MS</option>
+                  </select>
+                </div>
+                <div className="w-28">
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    Font Size
+                  </label>
+                  <select
+                    value={textFontSize}
+                    onChange={(e) => setTextFontSize(Number(e.target.value))}
+                    className="w-full p-2 border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value={14}>14px</option>
+                    <option value={18}>18px</option>
+                    <option value={24}>24px</option>
+                    <option value={32}>32px</option>
+                    <option value={40}>40px</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Row 2: Style Toggles & Color */}
+              <div className="flex items-center justify-between gap-2 pt-1">
+                <div className="flex items-center gap-1.5">
+                  <label className="text-xs font-medium text-gray-600 mr-1">Style:</label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setTextIsBold(!textIsBold)}
+                    className={`p-2 h-9 w-9 rounded-lg ${textIsBold ? "bg-blue-100 border-blue-500 text-blue-700" : "bg-white text-gray-700"}`}
+                    title="Bold"
+                  >
+                    <Bold className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setTextIsItalic(!textIsItalic)}
+                    className={`p-2 h-9 w-9 rounded-lg ${textIsItalic ? "bg-blue-100 border-blue-500 text-blue-700" : "bg-white text-gray-700"}`}
+                    title="Italic"
+                  >
+                    <Italic className="w-4 h-4" />
+                  </Button>
+                </div>
+
+                <div className="flex items-center gap-1">
+                  <label className="text-xs font-medium text-gray-600 mr-1">Color:</label>
+                  {[
+                    { name: "red", class: "bg-red-400" },
+                    { name: "green", class: "bg-green-400" },
+                    { name: "blue", class: "bg-blue-400" },
+                    { name: "purple", class: "bg-purple-400" },
+                    { name: "black", class: "bg-gray-900" },
+                  ].map((c) => (
+                    <button
+                      key={c.name}
+                      type="button"
+                      onClick={() => setTextColor(c.name)}
+                      className={`w-6 h-6 rounded-full ${c.class} ${
+                        textColor === c.name ? "ring-2 ring-offset-1 ring-blue-600 scale-110" : ""
+                      } transition-all`}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Live Preview */}
+              {textInput.trim() && (
+                <div className="mt-3 p-3 bg-gray-50 border rounded-lg overflow-x-auto">
+                  <span className="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-semibold">Preview:</span>
+                  <span
+                    style={{
+                      fontFamily: textFontFamily,
+                      fontSize: `${textFontSize}px`,
+                      fontWeight: textIsBold ? "bold" : "normal",
+                      fontStyle: textIsItalic ? "italic" : "normal",
+                      color:
+                        textColor === "red"
+                          ? "#ef4444"
+                          : textColor === "green"
+                            ? "#22c55e"
+                            : textColor === "blue"
+                              ? "#3b82f6"
+                              : textColor === "purple"
+                                ? "#a855f7"
+                                : "#000000",
+                    }}
+                    className="whitespace-pre-wrap break-words block"
+                  >
+                    {textInput}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-2 pt-2 border-t">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowTextModal(false);
+                  setTextInput("");
+                  setTextPosition(null);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleAddTextAnnotation}
+                disabled={!textInput.trim()}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Add Text
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Content Area */}
       <div className="flex-1 flex items-center justify-center p-8 relative overflow-auto">
         {/* Left Arrow */}
@@ -1672,6 +2131,38 @@ function PdfReader({
                 onMouseMove={(e) => handleMouseMove(e, currentPage)}
                 onMouseUp={(e) => handleMouseUp(e, currentPage)}
                 onMouseLeave={() => {
+                  if (selectedTool === "draw" && isDrawingRef.current) {
+                    isDrawingRef.current = false;
+                    const points = [...currentStrokePointsRef.current];
+                    currentStrokePointsRef.current = [];
+                    setCurrentStroke(null);
+
+                    if (points.length >= 2) {
+                      const newStroke: FreehandStroke = {
+                        id: `stroke-${Date.now()}`,
+                        points,
+                        color: "#000000",
+                        lineWidth: 2,
+                      };
+                      const newStrokes = {
+                        ...freehandStrokesRef.current,
+                        [currentPage]: [
+                          ...(freehandStrokesRef.current[currentPage] || []),
+                          newStroke,
+                        ],
+                      };
+                      setFreehandStrokes(newStrokes);
+                      addToHistory(
+                        highlightsRef.current,
+                        underlinesRef.current,
+                        commentsRef.current,
+                        bookmarksRef.current,
+                        textAnnotationsRef.current,
+                        newStrokes,
+                        erasedAreasRef.current,
+                      );
+                    }
+                  }
                   if (selectedTool === "eraser" && isErasingRef.current) {
                     if (hasErasedInCurrentStrokeRef.current) {
                       addToHistory(
@@ -1679,6 +2170,8 @@ function PdfReader({
                         underlinesRef.current,
                         commentsRef.current,
                         bookmarksRef.current,
+                        textAnnotationsRef.current,
+                        freehandStrokesRef.current,
                         erasedAreasRef.current,
                       );
                       hasErasedInCurrentStrokeRef.current = false;
@@ -1705,9 +2198,11 @@ function PdfReader({
                       ? "grab"
                       : selectedTool === "eraser"
                         ? "crosshair"
-                        : selectedTool
-                          ? "crosshair"
-                          : "default",
+                        : selectedTool === "text"
+                          ? "text"
+                          : selectedTool
+                            ? "crosshair"
+                            : "default",
                 }}
               />
             </div>
@@ -1733,21 +2228,7 @@ function PdfReader({
       {/* Bottom Toolbar */}
       <div className="py-4 px-8">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          {/* Left Section - Color Palette */}
-          <div className="flex gap-2">
-            {colors.map((color) => (
-              <Button
-                variant="default"
-                key={color.name}
-                onClick={() => setSelectedColor(color.name)}
-                className={`w-8 h-8 rounded-full bg-white ${color.class} ${selectedColor === color.name
-                    ? "ring-2 ring-offset-2 ring-gray-400"
-                    : ""
-                  } transition-all hover:scale-110`}
-                aria-label={`Select ${color.name} color`}
-              />
-            ))}
-          </div>
+          {/* Left / Center Section - Tools */}
 
           {/* Center Section - Tools */}
           <div className="flex items-center gap-1">
@@ -1805,6 +2286,26 @@ function PdfReader({
               title="Click to enable highlighting mode"
             >
               <BiHighlight className="w-5 h-5 text-gray-600" />
+            </Button>
+            <Button
+              variant="default"
+              onClick={() => handleToolClick("draw")}
+              className={`p-2 rounded-lg transition-colors bg-white ${selectedTool === "draw" ? "bg-gray-200" : "hover:bg-gray-100"
+                }`}
+              aria-label="Ballpoint Pen"
+              title="Click to draw with Ballpoint Pen"
+            >
+              <Pencil className="w-5 h-5 text-gray-600" />
+            </Button>
+            <Button
+              variant="default"
+              onClick={() => handleToolClick("text")}
+              className={`p-2 rounded-lg transition-colors bg-white ${selectedTool === "text" ? "bg-gray-200" : "hover:bg-gray-100"
+                }`}
+              aria-label="Write Text"
+              title="Click to write text on PDF"
+            >
+              <Type className="w-5 h-5 text-gray-600" />
             </Button>
             <Button
               variant="default"
