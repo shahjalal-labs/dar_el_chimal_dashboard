@@ -1,5 +1,6 @@
 "use client";
 
+
 import PdfReader from "@/components/Student/Book/BookReader/PdfReader";
 import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -33,13 +34,16 @@ export default function ReadBookPage() {
     <div>
       <Button onClick={() => route.back()} className='mb-2 bg-white/80 text-black hover:text-white cursor-pointer'><TfiAngleLeft />Back</Button>
       {streamingUrl ? (
-        <PdfReader
-          bookId="default-book-id"
-          pdfUrl={streamingUrl}
-          totalPages={1000000}
-          isButton={false}
-          useStreaming={true}
+        <PdfReader      
+          pdfUrl={streamingUrl}         
         />
+        // <PdfReader
+        //   bookId="default-book-id"
+        //   pdfUrl={streamingUrl}
+        //   totalPages={1000000}
+        //   isButton={false}
+        //   useStreaming={true}
+        // />
       ) : (
         <div className="text-center text-gray-600">No PDF file found.</div>
       )}

@@ -30,15 +30,11 @@ const PDF = () => {
 
     return (
         <div>
-            <Button onClick={() => route.back()} className='mb-6 bg-white/80 text-black hover:text-white cursor-pointer'><TfiAngleLeft />Back</Button>
+            <Button onClick={() => route.back()} className='bg-white/80 text-black hover:text-white cursor-pointer'><TfiAngleLeft />Back</Button>
             <div className="w-full h-screen flex justify-center items-center">
                 {streamingUrl ? (
-                    <PdfReader
-                        bookId="default-book-id"
-                        pdfUrl={streamingUrl}
-                        totalPages={1000000}
-                        isButton={false}
-                        useStreaming={true}
+                    <PdfReader                       
+                        pdfUrl={streamingUrl}                        
                     />
                 ) : (
                     <p>No PDF file found.</p>
