@@ -41,7 +41,7 @@ const AddNewAssignment = () => {
 
   // const { data: allBooks } = useGetAllBooksForFormQuery(undefined);
   const { data: allBooks } = useGetAllBooksForTeacherQuery({ currentPage: 1, limit: 100 });
-  console.log(allBooks, "assignment page");
+
 
   const [CreateAssignment, { isLoading: isCreating }] =
     useCreateAssignmentMutation();
