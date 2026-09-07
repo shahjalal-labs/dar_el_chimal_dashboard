@@ -6,7 +6,7 @@ import {
   useGetAllBooksForTeacherQuery,
 } from "@/redux/api/teacher/overviewApi";
 import Image from "next/image";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Button } from "../ui/button";
 import { TfiAngleLeft } from "react-icons/tfi";
 import { useState } from "react";
@@ -15,13 +15,11 @@ import Pagination from "../ui/pagination";
 const Books = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const route = useRouter();
-  const { id } = useParams();
 
   const { data: allBooks, isLoading: isBookLoading } =
     useGetAllBooksForTeacherQuery({
       currentPage,
       limit: 10,
-      gradeId: id && id !== "all" ? (id as string) : undefined,
     });
 
 
