@@ -18,12 +18,6 @@ import AdminStat from "./AdminStat";
 
 const DashboardLayout = () => {
   const authState = useSelector((state: RootState) => state.auth);
-  const router = useRouter();
-  console.log(authState);
-
-  if (!authState.token) {
-    router.push("/login");
-  }
 
   const { data: teacherOverviewData } = useGetTeacherOverviewQuery(undefined);
 
