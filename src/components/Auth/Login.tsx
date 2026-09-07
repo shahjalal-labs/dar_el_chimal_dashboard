@@ -174,7 +174,6 @@ export default function Login() {
 
         const response = await studentLoginFn(studentBody).unwrap();
         const token = response?.result?.accessToken;
-        
 
         if (response.success) {
           toast.success(response.message);
@@ -194,7 +193,7 @@ export default function Login() {
         };
 
         const response = await studentLoginFn(studentBody).unwrap();
-        
+
         const token = response?.result?.accessToken;
 
         if (response.success) {
@@ -219,14 +218,19 @@ export default function Login() {
       }
 
       if (response.success) {
-        if (role !== decodedPayload.role) {
-          toast.error("Please select the correct role!");
+        toast.success(response.message);
+        Cookies.set("token", token);
+        dispatch(setUserToken(token));
+        route.push("/");
+
+        /* if (role !== decodedPayload.role) {
+          // toast.error("Please select the correct role!");
         } else {
           toast.success(response.message);
           Cookies.set("token", token);
           dispatch(setUserToken(token));
           route.push("/");
-        }
+        } */
       } else {
         toast.error(response?.data?.message || "Login failed!");
       }
@@ -299,7 +303,7 @@ export default function Login() {
           <div className="lg:space-y-10 space-y-6 lg:px-0 px-4">
             <div className="text-start">
               <h2 className="text-3xl font-bold text-black">
-                Welcome back, {role}!
+                Welcome back {/* {role} */}!
               </h2>
               <p className="mt-2 text-lg text-[#636F85]">
                 {"Please sign in using your provided credentials."}

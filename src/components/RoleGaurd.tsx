@@ -10,24 +10,24 @@ import { RootState } from "@/redux/store/store";
 type UserRole = "Student" | "Teacher" | "Admin";
 
 interface RoleGuardProps {
-    role: UserRole;
-    children: ReactNode;
+  role: UserRole;
+  children: ReactNode;
 }
 
 const RoleGuard: React.FC<RoleGuardProps> = ({ role, children }) => {
-    const authState = useSelector((state: RootState) => state.auth);
-    const router = useRouter();
+  const authState = useSelector((state: RootState) => state.auth);
+  const router = useRouter();
 
-    useEffect(() => {
-        if (authState.role !== role) {
-            toast.warning("You are not authorized to view this page.");
-            router.push("/");
-        }
+  useEffect(() => {
+    if (authState.role !== role) {
+      toast.warning("You are not authorized to view this page.");
+      router.push("/login");
+    }
 
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-    return (authState.role === role) ? children : null;
+  return authState.role === role ? children : null;
 };
 
 export default RoleGuard;

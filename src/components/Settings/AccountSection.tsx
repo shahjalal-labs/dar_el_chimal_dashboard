@@ -73,7 +73,7 @@ const AccountSection = () => {
           if ("data" in response.error && response.error.data) {
             toast.error(
               (response.error.data as { message?: string })?.message ||
-              "An unknown error occurred."
+                "An unknown error occurred.",
             );
           } else if ("message" in response.error) {
             toast.error(response.error.message);
@@ -150,8 +150,9 @@ const AccountSection = () => {
                   type={showNewPassword ? "text" : "password"}
                   placeholder="Input your new password"
                   {...register("newPassword")}
-                  className={`${errors?.newPassword ? "border-red-500" : ""
-                    } px-5 py-4`}
+                  className={`${
+                    errors?.newPassword ? "border-red-500" : ""
+                  } px-5 py-4`}
                   required
                 />
                 <Button
@@ -192,8 +193,9 @@ const AccountSection = () => {
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="Confirm your new password"
                   {...register("confirmPassword")}
-                  className={`${errors?.confirmPassword ? "border-red-500" : ""
-                    } px-5 py-4`}
+                  className={`${
+                    errors?.confirmPassword ? "border-red-500" : ""
+                  } px-5 py-4`}
                   required
                 />
                 <Button
