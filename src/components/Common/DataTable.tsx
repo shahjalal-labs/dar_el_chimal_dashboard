@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { Eye, Search } from "lucide-react";
+import { BookOpen, Eye, Search } from "lucide-react";
 import Link from "next/link";
-import { useParams, usePathname } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { BiEditAlt } from "react-icons/bi";
 import { PiSpinner } from "react-icons/pi";
@@ -94,10 +94,43 @@ const DataTable = ({
   schoolId?: string;
   isLoading?: boolean;
 }) => {
+  const router = useRouter();
   const { id } = useParams();
   const pathname = usePathname();
   const [selectedId, setSelectedId] = useState("");
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
+
+  const handleRowClick = (singleData: any) => {
+    if (!singleData?.Id) return;
+
+    if (
+      pathname === `/teacher/classes/books/${id}` ||
+      (pathname.startsWith("/teacher/classes/books/") &&
+        !pathname.includes("/pdf"))
+    ) {
+      router.push(`/teacher/classes/books/${id}/${singleData?.Id}`);
+    } else if (pathname === "/admin/books") {
+      router.push(`/admin/books/book-overview/${singleData?.Id}`);
+    } else if (pathname === "/student/books") {
+      router.push(`/student/books/bookDetails/${singleData?.Id}`);
+    } else if (
+      pathname === "/admin/book-categories" ||
+      pathname === "/admin/schools" ||
+      pathname === "/admin/teachers" ||
+      pathname === "/admin/students" ||
+      pathname === `/teacher/classes/${id}/students`
+    ) {
+      setSelectedId(singleData?.Id);
+    }
+  };
+
+  const HIDDEN_KEYS = ["Id", "file", "pdfUrl", "rawFile"];
+  const visibleKeys =
+    data?.length > 0
+      ? Object.keys(data[0]).filter(
+          (key) => !HIDDEN_KEYS.includes(key) && !key.startsWith("_")
+        )
+      : [];
 
   const [DeleteBookCategory, { isLoading: isBookCategroyDeleting }] =
     useDeleteBookCategroyMutation();
@@ -253,33 +286,34 @@ const DataTable = ({
           <Table className="bg-white border border-[#F5F5F5] rounded-xl">
             <TableHeader>
               <TableRow className="bg-[#1E3A8A0D]">
-                <TableHead className="text-[#4A4A4A] font-semibold text-sm flex items-center gap-2">
-                  {schoolId && (
-                    <input
-                      type="checkbox"
-                      checked={isAllSelected}
-                      onChange={handleSelectAll}
-                      className="cursor-pointer"
-                    />
-                  )}
-                  Sl/No
+                <TableHead className="w-14 px-2 text-center text-[#4A4A4A] font-semibold text-sm whitespace-nowrap">
+                  <div className="flex items-center justify-center gap-1.5">
+                    {schoolId && (
+                      <input
+                        type="checkbox"
+                        checked={isAllSelected}
+                        onChange={handleSelectAll}
+                        onClick={(e) => e.stopPropagation()}
+                        className="cursor-pointer"
+                      />
+                    )}
+                    <span>Sl/No</span>
+                  </div>
                 </TableHead>
-                {data?.length > 0 &&
-                  Object.keys(data[0])?.map((key, index) => (
-                    <TableHead
-                      key={index}
-                      className="text-[#4A4A4A] font-semibold text-sm"
-                    >
-                      {key !== "Id" &&
-                        key
-                          .split("_")
-                          .map((header, idx) => (
-                            <span key={idx}>{header} </span>
-                          ))}
-                    </TableHead>
-                  ))}
+                {visibleKeys.map((key, index) => (
+                  <TableHead
+                    key={index}
+                    className="text-[#4A4A4A] font-semibold text-sm whitespace-nowrap"
+                  >
+                    {key
+                      .split("_")
+                      .map((header, idx) => (
+                        <span key={idx}>{header} </span>
+                      ))}
+                  </TableHead>
+                ))}
                 {pathname !== "/" && (
-                  <TableHead className="text-[#4A4A4A] font-semibold text-sm">
+                  <TableHead className="text-[#4A4A4A] font-semibold text-sm text-center min-w-[120px] whitespace-nowrap">
                     Action
                   </TableHead>
                 )}
@@ -289,180 +323,280 @@ const DataTable = ({
               {data?.map((singleData: any, index: number) => (
                 <TableRow
                   key={index}
-                  className="hover:bg-gray-50 text-[#5C5C5C]"
+                  onClick={(e) => {
+                    const target = e.target as HTMLElement;
+                    if (
+                      target.closest(
+                        'button, a, input, select, textarea, [role="button"], [role="dialog"], [data-no-row-click]'
+                      )
+                    ) {
+                      return;
+                    }
+                    handleRowClick(singleData);
+                  }}
+                  className="hover:bg-blue-50/40 cursor-pointer transition-colors text-[#5C5C5C] group"
+                  title="Click row to view details"
                 >
-                  <TableCell className="text-sm flex items-center gap-2">
-                    {schoolId && (
-                      <input
-                        type="checkbox"
-                        checked={selectedRows.includes(index)}
-                        onChange={() => handleSelectOne(index)}
-                        className="cursor-pointer"
-                      />
-                    )}
-
-                    {index + 1 + ((currentPage ?? 1) - 1) * 10}
+                  <TableCell className="w-14 px-2 text-center text-sm font-medium text-gray-500 whitespace-nowrap">
+                    <div className="flex items-center justify-center gap-1.5">
+                      {schoolId && (
+                        <input
+                          type="checkbox"
+                          checked={selectedRows.includes(index)}
+                          onChange={() => handleSelectOne(index)}
+                          onClick={(e) => e.stopPropagation()}
+                          className="cursor-pointer"
+                        />
+                      )}
+                      <span>{index + 1 + ((currentPage ?? 1) - 1) * 10}</span>
+                    </div>
                   </TableCell>
 
-                  {Object.entries(singleData).map(
-                    ([key, value]: any, idx: number) => (
-                      <TableCell key={idx} className="text-sm">
-                        {key === "Id" ? <></> : <span>{value}</span>}
-                      </TableCell>
-                    ),
-                  )}
+                  {visibleKeys.map((key, idx) => (
+                    <TableCell key={idx} className="text-sm">
+                      <span>{singleData[key]}</span>
+                    </TableCell>
+                  ))}
                   {pathname !== "/" && (
-                    <TableCell className="flex items-center gap-2">
-                      {/* VIEW  */}
+                    <TableCell
+                      className="text-sm"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div className="flex items-center justify-center gap-2">
+                        {/* VIEW & READ BUTTONS */}
 
-                      {pathname === "/admin/books" && (
-                        <Link
-                          href={`/admin/books/book-overview/${singleData?.Id}`}
-                        >
-                          <Button className="bg-[#F4A64033] hover:bg-[#F4A64026] text-[#F4A640] transition-colors ease-in-out duration-200 cursor-pointer">
-                            <span className="sr-only">View details</span>
-                            <Eye className="h-6 w-6" />
-                          </Button>
-                        </Link>
-                      )}
-
-                      {pathname === `/teacher/classes/books/${id}` && (
-                        <Link
-                          href={`/teacher/classes/books/${id}/${singleData?.Id}`}
-                        >
-                          <Button className="bg-[#F4A64033] hover:bg-[#F4A64026] text-[#F4A640] transition-colors ease-in-out duration-200 cursor-pointer">
-                            <span className="sr-only">View details</span>
-                            <Eye className="h-6 w-6" />
-                          </Button>
-                        </Link>
-                      )}
-
-                      {pathname === "/student/books" && (
-                        <Link
-                          href={`/student/books/bookDetails/${singleData?.Id}`}
-                        >
-                          <Button className="bg-[#F4A64033] hover:bg-[#F4A64026] text-[#F4A640] transition-colors ease-in-out duration-200 cursor-pointer">
-                            <span className="sr-only">View details</span>
-                            <Eye className="h-6 w-6" />
-                          </Button>
-                        </Link>
-                      )}
-
-                      {pathname !== "/admin/books" &&
-                      pathname !== `/teacher/classes/books/${id}` &&
-                      pathname !== "/student/books" ? (
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button
-                              onClick={() => setSelectedId(singleData?.Id)}
-                              className="bg-[#F4A64033] hover:bg-[#F4A64026] text-[#F4A640] transition-colors ease-in-out duration-200 cursor-pointer"
+                        {pathname === "/admin/books" && (
+                          <>
+                            {singleData?.file && (
+                              <Link
+                                href={`/admin/books/book-overview/${singleData?.Id}/pdf?pdfurl=${encodeURIComponent(singleData?.file || "")}`}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <Button
+                                  size="sm"
+                                  className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/85 text-white text-xs font-medium px-2.5 py-1.5 h-8 rounded-lg flex items-center gap-1.5 shadow-sm transition-all cursor-pointer whitespace-nowrap"
+                                  title="Directly Read Book"
+                                >
+                                  <BookOpen className="h-3.5 w-3.5" />
+                                  <span>Read</span>
+                                </Button>
+                              </Link>
+                            )}
+                            <Link
+                              href={`/admin/books/book-overview/${singleData?.Id}`}
+                              onClick={(e) => e.stopPropagation()}
                             >
-                              <span className="sr-only">View details</span>
-                              <Eye className="h-6 w-6" />
-                            </Button>
-                          </DialogTrigger>
-                          {selectedId === singleData?.Id && (
-                            <>
-                              {pathname === "/admin/book-categories" ? (
-                                <ViewBookCategoryModal id={singleData?.Id} />
-                              ) : pathname === "/admin/schools" ? (
-                                <ViewSchoolModal id={singleData?.Id} />
-                              ) : pathname === "/admin/teachers" ? (
-                                <ViewTeacherModal id={singleData?.Id} />
-                              ) : pathname === "/admin/students" ? (
-                                <ViewStudentModal id={singleData?.Id} />
-                              ) : pathname ===
-                                `/teacher/classes/${id}/students` ? (
-                                <ViewStudentDetailsModal id={singleData?.Id} />
-                              ) : (
-                                <></>
-                              )}
-                            </>
-                          )}
-                        </Dialog>
-                      ) : (
-                        <></>
-                      )}
+                              <Button
+                                size="sm"
+                                className="h-8 w-8 p-0 bg-[#F4A64033] hover:bg-[#F4A64026] text-[#F4A640] transition-colors ease-in-out duration-200 cursor-pointer rounded-lg flex items-center justify-center"
+                                title="View details"
+                              >
+                                <span className="sr-only">View details</span>
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </Link>
+                          </>
+                        )}
 
-                      {/* UPDATE & DELETE  */}
-                      {(pathname === "/admin/book-categories" ||
-                        pathname === "/admin/books" ||
-                        pathname === "/admin/schools" ||
-                        pathname === "/admin/teachers" ||
-                        pathname === "/admin/students") && (
-                        <>
+                        {(pathname === `/teacher/classes/books/${id}` ||
+                          (pathname.startsWith("/teacher/classes/books/") &&
+                            !pathname.includes("/pdf"))) && (
+                          <>
+                            {singleData?.file && (
+                              <Link
+                                href={`/teacher/classes/books/${id}/${singleData?.Id}/pdf?pdfurl=${encodeURIComponent(singleData?.file || "")}`}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <Button
+                                  size="sm"
+                                  className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/85 text-white text-xs font-medium px-2.5 py-1.5 h-8 rounded-lg flex items-center gap-1.5 shadow-sm transition-all cursor-pointer whitespace-nowrap"
+                                  title="Directly Read Book"
+                                >
+                                  <BookOpen className="h-3.5 w-3.5" />
+                                  <span>Read</span>
+                                </Button>
+                              </Link>
+                            )}
+                            <Link
+                              href={`/teacher/classes/books/${id}/${singleData?.Id}`}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Button
+                                size="sm"
+                                className="h-8 w-8 p-0 bg-[#F4A64033] hover:bg-[#F4A64026] text-[#F4A640] transition-colors ease-in-out duration-200 cursor-pointer rounded-lg flex items-center justify-center"
+                                title="View details"
+                              >
+                                <span className="sr-only">View details</span>
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </Link>
+                          </>
+                        )}
+
+                        {pathname === "/student/books" && (
+                          <>
+                            {singleData?.file && (
+                              <Link
+                                href={`/student/books/read?pdfurl=${encodeURIComponent(singleData?.file || "")}`}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <Button
+                                  size="sm"
+                                  className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/85 text-white text-xs font-medium px-2.5 py-1.5 h-8 rounded-lg flex items-center gap-1.5 shadow-sm transition-all cursor-pointer whitespace-nowrap"
+                                  title="Directly Read Book"
+                                >
+                                  <BookOpen className="h-3.5 w-3.5" />
+                                  <span>Read</span>
+                                </Button>
+                              </Link>
+                            )}
+                            <Link
+                              href={`/student/books/bookDetails/${singleData?.Id}`}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Button
+                                size="sm"
+                                className="h-8 w-8 p-0 bg-[#F4A64033] hover:bg-[#F4A64026] text-[#F4A640] transition-colors ease-in-out duration-200 cursor-pointer rounded-lg flex items-center justify-center"
+                                title="View details"
+                              >
+                                <span className="sr-only">View details</span>
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </Link>
+                          </>
+                        )}
+
+                        {pathname !== "/admin/books" &&
+                        !pathname.startsWith("/teacher/classes/books/") &&
+                        pathname !== "/student/books" ? (
                           <Dialog>
                             <DialogTrigger asChild>
                               <Button
-                                onClick={() => setSelectedId(singleData?.Id)}
-                                className="bg-[#17A23533] hover:bg-[#17A23526] text-[#17A235] transition-colors ease-in-out duration-200 cursor-pointer"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedId(singleData?.Id);
+                                }}
+                                className="h-8 w-8 p-0 bg-[#F4A64033] hover:bg-[#F4A64026] text-[#F4A640] transition-colors ease-in-out duration-200 cursor-pointer rounded-lg flex items-center justify-center"
+                                title="View details"
                               >
-                                <span className="sr-only">Update</span>
-                                <BiEditAlt className="h-6 w-6" />
+                                <span className="sr-only">View details</span>
+                                <Eye className="h-4 w-4" />
                               </Button>
                             </DialogTrigger>
-                            {selectedId === singleData?.Id &&
-                              (pathname === "/admin/book-categories" ? (
-                                <UpdateBookCategoryModal id={singleData?.Id} />
-                              ) : pathname === "/admin/books" ? (
-                                <UpdateBookModal id={singleData?.Id} />
-                              ) : pathname === "/admin/schools" ? (
-                                <UpdateSchoolModal id={singleData?.Id} />
-                              ) : pathname === "/admin/teachers" ? (
-                                <UpdateTeacherModal id={singleData?.Id} />
-                              ) : pathname === "/admin/students" ? (
-                                <UpdateStudentModal id={singleData?.Id} />
-                              ) : (
-                                <></>
-                              ))}
-                          </Dialog>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button className="bg-[#FE4D4F33] hover:bg-[#FE4D4F26] text-[#FE4D4F] transition-colors ease-in-out duration-200 cursor-pointer">
-                                <span className="sr-only">Delete</span>
-                                {(isSchoolDeleting ||
-                                  isBookCategroyDeleting ||
-                                  isBookDeleting ||
-                                  isTeacherDeleting ||
-                                  isStudentDeleting ||
-                                  isStudentsDeleting) &&
-                                selectedId === singleData?.Id ? (
-                                  <div className="animate-spin">
-                                    <PiSpinner className="h-4 w-4" />
-                                  </div>
+                            {selectedId === singleData?.Id && (
+                              <>
+                                {pathname === "/admin/book-categories" ? (
+                                  <ViewBookCategoryModal id={singleData?.Id} />
+                                ) : pathname === "/admin/schools" ? (
+                                  <ViewSchoolModal id={singleData?.Id} />
+                                ) : pathname === "/admin/teachers" ? (
+                                  <ViewTeacherModal id={singleData?.Id} />
+                                ) : pathname === "/admin/students" ? (
+                                  <ViewStudentModal id={singleData?.Id} />
+                                ) : pathname ===
+                                  `/teacher/classes/${id}/students` ? (
+                                  <ViewStudentDetailsModal id={singleData?.Id} />
                                 ) : (
-                                  <RiDeleteBin6Line className="w-6 h-6" />
+                                  <></>
                                 )}
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle className="text-[#30373D] text-3xl font-bold text-center">
-                                  Delete {deleteItem}?
-                                </AlertDialogTitle>
-                                <AlertDialogDescription className="text-[#636F85] text-center text-base mt-4">
-                                  Are you sure you want to permanently delete
-                                  this {deleteItem}?
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter className="flex justify-center items-center gap-4">
-                                <AlertDialogCancel className="flex-1 font-bold text-[#636F85] cursor-pointer transition-all duration-500 ease-in-out">
-                                  No
-                                </AlertDialogCancel>
-                                <AlertDialogAction
-                                  className="bg-[#1E3A8A] text-white hover:bg-[#1E3A8A80] flex-1 cursor-pointer transition-all duration-500 ease-in-out"
-                                  onClick={() => {
+                              </>
+                            )}
+                          </Dialog>
+                        ) : (
+                          <></>
+                        )}
+
+                        {/* UPDATE & DELETE  */}
+                        {(pathname === "/admin/book-categories" ||
+                          pathname === "/admin/books" ||
+                          pathname === "/admin/schools" ||
+                          pathname === "/admin/teachers" ||
+                          pathname === "/admin/students") && (
+                          <>
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
                                     setSelectedId(singleData?.Id);
-                                    handleDelete(singleData?.Id);
                                   }}
+                                  className="h-8 w-8 p-0 bg-[#17A23533] hover:bg-[#17A23526] text-[#17A235] transition-colors ease-in-out duration-200 cursor-pointer rounded-lg flex items-center justify-center"
+                                  title="Update"
                                 >
-                                  Yes
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </>
-                      )}
+                                  <span className="sr-only">Update</span>
+                                  <BiEditAlt className="h-4 w-4" />
+                                </Button>
+                              </DialogTrigger>
+                              {selectedId === singleData?.Id &&
+                                (pathname === "/admin/book-categories" ? (
+                                  <UpdateBookCategoryModal id={singleData?.Id} />
+                                ) : pathname === "/admin/books" ? (
+                                  <UpdateBookModal id={singleData?.Id} />
+                                ) : pathname === "/admin/schools" ? (
+                                  <UpdateSchoolModal id={singleData?.Id} />
+                                ) : pathname === "/admin/teachers" ? (
+                                  <UpdateTeacherModal id={singleData?.Id} />
+                                ) : pathname === "/admin/students" ? (
+                                  <UpdateStudentModal id={singleData?.Id} />
+                                ) : (
+                                  <></>
+                                ))}
+                            </Dialog>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedId(singleData?.Id);
+                                  }}
+                                  className="h-8 w-8 p-0 bg-[#FE4D4F33] hover:bg-[#FE4D4F26] text-[#FE4D4F] transition-colors ease-in-out duration-200 cursor-pointer rounded-lg flex items-center justify-center"
+                                  title="Delete"
+                                >
+                                  <span className="sr-only">Delete</span>
+                                  {(isSchoolDeleting ||
+                                    isBookCategroyDeleting ||
+                                    isBookDeleting ||
+                                    isTeacherDeleting ||
+                                    isStudentDeleting ||
+                                    isStudentsDeleting) &&
+                                  selectedId === singleData?.Id ? (
+                                    <div className="animate-spin">
+                                      <PiSpinner className="h-4 w-4" />
+                                    </div>
+                                  ) : (
+                                    <RiDeleteBin6Line className="w-4 h-4" />
+                                  )}
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle className="text-[#30373D] text-3xl font-bold text-center">
+                                    Delete {deleteItem}?
+                                  </AlertDialogTitle>
+                                  <AlertDialogDescription className="text-[#636F85] text-center text-base mt-4">
+                                    Are you sure you want to permanently delete
+                                    this {deleteItem}?
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter className="flex justify-center items-center gap-4">
+                                  <AlertDialogCancel className="flex-1 font-bold text-[#636F85] cursor-pointer transition-all duration-500 ease-in-out">
+                                    No
+                                  </AlertDialogCancel>
+                                  <AlertDialogAction
+                                    className="bg-[#1E3A8A] text-white hover:bg-[#1E3A8A80] flex-1 cursor-pointer transition-all duration-500 ease-in-out"
+                                    onClick={() => {
+                                      setSelectedId(singleData?.Id);
+                                      handleDelete(singleData?.Id);
+                                    }}
+                                  >
+                                    Yes
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </>
+                        )}
+                      </div>
                     </TableCell>
                   )}
                 </TableRow>

@@ -119,8 +119,8 @@ export const overviewApi = baseApi.injectEndpoints({
             providesTags: ["teacher", "books"]
         }),
         getAllBooksForTeacher: builder.query({
-            query: ({ currentPage, limit, gradeId }: { currentPage: number; limit: number; gradeId?: string }) => ({
-                url: `/book/for-teacher?page=${currentPage}&limit=${limit}${gradeId && gradeId !== 'all' ? `&gradeId=${gradeId}` : ''}`,
+            query: ({ currentPage, limit, gradeId, categoryId }: { currentPage: number; limit: number; gradeId?: string; categoryId?: string }) => ({
+                url: `/book/for-teacher?page=${currentPage}&limit=${limit}${gradeId && gradeId !== 'all' ? `&gradeId=${gradeId}` : ''}${categoryId && categoryId !== 'all' ? `&categoryId=${categoryId}` : ''}`,
                 method: "GET",
             }),
             providesTags: ["teacher", "books"]

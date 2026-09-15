@@ -5,19 +5,17 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { TfiAngleLeft } from "react-icons/tfi";
 import { Button } from "../ui/button";
 import PdfReader from "../Student/Book/BookReader/PdfReader";
+import { getOptimizedPdfUrl } from "@/lib/pdfUtils";
 
 const PDF = () => {
   const route = useRouter();
-  const fileUrl = useSearchParams().get("pdfurl");
+  const searchParams = useSearchParams();
+  const fileUrl = searchParams.get("pdfurl");
 
-  // Generate streaming URL for the PDF using backend API
+  // Generate high-speed CDN streaming URL for the PDF
   const streamingUrl = useMemo(() => {
     if (!fileUrl) return null;
-
-    // Use backend streaming endpoint
-    const encodedUrl = encodeURIComponent(fileUrl);
-    const baseUrl = "https://api.darelchimalapp.com/api/v1";
-    return `${baseUrl}/book/test-pdf-reader/${encodedUrl}`;
+    return getOptimizedPdfUrl(fileUrl);
   }, [fileUrl]);
 
   if (!fileUrl) {
@@ -40,7 +38,7 @@ const PDF = () => {
 
       <div className="w-full h-screen flex justify-center items-center">
         {streamingUrl ? (
-          <PdfReader pdfUrl={streamingUrl} />
+          <PdfReader pdfUrl={streamingUrl} hideDownloadAndPrint={true} />
         ) : (
           <p>No PDF file found.</p>
         )}

@@ -1,54 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getOptimizedPdfUrl } from "@/lib/pdfUtils";
 
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const pdfUrl = searchParams.get("url");
-
-    console.log("=== PDF Proxy Request ===");
-    console.log("Raw URL:", pdfUrl);
-    console.log("Full request URL:", request.url);
-    console.log(
-      "All search params:",
-      Object.fromEntries(searchParams.entries()),
-    );
+    let pdfUrl = searchParams.get("url");
 
     if (!pdfUrl) {
-      console.error("PDF Proxy Error: No URL provided");
       return NextResponse.json(
         { error: "PDF URL is required" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
-    // Check if URL looks incomplete
-    if (pdfUrl.length < 30) {
-      console.error(
-        "PDF Proxy Error: URL appears incomplete or invalid",
-        pdfUrl,
-      );
-      return NextResponse.json(
-        {
-          error:
-            "Invalid PDF URL - URL appears incomplete or does not point to a PDF file",
-          receivedUrl: pdfUrl,
-        },
-        { status: 400 },
-      );
-    }
+    // Automatically resolve to fast Cloudflare CDN if DO Spaces URL
+    pdfUrl = getOptimizedPdfUrl(pdfUrl);
 
     // Validate and parse URL
     let url: URL;
     try {
       url = new URL(pdfUrl);
-      console.log(
-        "Parsed URL - Hostname:",
-        url.hostname,
-        "Pathname:",
-        url.pathname,
-      );
     } catch (urlError) {
-      console.error("PDF Proxy Error: Invalid URL format", urlError);
       return NextResponse.json(
         {
           error: "Invalid URL format",
@@ -56,81 +28,86 @@ export async function GET(request: NextRequest) {
             urlError instanceof Error ? urlError.message : "Unknown error",
           receivedUrl: pdfUrl,
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
-    // Validate that the URL is from the expected domain (more lenient check)
+    // Validate allowed domains
     const allowedDomains = [
       "digitaloceanspaces.com",
       "fra1.digitaloceanspaces.com",
+      "dac.fra1.cdn.digitaloceanspaces.com",
       "api.darelchimalapp.com",
     ];
     const isAllowedDomain = allowedDomains.some((domain) =>
-      url.hostname.includes(domain),
+      url.hostname.includes(domain)
     );
 
     if (!isAllowedDomain) {
-      console.error("PDF Proxy Error: Domain not allowed", url.hostname);
       return NextResponse.json(
         {
           error: "Invalid PDF URL domain",
           hostname: url.hostname,
           allowedDomains,
         },
-        { status: 403 },
+        { status: 403 }
       );
     }
 
-    console.log("Fetching PDF from:", pdfUrl);
+    // Forward Range header from client if present
+    const rangeHeader = request.headers.get("range");
+    const fetchHeaders: Record<string, string> = {
+      Accept: "application/pdf",
+    };
+    if (rangeHeader) {
+      fetchHeaders["Range"] = rangeHeader;
+    }
 
-    // Fetch the PDF from DigitalOcean Spaces
+    // Fetch the PDF from source/CDN
     const response = await fetch(pdfUrl, {
       method: "GET",
-      headers: {
-        Accept: "application/pdf",
-      },
+      headers: fetchHeaders,
     });
 
-    console.log(
-      "PDF Fetch Response Status:",
-      response.status,
-      response.statusText,
-    );
-
-    if (!response.ok) {
-      console.error("PDF Fetch Failed:", response.status, response.statusText);
+    if (!response.ok && response.status !== 206) {
       return NextResponse.json(
         {
           error: "Failed to fetch PDF from source",
           status: response.status,
           statusText: response.statusText,
         },
-        { status: response.status },
+        { status: response.status }
       );
     }
 
-    // Get content length from the response headers
-    const contentLength = response.headers.get("content-length");
-    console.log("PDF Content Length:", contentLength, "bytes");
-
-    // Stream the PDF directly to avoid memory issues with large files
     const headers = new Headers({
       "Content-Type": "application/pdf",
+      "Accept-Ranges": "bytes",
       "Cache-Control": "public, max-age=31536000, immutable",
       "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Range",
+      "Access-Control-Expose-Headers":
+        "Content-Length, Content-Range, Accept-Ranges, ETag",
     });
 
-    // Add content-length if available
+    const contentLength = response.headers.get("content-length");
     if (contentLength) {
       headers.set("Content-Length", contentLength);
     }
 
-    // Return the response body stream directly
+    const contentRange = response.headers.get("content-range");
+    if (contentRange) {
+      headers.set("Content-Range", contentRange);
+    }
+
+    const etag = response.headers.get("etag");
+    if (etag) {
+      headers.set("ETag", etag);
+    }
+
     return new NextResponse(response.body, {
-      status: 200,
+      status: response.status,
       headers,
     });
   } catch (error) {
@@ -139,21 +116,21 @@ export async function GET(request: NextRequest) {
       {
         error: "Failed to load PDF",
         details: error instanceof Error ? error.message : "Unknown error",
-        stack: error instanceof Error ? error.stack : undefined,
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
 
-// Handle OPTIONS request for CORS preflight
 export async function OPTIONS() {
   return new NextResponse(null, {
     status: 200,
     headers: {
       "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Range",
+      "Access-Control-Expose-Headers":
+        "Content-Length, Content-Range, Accept-Ranges, ETag",
     },
   });
 }

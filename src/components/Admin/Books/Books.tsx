@@ -26,11 +26,13 @@ const Books = () => {
       coverImg: string;
       bookName: string;
       description: string;
+      file?: string;
       createdAt: string;
       updatedAt: string;
       category: { name: string };
     }) => ({
       Id: entry?.id,
+      file: entry?.file,
       Picture: (
         <Image
           src={entry?.coverImg || defaultImg}

@@ -23,8 +23,10 @@ const BookList = () => {
       bookName: string;
       description: string;
       author: string;
+      file?: string;
     }) => ({
       Id: entry.id,
+      file: entry.file,
       Picture: (
         <Image
           src={entry.image || defaultImg}

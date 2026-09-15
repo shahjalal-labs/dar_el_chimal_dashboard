@@ -39,8 +39,11 @@ const AddNewAssignment = () => {
 
   // const { data, isLoading } = useGetAllStudentsByTeacherQuery(profileData?.result?.id);
 
-  // const { data: allBooks } = useGetAllBooksForFormQuery(undefined);
-  const { data: allBooks } = useGetAllBooksForTeacherQuery({ currentPage: 1, limit: 100 });
+  const { data: allBooks } = useGetAllBooksForTeacherQuery({
+    currentPage: 1,
+    limit: 100,
+    gradeId: id && id !== "all" ? (id as string) : undefined,
+  });
 
 
   const [CreateAssignment, { isLoading: isCreating }] =
