@@ -17,10 +17,20 @@ export const adminApi = baseApi.injectEndpoints({
             providesTags: ["admin"]
         }),
         getAllTeachersByAdmin: builder.query({
-            query: ({ schoolId }) => ({
-                url: `${schoolId !== undefined ? `/users/get-teachers?schoolId=${schoolId}` : '/users/get-teachers'}`,
-                method: "GET",
-            }),
+            query: (params: { schoolId?: string; searchTerm?: string } = {}) => {
+                const query = new URLSearchParams();
+                if (params?.schoolId && params.schoolId !== "all") {
+                    query.append("schoolId", params.schoolId);
+                }
+                if (params?.searchTerm && params.searchTerm.trim()) {
+                    query.append("searchTerm", params.searchTerm.trim());
+                }
+                const queryString = query.toString();
+                return {
+                    url: `/users/get-teachers${queryString ? `?${queryString}` : ""}`,
+                    method: "GET",
+                };
+            },
             providesTags: ["teacher"],
         }),
         getSearchedTeachers: builder.query({
@@ -31,10 +41,20 @@ export const adminApi = baseApi.injectEndpoints({
             providesTags: ["teacher"],
         }),
         getAllStudentsByAdmin: builder.query({
-            query: ({ schoolId }) => ({
-                url: `${schoolId !== undefined ? `/users/get-students?schoolId=${schoolId}` : '/users/get-students'}`,
-                method: "GET",
-            }),
+            query: (params: { schoolId?: string; searchTerm?: string } = {}) => {
+                const query = new URLSearchParams();
+                if (params?.schoolId && params.schoolId !== "all") {
+                    query.append("schoolId", params.schoolId);
+                }
+                if (params?.searchTerm && params.searchTerm.trim()) {
+                    query.append("searchTerm", params.searchTerm.trim());
+                }
+                const queryString = query.toString();
+                return {
+                    url: `/users/get-students${queryString ? `?${queryString}` : ""}`,
+                    method: "GET",
+                };
+            },
             providesTags: ["student"],
         }),
         getSearchedStudents: builder.query({

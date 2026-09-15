@@ -9,11 +9,19 @@ import DataTable from '@/components/Common/DataTable';
 import Pagination from '@/components/ui/pagination';
 import defaultImg from '@/assets/no-img.jpg';
 import { useGetAllSchoolsByAdminQuery } from '@/redux/api/admin';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 
 const SchoolList = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState("");
-    const { data, isLoading } = useGetAllSchoolsByAdminQuery({ currentPage, limit: 10, searchTerm });
+    const [limit, setLimit] = useState(10);
+    const { data, isLoading } = useGetAllSchoolsByAdminQuery({ currentPage, limit, searchTerm });
     console.log("School List Data:", data);
 
     const formattedData = data?.result?.schools?.map(
@@ -98,14 +106,25 @@ const SchoolList = () => {
             <div className='flex flex-col md:flex-row justify-between items-center gap-6 mt-8'>
                 <div className='text-base text-[#4A4A4A] flex items-center justify-start gap-2'>
                     <span>Show</span>
-                    <Button
-                        variant="default"
-                        size="icon"
-                        className="h-8 w-8 rounded-none bg-[#1E3A8A1A] text-[#1E3A8A] hover:bg-[#1E3A8A1A]"
+                    <Select
+                        value={String(limit)}
+                        onValueChange={(val) => {
+                            setLimit(Number(val));
+                            setCurrentPage(1);
+                        }}
                     >
-                        {formattedData?.length}
-                    </Button>
-                    <span>from {data?.result?.meta?.total}</span>
+                        <SelectTrigger className="h-8 min-w-[3.5rem] w-fit px-2 rounded-md bg-[#1E3A8A1A] text-[#1E3A8A] font-semibold border-none hover:bg-[#1E3A8A26] cursor-pointer flex items-center gap-1 focus:ring-0 focus:ring-offset-0">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="min-w-[4rem]">
+                            <SelectItem value="5">5</SelectItem>
+                            <SelectItem value="10">10</SelectItem>
+                            <SelectItem value="20">20</SelectItem>
+                            <SelectItem value="50">50</SelectItem>
+                            <SelectItem value="100">100</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <span>from {data?.result?.meta?.total || 0}</span>
                 </div>
                 <Pagination totalPage={data?.result?.meta?.totalPages} setCurrentPage={setCurrentPage} currentPage={currentPage} />
             </div>

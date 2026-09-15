@@ -19,8 +19,8 @@ export const bookApi = baseApi.injectEndpoints({
       invalidatesTags: ["books"],
     }),
     getAllBooks: builder.query({
-      query: ({ currentPage, bookCategoryId, searchTerm }) => ({
-        url: `${bookCategoryId !== undefined ? `/book?page=${currentPage}&searchTerm=${searchTerm}&limit=10&bookCategoryId=${bookCategoryId}` : `/book?page=${currentPage}&searchTerm=${searchTerm}&limit=10`}`,
+      query: ({ currentPage, bookCategoryId, searchTerm, limit = 10 }) => ({
+        url: `${bookCategoryId !== undefined ? `/book?page=${currentPage}&searchTerm=${searchTerm}&limit=${limit}&bookCategoryId=${bookCategoryId}` : `/book?page=${currentPage}&searchTerm=${searchTerm}&limit=${limit}`}`,
         method: "GET",
       }),
       providesTags: ["books"],

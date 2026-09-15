@@ -17,8 +17,9 @@ const Books = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [bookCategoryId, setBookCategoryId] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [limit, setLimit] = useState(10);
   const { data: allBookCategories, isLoading } = useGetAllBookCategoriesQuery({ currentPage: 1, limit: 1000 });
-  const { data, isLoading: isBookLoading } = useGetAllBooksQuery({ currentPage, bookCategoryId: bookCategoryId ? bookCategoryId : undefined, searchTerm });
+  const { data, isLoading: isBookLoading } = useGetAllBooksQuery({ currentPage, bookCategoryId: bookCategoryId ? bookCategoryId : undefined, searchTerm, limit });
 
   const formattedData = data?.result?.result?.map(
     (entry: {
@@ -127,14 +128,25 @@ const Books = () => {
       <div className="flex flex-col md:flex-row justify-between items-center gap-6 mt-8">
         <div className="text-base text-[#4A4A4A] flex items-center justify-start gap-2">
           <span>Show</span>
-          <Button
-            variant="default"
-            size="icon"
-            className="h-8 w-8 rounded-none bg-[#1E3A8A1A] text-[#1E3A8A] hover:bg-[#1E3A8A1A] transition-all duration-500 ease-in-out cursor-pointer"
+          <Select
+            value={String(limit)}
+            onValueChange={(val) => {
+              setLimit(Number(val));
+              setCurrentPage(1);
+            }}
           >
-            {formattedData?.length}
-          </Button>
-          <span>from {data?.result?.meta?.total}</span>
+            <SelectTrigger className="h-8 min-w-[3.5rem] w-fit px-2 rounded-md bg-[#1E3A8A1A] text-[#1E3A8A] font-semibold border-none hover:bg-[#1E3A8A26] cursor-pointer flex items-center gap-1 focus:ring-0 focus:ring-offset-0">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="min-w-[4rem]">
+              <SelectItem value="5">5</SelectItem>
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="20">20</SelectItem>
+              <SelectItem value="50">50</SelectItem>
+              <SelectItem value="100">100</SelectItem>
+            </SelectContent>
+          </Select>
+          <span>from {data?.result?.meta?.total || 0}</span>
         </div>
         <Pagination
           totalPage={data?.result?.meta?.totalPage}

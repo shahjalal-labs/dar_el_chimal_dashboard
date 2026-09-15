@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import DataTable from "@/components/Common/DataTable";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -11,7 +11,6 @@ import defaultImg from "@/assets/no-img.jpg";
 import {
   useGetAllSchoolsByAdminQuery,
   useGetAllStudentsByAdminQuery,
-  useGetSearchedStudentsQuery,
 } from "@/redux/api/admin";
 import {
   Select,
@@ -24,9 +23,9 @@ import { Dialog } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
 import CreateStudentModal from "./AddNewStudent/CreateStudentModal";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import schoolImg from "@/assets/school.png";
 import { FiLoader } from "react-icons/fi";
 import { PiExport, PiSpinner } from "react-icons/pi";
-import schoolImg from "@/assets/school.png";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import {
   Tooltip,
@@ -51,6 +50,7 @@ interface PaginationProps {
   totalPage: number;
   currentPage: number;
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
+  limit?: number;
 }
 
 const StudentList = () => {
@@ -59,13 +59,12 @@ const StudentList = () => {
   const [schoolId, setSchoolId] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [studentData, setStudentData] = useState([]);
+  const [limit, setLimit] = useState(10);
 
   const { data, isLoading: isStudentLoading } = useGetAllStudentsByAdminQuery({
-    schoolId: schoolId ? schoolId : undefined,
+    schoolId: schoolId && schoolId !== "all" ? schoolId : undefined,
+    searchTerm: searchTerm.trim() || undefined,
   });
-  const { data: searchedStudents, isLoading: isSearchedStudentLoading } =
-    useGetSearchedStudentsQuery(searchTerm);
   const { data: allSchools, isLoading } = useGetAllSchoolsByAdminQuery({
     currentPage: 1,
     limit: 10000,
@@ -74,16 +73,33 @@ const StudentList = () => {
   const [DeleteAllStudents, { isLoading: isStudentDeleting }] =
     useDeleteAllStudentsMutation();
 
-  useEffect(() => {
-    if (searchTerm.length > 0) {
-      setStudentData(searchedStudents?.result?.meta?.result);
-    } else if (data?.result) {
-      setStudentData(data?.result?.meta?.result);
+  const filteredStudents = React.useMemo(() => {
+    let list: any[] = data?.result?.meta?.result || [];
+    if (schoolId && schoolId !== "all") {
+      list = list.filter((s: any) =>
+        s?.StudentGrades?.some(
+          (g: any) =>
+            g?.grade?.school?.id === schoolId || g?.grade?.schoolId === schoolId
+        )
+      );
     }
-  }, [data, searchTerm, searchedStudents]);
+    if (searchTerm.trim().length > 0) {
+      const term = searchTerm.trim().toLowerCase();
+      list = list.filter((s: any) =>
+        s?.fullName?.toLowerCase().includes(term) ||
+        s?.loginUserName?.toLowerCase().includes(term) ||
+        s?.email?.toLowerCase().includes(term) ||
+        s?.StudentGrades?.some((g: any) =>
+          g?.grade?.school?.name?.toLowerCase().includes(term) ||
+          g?.grade?.grade?.toLowerCase().includes(term)
+        )
+      );
+    }
+    return list;
+  }, [data, schoolId, searchTerm]);
 
-  const formattedData = studentData
-    ?.slice(currentPage * 10 - 10, currentPage * 10)
+  const formattedData = filteredStudents
+    ?.slice((currentPage - 1) * limit, currentPage * limit)
     .map(
       (entry: {
         id: string;
@@ -140,22 +156,36 @@ const StudentList = () => {
   };
 
   const handleExportToGoogleSheets = () => {
-    if (!data || data?.result?.meta?.result?.length === 0) {
+    if (!filteredStudents || filteredStudents.length === 0) {
       alert("No data available to export!");
       return;
     }
 
-    const headers = ["Sl/No", "Student Name", "Grade", "User Name", "Password"];
+    const headers = ["Sl/No", "Student Name", "School", "Grade", "User Name", "Password"];
+    const escapeCsv = (str: any) => {
+      if (str === null || str === undefined) return '""';
+      const s = String(str).replace(/"/g, '""');
+      return `"${s}"`;
+    };
+
     const csvRows = [
       headers.join(","),
-      ...data?.result?.meta?.result?.map(
-        (t: any, i: number) =>
-          `${String(i + 1).padStart(2, "0")},${t.fullName},${t.StudentGrades[0]?.grade?.grade},${t.loginUserName},${t.password}`,
-      ),
+      ...filteredStudents.map((t: any, i: number) => {
+        const schoolName = t.StudentGrades?.[0]?.grade?.school?.name || "N/A";
+        const gradeName = t.StudentGrades?.[0]?.grade?.grade || "N/A";
+        return [
+          String(i + 1).padStart(2, "0"),
+          escapeCsv(t.fullName),
+          escapeCsv(schoolName),
+          escapeCsv(gradeName),
+          escapeCsv(t.loginUserName),
+          escapeCsv(t.password || ""),
+        ].join(",");
+      }),
     ];
 
     const csvContent = csvRows.join("\n");
-    const blob = new Blob([csvContent], { type: "text/csv" });
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
 
     const a = document.createElement("a");
@@ -214,7 +244,7 @@ const StudentList = () => {
         data={formattedData}
         currentPage={currentPage}
         searchPlaceholder="Search by fullname, login name or school name"
-        isLoading={isStudentLoading || isSearchedStudentLoading}
+        isLoading={isStudentLoading}
         deleteItem="Student"
         setSearchTerm={(value) => {
           setSearchTerm(value);
@@ -222,7 +252,13 @@ const StudentList = () => {
         }}
         schoolId={schoolId}
         sortThree={
-          <Select onValueChange={(value) => setSchoolId(value)}>
+          <Select
+            value={schoolId || "all"}
+            onValueChange={(value) => {
+              setSchoolId(value === "all" ? "" : value);
+              setCurrentPage(1);
+            }}
+          >
             <SelectTrigger className="w-fit border border-[#1E3A8A] text-[#1E3A8A] bg-transparent hover:bg-transparent cursor-pointer flex items-center gap-2 px-3 py-2 rounded-md data-[placeholder]:text-[#1E3A8A]">
               <SelectValue placeholder="Select School" />
               <FaAngleDown className="text-[#1E3A8A]" />
@@ -233,24 +269,29 @@ const StudentList = () => {
                   <FiLoader size={24} />
                 </div>
               ) : (
-                allSchools?.result?.schools?.map(
-                  (
-                    school: { id: string; name: string; schoolLogo: string },
-                    idx: number,
-                  ) => (
-                    <SelectItem key={idx} value={school?.id}>
-                      <Image
-                        src={school.schoolLogo || schoolImg}
-                        height={50}
-                        width={50}
-                        alt={school.name}
-                        style={{ width: 24, height: 24, borderRadius: "50%" }}
-                        priority
-                      />
-                      {school?.name}
-                    </SelectItem>
-                  ),
-                )
+                <>
+                  <SelectItem value="all">All Schools</SelectItem>
+                  {allSchools?.result?.schools?.map(
+                    (
+                      school: { id: string; name: string; schoolLogo: string },
+                      idx: number,
+                    ) => (
+                      <SelectItem key={idx} value={school?.id}>
+                        <div className="flex items-center gap-2">
+                          <Image
+                            src={school.schoolLogo || schoolImg}
+                            height={50}
+                            width={50}
+                            alt={school.name}
+                            style={{ width: 24, height: 24, borderRadius: "50%" }}
+                            priority
+                          />
+                          <span>{school?.name}</span>
+                        </div>
+                      </SelectItem>
+                    ),
+                  )}
+                </>
               )}
             </SelectContent>
           </Select>
@@ -314,19 +355,31 @@ const StudentList = () => {
       <div className="flex flex-col md:flex-row justify-between items-center gap-6 mt-8">
         <div className="text-base text-[#4A4A4A] flex items-center justify-start gap-2">
           <span>Show</span>
-          <Button
-            variant="default"
-            size="icon"
-            className="h-8 w-8 rounded-none bg-[#1E3A8A1A] text-[#1E3A8A] hover:bg-[#1E3A8A1A]"
+          <Select
+            value={String(limit)}
+            onValueChange={(val) => {
+              setLimit(Number(val));
+              setCurrentPage(1);
+            }}
           >
-            {formattedData?.length}
-          </Button>
-          <span>from {data?.result?.meta?.total}</span>
+            <SelectTrigger className="h-8 min-w-[3.5rem] w-fit px-2 rounded-md bg-[#1E3A8A1A] text-[#1E3A8A] font-semibold border-none hover:bg-[#1E3A8A26] cursor-pointer flex items-center gap-1 focus:ring-0 focus:ring-offset-0">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="min-w-[4rem]">
+              <SelectItem value="5">5</SelectItem>
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="20">20</SelectItem>
+              <SelectItem value="50">50</SelectItem>
+              <SelectItem value="100">100</SelectItem>
+            </SelectContent>
+          </Select>
+          <span>from {filteredStudents?.length || 0}</span>
         </div>
         <Pagination
-          totalPage={data?.result?.meta?.total}
+          totalPage={filteredStudents?.length || 0}
           setCurrentPage={setCurrentPage}
           currentPage={currentPage}
+          limit={limit}
         />
       </div>
     </div>
@@ -339,7 +392,9 @@ const Pagination = ({
   totalPage,
   setCurrentPage,
   currentPage,
+  limit = 10,
 }: PaginationProps) => {
+  const totalPagesCount = Math.max(1, Math.ceil(totalPage / limit));
   return (
     <div className="flex justify-end items-center">
       <div className="flex items-center gap-2">
@@ -347,17 +402,17 @@ const Pagination = ({
           variant="ghost"
           size="icon"
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
+          disabled={currentPage <= 1}
           className="h-8 w-8 bg-[#1E3A8A33] text-[#1E3A8A]"
         >
           <ChevronLeft className="h-5 w-5" />
         </Button>
 
-        {Array.from({ length: totalPage / 10 }, (_, i) => i + 1)
+        {Array.from({ length: totalPagesCount }, (_, i) => i + 1)
           .filter(
             (page) =>
               page === 1 ||
-              page === totalPage / 10 ||
+              page === totalPagesCount ||
               (page >= currentPage - 1 && page <= currentPage + 1),
           )
           .map((page, index, array) => (
@@ -385,9 +440,9 @@ const Pagination = ({
           variant="ghost"
           size="icon"
           onClick={() =>
-            setCurrentPage((prev) => Math.min(prev + 1, totalPage / 10))
+            setCurrentPage((prev) => Math.min(prev + 1, totalPagesCount))
           }
-          disabled={currentPage === totalPage / 10}
+          disabled={currentPage >= totalPagesCount}
           className="h-8 w-8 bg-[#1E3A8A33] text-[#1E3A8A]"
         >
           <ChevronRight className="h-5 w-5" />
