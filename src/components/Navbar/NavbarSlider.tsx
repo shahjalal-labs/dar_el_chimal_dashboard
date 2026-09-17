@@ -82,7 +82,7 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
           },
           {
             label: "Book",
-            route: `/teacher/classes/books/${id || 'all'}`,
+            route: `/teacher/classes/books/all`,
             iconPath: <LuBookOpenText className="w-5 lg:w-6 h-5 lg:h-6" />,
           },
         ]
@@ -199,10 +199,7 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
                         ) && (item.label === "Book Management" || item.label === "Classes") ?
                           "bg-[#1E3A8A] text-white" :
                           (
-                            path === `/teacher/classes/books/${id || 'all'}` ||
-                            path === `/teacher/classes/books/${id || 'all'}/${bookId}` ||
-                            path === `/teacher/classes/books/${id || 'all'}/${bookId}/pdf` ||
-                            path === `/teacher/classes/books/${id || 'all'}/${bookId}/${resourceId}`
+                            path.startsWith("/teacher/classes/books")
                           ) && (item.label === "Book") ?
                             "bg-[#1E3A8A] text-white" :
                             (

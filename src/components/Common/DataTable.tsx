@@ -108,7 +108,7 @@ const DataTable = ({
       (pathname.startsWith("/teacher/classes/books/") &&
         !pathname.includes("/pdf"))
     ) {
-      router.push(`/teacher/classes/books/${id}/${singleData?.Id}`);
+      router.push(`/teacher/classes/books/${id || "all"}/${singleData?.Id}`);
     } else if (pathname === "/admin/books") {
       router.push(`/admin/books/book-overview/${singleData?.Id}`);
     } else if (pathname === "/student/books") {
@@ -404,7 +404,7 @@ const DataTable = ({
                           <>
                             {singleData?.file && (
                               <Link
-                                href={`/teacher/classes/books/${id}/${singleData?.Id}/pdf?pdfurl=${encodeURIComponent(singleData?.file || "")}`}
+                                href={`/teacher/classes/books/${id || "all"}/${singleData?.Id}/pdf?pdfurl=${encodeURIComponent(singleData?.file || "")}`}
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 <Button
@@ -418,7 +418,7 @@ const DataTable = ({
                               </Link>
                             )}
                             <Link
-                              href={`/teacher/classes/books/${id}/${singleData?.Id}`}
+                              href={`/teacher/classes/books/${id || "all"}/${singleData?.Id}`}
                               onClick={(e) => e.stopPropagation()}
                             >
                               <Button
