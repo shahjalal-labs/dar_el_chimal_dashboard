@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   useCreateAssignmentMutation,
   useGetAllBooksForTeacherQuery,
   useGetAllStudentsByTeacherQuery,
+  useGetTeacherOverviewQuery,
 } from "@/redux/api/teacher/overviewApi";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
@@ -15,7 +16,6 @@ import { PiSpinner } from "react-icons/pi";
 import { Dialog, DialogContent } from "../ui/dialog";
 import { Button } from "../ui/button";
 import { TfiAngleLeft } from "react-icons/tfi";
-import { useGetMyProfileQuery } from "@/redux/api/settingsApi";
 
 interface AssignmentFormData {
   title: string;
@@ -30,20 +30,40 @@ interface AssignmentFormData {
 }
 
 const AddNewAssignment = () => {
-   const { data: profileData } = useGetMyProfileQuery(undefined);
-
   const route = useRouter();
   const { id } = useParams();
   const [open, setOpen] = useState(false);
-  const { data, isLoading } = useGetAllStudentsByTeacherQuery(profileData?.result?.gradeId);
 
-  // const { data, isLoading } = useGetAllStudentsByTeacherQuery(profileData?.result?.id);
+  const { data: teacherOverviewData } = useGetTeacherOverviewQuery(undefined);
+  const teacherGrades = useMemo(
+    () => teacherOverviewData?.result?.grades || [],
+    [teacherOverviewData]
+  );
 
-  const { data: allBooks } = useGetAllBooksForTeacherQuery({
-    currentPage: 1,
-    limit: 100,
-    gradeId: id && id !== "all" ? (id as string) : undefined,
+  const [selectedGradeId, setSelectedGradeId] = useState<string>(
+    id && id !== "all" ? (id as string) : ""
+  );
+
+  useEffect(() => {
+    if (id && id !== "all") {
+      setSelectedGradeId(id as string);
+    } else if (!selectedGradeId && teacherGrades.length > 0) {
+      setSelectedGradeId(teacherGrades[0].id);
+    }
+  }, [id, teacherGrades, selectedGradeId]);
+
+  const { data, isLoading } = useGetAllStudentsByTeacherQuery(selectedGradeId, {
+    skip: !selectedGradeId,
   });
+
+  const { data: allBooks } = useGetAllBooksForTeacherQuery(
+    {
+      currentPage: 1,
+      limit: 100,
+      gradeId: selectedGradeId,
+    },
+    { skip: !selectedGradeId }
+  );
 
 
   const [CreateAssignment, { isLoading: isCreating }] =
@@ -61,6 +81,16 @@ const AddNewAssignment = () => {
     assignToAll: true,
   });
 
+  const handleGradeChange = (newGradeId: string) => {
+    setSelectedGradeId(newGradeId);
+    setFormData((prev) => ({
+      ...prev,
+      book: { id: "", name: "" },
+      selectedStudents: [],
+    }));
+    route.replace(`/teacher/classes/${newGradeId}/add-new-assignment`);
+  };
+
   const handleChange = (e: any) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -75,13 +105,15 @@ const AddNewAssignment = () => {
     });
   };
 
+  const students = data?.result?.students || [];
+
   const handleSelectAll = () => {
-    if (formData.selectedStudents.length === data?.result?.students?.length) {
+    if (formData.selectedStudents.length === students.length && students.length > 0) {
       setFormData((prev) => ({ ...prev, selectedStudents: [] }));
     } else {
       setFormData((prev) => ({
         ...prev,
-        selectedStudents: data?.result?.students?.map((s: any) => s.id) || [],
+        selectedStudents: students.map((s: any) => s.id) || [],
       }));
     }
   };
@@ -93,13 +125,23 @@ const AddNewAssignment = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!selectedGradeId) {
+      toast.warning("Please select a class");
+      return;
+    }
+
+    if (!formData.book.id) {
+      toast.warning("Please select a book");
+      return;
+    }
+
     const body = {
       title: formData.title,
       startPage: formData.pageFrom,
       endPage: formData.pageTo,
       instruction: formData.instruction,
       dueDate: formData.dueDate,
-      gradeId: id,
+      gradeId: selectedGradeId,
       bookId: formData.book.id,
       assignToAll: formData.assignToAll,
       studentIds: formData.selectedStudents,
@@ -120,10 +162,6 @@ const AddNewAssignment = () => {
       toast?.warning((error as any)?.data?.message || "Something went wrong");
     }
   };
-
-  if (isLoading) return <p>Loading...</p>;
-
-  const students = data?.result?.students || [];
 
   return (
     <div>
@@ -181,19 +219,56 @@ const AddNewAssignment = () => {
             />
           </div>
 
+          {/* Class / Grade Selection */}
+          <div>
+            <label className="font-medium text-[#30373D]">
+              Class / Grade
+            </label>
+            <select
+              value={selectedGradeId}
+              onChange={(e) => handleGradeChange(e.target.value)}
+              className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none bg-white mt-2"
+              required
+            >
+              <option value="" disabled>
+                {teacherGrades.length === 0
+                  ? "No classes assigned"
+                  : "Select Class / Grade"}
+              </option>
+              {teacherGrades.map((g: any) => (
+                <option key={g.id} value={g.id}>
+                  {g.grade}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Books  */}
           <div>
             <label className="font-medium text-[#30373D]">Books</label>
             <select
               name="book"
-              value={JSON.stringify(formData.book)}
+              value={formData.book.id ? JSON.stringify(formData.book) : ""}
               onChange={(e) => {
-                const value = JSON.parse(e.target.value);
-                setFormData((prev) => ({ ...prev, book: value }));
+                if (!e.target.value) {
+                  setFormData((prev) => ({ ...prev, book: { id: "", name: "" } }));
+                  return;
+                }
+                try {
+                  const value = JSON.parse(e.target.value);
+                  setFormData((prev) => ({ ...prev, book: value }));
+                } catch {
+                  setFormData((prev) => ({ ...prev, book: { id: "", name: "" } }));
+                }
               }}
               className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none bg-white mt-2"
               required
             >
+              <option value="" disabled>
+                {allBooks?.result?.data?.length === 0
+                  ? "No books available for this class"
+                  : "Select a book"}
+              </option>
               {allBooks?.result?.data?.map((book: any) => (
                 <option
                   key={book.id}
@@ -309,7 +384,10 @@ const AddNewAssignment = () => {
                   className="accent-[#1E3A8A] size-5 cursor-pointer"
                 />
                 <span className="text-[#272727] font-semibold">
-                  All students in {data?.result?.gradeData?.grade}
+                  All students in{" "}
+                  {data?.result?.gradeData?.grade ||
+                    teacherGrades.find((g: any) => g.id === selectedGradeId)?.grade ||
+                    "this class"}
                 </span>
               </label>
 
@@ -330,43 +408,56 @@ const AddNewAssignment = () => {
             {/* Individual student list */}
             {!formData.assignToAll && (
               <div className="">
-                <div className="flex items-center mb-2">
-                  <input
-                    type="checkbox"
-                    checked={
-                      formData.selectedStudents.length === students.length &&
-                      students.length > 0
-                    }
-                    onChange={handleSelectAll}
-                    className="accent-[#1E3A8A] size-4 mr-2"
-                  />
-                  <span className="text-[#272727] font-semibold">
-                    Select All
-                  </span>
-                </div>
+                {isLoading ? (
+                  <p className="text-gray-500 py-2 text-sm">Loading students...</p>
+                ) : students.length === 0 ? (
+                  <p className="text-gray-500 py-2 text-sm">
+                    No students found in this class.
+                  </p>
+                ) : (
+                  <>
+                    <div className="flex items-center mb-2">
+                      <input
+                        type="checkbox"
+                        checked={
+                          formData.selectedStudents.length === students.length &&
+                          students.length > 0
+                        }
+                        onChange={handleSelectAll}
+                        className="accent-[#1E3A8A] size-4 mr-2"
+                      />
+                      <span className="text-[#272727] font-semibold">
+                        Select All
+                      </span>
+                    </div>
 
-                {students?.map((student: any) => (
-                  <div
-                    key={student?.id}
-                    className="flex items-center space-x-2 py-1"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={formData.selectedStudents.includes(student?.id)}
-                      onChange={() => handleStudentSelect(student.id)}
-                      className="accent-[#1E3A8A] size-4 mr-2"
-                    />
-                    <Image
-                      src={student.profileImage}
-                      height={50}
-                      width={50}
-                      alt="profile"
-                      className="w-8 h-8 rounded-full object-cover"
-                      priority
-                    />
-                    <span>{student.fullName || student.email}</span>
-                  </div>
-                ))}
+                    {students?.map((student: any) => (
+                      <div
+                        key={student?.id}
+                        className="flex items-center space-x-2 py-1"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={formData.selectedStudents.includes(student?.id)}
+                          onChange={() => handleStudentSelect(student.id)}
+                          className="accent-[#1E3A8A] size-4 mr-2"
+                        />
+                        <Image
+                          src={
+                            student.profileImage ||
+                            "https://res.cloudinary.com/dddrm7ep8/image/upload/v1788255470/n2tfqinlzgwpdkittexh.jpg"
+                          }
+                          height={50}
+                          width={50}
+                          alt="profile"
+                          className="w-8 h-8 rounded-full object-cover"
+                          priority
+                        />
+                        <span>{student.fullName || student.email}</span>
+                      </div>
+                    ))}
+                  </>
+                )}
               </div>
             )}
           </div>

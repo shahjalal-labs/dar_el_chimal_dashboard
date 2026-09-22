@@ -27,6 +27,7 @@ import { TfiAngleDown, TfiAngleUp, TfiAnnouncement } from "react-icons/tfi";
 import { useDispatch, useSelector } from "react-redux";
 import { Button } from "../ui/button";
 import { useGetMyProfileQuery } from "@/redux/api/settingsApi";
+import { useGetTeacherOverviewQuery } from "@/redux/api/teacher/overviewApi";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -39,10 +40,15 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
   const dispatch = useDispatch();
   const [showDropdown, setShowDropdown] = useState(false);
   const { assignmentId, assignmentProgressId, announcmentId, bookId, resourceId } = useParams();
-     const { data: profileData } = useGetMyProfileQuery(undefined);
-     const id = profileData?.result?.gradeId
-
   const authState = useSelector((state: any) => state.auth.role);
+  const { data: profileData } = useGetMyProfileQuery(undefined);
+  const { data: teacherOverviewData } = useGetTeacherOverviewQuery(undefined, {
+    skip: authState !== "Teacher",
+  });
+  const id =
+    profileData?.result?.gradeId ||
+    teacherOverviewData?.result?.grades?.[0]?.id ||
+    "";
 
   const navigation = [
     ...(authState === "Student"
@@ -270,6 +276,16 @@ const NavbarSlider = ({ isOpen, toggleSidebar }: SidebarProps) => {
                   ) :
                     (showDropdown && item.label === "Classes") ?
                       (<div className="flex flex-col">
+                        <Link
+                          href="/teacher/classes"
+                          className={`font-medium p-3 ${isOpen && "pl-8 ml-8"} 
+                          ${path === "/teacher/classes"
+                              ? "border-l-2 border-[#1E3A8A] text-[#1E3A8A]"
+                              : "border-l border-[#F3EEF6] text-[#7C8091]"
+                            }`}
+                        >
+                          {!isOpen ? <SiGoogleclassroom /> : "All Classes"}
+                        </Link>
                         <Link
                           href={`/teacher/classes/${id}/students`}
                           className={`font-medium p-3 ${isOpen && "pl-8 ml-8"} 

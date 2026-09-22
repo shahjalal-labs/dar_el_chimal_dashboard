@@ -13,7 +13,10 @@ import { setAnnouncementDate } from "@/redux/features/announcementSlice";
 import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
 import { PiSpinner } from "react-icons/pi";
-import { useCreateAnnouncementMutation } from "@/redux/api/teacher/overviewApi";
+import {
+    useCreateAnnouncementMutation,
+    useGetTeacherOverviewQuery,
+} from "@/redux/api/teacher/overviewApi";
 import { useParams, useRouter } from "next/navigation";
 import { TfiAngleLeft } from "react-icons/tfi";
 
@@ -28,6 +31,24 @@ const AddNewAnnouncement = () => {
     const { id } = useParams();
     const dispatch = useDispatch();
     const [open, setOpen] = useState(false);
+
+    const { data: teacherOverviewData } = useGetTeacherOverviewQuery(undefined);
+    const teacherGrades = React.useMemo(
+        () => teacherOverviewData?.result?.grades || [],
+        [teacherOverviewData]
+    );
+
+    const [selectedGradeId, setSelectedGradeId] = useState<string>(
+        id && id !== "all" ? (id as string) : ""
+    );
+
+    React.useEffect(() => {
+        if (id && id !== "all") {
+            setSelectedGradeId(id as string);
+        } else if (!selectedGradeId && teacherGrades.length > 0) {
+            setSelectedGradeId(teacherGrades[0].id);
+        }
+    }, [id, teacherGrades, selectedGradeId]);
 
     const [formData, setFormData] = useState<AnnouncementFormData>({
         announcementTitle: "",
@@ -45,6 +66,11 @@ const AddNewAnnouncement = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        if (!selectedGradeId) {
+            toast.warning("Please select a class");
+            return;
+        }
+
         const body = {
             title: formData.announcementTitle,
             anouncement: formData.announcement,
@@ -52,7 +78,7 @@ const AddNewAnnouncement = () => {
         };
 
         try {
-            const response = await CreateAnnouncement({ id, body }).unwrap();
+            const response = await CreateAnnouncement({ id: selectedGradeId, body }).unwrap();
             if (response.success) {
                 toast.success(response.message);
                 setFormData({ announcementTitle: "", announcement: "", announcementDate: "" }); // reset form
@@ -82,6 +108,30 @@ const AddNewAnnouncement = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="bg-white rounded-2xl space-y-5 p-10">
+                {/* Class / Grade */}
+                <div>
+                    <Label>Class / Grade</Label>
+                    <select
+                        value={selectedGradeId}
+                        onChange={(e) => {
+                            const newGradeId = e.target.value;
+                            setSelectedGradeId(newGradeId);
+                            router.replace(`/teacher/classes/${newGradeId}/add-new-announcement`);
+                        }}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none bg-white mt-2"
+                        required
+                    >
+                        <option value="" disabled>
+                            {teacherGrades.length === 0 ? "No classes assigned" : "Select Class / Grade"}
+                        </option>
+                        {teacherGrades.map((g: any) => (
+                            <option key={g.id} value={g.id}>
+                                {g.grade}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
                 {/* Title */}
                 <div>
                     <Label>Title</Label>
