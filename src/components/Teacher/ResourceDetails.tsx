@@ -65,6 +65,10 @@ const ResourceDetails: React.FC = () => {
                             <span className="inline-flex items-center gap-1">
                                 <FaFilePdf className="text-red-500" /> PDF
                             </span>
+                        ) : Type === "Image" ? (
+                            <span className="inline-flex items-center gap-1">
+                                <FaFileAlt className="text-purple-500" /> Image
+                            </span>
                         ) : (
                             <span className="inline-flex items-center gap-1">
                                 <FaFileAlt className="text-blue-500" /> <span className="text-[#4C4C4C]">{Type}</span>
@@ -78,6 +82,17 @@ const ResourceDetails: React.FC = () => {
                         <span className="font-semibold">Uploaded by:</span> <span className="text-[#4C4C4C]">{uploderName || "Unknown"}</span>
                     </p>
                 </div>
+
+                {/* Image Preview if resource is an image */}
+                {Type === "Image" && file && (
+                    <div className="mb-6 flex justify-center bg-gray-50 p-4 rounded-lg border">
+                        <img
+                            src={file}
+                            alt={title}
+                            className="max-h-[450px] w-auto object-contain rounded-md shadow-xs"
+                        />
+                    </div>
+                )}
 
                 {/* Action Buttons */}
                 <div className="flex flex-wrap justify-center gap-3">
@@ -98,7 +113,7 @@ const ResourceDetails: React.FC = () => {
                         className="flex items-center gap-2 border-gray-300 text-[#1E3A8A] bg-[#F7F9FF] cursor-pointer"
                         onClick={() => window.open(file, "_blank")}
                     >
-                        <FaFilePdf /> Open {Type === "Pdf" ? 'PDF' : Type === "Video" ? 'Video' : 'Audio'}
+                        <FaFilePdf /> Open {Type === "Pdf" ? 'PDF' : Type === "Video" ? 'Video' : Type === "Image" ? 'Image' : 'Resource'}
                     </Button>
 
                     <AlertDialog>

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { DialogClose, DialogContent } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -10,39 +10,33 @@ import { RxCross1 } from 'react-icons/rx';
 import { Button } from '@/components/ui/button';
 import { PiSpinner } from 'react-icons/pi';
 import { toast } from 'sonner';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '@/redux/store/store';
-import { setPreviewResourceFile, setResourceDescription, setResourceFile, setResourceLink, setResourceTitle, setResourceType } from '@/redux/features/bookSlice';
 import { useGetSingleResourceQuery, useUpdateResourceMutation } from '@/redux/api/resource';
 
 const UpdateResource = ({ resourceId }: { resourceId: string }) => {
-    const dispatch = useDispatch();
     const closeRef = useRef<HTMLButtonElement>(null);
-    const {
-        resourceType,
-        resourceTitle,
-        resourceDescription,
-        previewResourceFile,
-        resourceFile,
-        resourceLink,
-    } = useSelector((state: RootState) => state.book);
+
+    const [resourceType, setResourceType] = useState<string>('');
+    const [resourceTitle, setResourceTitle] = useState<string>('');
+    const [resourceDescription, setResourceDescription] = useState<string>('');
+    const [previewResourceFile, setPreviewResourceFile] = useState<string>('');
+    const [resourceFile, setResourceFile] = useState<File | null>(null);
+    const [resourceLink, setResourceLink] = useState<string>('');
 
     const { data } = useGetSingleResourceQuery(resourceId);
     const [UpdateResource, { isLoading: isResourceLoading }] = useUpdateResourceMutation();
 
     useEffect(() => {
-        if (data) {
-            dispatch(setResourceType(data?.result?.Type));
-            dispatch(setResourceTitle(data?.result?.title));
-            dispatch(setResourceDescription(data?.result?.description));
-            dispatch(setResourceLink(data?.result?.file));
+        if (data?.result) {
+            setResourceType(data.result.Type || '');
+            setResourceTitle(data.result.title || '');
+            setResourceDescription(data.result.description || '');
+            setResourceLink(data.result.file || '');
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [data])
+    }, [data]);
 
     const handleRemoveResourceFile = () => {
-        dispatch(setResourceFile(null));
-        dispatch(setPreviewResourceFile(''));
+        setResourceFile(null);
+        setPreviewResourceFile('');
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -86,7 +80,7 @@ const UpdateResource = ({ resourceId }: { resourceId: string }) => {
                                 <input
                                     type="checkbox"
                                     checked={resourceType === type}
-                                    onChange={() => dispatch(setResourceType(type))}
+                                    onChange={() => setResourceType(type)}
                                     className="h-4 w-4 accent-[#1E3A8A] stroke-[#D8D8D8]"
                                 // required
                                 />
@@ -102,7 +96,7 @@ const UpdateResource = ({ resourceId }: { resourceId: string }) => {
                     <Input
                         placeholder="Enter your resource title"
                         value={resourceTitle}
-                        onChange={(e) => dispatch(setResourceTitle(e.target.value))}
+                        onChange={(e) => setResourceTitle(e.target.value)}
                         required
                     />
                 </div>
@@ -114,7 +108,7 @@ const UpdateResource = ({ resourceId }: { resourceId: string }) => {
                         placeholder="Enter your resource description"
                         className="border border-[#CBD5E1] rounded-md p-2 w-full h-24 mt-2"
                         value={resourceDescription}
-                        onChange={(e) => dispatch(setResourceDescription(e.target.value))}
+                        onChange={(e) => setResourceDescription(e.target.value)}
                     />
                 </div>
 
@@ -131,8 +125,8 @@ const UpdateResource = ({ resourceId }: { resourceId: string }) => {
                                     onChange={(e) => {
                                         const file = e.target.files?.[0] ?? null;
                                         if (file) {
-                                            dispatch(setResourceFile(file));
-                                            dispatch(setPreviewResourceFile(file.name));
+                                            setResourceFile(file);
+                                            setPreviewResourceFile(file.name);
                                         }
                                     }}
                                     className="hidden"
@@ -172,7 +166,7 @@ const UpdateResource = ({ resourceId }: { resourceId: string }) => {
                         type='url'
                         placeholder="Paste your link"
                         value={resourceLink}
-                        onChange={(e) => dispatch(setResourceLink(e.target.value))}
+                        onChange={(e) => setResourceLink(e.target.value)}
                     />
                 </div>
 

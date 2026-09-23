@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -18,12 +18,21 @@ import pdf from "@/assets/docs.svg";
 import Link from 'next/link';
 import { useGetSingleBookQuery } from '@/redux/api/book';
 import Resource from './Resource';
+import { ImageIcon } from 'lucide-react';
 
 const BookOverview = () => {
     const router = useRouter();
     const { id, bookId } = useParams();
-    const [tab, setTab] = useState('general');
+    const searchParams = useSearchParams();
+    const urlTab = searchParams.get('tab');
+    const [tab, setTab] = useState(urlTab === 'resources' ? 'resources' : 'general');
     const [isAddResource, setIsAddResource] = useState(false);
+
+    useEffect(() => {
+        if (urlTab === 'resources' || urlTab === 'general') {
+            setTab(urlTab);
+        }
+    }, [urlTab]);
 
     const { data, isLoading } = useGetSingleBookQuery(bookId);
     const book = data?.result;
@@ -61,7 +70,14 @@ const BookOverview = () => {
 
             <div className="p-6 bg-white rounded-xl shadow-sm">
                 {/* Tabs */}
-                <Tabs value={tab} onValueChange={setTab} className="w-full">
+                <Tabs
+                    value={tab}
+                    onValueChange={(val) => {
+                        setTab(val);
+                        router.replace(`/teacher/classes/books/${id}/${bookId}?tab=${val}`, { scroll: false });
+                    }}
+                    className="w-full"
+                >
                     <TabsList className="flex gap-2 border-b border-gray-200 pb-2 mb-4">
                         <TabsTrigger
                             value="general"
@@ -159,14 +175,15 @@ const BookOverview = () => {
                     <TabsContent value="resources">
                         {
                             isAddResource ?
-                                <><Resource bookId={bookId} setIsAddResource={setIsAddResource} /></> :
+                                <Resource bookId={bookId} setIsAddResource={setIsAddResource} /> :
                                 <>
-                                    <div className='md:flex justify-between items-center mb-6'>
-                                        <h1 className='font-medium text-xl md:text-2xl'>Total Attachment: {book?.Resources?.length}</h1>
+                                    <div className='flex justify-between items-center mb-6'>
+                                        <h1 className='font-medium text-xl md:text-2xl text-[#30373D]'>Total Attachments: {book?.Resources?.length || 0}</h1>
                                         <Button
+                                            type="button"
                                             onClick={() => setIsAddResource(true)}
-                                            className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A] text-white font-medium px-6 mt-6 md:mt-0">
-                                            <FaPlus />Add
+                                            className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 border border-[#1E3A8A] text-white font-medium px-6 flex items-center gap-2 cursor-pointer shadow-xs">
+                                            <FaPlus />Add Resource
                                         </Button>
                                     </div>
                                     {book.Resources?.length > 0 ? (
@@ -175,31 +192,40 @@ const BookOverview = () => {
                                                 <Link
                                                     key={res.id}
                                                     href={`/teacher/classes/books/${id}/${bookId}/${res?.id}`}
-                                                    className="border border-[#D8D8D880] bg-[#F7F9FFCC] rounded-lg p-4 flex justify-between items-center hover:bg-gray-50 transition"
+                                                    className="group border border-[#D8D8D880] bg-[#F7F9FFCC] rounded-lg p-4 flex justify-between items-center hover:bg-gray-50 transition"
                                                 >
                                                     <div className='flex items-center gap-4'>
-                                                        <div className={`px-2 py-2.5 rounded-lg ${res.Type === "Pdf" ? 'bg-[#FF9A3E1A]' : res.Type === "Video" ? 'bg-[#56A5781A]' : 'bg-[#FF4A4A1A]'}`}>
-                                                            <Image
-                                                                src={res.Type === "Pdf" ? pdf : res.Type === "Video" ? video : audio}
-                                                                height={100}
-                                                                width={100}
-                                                                alt=''
-                                                                className='w-8 h-8'
-                                                                priority
-                                                            />
+                                                        <div className={`px-2 py-2.5 rounded-lg flex items-center justify-center w-12 h-12 ${
+                                                            res.Type === "Pdf"
+                                                                ? 'bg-[#FF9A3E1A]'
+                                                                : res.Type === "Video"
+                                                                ? 'bg-[#56A5781A]'
+                                                                : res.Type === "Image"
+                                                                ? 'bg-purple-100 text-purple-600'
+                                                                : 'bg-[#FF4A4A1A]'
+                                                        }`}>
+                                                            {res.Type === "Image" ? (
+                                                                <ImageIcon className="w-7 h-7 text-purple-600" />
+                                                            ) : (
+                                                                <Image
+                                                                    src={res.Type === "Pdf" ? pdf : res.Type === "Video" ? video : audio}
+                                                                    height={32}
+                                                                    width={32}
+                                                                    alt=''
+                                                                    className='w-8 h-8'
+                                                                    priority
+                                                                />
+                                                            )}
                                                         </div>
                                                         <div>
-                                                            <h4 className="font-semibold md:text-lg">{res.title}</h4>
-                                                            <p className="text-[#636F85] text-sm md:text-base">Type: {res.Type}</p>
+                                                            <h4 className="font-semibold md:text-lg group-hover:text-[#1E3A8A] transition">{res.title}</h4>
+                                                            <p className="text-[#636F85] text-sm md:text-base">Type: {res.Type || 'Document'}</p>
                                                             <p className="text-xs text-gray-500 mt-1">{new Date(res.createdAt).toLocaleString('en-US')}</p>
                                                         </div>
                                                     </div>
-                                                    <Button
-                                                        onClick={() => window.open(res.file, '_blank')}
-                                                        className="bg-transparent hover:bg-transparent text-black text-3xl"
-                                                    >
-                                                        <TfiAngleRight className='w-6 md:w-12 h-6 md:h-12' />
-                                                    </Button>
+                                                    <div className="text-[#636F85] group-hover:text-[#1E3A8A] p-2 transition">
+                                                        <TfiAngleRight className='w-5 h-5' />
+                                                    </div>
                                                 </Link>
                                             ))}
                                         </div>

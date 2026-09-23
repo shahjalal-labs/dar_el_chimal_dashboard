@@ -2,7 +2,8 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { RootState } from "../store/store";
 
 // const baseUrl = "http://localhost:5555/api/v1";
-const baseUrl = "https://api.darelchimalapp.com/api/v1";
+// const baseUrl = "https://api.darelchimalapp.com/api/v1";
+const baseUrl = "http://10.0.20.221:5555/api/v1"; // testing from local
 
 export const baseApi = createApi({
   reducerPath: "api",
@@ -34,6 +35,6 @@ export const baseApi = createApi({
     "resource",
     "admin",
     "notifications",
-    "profile"
+    "profile",
   ],
 });

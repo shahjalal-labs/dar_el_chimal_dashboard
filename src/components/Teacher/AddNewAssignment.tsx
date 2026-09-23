@@ -16,6 +16,7 @@ import { PiSpinner } from "react-icons/pi";
 import { Dialog, DialogContent } from "../ui/dialog";
 import { Button } from "../ui/button";
 import { TfiAngleLeft } from "react-icons/tfi";
+import { FileText, Trash2, X } from "lucide-react";
 
 interface AssignmentFormData {
   title: string;
@@ -118,8 +119,24 @@ const AddNewAssignment = () => {
     }
   };
 
+  const getTodayDateString = () => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   const handleFileChange = (e: any) => {
-    setFormData((prev) => ({ ...prev, attachment: e.target.files[0] }));
+    if (e.target.files && e.target.files[0]) {
+      setFormData((prev) => ({ ...prev, attachment: e.target.files[0] }));
+    }
+  };
+
+  const handleRemoveFile = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setFormData((prev) => ({ ...prev, attachment: null }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -132,6 +149,18 @@ const AddNewAssignment = () => {
 
     if (!formData.book.id) {
       toast.warning("Please select a book");
+      return;
+    }
+
+    if (!formData.dueDate) {
+      toast.warning("Please select a due date");
+      return;
+    }
+
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    if (new Date(formData.dueDate) < todayStart) {
+      toast.warning("Due date cannot be in the past");
       return;
     }
 
@@ -311,38 +340,86 @@ const AddNewAssignment = () => {
 
           {/* Attachment */}
           <div>
-            <label className="font-medium text-[#30373D]">
-              Attachment (Optional)
-            </label>
-            <br />
-            <label className="cursor-pointer">
-              <div className="border border-dashed rounded-lg flex flex-col justify-center items-center w-full mt-2 p-6">
+            <div className="flex items-center justify-between">
+              <label className="font-medium text-[#30373D]">
+                Attachment (Optional)
+              </label>
+              {formData.attachment && (
+                <button
+                  type="button"
+                  onClick={handleRemoveFile}
+                  className="text-xs text-red-600 hover:text-red-700 font-medium flex items-center gap-1 hover:underline cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Remove file
+                </button>
+              )}
+            </div>
+
+            {!formData.attachment ? (
+              <label className="cursor-pointer block">
                 <input
                   type="file"
                   name="attachment"
                   onChange={handleFileChange}
-                  className="border rounded-md p-2 w-full hidden"
+                  className="hidden"
                 />
-                <Image
-                  src={link}
-                  height={50}
-                  width={50}
-                  alt="Link"
-                  className="w-6 h-6 mx-auto"
-                  priority
-                />
-                <p className="text-[#4C4C4C] text-center mt-4">
-                  Attach PDF, Audio or Link
-                </p>
+                <div className="border border-dashed border-gray-300 hover:border-[#1E3A8A] transition-colors rounded-lg flex flex-col justify-center items-center w-full mt-2 p-6 bg-gray-50/50 hover:bg-blue-50/30">
+                  <Image
+                    src={link}
+                    height={32}
+                    width={32}
+                    alt="Attach"
+                    className="w-6 h-6 mx-auto opacity-70"
+                    priority
+                  />
+                  <p className="text-[#4C4C4C] text-center mt-4 font-medium text-sm">
+                    Attach PDF, Audio or Link
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">Click to browse file</p>
+                </div>
+              </label>
+            ) : (
+              <div className="mt-2 border-2 border-[#1E3A8A]/30 bg-[#F0F4FF] rounded-xl p-4 flex items-center justify-between shadow-xs">
+                <div className="flex items-center space-x-3 overflow-hidden">
+                  <div className="w-10 h-10 rounded-lg bg-[#1E3A8A] text-white flex items-center justify-center shrink-0 shadow-sm">
+                    <FileText className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center space-x-2">
+                      <p className="text-sm font-semibold text-gray-900 truncate max-w-xs md:max-w-md">
+                        {formData.attachment.name}
+                      </p>
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-green-100 text-green-800 shrink-0">
+                        Selected
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      {(formData.attachment.size / (1024 * 1024)).toFixed(2)} MB
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2 shrink-0 ml-4">
+                  <label className="cursor-pointer text-xs font-medium text-[#1E3A8A] hover:bg-white bg-white/80 border border-[#1E3A8A]/40 px-3 py-1.5 rounded-lg transition shadow-2xs">
+                    Change
+                    <input
+                      type="file"
+                      name="attachment"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleRemoveFile}
+                    className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                    title="Remove file"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-            </label>
-            {formData?.attachment && (
-              <p className="text-sm text-gray-600 mt-2">
-                Selected:{" "}
-                <span className="font-medium">
-                  {formData?.attachment?.name}
-                </span>
-              </p>
             )}
           </div>
 
@@ -354,9 +431,19 @@ const AddNewAssignment = () => {
             <input
               type="date"
               name="dueDate"
+              min={getTodayDateString()}
               value={formData.dueDate ? formData.dueDate.split("T")[0] : ""}
               onChange={(e) => {
                 const selectedDate = e.target.value;
+                if (!selectedDate) {
+                  setFormData((prev) => ({ ...prev, dueDate: "" }));
+                  return;
+                }
+                const todayStr = getTodayDateString();
+                if (selectedDate < todayStr) {
+                  toast.warning("Due date cannot be in the past");
+                  return;
+                }
                 const isoDate = `${selectedDate}T23:59:59Z`;
 
                 setFormData((prev) => ({

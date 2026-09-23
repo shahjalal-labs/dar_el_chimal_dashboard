@@ -1,14 +1,14 @@
 "use client";
 
 import { useGetBookDetailsQuery } from "@/redux/api/student/booksApi";
-import { ChevronRight, FileText, Link2, Music, X } from "lucide-react";
+import { ChevronRight, FileText, Link2, Music, X, Image as ImageIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ReactNextPlayer } from "reactnextplayer";
 
 interface Attachment {
   id: string;
-  type: "Audio" | "Video" | "Pdf";
+  type: "Audio" | "Video" | "Pdf" | "Image";
   title: string;
   date: string;
   onClick?: () => void;
@@ -18,7 +18,7 @@ interface Resource {
   id: string;
   title: string;
   description: string;
-  Type: "Audio" | "Video" | "Pdf";
+  Type: "Audio" | "Video" | "Pdf" | "Image";
   file: string;
   bookId: string;
   uplodedBy: string;
@@ -38,12 +38,13 @@ export default function Attachments({
     { id: "1", type: "Audio", title: "Audio", date: "June 10, 2025" },
     { id: "2", type: "Video", title: "Video", date: "June 10, 2025" },
     { id: "3", type: "Pdf", title: "PDF", date: "June 10, 2025" },
+    { id: "4", type: "Image", title: "Images", date: "June 10, 2025" },
   ],
   onAttachmentClick,
   bookId,
 }: AttachmentsProps) {
   const [selectedType, setSelectedType] = useState<
-    "Audio" | "Video" | "Pdf" | null
+    "Audio" | "Video" | "Pdf" | "Image" | null
   >(null);
   const [selectedResource, setSelectedResource] = useState<Resource | null>(
     null
@@ -52,7 +53,7 @@ export default function Attachments({
 
   const { data: getBooksOverview } = useGetBookDetailsQuery(bookId);
 
-  const getIconConfig = (type: "Audio" | "Video" | "Pdf") => {
+  const getIconConfig = (type: "Audio" | "Video" | "Pdf" | "Image") => {
     switch (type) {
       case "Audio":
         return {
@@ -72,6 +73,12 @@ export default function Attachments({
           bgColor: "bg-orange-100",
           iconColor: "text-orange-600",
         };
+      case "Image":
+        return {
+          icon: ImageIcon,
+          bgColor: "bg-purple-100",
+          iconColor: "text-purple-600",
+        };
     }
   };
 
@@ -83,7 +90,7 @@ export default function Attachments({
     }) || [];
 
   // Count resources by type for the header
-  const getResourceCountByType = (type: "Audio" | "Video" | "Pdf") => {
+  const getResourceCountByType = (type: "Audio" | "Video" | "Pdf" | "Image") => {
     return (
       getBooksOverview?.result?.Resources?.filter(
         (resource: Resource) => resource.Type === type
@@ -261,6 +268,20 @@ export default function Attachments({
                         Your browser does not support the audio element.
                       </audio>
                     </div>
+                  </div>
+                )}
+
+                {selectedResource.Type === "Image" && (
+                  <div className="flex flex-col items-center justify-center p-2">
+                    <img
+                      src={selectedResource.file}
+                      alt={selectedResource.title}
+                      className="max-h-[60vh] max-w-full object-contain rounded-lg shadow-sm"
+                    />
+                    <p className="text-sm font-medium text-gray-700 mt-4">{selectedResource.title}</p>
+                    {selectedResource.description && (
+                      <p className="text-xs text-gray-500 mt-1">{selectedResource.description}</p>
+                    )}
                   </div>
                 )}
 
