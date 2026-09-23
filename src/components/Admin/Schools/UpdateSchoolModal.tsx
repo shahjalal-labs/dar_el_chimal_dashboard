@@ -164,13 +164,13 @@ const UpdateSchoolModal = ({ id }: { id: string }) => {
   }
 
   return (
-    <DialogContent className="overflow-y-auto overflow-x-hidden max-h-[85%] max-w-[90%] p-6" showCloseButton>
+    <DialogContent className="overflow-y-auto overflow-x-hidden max-h-[85vh] w-[95%] sm:max-w-2xl md:max-w-3xl p-6" showCloseButton>
       <DialogClose ref={closeRef} className="hidden" />
       <h1 className="font-bold text-2xl mt-4">Edit School - {data?.result?.name}</h1>
 
-      <div className="bg-white rounded-xl">
-        <Tabs value={tab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="flex gap-2 border-b border-gray-200 pb-2 mb-4">
+      <div className="bg-white rounded-xl min-w-0 w-full">
+        <Tabs value={tab} onValueChange={handleTabChange} className="w-full min-w-0">
+          <TabsList className="flex flex-wrap gap-2 border-b border-gray-200 pb-2 mb-4">
             <TabsTrigger
               value="general"
               className={`px-4 py-2 rounded-md text-sm font-medium ${
@@ -207,10 +207,10 @@ const UpdateSchoolModal = ({ id }: { id: string }) => {
             <UpdateGradeSection id={id} />
           </TabsContent>
 
-          <TabsContent value="assign">
-            <div className="space-y-4">
+          <TabsContent value="assign" className="min-w-0 w-full">
+            <div className="space-y-4 min-w-0 w-full">
               {/* Sub-navigation tabs: Unassigned vs Already Assigned */}
-              <div className="flex border-b border-gray-200 gap-4">
+              <div className="flex border-b border-gray-200 gap-4 overflow-x-auto min-w-0 pb-1">
                 <button
                   type="button"
                   onClick={() => setBookSubTab('unassigned')}
@@ -244,7 +244,7 @@ const UpdateSchoolModal = ({ id }: { id: string }) => {
 
               {/* TAB 1: UNASSIGNED BOOKS */}
               {bookSubTab === 'unassigned' && (
-                <div className="space-y-3">
+                <div className="space-y-3 min-w-0 w-full">
                   {/* Search Bar */}
                   <div className="relative">
                     <IoSearchOutline className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg" />
@@ -304,7 +304,7 @@ const UpdateSchoolModal = ({ id }: { id: string }) => {
                           No unassigned books found matching &quot;{unassignedSearch}&quot;.
                         </p>
                       ) : (
-                        <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                        <div className="space-y-2 max-h-72 overflow-y-auto pr-2">
                           {filteredUnassignedBooks.map((book) => {
                             const isSelected = selectedBookIds.includes(book.id);
                             return (
@@ -362,7 +362,7 @@ const UpdateSchoolModal = ({ id }: { id: string }) => {
 
               {/* TAB 2: ALREADY ASSIGNED BOOKS */}
               {bookSubTab === 'assigned' && (
-                <div className="space-y-3">
+                <div className="space-y-3 min-w-0 w-full">
                   {/* Search Bar */}
                   <div className="relative">
                     <IoSearchOutline className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg" />
@@ -398,7 +398,7 @@ const UpdateSchoolModal = ({ id }: { id: string }) => {
                       No assigned books found matching &quot;{assignedSearch}&quot;.
                     </p>
                   ) : (
-                    <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                    <div className="space-y-2 max-h-72 overflow-y-auto pr-2">
                       {filteredAssignedBooks.map((book) => (
                         <div
                           key={book.id}
