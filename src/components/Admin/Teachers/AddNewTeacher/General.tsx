@@ -37,19 +37,12 @@ const General = ({ id }: { id: string }) => {
 
     useEffect(() => {
         if (pathname === '/admin/teachers' && data?.result) {
-            dispatch(setTeacherName(data?.result?.fullName));
-            dispatch(setUserName(data?.result?.loginUserName));
-            dispatch(setEmail(data?.result?.email));
-            dispatch(setPreviewTeacherPhoto(data?.result?.profileImage));
+            dispatch(setTeacherName(data?.result?.fullName || ''));
+            dispatch(setUserName(data?.result?.loginUserName || ''));
+            dispatch(setEmail(data?.result?.email || ''));
+            dispatch(setPreviewTeacherPhoto(data?.result?.profileImage || ''));
         }
-        if (pathname === '/admin/teachers/add-new-teacher') {
-            dispatch(setTeacherName(''));
-            dispatch(setUserName(''));
-            dispatch(setEmail(''));
-            dispatch(setPreviewTeacherPhoto(''));
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [data])
+    }, [data, pathname, dispatch]);
 
     const handleImageChange = (file: File | null) => {
         if (file) {
@@ -85,9 +78,6 @@ const General = ({ id }: { id: string }) => {
                 const response = await UpdateTeacher({ id, formData }).unwrap();
                 if (response.success) {
                     toast.success(response.message);
-                    dispatch(setTeacherName(''))
-                    dispatch(setUserName(''))
-                    dispatch(setEmail(''))
                     dispatch(setActiveBookTab("grade"));
                 }
             }
@@ -104,7 +94,15 @@ const General = ({ id }: { id: string }) => {
         !userName || !password;
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form
+            onSubmit={handleSubmit}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') {
+                    e.preventDefault();
+                }
+            }}
+            className="space-y-5"
+        >
             {/* Teacher Name */}
             <div>
                 <Label>Teacher Name</Label>
@@ -212,6 +210,7 @@ const General = ({ id }: { id: string }) => {
             <div className="flex justify-center gap-3 pt-3">
                 <Link href="/admin/teachers" className={`${pathname === '/admin/teachers' ? 'hidden' : ''}`}>
                     <Button
+                        type="button"
                         variant="outline"
                         className="px-6 border-[#636F85] text-[#636F85]"
                     >

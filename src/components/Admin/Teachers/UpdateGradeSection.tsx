@@ -1,17 +1,13 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
 import GetSchools, { SchoolOption } from "@/components/Common/GetSchools";
 import { Label } from "@/components/ui/label";
-import Image from "next/image";
 import {
     useGetTeacherDetailsQuery,
     useUpdateTeacherMutation,
 } from "@/redux/api/teacher";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import CreatableSelect from "react-select/creatable";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { PiSpinner } from "react-icons/pi";
@@ -20,16 +16,15 @@ import {
     setSelectedGrades,
     setTeacherSchoolName,
 } from "@/redux/features/teacherSlice";
-import defaultImg from "@/assets/school.png";
 import { useGetSingleSchoolQuery } from "@/redux/api/school";
 import { useGetAllBookCategoriesQuery } from "@/redux/api/bookCategory";
 import Select, { ActionMeta, OnChangeValue, StylesConfig } from 'react-select';
+import { sortGrades } from "@/lib/gradeUtils";
 
 interface GradeOption {
     id: string;
     label: string;
     schoolId: string;
-    __isNew__?: boolean;
 }
 
 interface CategoryOption {
@@ -67,19 +62,15 @@ const styles: StylesConfig<CategoryOption, true> = {
 
 const UpdateGradeSection = ({ id }: { id: string }) => {
     const dispatch = useDispatch();
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
     const [selectedSchool, setSelectedSchool] = useState<SchoolOption | null>(null);
     const [selectedGrades, setSelectedGradesState] = useState<GradeOption[]>([]);
-    const [optionToRemove, setOptionToRemove] = useState<GradeOption | null>(null);
-    const [categoryOptionToRemove, setCategoryOptionToRemove] = useState<CategoryOption | null>(null);
 
     const { data: teacherData } = useGetTeacherDetailsQuery(id);
     const teacher = teacherData?.result;
 
     const [schoolId, setSchoolId] = useState<string>(teacher?.Teacher?.[0]?.grade?.school?.id);
 
-    const { data: schoolData } = useGetSingleSchoolQuery({ id: schoolId });
+    const { data: schoolData } = useGetSingleSchoolQuery({ id: schoolId }, { skip: !schoolId });
     const { data: allBookCategories } = useGetAllBookCategoriesQuery({ currentPage: 1, limit: 1000 });
 
     const allCategories: CategoryOption[] =
@@ -96,11 +87,20 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
         ];
     };
 
-    const [value, setValue] = useState<readonly CategoryOption[]>(
-        teacherData?.result?.teachersBookCategories?.map((category: any) => ({ id: category?.category?.id, categoryName: category?.category?.name }))
-    );
+    const [value, setValue] = useState<readonly CategoryOption[]>([]);
 
     const [updateTeacher, { isLoading: isUpdating }] = useUpdateTeacherMutation();
+
+    useEffect(() => {
+        if (teacherData?.result?.teachersBookCategories) {
+            setValue(
+                teacherData.result.teachersBookCategories.map((category: any) => ({
+                    id: category?.category?.id,
+                    categoryName: category?.category?.name,
+                }))
+            );
+        }
+    }, [teacherData]);
 
     useEffect(() => {
         if (teacher?.Teacher?.length) {
@@ -110,6 +110,7 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                 schoolName: school.name,
                 image: school.schoolLogo,
             });
+            setSchoolId(school.id);
 
             dispatch(setTeacherSchoolName(school.name));
 
@@ -119,19 +120,33 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                 schoolId: school.id,
             }));
 
-            setSelectedGradesState(mappedGrades);
-            dispatch(setSelectedGrades(mappedGrades));
+            const sorted = sortGrades(mappedGrades);
+            setSelectedGradesState(sorted);
+            dispatch(setSelectedGrades(sorted));
         }
     }, [teacher, dispatch]);
 
     const gradeOptions: GradeOption[] = useMemo(() => {
         if (!schoolData?.result?.grades) return [];
-        return schoolData.result.grades.map((g: any) => ({
+        const mapped = schoolData.result.grades.map((g: any) => ({
             id: g.id,
             label: g.grade,
             schoolId: schoolData.result.id,
         }));
+        return sortGrades(mapped);
     }, [schoolData]);
+
+    const isAllSelected = gradeOptions.length > 0 && selectedGrades.length === gradeOptions.length;
+
+    const handleToggleSelectAll = () => {
+        if (isAllSelected) {
+            setSelectedGradesState([]);
+            dispatch(setSelectedGrades([]));
+        } else {
+            setSelectedGradesState(gradeOptions);
+            dispatch(setSelectedGrades(gradeOptions));
+        }
+    };
 
     const onChange = (
         newValue: OnChangeValue<CategoryOption, true>,
@@ -145,126 +160,66 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                 }
                 break;
             case "clear":
-                newValue = value.filter((v) => v.isFixed); // keep fixed ones
+                newValue = (value || []).filter((v) => v.isFixed);
                 break;
         }
 
-        setValue(orderOptions(newValue));
+        setValue(orderOptions(newValue || []));
     };
 
     const handleSchoolChange = (school: SchoolOption) => {
         setSelectedSchool(school);
         setSchoolId(school?.schoolId);
         dispatch(setTeacherSchoolName(school?.schoolName));
-    };
-
-    const handleChange = (newValue: any) => {
-        setSelectedGradesState(newValue);
-        dispatch(setSelectedGrades(newValue));
-    };
-
-    const handleRemoveCategory = (option: CategoryOption) => {
-        setCategoryOptionToRemove(option);
-        setIsCategoryModalOpen(true);
-    };
-
-    const handleRemoveClick = (option: GradeOption) => {
-        setOptionToRemove(option);
-        setIsModalOpen(true);
-    };
-
-    const confirmRemove = async () => {
-        if (!optionToRemove) return;
-        try {
-            const body = {
-                userData: {},
-                gradeData: {
-                    deletedGrade: [optionToRemove?.id],
-                    newGradeAssign: [],
-                },
-            };
-            const formData = new FormData();
-            formData.append("bodyData", JSON.stringify(body));
-            const response = await updateTeacher({ id, formData }).unwrap();
-            if (response.success) {
-                toast.success(response.message);
-                setSelectedGradesState((prev) =>
-                    prev.filter((g) => g.id !== optionToRemove.id)
-                );
-                setIsModalOpen(false);
-                setOptionToRemove(null);
-            }
-        } catch (error) {
-            toast.warning(
-                (error as any)?.data?.message ||
-                "Something went wrong while removing the grade."
-            );
+        if (school?.schoolId !== selectedSchool?.schoolId) {
+            setSelectedGradesState([]);
+            dispatch(setSelectedGrades([]));
         }
     };
 
-    const confirmRemoveCategory = async () => {
-        if (!categoryOptionToRemove) return;
-        try {
-            const body = {
-                userData: {},
-                gradeData: {},
-                newBookCategoryIds: [],
-                deletedBookCategoryIds: [categoryOptionToRemove?.id]
-            };
-
-            const formData = new FormData();
-            formData.append("bodyData", JSON.stringify(body));
-            const response = await updateTeacher({ id, formData }).unwrap();
-
-            if (response.success) {
-                toast.success(response.message);
-                setValue((prev) => prev.filter((g) => g.id !== categoryOptionToRemove.id));
-                setIsCategoryModalOpen(false);
-                setCategoryOptionToRemove(null);
-            }
-        } catch (error) {
-            toast.warning(
-                (error as any)?.data?.message ||
-                "Something went wrong while removing the category."
-            );
-        }
+    const handleChange = (newValue: OnChangeValue<GradeOption, true>) => {
+        const sorted = sortGrades<GradeOption>([...(newValue || [])]);
+        setSelectedGradesState(sorted);
+        dispatch(setSelectedGrades(sorted));
     };
 
     const handleSave = async () => {
-        let newGradeAssign = [""];
+        const initialTeacherGrades = teacher?.Teacher || [];
+        const initialGradeIds: string[] = initialTeacherGrades.map((t: any) => String(t.grade.id));
+        const currentGradeIds: string[] = (selectedGrades || []).map((g) => String(g.id));
 
-        const mappedGrades = teacher.Teacher.map((t: any) => ({
-            id: t.grade.id
-        }));
+        let deletedGrade: string[] = [];
+        let newGradeAssign: string[] = [];
 
-        const mappedCategories = teacherData?.result?.teachersBookCategories?.map((category: any) => ({
-            id: category?.category?.id
-        }))
-
-        const mappedIds = mappedCategories.map((g: any) => String(g.id).trim());
-
-        const newBookCategoryIds = value
-            .filter(sg => !mappedIds.includes(String(sg.id).trim()))
-            .map(sg => sg.id);
-
-        if (teacher?.Teacher[0]?.grade?.school?.id !== schoolId) {
-            newGradeAssign = selectedGrades?.map((g) => g.id);
+        const initialSchoolId = initialTeacherGrades[0]?.grade?.school?.id;
+        if (initialSchoolId && schoolId && initialSchoolId !== schoolId) {
+            deletedGrade = initialGradeIds;
+            newGradeAssign = currentGradeIds;
+        } else {
+            deletedGrade = initialGradeIds.filter((id) => !currentGradeIds.includes(id));
+            newGradeAssign = currentGradeIds.filter((id) => !initialGradeIds.includes(id));
         }
-        else {
-            const mappedIds = mappedGrades.map((g: any) => String(g.id).trim());
-            newGradeAssign = selectedGrades
-                .filter(sg => !mappedIds.includes(String(sg.id).trim()))
-                .map(sg => sg.id);
-        }
+
+        const initialCategoryIds: string[] = (teacherData?.result?.teachersBookCategories || []).map(
+            (category: any) => String(category?.category?.id)
+        );
+        const currentCategoryIds: string[] = (value || []).map((c) => String(c.id));
+
+        const deletedBookCategoryIds = initialCategoryIds.filter(
+            (id) => !currentCategoryIds.includes(id)
+        );
+        const newBookCategoryIds = currentCategoryIds.filter(
+            (id) => !initialCategoryIds.includes(id)
+        );
 
         const body = {
             userData: {},
             gradeData: {
-                deletedGrade: [],
-                newGradeAssign: newGradeAssign,
+                deletedGrade,
+                newGradeAssign,
             },
-            newBookCategoryIds: newBookCategoryIds,
-            deletedBookCategoryIds: []
+            newBookCategoryIds,
+            deletedBookCategoryIds,
         };
         const formData = new FormData();
         formData.append("bodyData", JSON.stringify(body));
@@ -277,7 +232,7 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
         } catch (error) {
             toast.warning(
                 (error as any)?.data?.message ||
-                "Something went wrong while updating grades."
+                "Something went wrong while updating teacher."
             );
         }
     };
@@ -285,6 +240,7 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
     return (
         <div>
             <div className="flex flex-col items-start gap-6 mb-6 relative">
+                {/* Book Categories */}
                 <div className="w-full">
                     <Label>Select Book Categories</Label>
                     <Select
@@ -299,68 +255,39 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                         onChange={onChange}
                         options={allCategories}
                         placeholder="Choose categories..."
-                        components={{
-                            MultiValueRemove: (props) => (
-                                <div
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        handleRemoveCategory(props.data as CategoryOption);
-                                    }}
-                                    className="px-1 cursor-pointer text-gray-500 hover:text-red-600">
-                                    ✕
-                                </div>
-                            )
-                        }}
                     />
                 </div>
 
-                {/* ✅ School Name */}
+                {/* School Name */}
                 <div className="flex-1 relative w-full">
                     <Label>School Name</Label>
-                    <GetSchools onChange={handleSchoolChange} />
-                    {selectedSchool && (
-                        <div className="flex items-center gap-2 mt-2 absolute top-[35%] left-4">
-                            <Image
-                                src={selectedSchool.image || defaultImg}
-                                height={50}
-                                width={50}
-                                alt={selectedSchool.schoolName}
-                                style={{
-                                    width: 24,
-                                    height: 24,
-                                    borderRadius: "50%",
-                                    opacity: "50%",
-                                }}
-                                priority
-                            />
-                            <span className="opacity-[55%]">{selectedSchool.schoolName}</span>
-                        </div>
-                    )}
+                    <GetSchools value={selectedSchool} onChange={handleSchoolChange} />
                 </div>
 
-                {/* ✅ Grade Mapping */}
+                {/* Grade Section Mapping */}
                 <div className="flex-1 w-full">
-                    <Label>Grade Section Mapping</Label>
-                    <CreatableSelect
+                    <div className="flex items-center justify-between mb-1.5">
+                        <Label>Grade Section Mapping</Label>
+                        {gradeOptions.length > 0 && (
+                            <button
+                                type="button"
+                                onClick={handleToggleSelectAll}
+                                className="text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors cursor-pointer"
+                            >
+                                {isAllSelected ? "Unselect All" : "Select All"}
+                            </button>
+                        )}
+                    </div>
+                    <Select<GradeOption, true>
                         isMulti
                         options={gradeOptions}
                         value={selectedGrades}
                         onChange={handleChange}
-                        // onCreateOption={handleCreateOption}
                         getOptionLabel={(option) => option.label}
                         getOptionValue={(option) => option.id}
-                        components={{
-                            MultiValueRemove: (props) => (
-                                <div className="px-1 cursor-pointer text-gray-500 hover:text-red-600">
-                                    ✕
-                                </div>
-                            ),
-                        }}
+                        className="basic-multi-select mt-2"
+                        classNamePrefix="select"
                         styles={{
-                            container: (base) => ({
-                                ...base,
-                                marginTop: "0.5rem",
-                            }),
                             control: (base) => ({
                                 ...base,
                                 borderColor: "#CBD5E1",
@@ -368,111 +295,17 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                                 boxShadow: "none",
                                 padding: "2px 4px",
                             }),
-                            option: (base) => ({
-                                ...base,
-                                backgroundColor: "#FFFFFF",
-                                color: "#000000",
-                            }),
                         }}
                     />
                 </div>
-
-                {/* Tag */}
-                <div className="flex flex-wrap gap-2">
-                    {selectedGrades?.map((grade: any) => (
-                        <div key={grade?.id} className="bg-[#F1F5F9] text-sm rounded-md flex items-center gap-1.5 w-fit px-2.5 py-0.5">
-                            {grade?.label}
-                            <button type="button" onClick={() => handleRemoveClick(grade)} className="text-gray-700 hover:text-red-600 text-lg cursor-pointer">
-                                ×
-                            </button>
-                        </div>
-                    ))}
-                </div>
             </div>
 
-            {/* ✅ Confirmation Modal */}
-            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-                <DialogContent className="p-6">
-                    <DialogHeader>
-                        <DialogTitle>Remove Grade</DialogTitle>
-                    </DialogHeader>
-                    <p className="text-gray-700">
-                        Are you sure you want to remove{" "}
-                        <span className="font-semibold">{optionToRemove?.label}</span>?
-                    </p>
-                    <div className="flex justify-end gap-2 mt-4">
-                        <Button
-                            variant="default"
-                            onClick={() => setIsModalOpen(false)}
-                            className="px-4 py-2 border rounded-md bg-white text-black hover:text-white"
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            variant="destructive"
-                            onClick={confirmRemove}
-                            disabled={isUpdating}
-                            className="px-4 py-2 bg-red-600 hover:bg-red-300 text-white rounded-md transition-all ease-in-out duration-500 cursor-pointer"
-                        >
-                            {isUpdating ? (
-                                <div className="flex justify-center items-center gap-2">
-                                    Removing...
-                                    <div className="animate-spin">
-                                        <PiSpinner className="h-4 w-4" />
-                                    </div>
-                                </div>
-                            ) : (
-                                "Remove"
-                            )}
-                        </Button>
-                    </div>
-                </DialogContent>
-            </Dialog>
-
-            {/* ✅ Confirmation Modal 2 */}
-            <Dialog open={isCategoryModalOpen} onOpenChange={setIsCategoryModalOpen}>
-                <DialogContent className="p-6">
-                    <DialogHeader>
-                        <DialogTitle>Remove Category</DialogTitle>
-                    </DialogHeader>
-                    <p className="text-gray-700">
-                        Are you sure you want to remove{" "}
-                        <span className="font-semibold">{categoryOptionToRemove?.categoryName}</span>?
-                    </p>
-                    <div className="flex justify-end gap-2 mt-4">
-                        <Button
-                            variant="default"
-                            onClick={() => setIsCategoryModalOpen(false)}
-                            className="px-4 py-2 border rounded-md bg-white text-black hover:text-white"
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            variant="destructive"
-                            onClick={confirmRemoveCategory}
-                            disabled={isUpdating}
-                            className="px-4 py-2 bg-red-600 hover:bg-red-300 text-white rounded-md transition-all ease-in-out duration-500 cursor-pointer"
-                        >
-                            {isUpdating ? (
-                                <div className="flex justify-center items-center gap-2">
-                                    Removing...
-                                    <div className="animate-spin">
-                                        <PiSpinner className="h-4 w-4" />
-                                    </div>
-                                </div>
-                            ) : (
-                                "Remove"
-                            )}
-                        </Button>
-                    </div>
-                </DialogContent>
-            </Dialog>
-
-            {/* ✅ Buttons */}
+            {/* Save Button */}
             <div className="flex justify-center gap-3 pt-3 mt-6">
                 <Button
-                    type="submit"
+                    type="button"
                     onClick={handleSave}
+                    disabled={isUpdating}
                     className="px-6 text-white font-medium border border-[#1E3A8A] transition-all duration-300 bg-[#1E3A8A] hover:bg-[#1E3A8A]/80"
                 >
                     {isUpdating ? (

@@ -5,7 +5,6 @@ import React, { useMemo, useRef, useState } from "react";
 import { DialogClose, DialogContent } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import GetSchools, { SchoolOption } from "@/components/Common/GetSchools";
-import Image from "next/image";
 import Select, { ActionMeta, OnChangeValue, StylesConfig } from "react-select";
 import { useGetAllGradesQuery } from "@/redux/api/grade";
 import { Input } from "@/components/ui/input";
@@ -20,7 +19,7 @@ import {
 } from "@/redux/features/teacherSlice";
 import { RootState } from "@/redux/store/store";
 import { useGetAllBookCategoriesQuery } from "@/redux/api/bookCategory";
-import schoolImg from "@/assets/school.png";
+import { sortGrades } from "@/lib/gradeUtils";
 
 interface GradeOption {
   id: string;
@@ -207,10 +206,24 @@ const CreateTeacherModal = () => {
         {mappings?.map((mapping) => {
           const { school, grades } = mapping;
           const filteredGradeOptions = school
-            ? allGrades?.filter(
-                (g: any) => String(g?.schoolId) === String(school?.schoolId),
+            ? sortGrades(
+                allGrades?.filter(
+                  (g: any) => String(g?.schoolId) === String(school?.schoolId),
+                ),
               )
             : [];
+
+          const isAllSelected =
+            filteredGradeOptions.length > 0 &&
+            grades.length === filteredGradeOptions.length;
+
+          const handleToggleSelectAll = () => {
+            if (isAllSelected) {
+              handleGradeChange(mapping?.id, []);
+            } else {
+              handleGradeChange(mapping?.id, filteredGradeOptions);
+            }
+          };
 
           return (
             <div key={mapping?.id}>
@@ -219,25 +232,12 @@ const CreateTeacherModal = () => {
                 <div className="flex-1 relative w-full">
                   <Label>School Name</Label>
                   <GetSchools
+                    value={school}
                     onChange={(selectedSchool) =>
                       handleSchoolChange(mapping?.id, selectedSchool)
                     }
                     excludeIds={selectedSchoolIds}
                   />
-
-                  {/* Display selected school */}
-                  {school && (
-                    <div className="flex items-center gap-2 mt-2 absolute top-[35%] left-4">
-                      <Image
-                        src={school?.image || schoolImg}
-                        height={32}
-                        width={24}
-                        alt={school?.schoolName}
-                        className="rounded-xl"
-                      />
-                      <span>{school?.schoolName}</span>
-                    </div>
-                  )}
                 </div>
 
                 {/* Number of Teacher */}
@@ -268,7 +268,18 @@ const CreateTeacherModal = () => {
 
               {/* Grade Section Mapping */}
               <div className="flex-1 w-full">
-                <Label>Grade Section Mapping</Label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <Label>Grade Section Mapping</Label>
+                  {filteredGradeOptions.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleToggleSelectAll}
+                      className="text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors cursor-pointer"
+                    >
+                      {isAllSelected ? "Unselect All" : "Select All"}
+                    </button>
+                  )}
+                </div>
                 <Select<GradeOption, true>
                   isMulti
                   options={filteredGradeOptions}
@@ -278,7 +289,7 @@ const CreateTeacherModal = () => {
                   getOptionValue={(option) => option?.id}
                   value={grades}
                   onChange={(selectedOptions) =>
-                    handleGradeChange(mapping?.id, selectedOptions)
+                    handleGradeChange(mapping?.id, (selectedOptions as GradeOption[]) || [])
                   }
                   styles={{
                     control: (base) => ({
@@ -297,6 +308,7 @@ const CreateTeacherModal = () => {
 
         <div className="flex justify-center items-center gap-3 pt-6">
           <Button
+            type="button"
             variant="outline"
             onClick={() => closeRef.current?.click()}
             className="px-6 border-[#636F85] text-[#636F85] font-medium"

@@ -18,55 +18,13 @@ interface Option {
     __isNew__?: boolean;
 }
 
-export const STANDARD_GRADE_ORDER = [
-    "Preschool",
-    "KG1",
-    "KG2",
-    "KG3",
-    "Grade 1",
-    "Grade 2",
-    "Grade 3",
-    "Grade 4",
-    "Grade 5",
-    "Grade 6",
-    "Grade 7",
-    "Grade 8",
-    "Grade 9",
-    "Grade 10",
-    "Grade 11",
-    "Grade 12",
-];
+import { STANDARD_GRADE_ORDER, sortGrades } from '@/lib/gradeUtils';
+export { STANDARD_GRADE_ORDER, sortGrades };
 
 const BASE_GRADE_OPTIONS: Option[] = STANDARD_GRADE_ORDER.map((g) => ({
     value: g,
     label: g,
 }));
-
-export const sortGrades = (options: Option[]): Option[] => {
-    const getGradeRank = (val: string): number => {
-        const str = String(val).trim();
-        const stdIndex = STANDARD_GRADE_ORDER.findIndex(
-            (g) => g.toLowerCase() === str.toLowerCase()
-        );
-        if (stdIndex !== -1) return stdIndex;
-
-        const match = str.match(/\d+/);
-        if (match) {
-            const num = parseInt(match[0], 10);
-            if (str.toLowerCase().startsWith("kg")) return 10 + num;
-            if (str.toLowerCase().startsWith("grade")) return 100 + num;
-            return 500 + num;
-        }
-        return 1000;
-    };
-
-    return [...options].sort((a, b) => {
-        const rankA = getGradeRank(a.value);
-        const rankB = getGradeRank(b.value);
-        if (rankA !== rankB) return rankA - rankB;
-        return a.value.localeCompare(b.value, undefined, { numeric: true, sensitivity: "base" });
-    });
-};
 
 const UpdateGradeSection = ({ id }: { id: string }) => {
     const dispatch = useDispatch();

@@ -1,13 +1,12 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { FormEvent, ReactEventHandler, ReactHTMLElement, useMemo, useState } from 'react';
+import React, { FormEvent, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { RootState } from '@/redux/store/store';
 import { useDispatch, useSelector } from 'react-redux';
-import { setEmail, setPassword, setPreviewTeacherPhoto, setTeacherName, setUserName } from '@/redux/features/teacherSlice';
+import { resetTeacherForm } from '@/redux/features/teacherSlice';
 import GetSchools, { SchoolOption } from '@/components/Common/GetSchools';
 import Link from 'next/link';
 import { PiSpinner } from 'react-icons/pi';
@@ -17,6 +16,7 @@ import { useRouter } from 'next/navigation';
 import { useCreateTeacherMutation } from '@/redux/api/teacher';
 import Select, { ActionMeta, OnChangeValue, StylesConfig } from 'react-select';
 import { useGetAllBookCategoriesQuery } from '@/redux/api/bookCategory';
+import { sortGrades } from '@/lib/gradeUtils';
 
 interface GradeOption {
     id: string;
@@ -115,18 +115,22 @@ const Grade = () => {
         setValue(orderOptions(newValue));
     };
 
-    const allGrades: GradeOption[] = gradesData?.result?.map((singleGrade: any) => ({
-        id: singleGrade?.id,
-        label: singleGrade?.grade,
-        schoolId: singleGrade?.schoolId,
-    })) ?? [];
+    const allGrades: GradeOption[] = useMemo(() => {
+        const raw = gradesData?.result?.map((singleGrade: any) => ({
+            id: singleGrade?.id,
+            label: singleGrade?.grade,
+            schoolId: singleGrade?.schoolId,
+        })) ?? [];
+        return sortGrades(raw);
+    }, [gradesData]);
 
     const handleSchoolChange = (id: string, school: SchoolOption) => {
         setMappings((prev) => prev?.map((item) => item?.id === id ? { ...item, school, grades: [] } : item));
     };
 
     const handleGradeChange = (id: string, selectedGrades: readonly GradeOption[]) => {
-        setMappings((prev) => prev?.map((item) => item?.id === id ? { ...item, grades: [...selectedGrades] } : item));
+        const sorted = sortGrades([...selectedGrades]);
+        setMappings((prev) => prev?.map((item) => item?.id === id ? { ...item, grades: sorted } : item));
     };
 
     const selectedSchoolIds = useMemo(() => mappings?.filter((m) => m?.school)?.map((m) => m?.school!.schoolId), [mappings]);
@@ -155,6 +159,7 @@ const Grade = () => {
             const response = await CreateTeacher(formData).unwrap();
             if (response.success) {
                 toast.success(response.message);
+                dispatch(resetTeacherForm());
                 route.push('/admin/teachers');
             }
         } catch (error) {
@@ -165,7 +170,14 @@ const Grade = () => {
     const isButtonDisabled = !mappings[0].school || !mappings[0].grades.length;
 
     return (
-        <form onSubmit={handleSave}>
+        <form
+            onSubmit={handleSave}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') {
+                    e.preventDefault();
+                }
+            }}
+        >
             <div className="w-full">
                 <Label>Select Book Categories</Label>
                 <Select
@@ -186,7 +198,19 @@ const Grade = () => {
             {mappings?.map((mapping) => {
                 const { school, grades } = mapping;
 
-                const filteredGradeOptions = school ? allGrades?.filter((g) => String(g?.schoolId) === String(school?.schoolId)) : [];
+                const filteredGradeOptions = school
+                    ? sortGrades(allGrades?.filter((g) => String(g?.schoolId) === String(school?.schoolId)))
+                    : [];
+
+                const isAllSelected = filteredGradeOptions.length > 0 && grades.length === filteredGradeOptions.length;
+
+                const handleToggleSelectAll = () => {
+                    if (isAllSelected) {
+                        handleGradeChange(mapping.id, []);
+                    } else {
+                        handleGradeChange(mapping.id, filteredGradeOptions);
+                    }
+                };
 
                 return (
                     <div
@@ -197,6 +221,7 @@ const Grade = () => {
                         <div className="flex-1 relative w-full">
                             <Label>School Name</Label>
                             <GetSchools
+                                value={school}
                                 onChange={(selectedSchool) => handleSchoolChange(mapping?.id, selectedSchool)}
                                 excludeIds={selectedSchoolIds}
                             />
@@ -204,7 +229,18 @@ const Grade = () => {
 
                         {/* Grade Section Mapping */}
                         <div className="flex-1 w-full">
-                            <Label>Grade Section Mapping</Label>
+                            <div className="flex items-center justify-between mb-1.5">
+                                <Label>Grade Section Mapping</Label>
+                                {filteredGradeOptions.length > 0 && (
+                                    <button
+                                        type="button"
+                                        onClick={handleToggleSelectAll}
+                                        className="text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors cursor-pointer"
+                                    >
+                                        {isAllSelected ? "Unselect All" : "Select All"}
+                                    </button>
+                                )}
+                            </div>
                             <Select<GradeOption, true>
                                 isMulti
                                 options={filteredGradeOptions}
@@ -213,7 +249,7 @@ const Grade = () => {
                                 getOptionLabel={(option) => option?.label}
                                 getOptionValue={(option) => option?.id}
                                 value={grades}
-                                onChange={(selectedOptions) => handleGradeChange(mapping?.id, selectedOptions)}
+                                onChange={(selectedOptions) => handleGradeChange(mapping?.id, selectedOptions || [])}
                                 styles={{
                                     control: (base) => ({
                                         ...base,
@@ -233,6 +269,7 @@ const Grade = () => {
             <div className="flex justify-center items-center gap-3 pt-6">
                 <Link href="/admin/teachers">
                     <Button
+                        type="button"
                         variant="outline"
                         className="px-6 border-[#636F85] text-[#636F85] font-medium"
                     >

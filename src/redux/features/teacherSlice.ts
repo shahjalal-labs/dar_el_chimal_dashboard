@@ -75,8 +75,21 @@ const teacherSlice = createSlice({
         setTeachersList: (state, action: PayloadAction<{ loginUserName: string; password: string }[]>) => {
             state.teacherList = action.payload;
         },
+        resetTeacherForm: (state) => {
+            state.teacherName = '';
+            state.userName = '';
+            state.password = '';
+            state.email = '';
+            state.teacherSchoolName = '';
+            state.numberOfTeacher = 0;
+            state.previewTeacherPhoto = '';
+            state.teacherList = [];
+            state.teacherPhoto = null;
+            state.options = [];
+            state.selectedGrades = [];
+        },
     },
 });
 
-export const { setTeacherName, setUserName, setPassword, setEmail, setTeacherSchoolName, setNumberOfTeacher, setTeacherPhoto, setPreviewTeacherPhoto, setTeachersList, setGradeOptions, setSelectedGrades, clearGradeOptions } = teacherSlice.actions;
+export const { setTeacherName, setUserName, setPassword, setEmail, setTeacherSchoolName, setNumberOfTeacher, setTeacherPhoto, setPreviewTeacherPhoto, setTeachersList, setGradeOptions, setSelectedGrades, clearGradeOptions, resetTeacherForm } = teacherSlice.actions;
 export default teacherSlice.reducer;

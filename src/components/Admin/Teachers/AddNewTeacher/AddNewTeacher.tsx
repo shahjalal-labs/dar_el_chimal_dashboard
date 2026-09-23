@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MdOutlineDataset } from 'react-icons/md';
 import { RiGraduationCapLine } from 'react-icons/ri';
@@ -9,14 +9,20 @@ import Grade from './Grade';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/redux/store/store';
 import { setActiveBookTab } from '@/redux/features/uiSlice';
+import { resetTeacherForm } from '@/redux/features/teacherSlice';
 
 const AddNewTeacher = () => {
     const dispatch = useDispatch();
     const tab = useSelector((state: RootState) => state.ui.activeBookTab);
 
+    useEffect(() => {
+        dispatch(resetTeacherForm());
+        dispatch(setActiveBookTab("general"));
+    }, [dispatch]);
+
     const handleTabChange = (value: string) => {
         dispatch(setActiveBookTab(value as "general" | "resources" | "grade"));
-    }
+    };
 
     return (
         <div>
