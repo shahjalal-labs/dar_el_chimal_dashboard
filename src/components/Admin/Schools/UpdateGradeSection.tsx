@@ -1,17 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Label } from '@/components/ui/label';
 import CreatableSelect from 'react-select/creatable';
 import { Button } from '@/components/ui/button';
 import { RootState } from '@/redux/store/store';
-import { setActiveStudents, setActiveTeachers, setAddress, setGradeOptions, setPreviewSchoolPhoto, setSchoolName, setStudentCount, setTeacherCount } from '@/redux/features/schoolSlice';
+import { setGradeOptions } from '@/redux/features/schoolSlice';
 import { toast } from 'sonner';
 import { useGetSingleSchoolQuery, useUpdateSchoolMutation } from '@/redux/api/school';
 import { PiSpinner } from 'react-icons/pi';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface Option {
     label: string;
@@ -19,186 +18,235 @@ interface Option {
     __isNew__?: boolean;
 }
 
-const initialOptions = [
-    { value: "All", label: "All" },
-    { value: "Preschool", label: "Preschool" },
-    { value: "KG1", label: "KG1" },
-    { value: "KG2", label: "KG2" },
-    { value: "KG3", label: "KG3" },
-    { value: "Grade 1", label: "Grade 1" },
-    { value: "Grade 2", label: "Grade 2" },
-    { value: "Grade 3", label: "Grade 3" },
-    { value: "Grade 4", label: "Grade 4" },
-    { value: "Grade 5", label: "Grade 5" },
-    { value: "Grade 6", label: "Grade 6" },
-    { value: "Grade 7", label: "Grade 7" },
-    { value: "Grade 8", label: "Grade 8" },
-    { value: "Grade 9", label: "Grade 9" },
-    { value: "Grade 10", label: "Grade 10" },
-    { value: "Grade 11", label: "Grade 11" },
-    { value: "Grade 12", label: "Grade 12" },
+export const STANDARD_GRADE_ORDER = [
+    "Preschool",
+    "KG1",
+    "KG2",
+    "KG3",
+    "Grade 1",
+    "Grade 2",
+    "Grade 3",
+    "Grade 4",
+    "Grade 5",
+    "Grade 6",
+    "Grade 7",
+    "Grade 8",
+    "Grade 9",
+    "Grade 10",
+    "Grade 11",
+    "Grade 12",
 ];
+
+const BASE_GRADE_OPTIONS: Option[] = STANDARD_GRADE_ORDER.map((g) => ({
+    value: g,
+    label: g,
+}));
+
+export const sortGrades = (options: Option[]): Option[] => {
+    const getGradeRank = (val: string): number => {
+        const str = String(val).trim();
+        const stdIndex = STANDARD_GRADE_ORDER.findIndex(
+            (g) => g.toLowerCase() === str.toLowerCase()
+        );
+        if (stdIndex !== -1) return stdIndex;
+
+        const match = str.match(/\d+/);
+        if (match) {
+            const num = parseInt(match[0], 10);
+            if (str.toLowerCase().startsWith("kg")) return 10 + num;
+            if (str.toLowerCase().startsWith("grade")) return 100 + num;
+            return 500 + num;
+        }
+        return 1000;
+    };
+
+    return [...options].sort((a, b) => {
+        const rankA = getGradeRank(a.value);
+        const rankB = getGradeRank(b.value);
+        if (rankA !== rankB) return rankA - rankB;
+        return a.value.localeCompare(b.value, undefined, { numeric: true, sensitivity: "base" });
+    });
+};
 
 const UpdateGradeSection = ({ id }: { id: string }) => {
     const dispatch = useDispatch();
     const selectedFromRedux = useSelector((state: RootState) => state.school.options);
-    const [selectedOptions, setSelectedOptions] = useState(selectedFromRedux);
 
-    const [optionToRemove, setOptionToRemove] = useState<Option | null>(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedOptions, setSelectedOptions] = useState<Option[]>([]);
+    const [customOptions, setCustomOptions] = useState<Option[]>([]);
 
     const { data } = useGetSingleSchoolQuery({ id });
     const [UpdateSchool, { isLoading: isUpdating }] = useUpdateSchoolMutation();
 
+    // Populate initial grades from server
     useEffect(() => {
-        if (data?.result) {
-            const grades = data?.result?.grades?.map((g: any) => ({
+        if (data?.result?.grades) {
+            const serverGrades: Option[] = data.result.grades.map((g: any) => ({
                 label: g.grade,
                 value: g.grade,
-                __isNew__: true
             }));
-            dispatch(setGradeOptions(grades));
-            setSelectedOptions(grades);
+
+            // Track any custom grades that are not in BASE_GRADE_OPTIONS
+            const extraOptions = serverGrades.filter(
+                (sg) => !BASE_GRADE_OPTIONS.some((bg) => bg.value.toLowerCase() === sg.value.toLowerCase())
+            );
+            if (extraOptions.length > 0) {
+                setCustomOptions(extraOptions);
+            }
+
+            const sorted = sortGrades(serverGrades);
+            setSelectedOptions(sorted);
+            dispatch(setGradeOptions(sorted));
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [data])
+    }, [data, dispatch]);
+
+    // Combine base options + custom options
+    const allAvailableOptions = useMemo(() => {
+        const map = new Map<string, Option>();
+        BASE_GRADE_OPTIONS.forEach((opt) => map.set(opt.value.toLowerCase(), opt));
+        customOptions.forEach((opt) => map.set(opt.value.toLowerCase(), opt));
+        return sortGrades(Array.from(map.values()));
+    }, [customOptions]);
+
+    // Dropdown options include dynamic "Select All" / "Unselect All" at top
+    const isAllSelected = selectedOptions.length > 0 && selectedOptions.length === allAvailableOptions.length;
+
+    const dropdownOptions = useMemo(() => {
+        const selectAllOption: Option = isAllSelected
+            ? { value: "__DESELECT_ALL__", label: "✕ Unselect All Grades" }
+            : { value: "__SELECT_ALL__", label: "✓ Select All Grades" };
+
+        return [selectAllOption, ...allAvailableOptions];
+    }, [isAllSelected, allAvailableOptions]);
+
+    const handleSelectAll = () => {
+        const sorted = sortGrades(allAvailableOptions);
+        setSelectedOptions(sorted);
+        dispatch(setGradeOptions(sorted));
+    };
+
+    const handleUnselectAll = () => {
+        setSelectedOptions([]);
+        dispatch(setGradeOptions([]));
+    };
 
     const handleChange = (
         newValue: readonly Option[],
+        actionMeta: any
     ) => {
-        const selectedList = [...newValue]; // copy because it's readonly
-        const selectedValues = selectedList.map((opt) => opt.value);
-        const isAllSelected = selectedValues.includes("All");
-
-        // If "All" selected → select all options
-        if (isAllSelected) {
-            const allOptions = [...initialOptions];
-            setSelectedOptions(allOptions);
-            dispatch(setGradeOptions(allOptions));
+        // If user clicked the "__SELECT_ALL__" option from dropdown
+        if (actionMeta?.option?.value === "__SELECT_ALL__") {
+            handleSelectAll();
             return;
         }
 
-        // Remove "All" if something else is changed
-        const withoutAll = selectedList.filter((opt) => opt.value !== "All");
+        // If user clicked the "__DESELECT_ALL__" option from dropdown
+        if (actionMeta?.option?.value === "__DESELECT_ALL__") {
+            handleUnselectAll();
+            return;
+        }
 
-        setSelectedOptions(withoutAll);
-        dispatch(setGradeOptions(withoutAll));
+        // Filter out any accidental select-all tokens
+        const filtered = newValue.filter(
+            (opt) => opt.value !== "__SELECT_ALL__" && opt.value !== "__DESELECT_ALL__" && opt.value !== "All"
+        );
+
+        const sorted = sortGrades(filtered);
+        setSelectedOptions(sorted);
+        dispatch(setGradeOptions(sorted));
     };
 
     const handleCreateOption = (inputValue: string) => {
-        if (!inputValue.trim()) return;
+        const trimmed = inputValue.trim();
+        if (!trimmed) return;
 
         const newOption: Option = {
-            value: inputValue,
-            label: inputValue,
+            value: trimmed,
+            label: trimmed,
             __isNew__: true,
         };
 
-        // Add to initial options
-        initialOptions.push(newOption);
-
-        const isAllSelected = selectedOptions.some((opt) => opt.value === "All");
-
-        const updatedSelection = isAllSelected
-            ? [...initialOptions] // If All was selected → include new option automatically
-            : [...selectedOptions, newOption];
-
-        setSelectedOptions(updatedSelection);
-        dispatch(setGradeOptions(updatedSelection));
-    };
-
-    const handleRemoveClick = (option: Option) => {
-        setOptionToRemove(option);
-        setIsModalOpen(true);
-    };
-
-    const confirmRemove = async () => {
-        const deletedGrade = data?.result?.grades?.find((g: any) => g?.grade === optionToRemove?.value);
-        const body = {
-            schoolData: {},
-            DeleteGrades: [
-                deletedGrade?.id
-            ],
-        }
-
-        const formData = new FormData();
-        formData.append('bodyData', JSON.stringify(body))
-
-        try {
-            const response = await UpdateSchool({ id, formData }).unwrap();
-            if (response.success) {
-                toast.success(response.message);
-                setSelectedOptions((prev) =>
-                    prev.filter((opt) => opt.value !== optionToRemove?.value)
-                );
-                setIsModalOpen(false);
-                setOptionToRemove(null);
-            }
-        } catch (error) {
-            toast.warning((error as any)?.data?.message || "Something went wrong");
-        }
+        setCustomOptions((prev) => [...prev, newOption]);
+        const updated = sortGrades([...selectedOptions, newOption]);
+        setSelectedOptions(updated);
+        dispatch(setGradeOptions(updated));
     };
 
     const handleSave = async () => {
-        let newAssignedGrades = [""];
+        const initialGrades: Array<{ id: string; grade: string }> = data?.result?.grades || [];
+        const currentGradeValues = selectedOptions.map((opt) => opt.value);
 
-        const prevGrades = data?.result?.grades?.map((g: any) => String(g.grade));
-        newAssignedGrades = selectedFromRedux?.filter((sg: any) => !prevGrades.includes(sg?.value))?.map((sg: any) => sg?.value);
+        // Grades to delete: were in initialGrades, but removed from current selection
+        const deleteGradeIds = initialGrades
+            .filter((ig) => !currentGradeValues.some((name) => name.toLowerCase() === ig.grade.toLowerCase()))
+            .map((ig) => ig.id);
+
+        // Grades to add: in current selection, but were not in initialGrades
+        const newGradesToAdd = currentGradeValues
+            .filter((name) => !initialGrades.some((ig) => ig.grade.toLowerCase() === name.toLowerCase()))
+            .map((name) => ({ gradeLevel: name }));
+
+        if (deleteGradeIds.length === 0 && newGradesToAdd.length === 0) {
+            toast.info("No changes to update");
+            return;
+        }
 
         const body = {
             schoolData: {},
-            grades: newAssignedGrades?.filter((grade: any) => grade !== 'All')?.map((grade: any) => ({ gradeLevel: grade }))
-        }
+            DeleteGrades: deleteGradeIds,
+            grades: newGradesToAdd,
+        };
 
         const formData = new FormData();
-        formData.append('bodyData', JSON.stringify(body))
+        formData.append('bodyData', JSON.stringify(body));
 
         try {
             const response = await UpdateSchool({ id, formData }).unwrap();
             if (response.success) {
-                toast.success(response.message);
-                dispatch(setSchoolName(''))
-                dispatch(setAddress(''))
-                dispatch(setTeacherCount(0))
-                dispatch(setActiveTeachers(0))
-                dispatch(setStudentCount(0))
-                dispatch(setActiveStudents(0))
-                dispatch(setPreviewSchoolPhoto(''))
-                dispatch(setGradeOptions([]));
-                window.location.reload();
+                toast.success(response.message || "School grades updated successfully");
             }
-        } catch (error) {
-            toast.warning((error as any)?.data?.message || "Something went wrong");
+        } catch (error: any) {
+            toast.error(error?.data?.message || error?.message || "Failed to update school grades");
         }
     };
 
     return (
         <div>
-            <Label>Grade Section Mapping</Label>
+            {/* Header with Title and Quick Action Buttons */}
+            <div className="flex items-center justify-between mb-2">
+                <Label className="text-sm font-semibold text-gray-700">Grade Section Mapping</Label>
+                <div className="flex items-center gap-2">
+                    <button
+                        type="button"
+                        onClick={handleSelectAll}
+                        className="text-xs font-semibold text-[#1E3A8A] hover:underline cursor-pointer"
+                    >
+                        Select All
+                    </button>
+                    <span className="text-gray-300">|</span>
+                    <button
+                        type="button"
+                        onClick={handleUnselectAll}
+                        className="text-xs font-semibold text-gray-500 hover:text-red-600 hover:underline cursor-pointer"
+                    >
+                        Unselect All
+                    </button>
+                </div>
+            </div>
+
             <CreatableSelect
                 isMulti={true}
-                options={initialOptions}
+                options={dropdownOptions}
                 value={selectedOptions}
                 onChange={handleChange}
                 onCreateOption={handleCreateOption}
-                components={{
-                    MultiValueRemove: (props) => (
-                        <div
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                e.preventDefault();
-                                handleRemoveClick(props.data as Option);
-                            }}
-                            className="px-1 cursor-pointer text-gray-500 hover:text-red-600"
-                        >
-                            ✕
-                        </div>
-                    ),
-                }}
+                placeholder="Select or type grade section..."
+                closeMenuOnSelect={false}
+                isClearable={true}
                 styles={{
                     container: (base) => ({
                         ...base,
-                        marginTop: "0.5rem",
+                        marginTop: "0.25rem",
                     }),
                     control: (base) => ({
                         ...base,
@@ -206,70 +254,70 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                         borderRadius: "0.5rem",
                         boxShadow: "none",
                         padding: "2px 4px",
+                        minHeight: "44px",
                     }),
-                    option: (base) => ({
+                    multiValue: (base) => ({
                         ...base,
-                        backgroundColor: "#FFFFFF",
-                        color: "#000000",
+                        backgroundColor: "#F1F5F9",
+                        borderRadius: "0.375rem",
+                        border: "1px solid #E2E8F0",
                     }),
+                    multiValueLabel: (base) => ({
+                        ...base,
+                        color: "#1E293B",
+                        fontWeight: 500,
+                        padding: "2px 6px",
+                    }),
+                    multiValueRemove: (base) => ({
+                        ...base,
+                        color: "#64748B",
+                        cursor: "pointer",
+                        ":hover": {
+                            backgroundColor: "#FEE2E2",
+                            color: "#EF4444",
+                        },
+                    }),
+                    option: (base, state) => {
+                        const isSelectAllOption = state.data.value === "__SELECT_ALL__" || state.data.value === "__DESELECT_ALL__";
+                        return {
+                            ...base,
+                            backgroundColor: state.isFocused
+                                ? isSelectAllOption ? "#EEF2FF" : "#F8FAFC"
+                                : "#FFFFFF",
+                            color: isSelectAllOption ? "#1E3A8A" : "#1E293B",
+                            fontWeight: isSelectAllOption ? 600 : 400,
+                            borderBottom: isSelectAllOption ? "1px solid #E2E8F0" : "none",
+                            cursor: "pointer",
+                        };
+                    },
                 }}
             />
 
-            {/* Modal */}
-            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-                <DialogContent className="p-6">
-                    <DialogHeader>
-                        <DialogTitle>Remove Grade</DialogTitle>
-                    </DialogHeader>
-                    <p className="text-gray-700">
-                        Are you sure you want to remove{" "}
-                        <span className="font-semibold">{optionToRemove?.label}</span>?
-                    </p>
-                    <div className="flex justify-end gap-2 mt-4">
-                        <Button
-                            variant="default"
-                            onClick={() => setIsModalOpen(false)}
-                            className='px-4 py-2 border rounded-md bg-white text-black hover:text-white'
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            variant="destructive"
-                            onClick={confirmRemove}
-                            className='px-4 py-2 bg-red-600 hover:bg-red-300 text-white rounded-md transition-all ease-in-out duration-500 cursor-pointer'
-                        >
-                            {
-                                (isUpdating) ?
-                                    <div className="flex justify-center items-center gap-2">
-                                        Removing...
-                                        <div className="animate-spin">
-                                            <PiSpinner className="h-4 w-4" />
-                                        </div>
-                                    </div> :
-                                    "Remove"
-                            }
-                        </Button>
-                    </div>
-                </DialogContent>
-            </Dialog>
+            {/* Selected Count Indicator */}
+            <div className="flex justify-between items-center text-xs text-gray-500 mt-1.5">
+                <span>
+                    {selectedOptions.length === 0
+                        ? "No grades selected"
+                        : `${selectedOptions.length} grade${selectedOptions.length > 1 ? "s" : ""} selected`}
+                </span>
+            </div>
 
-            {/* Buttons */}
+            {/* Update & Continue Button */}
             <div className="flex justify-center pt-3 mt-6">
                 <Button
-                    type="submit"
+                    type="button"
                     onClick={handleSave}
-                    className={`px-6 text-white font-medium border border-[#1E3A8A] transition-all ease-in-out duration-500 cursor-pointer bg-[#1E3A8A] hover:bg-[#1E3A8A]/80`}
+                    disabled={isUpdating}
+                    className="px-8 py-2.5 text-white font-medium border border-[#1E3A8A] transition-all ease-in-out duration-300 cursor-pointer bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 rounded-md"
                 >
-                    {
-                        (isUpdating && !isModalOpen) ?
-                            <div className="flex justify-center items-center gap-2">
-                                Updating...
-                                <div className="animate-spin">
-                                    <PiSpinner className="h-4 w-4" />
-                                </div>
-                            </div> :
-                            "Update & Continue"
-                    }
+                    {isUpdating ? (
+                        <div className="flex justify-center items-center gap-2">
+                            Updating...
+                            <PiSpinner className="animate-spin h-4 w-4" />
+                        </div>
+                    ) : (
+                        "Update & Continue"
+                    )}
                 </Button>
             </div>
         </div>

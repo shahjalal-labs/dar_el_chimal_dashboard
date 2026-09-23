@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Label } from "@/components/ui/label";
 import CreatableSelect from "react-select/creatable";
@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { useCreateSchoolMutation } from "@/redux/api/school";
 import { PiSpinner } from "react-icons/pi";
 import { useRouter } from "next/navigation";
+import { STANDARD_GRADE_ORDER, sortGrades } from "../UpdateGradeSection";
 
 interface Option {
     label: string;
@@ -28,25 +29,10 @@ interface Option {
     __isNew__?: boolean;
 }
 
-const initialOptions = [
-    { value: "All", label: "All" },
-    { value: "Preschool", label: "Preschool" },
-    { value: "KG1", label: "KG1" },
-    { value: "KG2", label: "KG2" },
-    { value: "KG3", label: "KG3" },
-    { value: "Grade 1", label: "Grade 1" },
-    { value: "Grade 2", label: "Grade 2" },
-    { value: "Grade 3", label: "Grade 3" },
-    { value: "Grade 4", label: "Grade 4" },
-    { value: "Grade 5", label: "Grade 5" },
-    { value: "Grade 6", label: "Grade 6" },
-    { value: "Grade 7", label: "Grade 7" },
-    { value: "Grade 8", label: "Grade 8" },
-    { value: "Grade 9", label: "Grade 9" },
-    { value: "Grade 10", label: "Grade 10" },
-    { value: "Grade 11", label: "Grade 11" },
-    { value: "Grade 12", label: "Grade 12" },
-];
+const BASE_GRADE_OPTIONS: Option[] = STANDARD_GRADE_ORDER.map((g) => ({
+    value: g,
+    label: g,
+}));
 
 const AddGradeSection = () => {
     const route = useRouter();
@@ -60,77 +46,97 @@ const AddGradeSection = () => {
         studentCount,
         activeStudents,
         schoolPhoto,
-        previewResourceFile
+        previewResourceFile,
     } = useSelector((state: RootState) => state.school);
-    const selectedFromRedux = useSelector(
-        (state: RootState) => state.school.options
-    );
 
     const [selectedOptions, setSelectedOptions] = useState<Option[]>([]);
+    const [customOptions, setCustomOptions] = useState<Option[]>([]);
     const [CreateSchool, { isLoading: isCreating }] = useCreateSchoolMutation();
+
+    const allAvailableOptions = useMemo(() => {
+        const map = new Map<string, Option>();
+        BASE_GRADE_OPTIONS.forEach((opt) => map.set(opt.value.toLowerCase(), opt));
+        customOptions.forEach((opt) => map.set(opt.value.toLowerCase(), opt));
+        return sortGrades(Array.from(map.values()));
+    }, [customOptions]);
+
+    const isAllSelected = selectedOptions.length > 0 && selectedOptions.length === allAvailableOptions.length;
+
+    const dropdownOptions = useMemo(() => {
+        const selectAllOption: Option = isAllSelected
+            ? { value: "__DESELECT_ALL__", label: "✕ Unselect All Grades" }
+            : { value: "__SELECT_ALL__", label: "✓ Select All Grades" };
+
+        return [selectAllOption, ...allAvailableOptions];
+    }, [isAllSelected, allAvailableOptions]);
+
+    const handleSelectAll = () => {
+        const sorted = sortGrades(allAvailableOptions);
+        setSelectedOptions(sorted);
+        dispatch(setGradeOptions(sorted));
+    };
+
+    const handleUnselectAll = () => {
+        setSelectedOptions([]);
+        dispatch(setGradeOptions([]));
+    };
 
     const handleChange = (
         newValue: readonly Option[],
+        actionMeta: any
     ) => {
-        if (!newValue || newValue.length === 0) {
-            setSelectedOptions([]);
-            dispatch(setGradeOptions([]));
+        if (actionMeta?.option?.value === "__SELECT_ALL__") {
+            handleSelectAll();
             return;
         }
 
-        const selectedList = [...newValue]; // copy because it's readonly
-        const selectedValues = selectedList.map((opt) => opt.value);
-        const isAllSelected = selectedValues.includes("All");
-
-        // If "All" selected → select all options
-        if (isAllSelected) {
-            const allOptions = [...initialOptions];
-            setSelectedOptions(allOptions);
-            dispatch(setGradeOptions(allOptions));
+        if (actionMeta?.option?.value === "__DESELECT_ALL__") {
+            handleUnselectAll();
             return;
         }
 
-        // Remove "All" if something else is changed
-        const withoutAll = selectedList.filter((opt) => opt.value !== "All");
+        const filtered = newValue.filter(
+            (opt) => opt.value !== "__SELECT_ALL__" && opt.value !== "__DESELECT_ALL__" && opt.value !== "All"
+        );
 
-        setSelectedOptions(withoutAll);
-        dispatch(setGradeOptions(withoutAll));
+        const sorted = sortGrades(filtered);
+        setSelectedOptions(sorted);
+        dispatch(setGradeOptions(sorted));
     };
 
     const handleCreateOption = (inputValue: string) => {
-        if (!inputValue.trim()) return;
+        const trimmed = inputValue.trim();
+        if (!trimmed) return;
 
         const newOption: Option = {
-            value: inputValue,
-            label: inputValue,
+            value: trimmed,
+            label: trimmed,
             __isNew__: true,
         };
 
-        // Add to initial options
-        initialOptions.push(newOption);
-
-        const isAllSelected = selectedOptions.some((opt) => opt.value === "All");
-
-        const updatedSelection = isAllSelected
-            ? [...initialOptions] // If All was selected → include new option automatically
-            : [...selectedOptions, newOption];
-
-        setSelectedOptions(updatedSelection);
-        dispatch(setGradeOptions(updatedSelection));
+        setCustomOptions((prev) => [...prev, newOption]);
+        const updated = sortGrades([...selectedOptions, newOption]);
+        setSelectedOptions(updated);
+        dispatch(setGradeOptions(updated));
     };
 
     const handleSave = async () => {
+        if (selectedOptions.length === 0) {
+            toast.error("Please select at least one grade");
+            return;
+        }
+
         const body = {
             name: schoolName,
             location: address,
-            teacherCount: Number(teacherCount),
-            studentsCount: Number(studentCount),
-            activeStudents: Number(activeStudents),
-            activeTeachers: Number(activeTeachers),
-            grades: selectedFromRedux?.filter((opt) => opt.value !== "All")?.map((grade) => ({
-                gradeLevel: grade?.value,
+            teacherCount: Number(teacherCount) || 0,
+            studentsCount: Number(studentCount) || 0,
+            activeStudents: Number(activeStudents) || 0,
+            activeTeachers: Number(activeTeachers) || 0,
+            grades: selectedOptions.map((grade) => ({
+                gradeLevel: grade.value,
             })),
-            schoolDocuments: previewResourceFile
+            schoolDocuments: previewResourceFile || [],
         };
 
         const formData = new FormData();
@@ -140,7 +146,7 @@ const AddGradeSection = () => {
         try {
             const response = await CreateSchool(formData).unwrap();
             if (response.success) {
-                toast.success(response.message);
+                toast.success(response.message || "School created successfully");
                 dispatch(setSchoolName(""));
                 dispatch(setAddress(""));
                 dispatch(setTeacherCount(0));
@@ -151,32 +157,102 @@ const AddGradeSection = () => {
                 dispatch(setGradeOptions([]));
                 route.push("/admin/schools");
             }
-        } catch (error) {
-            toast.warning(((error as any).data.errors.map((err: any) => err.message + ". ")) || "Something went wrong");
+        } catch (error: any) {
+            const errorMsg =
+                error?.data?.errors?.map((err: any) => err.message).join(". ") ||
+                error?.data?.message ||
+                error?.message ||
+                "Something went wrong";
+            toast.error(errorMsg);
         }
     };
 
     return (
         <div>
-            <Label>Grade Section Mapping</Label>
+            <div className="flex items-center justify-between mb-2">
+                <Label className="text-sm font-semibold text-gray-700">Grade Section Mapping</Label>
+                <div className="flex items-center gap-2">
+                    <button
+                        type="button"
+                        onClick={handleSelectAll}
+                        className="text-xs font-semibold text-[#1E3A8A] hover:underline cursor-pointer"
+                    >
+                        Select All
+                    </button>
+                    <span className="text-gray-300">|</span>
+                    <button
+                        type="button"
+                        onClick={handleUnselectAll}
+                        className="text-xs font-semibold text-gray-500 hover:text-red-600 hover:underline cursor-pointer"
+                    >
+                        Unselect All
+                    </button>
+                </div>
+            </div>
+
             <CreatableSelect
                 isMulti
-                options={initialOptions}
+                options={dropdownOptions}
                 value={selectedOptions}
                 onChange={handleChange}
                 onCreateOption={handleCreateOption}
+                placeholder="Select or type grade section..."
+                closeMenuOnSelect={false}
+                isClearable={true}
                 styles={{
-                    container: (base) => ({ ...base, marginTop: "0.5rem" }),
+                    container: (base) => ({ ...base, marginTop: "0.25rem" }),
                     control: (base) => ({
                         ...base,
                         borderColor: "#CBD5E1",
                         borderRadius: "0.5rem",
                         boxShadow: "none",
                         padding: "2px 4px",
+                        minHeight: "44px",
                     }),
+                    multiValue: (base) => ({
+                        ...base,
+                        backgroundColor: "#F1F5F9",
+                        borderRadius: "0.375rem",
+                        border: "1px solid #E2E8F0",
+                    }),
+                    multiValueLabel: (base) => ({
+                        ...base,
+                        color: "#1E293B",
+                        fontWeight: 500,
+                        padding: "2px 6px",
+                    }),
+                    multiValueRemove: (base) => ({
+                        ...base,
+                        color: "#64748B",
+                        cursor: "pointer",
+                        ":hover": {
+                            backgroundColor: "#FEE2E2",
+                            color: "#EF4444",
+                        },
+                    }),
+                    option: (base, state) => {
+                        const isSelectAllOption = state.data.value === "__SELECT_ALL__" || state.data.value === "__DESELECT_ALL__";
+                        return {
+                            ...base,
+                            backgroundColor: state.isFocused
+                                ? isSelectAllOption ? "#EEF2FF" : "#F8FAFC"
+                                : "#FFFFFF",
+                            color: isSelectAllOption ? "#1E3A8A" : "#1E293B",
+                            fontWeight: isSelectAllOption ? 600 : 400,
+                            borderBottom: isSelectAllOption ? "1px solid #E2E8F0" : "none",
+                            cursor: "pointer",
+                        };
+                    },
                 }}
             />
 
+            <div className="flex justify-between items-center text-xs text-gray-500 mt-1.5">
+                <span>
+                    {selectedOptions.length === 0
+                        ? "No grades selected"
+                        : `${selectedOptions.length} grade${selectedOptions.length > 1 ? "s" : ""} selected`}
+                </span>
+            </div>
 
             <div className="flex justify-center gap-3 pt-3 mt-6">
                 <Button
@@ -187,9 +263,10 @@ const AddGradeSection = () => {
                     Cancel
                 </Button>
                 <Button
-                    type="submit"
+                    type="button"
                     onClick={handleSave}
-                    className={`px-6 text-white font-medium transition-all ease-in-out duration-500 cursor-pointer bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A]`}
+                    disabled={isCreating}
+                    className="px-6 text-white font-medium transition-all ease-in-out duration-500 cursor-pointer bg-[#1E3A8A] hover:bg-[#1E3A8A]/80 border border-[#1E3A8A]"
                 >
                     {isCreating ? (
                         <div className="flex justify-center items-center gap-2">
