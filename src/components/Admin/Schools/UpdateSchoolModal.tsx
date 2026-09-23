@@ -33,6 +33,7 @@ interface BookItem {
   bookName: string;
   coverImg?: string | null;
   author?: string | null;
+  categoryName?: string | null;
   grades?: string[];
 }
 
@@ -75,7 +76,9 @@ const UpdateSchoolModal = ({ id }: { id: string }) => {
     return unassignedBooks.filter(
       (b) =>
         b.bookName?.toLowerCase().includes(q) ||
-        b.author?.toLowerCase().includes(q)
+        b.author?.toLowerCase().includes(q) ||
+        b.categoryName?.toLowerCase().includes(q) ||
+        b.grades?.some((g) => g.toLowerCase().includes(q))
     );
   }, [unassignedBooks, unassignedSearch]);
 
@@ -87,6 +90,7 @@ const UpdateSchoolModal = ({ id }: { id: string }) => {
       (b) =>
         b.bookName?.toLowerCase().includes(q) ||
         b.author?.toLowerCase().includes(q) ||
+        b.categoryName?.toLowerCase().includes(q) ||
         b.grades?.some((g) => g.toLowerCase().includes(q))
     );
   }, [assignedBooks, assignedSearch]);
@@ -250,7 +254,7 @@ const UpdateSchoolModal = ({ id }: { id: string }) => {
                     <IoSearchOutline className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg" />
                     <input
                       type="text"
-                      placeholder="Search unassigned books by title or author..."
+                      placeholder="Search unassigned books by title, grade, category, or author..."
                       value={unassignedSearch}
                       onChange={(e) => setUnassignedSearch(e.target.value)}
                       className="w-full pl-10 pr-10 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#1E3A8A] transition"
@@ -326,9 +330,29 @@ const UpdateSchoolModal = ({ id }: { id: string }) => {
                                   <IoBookOutline className="text-[#1E3A8A] text-lg flex-shrink-0" />
                                   <div className="min-w-0">
                                     <p className="text-sm font-medium text-gray-800 truncate">{book.bookName}</p>
-                                    {book.author && (
-                                      <p className="text-xs text-gray-500 truncate">Author: {book.author}</p>
-                                    )}
+                                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                      {book.grades && book.grades.length > 0 && (
+                                        <div className="flex items-center gap-1 flex-wrap">
+                                          <span className="text-[11px] text-gray-400">Grade:</span>
+                                          {book.grades.map((gr) => (
+                                            <span
+                                              key={gr}
+                                              className="text-[11px] px-1.5 py-0.5 rounded bg-blue-50 text-[#1E3A8A] font-semibold border border-blue-200"
+                                            >
+                                              {gr}
+                                            </span>
+                                          ))}
+                                        </div>
+                                      )}
+                                      {book.categoryName && (
+                                        <span className="text-[11px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 border border-gray-200">
+                                          {book.categoryName}
+                                        </span>
+                                      )}
+                                      {book.author && (
+                                        <span className="text-xs text-gray-500 truncate">Author: {book.author}</span>
+                                      )}
+                                    </div>
                                   </div>
                                 </div>
                               </label>
@@ -368,7 +392,7 @@ const UpdateSchoolModal = ({ id }: { id: string }) => {
                     <IoSearchOutline className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg" />
                     <input
                       type="text"
-                      placeholder="Search already assigned books by title, author, or grade..."
+                      placeholder="Search already assigned books by title, grade, category, or author..."
                       value={assignedSearch}
                       onChange={(e) => setAssignedSearch(e.target.value)}
                       className="w-full pl-10 pr-10 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#1E3A8A] transition"
@@ -408,13 +432,10 @@ const UpdateSchoolModal = ({ id }: { id: string }) => {
                             <IoCheckmarkCircleOutline className="text-green-600 text-lg flex-shrink-0" />
                             <div className="min-w-0">
                               <p className="text-sm font-semibold text-gray-800 truncate">{book.bookName}</p>
-                              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                                {book.author && (
-                                  <span className="text-xs text-gray-500">Author: {book.author}</span>
-                                )}
+                              <div className="flex items-center gap-2 mt-1 flex-wrap">
                                 {book.grades && book.grades.length > 0 && (
                                   <div className="flex items-center gap-1 flex-wrap">
-                                    <span className="text-xs text-gray-400">Grades:</span>
+                                    <span className="text-[11px] text-gray-400">Grades:</span>
                                     {book.grades.map((gr) => (
                                       <span
                                         key={gr}
@@ -424,6 +445,14 @@ const UpdateSchoolModal = ({ id }: { id: string }) => {
                                       </span>
                                     ))}
                                   </div>
+                                )}
+                                {book.categoryName && (
+                                  <span className="text-[11px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 border border-gray-200">
+                                    {book.categoryName}
+                                  </span>
+                                )}
+                                {book.author && (
+                                  <span className="text-xs text-gray-500">Author: {book.author}</span>
                                 )}
                               </div>
                             </div>
