@@ -55,7 +55,32 @@ export const schoolApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: ["school"],
         }),
+        assignedBooks: builder.query({
+            query: (id) => ({
+                url: `/school/assigned-books/${id}`,
+                method: "GET",
+            }),
+            providesTags: ["school"],
+        }),
+        unassignBooks: builder.mutation({
+            query: (payload) => ({
+                url: `/school/unassign-books`,
+                method: "POST",
+                body: payload,
+            }),
+            invalidatesTags: ["school"],
+        }),
     }),
 });
 
-export const { useAssignBooksMutation, useNotAssignedBooksQuery, useCreateSchoolMutation, useGetSingleSchoolQuery, useUpdateSchoolMutation, useDeleteSchoolMutation, useUploadSchoolResourceMutation } = schoolApi;
+export const {
+    useAssignBooksMutation,
+    useNotAssignedBooksQuery,
+    useAssignedBooksQuery,
+    useUnassignBooksMutation,
+    useCreateSchoolMutation,
+    useGetSingleSchoolQuery,
+    useUpdateSchoolMutation,
+    useDeleteSchoolMutation,
+    useUploadSchoolResourceMutation,
+} = schoolApi;
