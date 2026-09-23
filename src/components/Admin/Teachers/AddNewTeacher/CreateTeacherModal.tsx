@@ -230,7 +230,10 @@ const CreateTeacherModal = () => {
               <div className="flex flex-col md:flex-row items-start gap-6 mb-6 relative">
                 {/* School Name */}
                 <div className="flex-1 relative w-full">
-                  <Label>School Name</Label>
+                  <Label className="flex items-center gap-2">
+                    School Name
+                    <span className="text-xs text-[#636F85] font-normal">(Can search schools)</span>
+                  </Label>
                   <GetSchools
                     value={school}
                     onChange={(selectedSchool) =>
