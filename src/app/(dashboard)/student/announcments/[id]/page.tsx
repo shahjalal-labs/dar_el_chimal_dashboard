@@ -4,9 +4,11 @@ import { AnnouncementDetail } from "@/components/Student/Announcments/Announceme
 import { useGetAnnouncementDetailsQuery } from "@/redux/api/student/overviewApi";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 
-export default function AnnouncementDetailPage({ params, }: { params: { id: string }; }) {
-  const id = params?.id;
+export default function AnnouncementDetailPage() {
+  const params = useParams();
+  const id = params?.id as string;
 
   const { data: announcementDetails } = useGetAnnouncementDetailsQuery(id);
   const announcementData = announcementDetails?.result;

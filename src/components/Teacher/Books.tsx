@@ -83,6 +83,7 @@ const Books = () => {
         />
       ),
       "Book Name": entry.bookName,
+      Category: entry.category?.name || "General",
       Description: entry.description,
       Author: entry.author,
       ISBN: entry.ISBN,

@@ -27,6 +27,7 @@ import {
 } from 'react-icons/io5';
 import { toast } from 'sonner';
 import { PiSpinner } from 'react-icons/pi';
+import { compareBookTitlesNaturally } from '@/lib/bookSortUtils';
 
 interface BookItem {
   id: string;
@@ -39,9 +40,7 @@ interface BookItem {
 
 const sortBooks = <T extends { bookName?: string | null }>(bookList: T[]): T[] => {
   return [...bookList].sort((a, b) => {
-    const nameA = a.bookName || '';
-    const nameB = b.bookName || '';
-    return nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: 'base' });
+    return compareBookTitlesNaturally(a.bookName, b.bookName);
   });
 };
 
@@ -62,12 +61,14 @@ const UpdateSchoolModal = ({ id }: { id: string }) => {
   const { data: assignedData, isLoading: isLoadingAssigned } = useAssignedBooksQuery(id);
   const [assignBooks, { isLoading: isAssigning }] = useAssignBooksMutation();
   const [unassignBooks] = useUnassignBooksMutation();
-
-  const rawUnassignedBooks: BookItem[] = notAssigned?.result ?? [];
-  const rawAssignedBooks: BookItem[] = assignedData?.result ?? [];
-
-  const unassignedBooks = useMemo(() => sortBooks(rawUnassignedBooks), [rawUnassignedBooks]);
-  const assignedBooks = useMemo(() => sortBooks(rawAssignedBooks), [rawAssignedBooks]);
+  const unassignedBooks = useMemo(
+    () => sortBooks<BookItem>(notAssigned?.result ?? []),
+    [notAssigned?.result]
+  );
+  const assignedBooks = useMemo(
+    () => sortBooks<BookItem>(assignedData?.result ?? []),
+    [assignedData?.result]
+  );
 
   // Filter unassigned books by search term
   const filteredUnassignedBooks = useMemo(() => {

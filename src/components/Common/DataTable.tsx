@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { BookOpen, Eye, Search } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, BookOpen, Eye, Search } from "lucide-react";
 import Link from "next/link";
 import { useParams, usePathname, useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
+import { compareBookTitlesNaturally } from "@/lib/bookSortUtils";
 import { BiEditAlt } from "react-icons/bi";
 import { PiSpinner } from "react-icons/pi";
 import { RiDeleteBin6Line } from "react-icons/ri";
@@ -99,6 +100,64 @@ const DataTable = ({
   const pathname = usePathname();
   const [selectedId, setSelectedId] = useState("");
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
+  const [sortColumn, setSortColumn] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+
+  const handleSort = (columnKey: string) => {
+    if (columnKey === "Picture") return;
+    if (sortColumn === columnKey) {
+      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortColumn(columnKey);
+      setSortDirection("asc");
+    }
+  };
+
+  const sortedData = useMemo(() => {
+    if (!data || !Array.isArray(data) || data.length === 0) return data;
+
+    const activeColumn =
+      sortColumn || ("Book Name" in (data[0] || {}) ? "Book Name" : null);
+    if (!activeColumn) return data;
+
+    return [...data].sort((a, b) => {
+      const valA = a[activeColumn];
+      const valB = b[activeColumn];
+
+      if (valA === valB) return 0;
+      if (valA == null) return 1;
+      if (valB == null) return -1;
+
+      let cmp = 0;
+      if (
+        activeColumn.toLowerCase().includes("book") ||
+        activeColumn.toLowerCase().includes("name") ||
+        activeColumn.toLowerCase().includes("title")
+      ) {
+        cmp = compareBookTitlesNaturally(String(valA), String(valB));
+      } else {
+        const strA = String(valA).trim();
+        const strB = String(valB).trim();
+
+        const dateA = Date.parse(strA);
+        const dateB = Date.parse(strB);
+        if (
+          !isNaN(dateA) &&
+          !isNaN(dateB) &&
+          (strA.includes(",") || strA.includes("-") || strA.includes("/"))
+        ) {
+          cmp = dateA - dateB;
+        } else {
+          cmp = strA.localeCompare(strB, undefined, {
+            numeric: true,
+            sensitivity: "base",
+          });
+        }
+      }
+
+      return sortDirection === "asc" ? cmp : -cmp;
+    });
+  }, [data, sortColumn, sortDirection]);
 
   const handleRowClick = (singleData: any) => {
     if (!singleData?.Id) return;
@@ -300,18 +359,48 @@ const DataTable = ({
                     <span>Sl/No</span>
                   </div>
                 </TableHead>
-                {visibleKeys.map((key, index) => (
-                  <TableHead
-                    key={index}
-                    className="text-[#4A4A4A] font-semibold text-sm whitespace-nowrap"
-                  >
-                    {key
-                      .split("_")
-                      .map((header, idx) => (
-                        <span key={idx}>{header} </span>
-                      ))}
-                  </TableHead>
-                ))}
+                {visibleKeys.map((key, index) => {
+                  const isSortable = key !== "Picture";
+                  const activeCol =
+                    sortColumn ||
+                    (data && data[0] && "Book Name" in data[0]
+                      ? "Book Name"
+                      : null);
+                  const isCurrent = activeCol === key;
+
+                  return (
+                    <TableHead
+                      key={index}
+                      onClick={() => isSortable && handleSort(key)}
+                      className={`text-[#4A4A4A] font-semibold text-sm whitespace-nowrap ${
+                        isSortable
+                          ? "cursor-pointer select-none hover:text-[#1E3A8A] transition-colors"
+                          : ""
+                      }`}
+                      title={isSortable ? `Click to sort by ${key}` : undefined}
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span>
+                          {key
+                            .split("_")
+                            .map((header, idx) => (
+                              <span key={idx}>{header} </span>
+                            ))}
+                        </span>
+                        {isSortable &&
+                          (isCurrent ? (
+                            sortDirection === "asc" ? (
+                              <ArrowUp className="w-3.5 h-3.5 text-[#1E3A8A] flex-shrink-0" />
+                            ) : (
+                              <ArrowDown className="w-3.5 h-3.5 text-[#1E3A8A] flex-shrink-0" />
+                            )
+                          ) : (
+                            <ArrowUpDown className="w-3 h-3 text-gray-400 opacity-50 hover:opacity-100 flex-shrink-0" />
+                          ))}
+                      </div>
+                    </TableHead>
+                  );
+                })}
                 {pathname !== "/" && (
                   <TableHead className="text-[#4A4A4A] font-semibold text-sm text-center min-w-[120px] whitespace-nowrap">
                     Action
@@ -320,7 +409,7 @@ const DataTable = ({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data?.map((singleData: any, index: number) => (
+              {sortedData?.map((singleData: any, index: number) => (
                 <TableRow
                   key={index}
                   onClick={(e) => {

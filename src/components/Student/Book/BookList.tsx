@@ -19,17 +19,19 @@ const BookList = () => {
   const formattedData = data?.result?.books?.map(
     (entry: {
       id: string;
-      image: string;
+      image?: string;
+      coverImg?: string;
       bookName: string;
       description: string;
       author: string;
       file?: string;
+      category?: { name: string };
     }) => ({
       Id: entry.id,
       file: entry.file,
       Picture: (
         <Image
-          src={entry.image || defaultImg}
+          src={entry.image || entry.coverImg || defaultImg}
           height={50}
           width={50}
           alt={entry.bookName}
@@ -37,12 +39,13 @@ const BookList = () => {
           priority
         />
       ),
-      "Category Name": entry.bookName,
+      "Book Name": entry.bookName,
+      Category: entry.category?.name || "General",
       Description:
-        entry.description.length > 30
+        entry.description?.length > 30
           ? entry.description.slice(0, 30) + "..."
           : entry.description,
-      author: entry.author,
+      Author: entry.author,
     })
   );
 
