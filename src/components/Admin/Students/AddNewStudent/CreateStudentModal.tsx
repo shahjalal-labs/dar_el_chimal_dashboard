@@ -107,7 +107,7 @@ const CreateStudentModal = () => {
       const response = await createStudent(body).unwrap();
       if (response.success) {
         toast.success(
-          "Student creation process is in progress. Please refresh after a few seconds.",
+          response?.message || "Students created successfully!",
         );
         dispatch(setNumberOfStudent(0));
         closeRef.current?.click();

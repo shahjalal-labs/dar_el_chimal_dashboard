@@ -172,7 +172,7 @@ const CreateTeacherModal = () => {
       const response = await CreateTeacher(formData).unwrap();
       if (response.success) {
         toast.success(
-          "Teacher creation process is in progress. Please refresh after a few seconds.",
+          response?.message || "Teachers created successfully!",
         );
         dispatch(setNumberOfTeacher(0));
         closeRef.current?.click();
