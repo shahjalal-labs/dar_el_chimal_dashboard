@@ -4,7 +4,6 @@
 import React, { useState } from "react";
 import DataTable from "@/components/Common/DataTable";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { FaAngleDown, FaPlus } from "react-icons/fa";
 import Image from "next/image";
 import defaultImg from "@/assets/no-img.jpg";
@@ -19,6 +18,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
 import { Dialog } from "@/components/ui/dialog";
 import CreateTeacherModal from "./AddNewTeacher/CreateTeacherModal";
@@ -190,20 +195,31 @@ const TeacherList = () => {
           </p>
         </div>
 
-        <Select onValueChange={(value) => handleRoute(value)}>
-          <SelectTrigger className="w-fit border border-[#1E3A8A] text-[#1E3A8A] bg-transparent hover:bg-transparent cursor-pointer flex items-center gap-2 px-3 py-2 rounded-md data-[placeholder]:text-[#1E3A8A]">
-            <FaPlus className="text-[#1E3A8A]" />
-            <SelectValue placeholder="Create New Teacher" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="manual">
-              <Link href="/admin/teachers/add-new-teacher">
-                Manually Create
-              </Link>
-            </SelectItem>
-            <SelectItem value="automatic">Automatically Create</SelectItem>
-          </SelectContent>
-        </Select>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className="w-fit border border-[#1E3A8A] text-[#1E3A8A] bg-transparent hover:bg-[#1E3A8A]/5 cursor-pointer flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium outline-none transition-colors"
+            >
+              <FaPlus className="text-[#1E3A8A]" />
+              <span>Create New Teacher</span>
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48 bg-white shadow-lg border border-gray-100 rounded-md p-1">
+            <DropdownMenuItem
+              className="cursor-pointer hover:bg-gray-100 rounded px-2.5 py-1.5 text-sm text-[#4A4A4A]"
+              onSelect={() => handleRoute("manual")}
+            >
+              Manually Create
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="cursor-pointer hover:bg-gray-100 rounded px-2.5 py-1.5 text-sm text-[#4A4A4A]"
+              onSelect={() => handleRoute("automatic")}
+            >
+              Automatically Create
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <Dialog open={open} onOpenChange={setOpen}>
           <CreateTeacherModal />
         </Dialog>
