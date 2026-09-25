@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { DialogClose, DialogContent } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import GetSchools, { SchoolOption } from "@/components/Common/GetSchools";
@@ -73,6 +73,13 @@ const CreateTeacherModal = () => {
   const [mappings, setMappings] = useState<Mapping[]>([
     { id: Date?.now()?.toString(), school: null, grades: [] },
   ]);
+
+  useEffect(() => {
+    dispatch(setNumberOfTeacher(0));
+    return () => {
+      dispatch(setNumberOfTeacher(0));
+    };
+  }, [dispatch]);
 
   const { data: gradesData } = useGetAllGradesQuery({
     currentPage: 1,
@@ -167,6 +174,7 @@ const CreateTeacherModal = () => {
         toast.success(
           "Teacher creation process is in progress. Please refresh after a few seconds.",
         );
+        dispatch(setNumberOfTeacher(0));
         closeRef.current?.click();
       }
     } catch (error) {
@@ -251,13 +259,31 @@ const CreateTeacherModal = () => {
                     step={1}
                     min={1}
                     max={100}
-                    placeholder="00"
-                    value={numberOfTeacher}
+                    placeholder="e.g. 50"
+                    value={numberOfTeacher === 0 ? "" : numberOfTeacher}
+                    onKeyDown={(e) => {
+                      if (["e", "E", "+", "-", "."].includes(e.key)) {
+                        e.preventDefault();
+                      }
+                    }}
                     onChange={(e) => {
-                      const value = Number(e.target.value);
+                      const valStr = e.target.value;
+                      if (!valStr) {
+                        dispatch(setNumberOfTeacher(0));
+                        return;
+                      }
+                      const sanitized = valStr.replace(/^0+/, "");
+                      if (sanitized === "") {
+                        e.target.value = "";
+                        dispatch(setNumberOfTeacher(0));
+                        return;
+                      }
+                      const value = Number(sanitized);
                       if (value <= 100) {
+                        e.target.value = String(value);
                         dispatch(setNumberOfTeacher(value));
                       } else {
+                        e.target.value = "100";
                         dispatch(setNumberOfTeacher(100));
                         toast.error(
                           "The number of teachers cannot be more than 100!",
