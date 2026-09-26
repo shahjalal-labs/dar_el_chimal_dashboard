@@ -18,6 +18,7 @@ import {
   setNumberOfStudent,
   setStudentSchoolName,
 } from "@/redux/features/studentSlice";
+import { sortGrades } from "@/lib/gradeUtils";
 
 interface GradeOption {
   id: string;
@@ -108,6 +109,7 @@ const CreateStudentModal = () => {
           response?.message || "Students created successfully!",
         );
         dispatch(setNumberOfStudent(0));
+        setMappings([{ id: Date.now().toString(), school: null, grade: null }]);
         closeRef.current?.click();
       }
     } catch (error) {
@@ -119,7 +121,7 @@ const CreateStudentModal = () => {
   };
 
   const isButtonDisabled =
-    !mappings[0]?.school || !mappings[0]?.grade || !numberOfStudent;
+    !mappings[0]?.school || !mappings[0]?.grade || !numberOfStudent || isCreating;
 
   return (
     <DialogContent
@@ -133,8 +135,10 @@ const CreateStudentModal = () => {
         {mappings.map((mapping) => {
           const { school, grade } = mapping;
           const filteredGradeOptions = school
-            ? allGrades.filter(
-                (g) => String(g.schoolId) === String(school.schoolId),
+            ? sortGrades(
+                allGrades.filter(
+                  (g) => String(g.schoolId) === String(school.schoolId),
+                ),
               )
             : [];
 
@@ -228,8 +232,12 @@ const CreateStudentModal = () => {
 
         <div className="flex justify-center items-center gap-3 pt-6">
           <Button
+            type="button"
             variant="outline"
-            onClick={() => closeRef.current?.click()}
+            onClick={() => {
+              setMappings([{ id: Date.now().toString(), school: null, grade: null }]);
+              closeRef.current?.click();
+            }}
             className="px-6 border-[#636F85] text-[#636F85] font-medium"
           >
             Cancel
