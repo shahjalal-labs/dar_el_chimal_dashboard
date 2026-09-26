@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { messaging } from "@/lib/firebase";
 import { useLoginMutation, useStudentLoginMutation } from "@/redux/api/authApi";
-import { setUserToken } from "@/redux/features/authSlice";
+import { setUser, setUserToken } from "@/redux/features/authSlice";
 import { AppDispatch } from "@/redux/store/store";
 import { LoadingOutlined } from "@ant-design/icons";
 import { Alert, Modal, Spin } from "antd";
@@ -84,7 +84,21 @@ export default function Login() {
 
   const route = useRouter();
   const dispatch = useDispatch<AppDispatch>();
-  const role = useSelector((state: any) => state.auth.role);
+  const reduxRole = useSelector((state: any) => state.auth.role);
+  const [role, setRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (reduxRole) {
+      setRole(reduxRole);
+      Cookies.set("userRole", reduxRole, { expires: 7 });
+    } else {
+      const cookieRole = Cookies.get("userRole");
+      if (cookieRole) {
+        setRole(cookieRole);
+        dispatch(setUser(cookieRole));
+      }
+    }
+  }, [reduxRole, dispatch]);
 
   const [login, { isLoading, error }] = useLoginMutation();
   const [studentLoginFn] = useStudentLoginMutation();
@@ -159,81 +173,95 @@ export default function Login() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const body = {
-      userName: userName,
-      password: password,
-    };
+    const cleanUserName = userName.trim();
+    const cleanPassword = password.trim();
+
+    if (!cleanUserName || !cleanPassword) {
+      toast.warning("Please enter both username and password.");
+      return;
+    }
 
     try {
-      if (role === "Student") {
-        const studentBody = {
-          userName: userName,
-          password: password,
-          fcmToken: fcmToken || "",
-        };
+      // 1. If explicit role is Admin, try admin login first
+      if (role === "Admin") {
+        try {
+          const response = await login({
+            userName: cleanUserName,
+            password: cleanPassword,
+          }).unwrap();
 
+          if (response?.success) {
+            const token = response?.result?.accessToken;
+            toast.success(response.message || "Logged in successfully!");
+            Cookies.set("token", token);
+            dispatch(setUserToken(token));
+            dispatch(setUser("Admin"));
+            Cookies.set("userRole", "Admin", { expires: 7 });
+            route.push("/");
+            return;
+          }
+        } catch (adminErr: any) {
+          // If not found in admin, allow checking student/teacher login below
+          if (adminErr?.data?.message !== "Admin not found" && adminErr?.status !== 404) {
+            throw adminErr;
+          }
+        }
+      }
+
+      // 2. Try student/teacher login via /auth/login
+      const studentBody = {
+        userName: cleanUserName,
+        password: cleanPassword,
+        fcmToken: fcmToken || "",
+      };
+
+      try {
         const response = await studentLoginFn(studentBody).unwrap();
-        const token = response?.result?.accessToken;
-        
-
-        if (response.success) {
-          toast.success(response.message);
+        if (response?.success) {
+          const token = response?.result?.accessToken;
+          const userRole = response?.result?.role || role || "Student";
+          toast.success(response.message || "Logged in successfully!");
           Cookies.set("token", token);
           dispatch(setUserToken(token));
-          route.push("/student/overview");
+          dispatch(setUser(userRole));
+          Cookies.set("userRole", userRole, { expires: 7 });
+
+          if (userRole === "Student") {
+            route.push("/student/overview");
+          } else {
+            route.push("/");
+          }
+          return;
         } else {
           toast.error(response?.data?.message || "Login failed!");
+          return;
         }
-        return;
-      }
-      if (role === "Teacher") {
-        const studentBody = {
-          userName: userName,
-          password: password,
-          fcmToken: fcmToken || "",
-        };
+      } catch (userErr: any) {
+        // 3. If user not found in /auth/login and role is not Student, try admin-login as fallback
+        if (role !== "Student" && (userErr?.data?.message === "User not found" || userErr?.status === 404)) {
+          const adminResponse = await login({
+            userName: cleanUserName,
+            password: cleanPassword,
+          }).unwrap();
 
-        const response = await studentLoginFn(studentBody).unwrap();
-        
-        const token = response?.result?.accessToken;
-
-        if (response.success) {
-          toast.success(response.message);
-          Cookies.set("token", token);
-          dispatch(setUserToken(token));
-          route.push("/");
-        } else {
-          toast.error(response?.data?.message || "Login failed!");
+          if (adminResponse?.success) {
+            const token = adminResponse?.result?.accessToken;
+            toast.success(adminResponse.message || "Logged in successfully!");
+            Cookies.set("token", token);
+            dispatch(setUserToken(token));
+            dispatch(setUser("Admin"));
+            Cookies.set("userRole", "Admin", { expires: 7 });
+            route.push("/");
+            return;
+          }
         }
-        return;
+        throw userErr;
       }
-
-      const response = await login(body).unwrap();
-      const token = response?.result?.accessToken;
-      let decodedPayload: JWTPayload = {};
-
-      if (token) {
-        const base64Url = token.split(".")[1];
-        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-        decodedPayload = JSON.parse(atob(base64));
-      }
-
-      if (response.success) {
-        if (role !== decodedPayload.role) {
-          toast.error("Please select the correct role!");
-        } else {
-          toast.success(response.message);
-          Cookies.set("token", token);
-          dispatch(setUserToken(token));
-          route.push("/");
-        }
-      } else {
-        toast.error(response?.data?.message || "Login failed!");
-      }
-    } catch (error) {
+    } catch (error: any) {
       toast.error(
-        (error as any)?.data?.message ||
-          "Something went wrong. Please try again.",
+        error?.data?.message ||
+          error?.message ||
+          "Something went wrong. Please try again."
       );
     }
   };
@@ -299,7 +327,7 @@ export default function Login() {
           <div className="lg:space-y-10 space-y-6 lg:px-0 px-4">
             <div className="text-start">
               <h2 className="text-3xl font-bold text-black">
-                Welcome back, {role}!
+                Welcome back{role ? `, ${role}` : ""}!
               </h2>
               <p className="mt-2 text-lg text-[#636F85]">
                 {"Please sign in using your provided credentials."}

@@ -146,11 +146,14 @@ const Grade = () => {
             return;
         }
 
+        const cleanUserName = studentUserName?.trim();
+        const cleanPassword = studentPassword?.trim();
+
         const body = {
-            name: studentName,
-            userName: studentUserName,
-            password: studentPassword,
-            email,
+            name: studentName?.trim() || cleanUserName,
+            userName: cleanUserName,
+            password: cleanPassword,
+            email: email?.trim() || undefined,
             schoolId: school.schoolId,
             gradeId: grade.id,
             bookIds: selectedBooks.map((b) => b.id),

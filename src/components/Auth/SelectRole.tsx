@@ -1,10 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { setUser } from "@/redux/features/authSlice";
+import { RootState } from "@/redux/store/store";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
+import Cookies from "js-cookie";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import LeftSide from "./LeftSide";
@@ -12,11 +15,21 @@ import LeftSide from "./LeftSide";
 const SelectRole = () => {
   const route = useRouter();
   const dispatch = useDispatch();
-  const [role, setRole] = useState("");
+  const reduxRole = useSelector((state: RootState) => state.auth.role);
+  const [role, setRole] = useState(reduxRole || Cookies.get("userRole") || "");
+
+  useEffect(() => {
+    const savedRole = reduxRole || Cookies.get("userRole");
+    if (savedRole) {
+      setRole(savedRole);
+      dispatch(setUser(savedRole));
+    }
+  }, [reduxRole, dispatch]);
 
   const handleSelect = (value: string) => {
     setRole(value);
     dispatch(setUser(value));
+    Cookies.set("userRole", value, { expires: 7 });
   };
 
   const handleNext = () => {
@@ -49,7 +62,7 @@ const SelectRole = () => {
               className="mt-2 mr-2 accent-[#1E3A8A] w-fit"
             />
             <div>
-              <span className={`font-semibold ${role === "Admin" ? "text-[#1E3A8A]" : "text-black"}`}>I&apos;m a Student</span>
+              <span className={`font-semibold ${role === "Student" ? "text-[#1E3A8A]" : "text-black"}`}>I&apos;m a Student</span>
               <p className="text-[#636F85]">View lessons, complete activities, and track your progress.</p>
             </div>
           </label>
@@ -65,7 +78,7 @@ const SelectRole = () => {
               className="mt-2 mr-2 accent-[#1E3A8A] w-fit"
             />
             <div>
-              <span className={`font-semibold ${role === "admin" ? "text-[#1E3A8A]" : "text-black"}`}>I&apos;m a Teacher</span>
+              <span className={`font-semibold ${role === "Teacher" ? "text-[#1E3A8A]" : "text-black"}`}>I&apos;m a Teacher</span>
               <p className="text-[#636F85]">Access your dashboard, manage classes, and share resources.</p>
             </div>
           </label>
