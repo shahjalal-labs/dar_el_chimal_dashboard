@@ -29,7 +29,31 @@ export function AssignmentDetailView({
 
   const assignment = assingmentDetails?.result?.assignment;
   const answer = assingmentDetails?.result?.answer;
-  const isGraded = answer?.status === "Graded";
+
+  const feedbackText = answer?.feedBack || answer?.feedback;
+  const grade = answer?.grade || answer?.assignmentGrade;
+  const isGraded =
+    answer?.status === "Graded" ||
+    assignments?.status === "Graded" ||
+    Boolean(grade || feedbackText);
+
+  const formatGrade = (gradeVal?: string) => {
+    if (!gradeVal) return "";
+    const gradeMap: Record<string, string> = {
+      A_plus: "A+",
+      A: "A",
+      A_minus: "A-",
+      B_plus: "B+",
+      B: "B",
+      B_minus: "B-",
+      C_plus: "C+",
+      C: "C",
+      C_minus: "C-",
+      D: "D",
+      F: "F",
+    };
+    return gradeMap[gradeVal] || gradeVal;
+  };
 
   const attachmentUrl = assignment?.attachment || assignment?.attachament;
   const isAttachmentImage = Boolean(
@@ -127,30 +151,49 @@ export function AssignmentDetailView({
             </div>
           )}
 
-          <div className="flex justify-between">
+          <div className="flex justify-between items-center">
             <span className="font-semibold text-gray-900">Status:</span>
             <span
-              className={`font-medium ${
-                isGraded ? "text-gray-500" : "text-green-500"
+              className={`font-semibold text-xs px-2.5 py-1 rounded-full ${
+                isGraded
+                  ? "bg-blue-100 text-blue-700"
+                  : "bg-emerald-100 text-emerald-700"
               }`}
             >
-              {answer?.status || "Submitted"}
+              {isGraded ? "Graded" : (answer?.status || assignments?.status || "Submitted")}
             </span>
           </div>
 
           {/* Grade and Feedback (only for graded) */}
           {isGraded && (
             <>
-              <div className="flex justify-between">
-                <span className="font-semibold text-gray-900">Grade:</span>
-                <span className="text-gray-600">{answer?.grade}</span>
-              </div>
-              <div className="space-y-2 pt-4">
-                <span className="block font-semibold text-gray-900">
-                  Feedback:
-                </span>
-                <p className="text-gray-600">{answer?.feedBack}</p>
-              </div>
+              {grade && (
+                <div className="flex justify-between items-center pt-1">
+                  <span className="font-semibold text-gray-900">Grade:</span>
+                  <span className="font-bold text-base text-blue-700 bg-blue-50 px-3 py-0.5 rounded-md border border-blue-200">
+                    {formatGrade(grade)}
+                  </span>
+                </div>
+              )}
+              {feedbackText && (
+                <div className="space-y-2 pt-3 border-t border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <span className="block font-semibold text-gray-900">
+                      Teacher Feedback:
+                    </span>
+                    {answer?.gradeBy && (
+                      <span className="text-xs text-gray-500 font-medium">
+                        By {answer.gradeBy}
+                      </span>
+                    )}
+                  </div>
+                  <div className="rounded-xl border border-blue-100 bg-blue-50/70 p-4 text-gray-800 shadow-xs">
+                    <p className="text-sm leading-relaxed whitespace-pre-line">
+                      {feedbackText.trim()}
+                    </p>
+                  </div>
+                </div>
+              )}
             </>
           )}
         </div>

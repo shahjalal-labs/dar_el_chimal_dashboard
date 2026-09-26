@@ -51,7 +51,7 @@ export default function Assignment() {
       case "Submitted":
         return "text-green-500";
       case "Graded":
-        return "text-gray-500";
+        return "text-blue-600";
       case "Missed":
         return "text-red-500";
       default:
@@ -138,17 +138,9 @@ export default function Assignment() {
         assignments={{
           id: selectedAssignment.id,
           title: selectedAssignment.title,
-          description: "Read this page and write a short summary of how photosynthesis works.",
+          description: "",
           status: selectedAssignment.status as "Submitted" | "Graded",
-          grade: selectedAssignment.status === "Graded" ? "B+" : undefined,
-          feedback:
-            selectedAssignment.status === "Graded"
-              ? "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-              : undefined,
-          answer:
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-          attachmentName: "Photosynthesis Drawing.jpeg",
-          attachmentUrl: "/photosynthesis-diagram.png",
+          answer: "",
         }}
         onBack={handleCloseDetailView}
       />
