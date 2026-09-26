@@ -27,6 +27,7 @@ import {
 import { Dialog } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
 import CreateStudentModal from "./AddNewStudent/CreateStudentModal";
+import SchoolFilterDropdown from "@/components/Common/SchoolFilterDropdown";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import schoolImg from "@/assets/school.png";
 import { FiLoader } from "react-icons/fi";
@@ -103,22 +104,21 @@ const StudentList = () => {
     return list;
   }, [data, schoolId, searchTerm]);
 
+  const schoolsList = React.useMemo(() => {
+    return (
+      allSchools?.result?.schools ||
+      (Array.isArray(allSchools?.result) ? allSchools?.result : []) ||
+      []
+    );
+  }, [allSchools]);
+
   const formattedData = filteredStudents
     ?.slice((currentPage - 1) * limit, currentPage * limit)
-    .map(
-      (entry: {
-        id: string;
-        profileImage: string;
-        fullName: string;
-        loginUserName: string;
-        email: string;
-        phone: string;
-        gender: string;
-        DOB: string;
-        status: string;
-        joinedAt: string;
-        updatedAt: string;
-      }) => ({
+    .map((entry: any) => {
+      const schoolName =
+        entry?.StudentGrades?.[0]?.grade?.school?.name || "N/A";
+      const gradeName = entry?.StudentGrades?.[0]?.grade?.grade || "N/A";
+      return {
         Id: entry?.id,
         Picture: (
           <Image
@@ -130,12 +130,11 @@ const StudentList = () => {
             priority
           />
         ),
-        "Full Name": entry?.fullName,
-        "User Name": entry?.loginUserName,
-        Email: entry?.email,
-        Phone: entry?.phone,
-        Gender: entry?.gender,
-        "Date of Birth": entry?.DOB,
+        "Full Name": entry?.fullName || "N/A",
+        School: schoolName,
+        Grade: gradeName,
+        "User Name": entry?.loginUserName || "N/A",
+        Password: entry?.password || "N/A",
         Status: entry?.status,
         "Joined At": new Date(entry?.joinedAt).toLocaleString("en-US", {
           year: "numeric",
@@ -144,15 +143,8 @@ const StudentList = () => {
           hour: "2-digit",
           minute: "2-digit",
         }),
-        "Updated At": new Date(entry?.joinedAt).toLocaleString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      }),
-    );
+      };
+    });
 
   const handleRoute = (value: string) => {
     if (value === "manual")
@@ -268,49 +260,15 @@ const StudentList = () => {
         }}
         schoolId={schoolId}
         sortThree={
-          <Select
-            value={schoolId || "all"}
-            onValueChange={(value) => {
-              setSchoolId(value === "all" ? "" : value);
+          <SchoolFilterDropdown
+            value={schoolId}
+            onChange={(selectedId) => {
+              setSchoolId(selectedId);
               setCurrentPage(1);
             }}
-          >
-            <SelectTrigger className="w-fit border border-[#1E3A8A] text-[#1E3A8A] bg-transparent hover:bg-transparent cursor-pointer flex items-center gap-2 px-3 py-2 rounded-md data-[placeholder]:text-[#1E3A8A]">
-              <SelectValue placeholder="Select School" />
-              <FaAngleDown className="text-[#1E3A8A]" />
-            </SelectTrigger>
-            <SelectContent className="max-h-80">
-              {isLoading ? (
-                <div className="flex justify-center items-center text-[#1E3A8A] animate-spin my-6">
-                  <FiLoader size={24} />
-                </div>
-              ) : (
-                <>
-                  <SelectItem value="all">All Schools</SelectItem>
-                  {allSchools?.result?.schools?.map(
-                    (
-                      school: { id: string; name: string; schoolLogo: string },
-                      idx: number,
-                    ) => (
-                      <SelectItem key={idx} value={school?.id}>
-                        <div className="flex items-center gap-2">
-                          <Image
-                            src={school.schoolLogo || schoolImg}
-                            height={50}
-                            width={50}
-                            alt={school.name}
-                            style={{ width: 24, height: 24, borderRadius: "50%" }}
-                            priority
-                          />
-                          <span>{school?.name}</span>
-                        </div>
-                      </SelectItem>
-                    ),
-                  )}
-                </>
-              )}
-            </SelectContent>
-          </Select>
+            schools={schoolsList}
+            isLoading={isLoading}
+          />
         }
         sortFour={
           <Button

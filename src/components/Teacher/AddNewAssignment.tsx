@@ -16,7 +16,7 @@ import { PiSpinner } from "react-icons/pi";
 import { Dialog, DialogContent } from "../ui/dialog";
 import { Button } from "../ui/button";
 import { TfiAngleLeft } from "react-icons/tfi";
-import { FileText, Trash2, X } from "lucide-react";
+import { FileText, Search, Trash2, X } from "lucide-react";
 
 interface AssignmentFormData {
   title: string;
@@ -82,6 +82,8 @@ const AddNewAssignment = () => {
     assignToAll: true,
   });
 
+  const [studentSearchTerm, setStudentSearchTerm] = useState("");
+
   const handleGradeChange = (newGradeId: string) => {
     setSelectedGradeId(newGradeId);
     setFormData((prev) => ({
@@ -89,7 +91,13 @@ const AddNewAssignment = () => {
       book: { id: "", name: "" },
       selectedStudents: [],
     }));
-    route.replace(`/teacher/classes/${newGradeId}/add-new-assignment`);
+    if (typeof window !== "undefined") {
+      window.history.replaceState(
+        null,
+        "",
+        `/teacher/classes/${newGradeId}/add-new-assignment`
+      );
+    }
   };
 
   const handleChange = (e: any) => {
@@ -106,7 +114,26 @@ const AddNewAssignment = () => {
     });
   };
 
-  const students = data?.result?.students || [];
+  const students = useMemo(() => data?.result?.students || [], [data]);
+
+  const currentGradeName = useMemo(() => {
+    return (
+      data?.result?.gradeData?.grade ||
+      teacherGrades.find((g: any) => g.id === selectedGradeId)?.grade ||
+      "this class"
+    );
+  }, [data, teacherGrades, selectedGradeId]);
+
+  const filteredStudents = useMemo(() => {
+    if (!studentSearchTerm.trim()) return students;
+    const term = studentSearchTerm.trim().toLowerCase();
+    return students.filter(
+      (s: any) =>
+        s?.fullName?.toLowerCase().includes(term) ||
+        s?.loginUserName?.toLowerCase().includes(term) ||
+        s?.email?.toLowerCase().includes(term)
+    );
+  }, [students, studentSearchTerm]);
 
   const handleSelectAll = () => {
     if (formData.selectedStudents.length === students.length && students.length > 0) {
@@ -471,10 +498,7 @@ const AddNewAssignment = () => {
                   className="accent-[#1E3A8A] size-5 cursor-pointer"
                 />
                 <span className="text-[#272727] font-semibold">
-                  All students in{" "}
-                  {data?.result?.gradeData?.grade ||
-                    teacherGrades.find((g: any) => g.id === selectedGradeId)?.grade ||
-                    "this class"}
+                  All students in {currentGradeName}
                 </span>
               </label>
 
@@ -494,55 +518,117 @@ const AddNewAssignment = () => {
 
             {/* Individual student list */}
             {!formData.assignToAll && (
-              <div className="">
+              <div className="border border-gray-200 rounded-xl p-4 bg-gray-50/50 mt-4">
                 {isLoading ? (
-                  <p className="text-gray-500 py-2 text-sm">Loading students...</p>
+                  <p className="text-gray-500 py-3 text-sm text-center">Loading students...</p>
                 ) : students.length === 0 ? (
-                  <p className="text-gray-500 py-2 text-sm">
+                  <p className="text-gray-500 py-3 text-sm text-center">
                     No students found in this class.
                   </p>
                 ) : (
                   <>
-                    <div className="flex items-center mb-2">
-                      <input
-                        type="checkbox"
-                        checked={
-                          formData.selectedStudents.length === students.length &&
-                          students.length > 0
-                        }
-                        onChange={handleSelectAll}
-                        className="accent-[#1E3A8A] size-4 mr-2"
-                      />
-                      <span className="text-[#272727] font-semibold">
-                        Select All
-                      </span>
+                    {/* Search and Select All controls */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-gray-200">
+                      <div className="flex items-center">
+                        <label className="flex items-center space-x-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={
+                              formData.selectedStudents.length === students.length &&
+                              students.length > 0
+                            }
+                            onChange={handleSelectAll}
+                            className="accent-[#1E3A8A] size-4 rounded cursor-pointer"
+                          />
+                          <span className="text-[#272727] font-semibold text-sm">
+                            Select All
+                          </span>
+                        </label>
+                        <span className="text-xs text-gray-500 ml-3 bg-white px-2.5 py-0.5 rounded-full border border-gray-200">
+                          {formData.selectedStudents.length} of {students.length} selected
+                        </span>
+                      </div>
+
+                      {students.length > 3 && (
+                        <div className="relative w-full sm:w-64">
+                          <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-gray-400" />
+                          <input
+                            type="text"
+                            placeholder="Search student name..."
+                            value={studentSearchTerm}
+                            onChange={(e) => setStudentSearchTerm(e.target.value)}
+                            className="w-full pl-8 pr-7 py-1.5 text-xs bg-white border border-gray-200 rounded-md focus:outline-none focus:border-[#1E3A8A]"
+                          />
+                          {studentSearchTerm && (
+                            <button
+                              type="button"
+                              onClick={() => setStudentSearchTerm("")}
+                              className="absolute right-2 top-2 text-gray-400 hover:text-gray-600"
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      )}
                     </div>
 
-                    {students?.map((student: any) => (
-                      <div
-                        key={student?.id}
-                        className="flex items-center space-x-2 py-1"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={formData.selectedStudents.includes(student?.id)}
-                          onChange={() => handleStudentSelect(student.id)}
-                          className="accent-[#1E3A8A] size-4 mr-2"
-                        />
-                        <Image
-                          src={
-                            student.profileImage ||
-                            "https://res.cloudinary.com/dddrm7ep8/image/upload/v1788255470/n2tfqinlzgwpdkittexh.jpg"
-                          }
-                          height={50}
-                          width={50}
-                          alt="profile"
-                          className="w-8 h-8 rounded-full object-cover"
-                          priority
-                        />
-                        <span>{student.fullName || student.email}</span>
+                    {filteredStudents.length === 0 ? (
+                      <p className="text-gray-400 py-4 text-xs text-center">
+                        No students match &quot;{studentSearchTerm}&quot;
+                      </p>
+                    ) : (
+                      <div className="max-h-72 overflow-y-auto space-y-1.5 pr-1">
+                        {filteredStudents.map((student: any) => {
+                          const isSelected = formData.selectedStudents.includes(student?.id);
+                          const studentGrade = student?.grade || currentGradeName;
+                          return (
+                            <div
+                              key={student?.id}
+                              onClick={() => handleStudentSelect(student.id)}
+                              className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors border ${
+                                isSelected
+                                  ? "bg-blue-50/80 border-[#1E3A8A]/30"
+                                  : "bg-white hover:bg-gray-50 border-gray-100"
+                              }`}
+                            >
+                              <div className="flex items-center space-x-3 min-w-0">
+                                <input
+                                  type="checkbox"
+                                  checked={isSelected}
+                                  onChange={() => {}} // handled by parent onClick
+                                  className="accent-[#1E3A8A] size-4 rounded cursor-pointer shrink-0"
+                                />
+                                <Image
+                                  src={
+                                    student.profileImage ||
+                                    "https://res.cloudinary.com/dddrm7ep8/image/upload/v1788255470/n2tfqinlzgwpdkittexh.jpg"
+                                  }
+                                  height={40}
+                                  width={40}
+                                  alt="profile"
+                                  className="w-7 h-7 rounded-full object-cover shrink-0"
+                                  priority
+                                />
+                                <div className="min-w-0 flex items-center gap-2">
+                                  <span className="font-semibold text-sm text-[#272727] truncate">
+                                    {student.fullName || student.loginUserName || "Student"}
+                                  </span>
+                                  {student.loginUserName && student.loginUserName !== student.fullName && (
+                                    <span className="text-xs text-gray-400 hidden sm:inline">
+                                      (@{student.loginUserName})
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+
+                              <span className="text-xs px-2.5 py-0.5 rounded-full bg-blue-100/70 text-[#1E3A8A] font-medium shrink-0 ml-2">
+                                Grade: {studentGrade}
+                              </span>
+                            </div>
+                          );
+                        })}
                       </div>
-                    ))}
+                    )}
                   </>
                 )}
               </div>
