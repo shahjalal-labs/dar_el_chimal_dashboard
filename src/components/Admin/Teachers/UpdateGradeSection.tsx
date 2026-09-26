@@ -246,7 +246,13 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                     <Select
                         value={value}
                         isMulti
-                        styles={styles}
+                        styles={{
+                            ...styles,
+                            placeholder: (base, state) => ({
+                                ...base,
+                                display: (state.hasValue || (value && value.length > 0)) ? 'none' : 'block',
+                            }),
+                        }}
                         name="categories"
                         className="react-select-container rounded-xl mt-2"
                         classNamePrefix="select"
@@ -254,7 +260,7 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                         getOptionValue={(option) => option.id}
                         onChange={onChange}
                         options={allCategories}
-                        placeholder="Choose categories..."
+                        placeholder={value && value.length > 0 ? "" : "Choose categories..."}
                     />
                 </div>
 
@@ -290,6 +296,7 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                         getOptionValue={(option) => option.id}
                         className="basic-multi-select mt-2"
                         classNamePrefix="select"
+                        placeholder={selectedGrades && selectedGrades.length > 0 ? "" : "Select grades..."}
                         styles={{
                             control: (base) => ({
                                 ...base,
@@ -297,6 +304,10 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                                 borderRadius: "0.5rem",
                                 boxShadow: "none",
                                 padding: "2px 4px",
+                            }),
+                            placeholder: (base, state) => ({
+                                ...base,
+                                display: (state.hasValue || (selectedGrades && selectedGrades.length > 0)) ? 'none' : 'block',
                             }),
                         }}
                     />

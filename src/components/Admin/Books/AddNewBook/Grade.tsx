@@ -388,7 +388,7 @@ const Grade = ({ id, onClose }: { id: string, onClose?: () => void }) => {
                                 onChange={(selectedSchool) =>
                                     handleSchoolChange(mapping?.id, selectedSchool)
                                 }
-                                excludeIds={selectedSchoolIds}
+                                excludeIds={mappings.filter((m) => m?.id !== mapping?.id && m?.school).map((m) => m?.school!.schoolId)}
                             />
                         </div>
 
@@ -406,6 +406,7 @@ const Grade = ({ id, onClose }: { id: string, onClose?: () => void }) => {
                                 onChange={(selectedOptions) =>
                                     handleGradeChange(mapping?.id, selectedOptions)
                                 }
+                                placeholder={grades && grades.length > 0 ? "" : "Select grades..."}
                                 components={{
                                     MultiValueRemove: (props) => (
                                         <div
@@ -429,6 +430,10 @@ const Grade = ({ id, onClose }: { id: string, onClose?: () => void }) => {
                                         borderRadius: '0.5rem',
                                         boxShadow: 'none',
                                         padding: '2px 4px',
+                                    }),
+                                    placeholder: (base, state) => ({
+                                        ...base,
+                                        display: (state.hasValue || (grades && grades.length > 0)) ? 'none' : 'block',
                                     }),
                                 }}
                             />

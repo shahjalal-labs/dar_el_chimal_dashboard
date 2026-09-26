@@ -196,7 +196,7 @@ const AddGradeSection = () => {
                 value={selectedOptions}
                 onChange={handleChange}
                 onCreateOption={handleCreateOption}
-                placeholder="Select or type grade section..."
+                placeholder={selectedOptions.length > 0 ? "" : "Select or type grade section..."}
                 closeMenuOnSelect={false}
                 isClearable={true}
                 styles={{
@@ -208,6 +208,10 @@ const AddGradeSection = () => {
                         boxShadow: "none",
                         padding: "2px 4px",
                         minHeight: "44px",
+                    }),
+                    placeholder: (base, state) => ({
+                        ...base,
+                        display: (state.hasValue || selectedOptions.length > 0) ? 'none' : 'block',
                     }),
                     multiValue: (base) => ({
                         ...base,

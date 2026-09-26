@@ -200,7 +200,7 @@ const Grade = () => {
                             <GetSchools
                                 value={school}
                                 onChange={(selectedSchool) => handleSchoolChange(mapping.id, selectedSchool)}
-                                excludeIds={selectedSchoolIds}
+                                excludeIds={mappings.filter((m) => m.id !== mapping.id && m.school).map((m) => m.school!.schoolId)}
                             />
                         </div>
 
@@ -216,6 +216,7 @@ const Grade = () => {
                                 getOptionValue={(option) => option.id}
                                 value={grade}
                                 onChange={(selected) => handleGradeChange(mapping.id, selected as GradeOption)}
+                                placeholder={grade ? "" : "Select grade..."}
                                 styles={{
                                     control: (base) => ({
                                         ...base,
@@ -223,6 +224,15 @@ const Grade = () => {
                                         borderRadius: "0.5rem",
                                         boxShadow: "none",
                                         padding: "2px 4px",
+                                    }),
+                                    placeholder: (base, state) => ({
+                                        ...base,
+                                        display: (state.hasValue || Boolean(grade)) ? 'none' : 'block',
+                                    }),
+                                    singleValue: (base) => ({
+                                        ...base,
+                                        display: 'flex',
+                                        alignItems: 'center',
                                     }),
                                 }}
                             />
@@ -249,7 +259,7 @@ const Grade = () => {
                                 options={availableBooks}
                                 className="basic-multi-select mt-2"
                                 classNamePrefix="select"
-                                placeholder={grade ? "Select books to assign..." : "Please select a grade first"}
+                                placeholder={selectedBooks.length > 0 ? "" : (grade ? "Select books to assign..." : "Please select a grade first")}
                                 getOptionLabel={(option) => option.label}
                                 getOptionValue={(option) => option.id}
                                 value={selectedBooks}
@@ -261,6 +271,10 @@ const Grade = () => {
                                         borderRadius: "0.5rem",
                                         boxShadow: "none",
                                         padding: "2px 4px",
+                                    }),
+                                    placeholder: (base, state) => ({
+                                        ...base,
+                                        display: (state.hasValue || selectedBooks.length > 0) ? 'none' : 'block',
                                     }),
                                     multiValue: (base) => ({
                                         ...base,

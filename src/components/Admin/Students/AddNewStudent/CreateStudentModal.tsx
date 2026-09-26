@@ -153,7 +153,7 @@ const CreateStudentModal = () => {
                     onChange={(selectedSchool) =>
                       handleSchoolChange(mapping.id, selectedSchool)
                     }
-                    excludeIds={selectedSchoolIds}
+                    excludeIds={mappings.filter((m) => m.id !== mapping.id && m.school).map((m) => m.school!.schoolId)}
                   />
                 </div>
 
@@ -215,6 +215,7 @@ const CreateStudentModal = () => {
                   onChange={(selectedOption) =>
                     handleGradeChange(mapping.id, selectedOption as GradeOption)
                   }
+                  placeholder={grade ? "" : "Select grade..."}
                   styles={{
                     control: (base) => ({
                       ...base,
@@ -222,6 +223,15 @@ const CreateStudentModal = () => {
                       borderRadius: "0.5rem",
                       boxShadow: "none",
                       padding: "2px 4px",
+                    }),
+                    placeholder: (base, state) => ({
+                      ...base,
+                      display: (state.hasValue || Boolean(grade)) ? 'none' : 'block',
+                    }),
+                    singleValue: (base) => ({
+                      ...base,
+                      display: 'flex',
+                      alignItems: 'center',
                     }),
                   }}
                 />

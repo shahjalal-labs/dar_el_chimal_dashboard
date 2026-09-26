@@ -248,7 +248,7 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                             <GetSchools
                                 value={school}
                                 onChange={(selectedSchool) => handleSchoolChange(mapping.id, selectedSchool)}
-                                excludeIds={selectedSchoolIds}
+                                excludeIds={mappings.filter((m) => m.id !== mapping.id && m.school).map((m) => m.school!.schoolId)}
                             />
                         </div>
 
@@ -259,7 +259,7 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                                 isMulti
                                 closeMenuOnSelect={false}
                                 hideSelectedOptions={false}
-                                placeholder="Select grades"
+                                placeholder={grade && grade.length > 0 ? "" : "Select grades"}
                                 options={filteredGradeOptions}
                                 className="mt-2"
                                 classNamePrefix="select"
@@ -273,6 +273,10 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                                         borderRadius: "0.5rem",
                                         boxShadow: "none",
                                         padding: "2px 4px",
+                                    }),
+                                    placeholder: (base, state) => ({
+                                        ...base,
+                                        display: (state.hasValue || (grade && grade.length > 0)) ? 'none' : 'block',
                                     }),
                                     multiValue: (base) => ({
                                         ...base,
@@ -331,7 +335,7 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                                 options={availableBooks}
                                 className="basic-multi-select mt-2"
                                 classNamePrefix="select"
-                                placeholder={grade?.length ? "Select books to assign..." : "Please select a grade first"}
+                                placeholder={selectedBooks.length > 0 ? "" : (grade?.length ? "Select books to assign..." : "Please select a grade first")}
                                 getOptionLabel={(option) => option.label}
                                 getOptionValue={(option) => option.id}
                                 value={selectedBooks}
@@ -343,6 +347,10 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                                         borderRadius: "0.5rem",
                                         boxShadow: "none",
                                         padding: "2px 4px",
+                                    }),
+                                    placeholder: (base, state) => ({
+                                        ...base,
+                                        display: (state.hasValue || selectedBooks.length > 0) ? 'none' : 'block',
                                     }),
                                     multiValue: (base) => ({
                                         ...base,

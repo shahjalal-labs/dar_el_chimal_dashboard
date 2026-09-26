@@ -183,7 +183,13 @@ const Grade = () => {
                 <Select
                     value={value}
                     isMulti
-                    styles={styles}
+                    styles={{
+                        ...styles,
+                        placeholder: (base, state) => ({
+                            ...base,
+                            display: (state.hasValue || (value && value.length > 0)) ? 'none' : 'block',
+                        }),
+                    }}
                     name="categories"
                     className="react-select-container rounded-xl mt-2 mb-5"
                     classNamePrefix="select"
@@ -191,7 +197,7 @@ const Grade = () => {
                     getOptionValue={(option) => option.id}
                     onChange={onChange}
                     options={allCategories}
-                    placeholder="Choose categories..."
+                    placeholder={value && value.length > 0 ? "" : "Choose categories..."}
                 />
             </div>
 
@@ -226,7 +232,7 @@ const Grade = () => {
                             <GetSchools
                                 value={school}
                                 onChange={(selectedSchool) => handleSchoolChange(mapping?.id, selectedSchool)}
-                                excludeIds={selectedSchoolIds}
+                                excludeIds={mappings.filter((m) => m?.id !== mapping?.id && m?.school).map((m) => m?.school!.schoolId)}
                             />
                         </div>
 
@@ -253,6 +259,7 @@ const Grade = () => {
                                 getOptionValue={(option) => option?.id}
                                 value={grades}
                                 onChange={(selectedOptions) => handleGradeChange(mapping?.id, selectedOptions || [])}
+                                placeholder={grades && grades.length > 0 ? "" : "Select grades..."}
                                 styles={{
                                     control: (base) => ({
                                         ...base,
@@ -260,6 +267,10 @@ const Grade = () => {
                                         borderRadius: '0.5rem',
                                         boxShadow: 'none',
                                         padding: '2px 4px',
+                                    }),
+                                    placeholder: (base, state) => ({
+                                        ...base,
+                                        display: (state.hasValue || (grades && grades.length > 0)) ? 'none' : 'block',
                                     }),
                                 }}
                             />

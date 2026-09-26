@@ -55,9 +55,11 @@ export const GetBookCategory: React.FC<GetBookCategoryProps> = ({
         );
     }, [value, categoryOptions]);
 
+    const hasSelectedCategory = Boolean(selectedOption && (selectedOption.categoryId || selectedOption.name));
+
     return (
         <Select<CategoryOption, false>
-            placeholder={placeholder}
+            placeholder={hasSelectedCategory ? "" : placeholder}
             isSearchable={true}
             isLoading={isLoading}
             options={categoryOptions}
@@ -102,10 +104,16 @@ export const GetBookCategory: React.FC<GetBookCategoryProps> = ({
                         borderColor: '#94A3B8',
                     },
                 }),
-                placeholder: (base) => ({
+                placeholder: (base, state) => ({
                     ...base,
+                    display: (state.hasValue || hasSelectedCategory) ? 'none' : 'block',
                     color: '#909296',
                     fontSize: '0.875rem',
+                }),
+                singleValue: (base) => ({
+                    ...base,
+                    display: 'flex',
+                    alignItems: 'center',
                 }),
                 input: (base) => ({
                     ...base,

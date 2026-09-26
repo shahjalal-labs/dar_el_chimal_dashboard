@@ -31,6 +31,7 @@ export const GetSchools: React.FC<GetSchoolProps> = ({
     const { data, isLoading } = useGetAllSchoolsByAdminQuery({ currentPage: 1, limit: 10000, searchTerm: "" });
 
     const schoolOptions: readonly SchoolOption[] = React.useMemo(() => {
+        const currentSchoolId = value?.schoolId;
         return (
             data?.result?.schools
                 ?.map((school: { id: string; name: string; schoolLogo: string }) => ({
@@ -38,9 +39,9 @@ export const GetSchools: React.FC<GetSchoolProps> = ({
                     schoolName: school.name,
                     image: school.schoolLogo,
                 }))
-                ?.filter((school: any) => !excludeIds.includes(school.schoolId)) ?? []
+                ?.filter((school: any) => !excludeIds.includes(school.schoolId) || (currentSchoolId && school.schoolId === currentSchoolId)) ?? []
         );
-    }, [data, excludeIds]);
+    }, [data, excludeIds, value?.schoolId]);
 
     const selectedOption = React.useMemo(() => {
         if (!value || (!value.schoolId && !value.schoolName)) return null;
@@ -51,9 +52,11 @@ export const GetSchools: React.FC<GetSchoolProps> = ({
         );
     }, [value, schoolOptions]);
 
+    const hasSelectedSchool = Boolean(selectedOption && (selectedOption.schoolId || selectedOption.schoolName));
+
     return (
         <Select<SchoolOption, false>
-            placeholder={placeholder}
+            placeholder={hasSelectedSchool ? "" : placeholder}
             isSearchable={true}
             isLoading={isLoading}
             options={schoolOptions}
@@ -91,6 +94,15 @@ export const GetSchools: React.FC<GetSchoolProps> = ({
                     '&:hover': {
                         borderColor: '#94A3B8',
                     },
+                }),
+                placeholder: (base, state) => ({
+                    ...base,
+                    display: (state.hasValue || hasSelectedSchool) ? 'none' : 'block',
+                }),
+                singleValue: (base) => ({
+                    ...base,
+                    display: 'flex',
+                    alignItems: 'center',
                 }),
                 option: (base, state) => ({
                     ...base,

@@ -178,9 +178,13 @@
     @supports (color: color-mix(in lab, red, red)) {
       background-color: color-mix(in oklab, var(--color-black) 5%, transparent) !important;
     }
-  } */
-
-  /* [data-state="open"] > .fixed.inset-0.bg-black\/10 {
-
 } */
+
+/* Prevent react-select placeholder from overlapping with selected values */
+.select__value-container--has-value .select__placeholder,
+div[class*="value-container--has-value"] > div[class*="placeholder"],
+div[class*="ValueContainer"][class*="has-value"] > div[class*="placeholder"] {
+  display: none !important;
+}
+
 
