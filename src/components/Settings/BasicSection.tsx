@@ -3,7 +3,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
-import { ChevronDownIcon, Info } from 'lucide-react';
+import { ChevronDownIcon, Info, Eye, EyeOff } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
@@ -30,12 +30,16 @@ interface ProfileData {
     gender: string,
     DOB: string,
     userName: string,
+    password?: string,
+    schoolName?: string,
+    gradeName?: string,
     status: string,
 }
 
 const BasicSection = () => {
     const [open, setOpen] = React.useState(false)
     const [active, setActive] = React.useState(false)
+    const [showPassword, setShowPassword] = useState(false)
     const [profile, setProfile] = useState<ProfileData>({
         profileImage: "",
         fullName: "",
@@ -45,6 +49,9 @@ const BasicSection = () => {
         gender: "",
         DOB: "",
         userName: "",
+        password: "",
+        schoolName: "",
+        gradeName: "",
         status: "",
     })
 
@@ -61,6 +68,9 @@ const BasicSection = () => {
                 gender: data?.result?.gender || "",
                 DOB: data?.result?.DOB || "",
                 userName: data?.result?.loginUserName || "",
+                password: data?.result?.password || "",
+                schoolName: data?.result?.schoolName || "",
+                gradeName: data?.result?.gradeName || "",
                 status: data?.result?.status || "",
             })
         }
@@ -250,8 +260,39 @@ const BasicSection = () => {
                                     </div>
                                 </div>
 
-                                {/* User Name, status  */}
-                                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                                {/* School and Grade (for Students and Teachers) */}
+                                {(profile.schoolName || profile.gradeName || profile.role === "Student" || profile.role === "Teacher") && (
+                                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                                        <div className='w-full'>
+                                            <Label htmlFor="school" className="text-sm font-medium text-[#30373D]">
+                                                School
+                                            </Label>
+                                            <Input
+                                                id="school"
+                                                type="text"
+                                                value={profile.schoolName || "Not Assigned"}
+                                                className="mt-2 px-5 py-4 bg-gray-50 text-gray-800 cursor-not-allowed"
+                                                readOnly
+                                            />
+                                        </div>
+
+                                        <div className='w-full'>
+                                            <Label htmlFor="grade" className="text-sm font-medium text-[#30373D]">
+                                                Grade
+                                            </Label>
+                                            <Input
+                                                id="grade"
+                                                type="text"
+                                                value={profile.gradeName || "Not Assigned"}
+                                                className="mt-2 px-5 py-4 bg-gray-50 text-gray-800 cursor-not-allowed"
+                                                readOnly
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* User Name, Password & Status */}
+                                <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
                                     <div className='w-full'>
                                         <Label htmlFor="userName" className="text-sm font-medium text-[#30373D]">
                                             User Name
@@ -259,10 +300,37 @@ const BasicSection = () => {
                                         <Input
                                             id="userName"
                                             type="text"
-                                            defaultValue={profile.userName}
-                                            className="mt-2 px-5 py-4"
+                                            value={profile.userName}
+                                            className="mt-2 px-5 py-4 bg-gray-50 text-gray-800 cursor-not-allowed"
                                             readOnly
                                         />
+                                    </div>
+
+                                    <div className='w-full'>
+                                        <Label htmlFor="password" className="text-sm font-medium text-[#30373D]">
+                                            User Password
+                                        </Label>
+                                        <div className="relative mt-2">
+                                            <Input
+                                                id="password"
+                                                type={showPassword ? "text" : "password"}
+                                                value={profile.password || ""}
+                                                className="px-5 py-4 pr-12 bg-gray-50 text-gray-800 cursor-not-allowed"
+                                                readOnly
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword((prev) => !prev)}
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 p-1.5 cursor-pointer"
+                                                title={showPassword ? "Hide password" : "Show password"}
+                                            >
+                                                {showPassword ? (
+                                                    <EyeOff className="h-4 w-4" />
+                                                ) : (
+                                                    <Eye className="h-4 w-4" />
+                                                )}
+                                            </button>
+                                        </div>
                                     </div>
 
                                     <div className='w-full'>
@@ -272,8 +340,8 @@ const BasicSection = () => {
                                         <Input
                                             id="status"
                                             type="text"
-                                            defaultValue={profile.status}
-                                            className="mt-2 px-5 py-4"
+                                            value={profile.status}
+                                            className="mt-2 px-5 py-4 bg-gray-50 text-gray-800 cursor-not-allowed"
                                             readOnly
                                         />
                                     </div>

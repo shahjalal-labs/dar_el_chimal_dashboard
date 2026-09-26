@@ -93,6 +93,14 @@ const ViewTeacherModal = ({ id }: { id: string }) => {
             {/* Basic Details */}
             <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
+                    <span className="font-medium">User Name:</span>{" "}
+                    <span className="font-semibold text-gray-900">{loginUserName || "Not provided"}</span>
+                </div>
+                <div>
+                    <span className="font-medium">Password:</span>{" "}
+                    <span className="font-semibold text-gray-900">{teacher?.password || "Not provided"}</span>
+                </div>
+                <div>
                     <span className="font-medium">Email:</span> {email || "Not provided"}
                 </div>
                 <div>
