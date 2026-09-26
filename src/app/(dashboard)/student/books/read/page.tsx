@@ -3,11 +3,12 @@
 import PdfReader from "@/components/Student/Book/BookReader/PdfReader";
 import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, Suspense } from "react";
 import { TfiAngleLeft } from "react-icons/tfi";
 import { getOptimizedPdfUrl } from "@/lib/pdfUtils";
+import { PiSpinner } from "react-icons/pi";
 
-export default function ReadBookPage() {
+function ReadBookContent() {
   const route = useRouter();
   const params = useSearchParams();
   const pdfUrl = params.get("pdfurl");
@@ -20,26 +21,53 @@ export default function ReadBookPage() {
 
   if (!pdfUrl) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-600">PDF not found</div>
+      <div className="h-[70vh] flex flex-col items-center justify-center gap-4">
+        <div className="text-gray-600 font-medium">PDF not specified or not found</div>
+        <Button
+          onClick={() => route.back()}
+          className="bg-white text-black border hover:bg-gray-50 cursor-pointer shadow-sm"
+        >
+          <TfiAngleLeft className="mr-2" /> Back
+        </Button>
       </div>
     );
   }
 
   return (
-    <div>
-      <Button
-        onClick={() => route.back()}
-        className="mb-2 bg-white/80 text-black hover:text-white cursor-pointer"
-      >
-        <TfiAngleLeft />
-        Back
-      </Button>
-      {streamingUrl ? (
-        <PdfReader pdfUrl={streamingUrl} hideDownloadAndPrint={true} />
-      ) : (
-        <div className="text-center text-gray-600">No PDF file found.</div>
-      )}
+    <div className="flex flex-col h-[calc(100vh-135px)] w-full">
+      <div className="flex items-center justify-between mb-3 shrink-0">
+        <Button
+          onClick={() => route.back()}
+          className="bg-white/90 text-black hover:text-white cursor-pointer shadow-sm border border-gray-200"
+        >
+          <TfiAngleLeft className="mr-1" />
+          Back
+        </Button>
+      </div>
+      <div className="flex-1 w-full min-h-[550px] relative">
+        {streamingUrl ? (
+          <PdfReader pdfUrl={streamingUrl} hideDownloadAndPrint={true} />
+        ) : (
+          <div className="flex h-full items-center justify-center text-gray-500">
+            No PDF file found.
+          </div>
+        )}
+      </div>
     </div>
+  );
+}
+
+export default function ReadBookPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="h-[70vh] flex items-center justify-center gap-3">
+          <PiSpinner className="h-8 w-8 animate-spin text-[#1E3A8A]" />
+          <span className="text-gray-600 font-medium">Loading viewer...</span>
+        </div>
+      }
+    >
+      <ReadBookContent />
+    </Suspense>
   );
 }

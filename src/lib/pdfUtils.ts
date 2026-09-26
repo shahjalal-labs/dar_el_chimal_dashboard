@@ -10,7 +10,11 @@ export function getOptimizedPdfUrl(fileUrl: string | null | undefined): string {
   if (!fileUrl) return "";
 
   try {
-    const url = new URL(fileUrl);
+    let cleanUrl = fileUrl.trim();
+    if (cleanUrl.startsWith("http%3A") || cleanUrl.startsWith("https%3A")) {
+      cleanUrl = decodeURIComponent(cleanUrl);
+    }
+    const url = new URL(cleanUrl);
 
     // Pattern 1: https://fra1.digitaloceanspaces.com/dac/... -> https://dac.fra1.cdn.digitaloceanspaces.com/...
     if (
@@ -27,7 +31,7 @@ export function getOptimizedPdfUrl(fileUrl: string | null | undefined): string {
     }
 
     // If it's already on the CDN or another domain, return as-is
-    return fileUrl;
+    return cleanUrl;
   } catch {
     return fileUrl || "";
   }

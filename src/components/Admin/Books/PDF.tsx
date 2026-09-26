@@ -26,19 +26,22 @@ const PDF = () => {
   }
 
   return (
-    <div>
-      <Button
-        onClick={() => route.back()}
-        className="bg-white/80 text-black hover:text-white cursor-pointer"
-      >
-        <TfiAngleLeft />
-        Back
-      </Button>
-      <div className="w-full h-screen flex justify-center items-center">
+    <div className="flex flex-col h-[calc(100vh-135px)] w-full">
+      <div className="flex items-center justify-between mb-3 shrink-0">
+        <Button
+          onClick={() => route.back()}
+          className="bg-white/90 text-black hover:text-white cursor-pointer shadow-sm border border-gray-200"
+        >
+          <TfiAngleLeft className="mr-1" />
+          Back
+        </Button>
+      </div>
+
+      <div className="flex-1 w-full min-h-[550px] relative">
         {streamingUrl ? (
           <PdfReader pdfUrl={streamingUrl} hideDownloadAndPrint={false} />
         ) : (
-          <p>No PDF file found.</p>
+          <p className="text-gray-500">No PDF file found.</p>
         )}
       </div>
     </div>
