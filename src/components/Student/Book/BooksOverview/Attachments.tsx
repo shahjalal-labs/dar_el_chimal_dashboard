@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useGetBookDetailsQuery } from "@/redux/api/student/booksApi";
@@ -51,7 +52,7 @@ export default function Attachments({
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { data: getBooksOverview } = useGetBookDetailsQuery(bookId);
+  const { data: getBooksOverview, error, isLoading } = useGetBookDetailsQuery(bookId);
 
   const getIconConfig = (type: "Audio" | "Video" | "Pdf" | "Image") => {
     switch (type) {
@@ -129,6 +130,31 @@ export default function Attachments({
     setIsModalOpen(false);
     setSelectedResource(null);
   };
+
+  if (isLoading) {
+    return (
+      <div className="bg-white rounded-2xl p-12 flex flex-col justify-center items-center min-h-[300px]">
+        <span className="text-gray-600 font-medium">Loading attachments...</span>
+      </div>
+    );
+  }
+
+  if (error || !getBooksOverview?.result) {
+    return (
+      <section className="bg-white rounded-2xl p-8 sm:p-12 text-center max-w-lg mx-auto shadow-sm my-10">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h2>
+        <p className="text-gray-600 mb-6 leading-relaxed">
+          {(error as any)?.data?.message || "This book is not assigned to you."}
+        </p>
+        <button
+          onClick={() => router.push("/student/books")}
+          className="bg-[#1E3A8A] text-white hover:bg-[#1E3A8A]/90 px-6 py-2.5 rounded-lg font-medium cursor-pointer"
+        >
+          Return to My Books
+        </button>
+      </section>
+    );
+  }
 
   // Update attachments with actual counts from API
   const actualAttachments = attachments.map((attachment) => ({

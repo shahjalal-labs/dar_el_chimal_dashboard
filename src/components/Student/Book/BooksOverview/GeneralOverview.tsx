@@ -1,7 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from "@/components/ui/button";
 import { useGetBookDetailsQuery } from "@/redux/api/student/booksApi";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { PiSpinner } from "react-icons/pi";
+import { FiAlertTriangle } from "react-icons/fi";
 
 interface GradeItem {
   grade: string;
@@ -31,7 +34,7 @@ interface GeneralOverviewProps {
 
 function GeneralOverview({ bookId }: GeneralOverviewProps) {
   const router = useRouter();
-  const { data: getBooksOverview } = useGetBookDetailsQuery(bookId);
+  const { data: getBooksOverview, error, isLoading } = useGetBookDetailsQuery(bookId);
 
   const bookOverviewData: BookOverviewData | undefined = (
     getBooksOverview as BookOverviewResponse
@@ -50,6 +53,42 @@ function GeneralOverview({ bookId }: GeneralOverviewProps) {
   const handleBack = () => {
     router.back();
   };
+
+  if (isLoading) {
+    return (
+      <div className="bg-white rounded-2xl p-12 flex flex-col justify-center items-center min-h-[300px]">
+        <PiSpinner className="h-8 w-8 animate-spin text-[#1E3A8A] mb-3" />
+        <span className="text-gray-600 font-medium">Loading book details...</span>
+      </div>
+    );
+  }
+
+  if (error || !bookOverviewData) {
+    const errorMessage =
+      (error as any)?.data?.message ||
+      (error as any)?.message ||
+      "Access Denied: This book is not assigned to you, or does not exist.";
+
+    return (
+      <section className="bg-white rounded-2xl p-8 sm:p-12 text-center max-w-lg mx-auto shadow-sm my-10">
+        <div className="w-16 h-16 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+          <FiAlertTriangle className="w-8 h-8" />
+        </div>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h2>
+        <p className="text-gray-600 mb-6 leading-relaxed">
+          {errorMessage}
+        </p>
+        <div className="flex justify-center gap-3">
+          <Button
+            onClick={() => router.push("/student/books")}
+            className="bg-[#1E3A8A] text-white hover:bg-[#1E3A8A]/90 px-6 font-medium"
+          >
+            Return to My Books
+          </Button>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="bg-white rounded-2xl p-5">

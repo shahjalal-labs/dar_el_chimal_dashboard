@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { RootState } from "@/redux/store/store";
@@ -11,6 +11,7 @@ import GetSchools, { SchoolOption } from "@/components/Common/GetSchools";
 import Link from "next/link";
 import { PiSpinner } from "react-icons/pi";
 import { useGetAllGradesQuery } from "@/redux/api/grade";
+import { useAssignedBooksQuery } from "@/redux/api/school";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useCreateStudentMutation } from "@/redux/api/student";
@@ -21,11 +22,18 @@ import {
     setStudentPassword,
     setStudentUserName,
 } from "@/redux/features/studentSlice";
+import { sortGrades } from "@/lib/gradeUtils";
 
 interface GradeOption {
     id: string;
     label: string;
     schoolId: string;
+}
+
+interface BookOption {
+    id: string;
+    label: string;
+    gradeIds?: string[];
 }
 
 interface Mapping {
@@ -46,17 +54,24 @@ const Grade = () => {
     } = useSelector((state: RootState) => state.student);
 
     const [mappings, setMappings] = useState<Mapping[]>([{ id: Date.now().toString(), school: null, grade: null }]);
+    const [selectedBooks, setSelectedBooks] = useState<BookOption[]>([]);
+    const [lastGradeId, setLastGradeId] = useState<string | null>(null);
 
     const { data: gradesData } = useGetAllGradesQuery({ currentPage: 1, limit: 1000 });
 
+    const selectedSchoolId = mappings[0]?.school?.schoolId;
+    const { data: assignedBooksData } = useAssignedBooksQuery(selectedSchoolId, { skip: !selectedSchoolId });
+
     const [createStudent, { isLoading: isCreating }] = useCreateStudentMutation();
 
-    const allGrades: GradeOption[] =
-        gradesData?.result?.map((g: any) => ({
+    const allGrades: GradeOption[] = useMemo(() => {
+        const raw = gradesData?.result?.map((g: any) => ({
             id: g.id,
             label: g.grade,
             schoolId: g.schoolId,
         })) ?? [];
+        return sortGrades(raw);
+    }, [gradesData]);
 
     const handleSchoolChange = (id: string, school: SchoolOption) => {
         setMappings((prev) =>
@@ -64,6 +79,8 @@ const Grade = () => {
                 item.id === id ? { ...item, school, grade: null } : item
             )
         );
+        setSelectedBooks([]);
+        setLastGradeId(null);
     };
 
     const handleGradeChange = (id: string, selectedGrade: GradeOption | null) => {
@@ -72,6 +89,45 @@ const Grade = () => {
                 item.id === id ? { ...item, grade: selectedGrade } : item
             )
         );
+    };
+
+    const availableBooks: BookOption[] = useMemo(() => {
+        if (!assignedBooksData?.result || !mappings[0]?.grade) return [];
+        const currentGradeId = mappings[0].grade.id;
+        const matching = assignedBooksData.result
+            .filter((b: any) => b.gradeIds?.includes(currentGradeId))
+            .map((b: any) => ({
+                id: b.id,
+                label: b.bookName || "Untitled Book",
+                gradeIds: b.gradeIds,
+            }));
+        if (matching.length > 0) return matching;
+        return assignedBooksData.result.map((b: any) => ({
+            id: b.id,
+            label: b.bookName || "Untitled Book",
+            gradeIds: b.gradeIds,
+        }));
+    }, [assignedBooksData, mappings]);
+
+    useEffect(() => {
+        const currentGradeId = mappings[0]?.grade?.id || null;
+        if (currentGradeId !== lastGradeId) {
+            setLastGradeId(currentGradeId);
+            if (availableBooks.length > 0) {
+                setSelectedBooks(availableBooks);
+            } else {
+                setSelectedBooks([]);
+            }
+        }
+    }, [mappings, lastGradeId, availableBooks]);
+
+    const isAllSelected = availableBooks.length > 0 && selectedBooks.length === availableBooks.length;
+    const handleToggleSelectAll = () => {
+        if (isAllSelected) {
+            setSelectedBooks([]);
+        } else {
+            setSelectedBooks(availableBooks);
+        }
     };
 
     const selectedSchoolIds = useMemo(
@@ -94,8 +150,10 @@ const Grade = () => {
             name: studentName,
             userName: studentUserName,
             password: studentPassword,
+            email,
             schoolId: school.schoolId,
             gradeId: grade.id,
+            bookIds: selectedBooks.map((b) => b.id),
         };
 
         const formData = new FormData();
@@ -115,6 +173,7 @@ const Grade = () => {
                 dispatch(setPreviewStudentPhoto(""));
                 setEmail("");
                 setMappings([{ id: Date.now().toString(), school: null, grade: null }]);
+                setSelectedBooks([]);
                 route.push("/admin/students");
             }
         } catch (error) {
@@ -131,7 +190,7 @@ const Grade = () => {
 
             {mappings.map((mapping) => {
                 const { school, grade } = mapping;
-                const filteredGradeOptions = school ? allGrades.filter((g) => String(g.schoolId) === String(school.schoolId)) : [];
+                const filteredGradeOptions = school ? sortGrades(allGrades.filter((g) => String(g.schoolId) === String(school.schoolId))) : [];
 
                 return (
                     <div key={mapping.id} className="mb-6 space-y-5">
@@ -167,6 +226,61 @@ const Grade = () => {
                                     }),
                                 }}
                             />
+                        </div>
+
+                        {/* Assign Books Section */}
+                        <div className="flex-1 w-full">
+                            <div className="flex items-center justify-between mb-1.5">
+                                <Label>Assign Books</Label>
+                                {availableBooks.length > 0 && (
+                                    <button
+                                        type="button"
+                                        onClick={handleToggleSelectAll}
+                                        className="text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors cursor-pointer"
+                                    >
+                                        {isAllSelected ? "Unselect All" : "Select All"}
+                                    </button>
+                                )}
+                            </div>
+                            <Select<BookOption, true>
+                                isMulti
+                                closeMenuOnSelect={false}
+                                hideSelectedOptions={false}
+                                options={availableBooks}
+                                className="basic-multi-select mt-2"
+                                classNamePrefix="select"
+                                placeholder={grade ? "Select books to assign..." : "Please select a grade first"}
+                                getOptionLabel={(option) => option.label}
+                                getOptionValue={(option) => option.id}
+                                value={selectedBooks}
+                                onChange={(selected) => setSelectedBooks([...(selected || [])])}
+                                styles={{
+                                    control: (base) => ({
+                                        ...base,
+                                        borderColor: "#CBD5E1",
+                                        borderRadius: "0.5rem",
+                                        boxShadow: "none",
+                                        padding: "2px 4px",
+                                    }),
+                                    multiValue: (base) => ({
+                                        ...base,
+                                        backgroundColor: "#E5E7EB",
+                                        borderRadius: "9999px",
+                                        padding: "0 4px",
+                                    }),
+                                    multiValueLabel: (base) => ({
+                                        ...base,
+                                        fontWeight: 500,
+                                        color: "#374151",
+                                        paddingRight: 6,
+                                    }),
+                                }}
+                            />
+                            {grade && availableBooks.length === 0 && (
+                                <p className="text-xs text-gray-500 mt-1">
+                                    No books currently mapped to this school/grade.
+                                </p>
+                            )}
                         </div>
                     </div>
                 );

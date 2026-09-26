@@ -12,6 +12,7 @@ import GetSchools, { SchoolOption } from "@/components/Common/GetSchools";
 import Link from "next/link";
 import { PiSpinner } from "react-icons/pi";
 import { useGetAllGradesQuery } from "@/redux/api/grade";
+import { useAssignedBooksQuery } from "@/redux/api/school";
 import { toast } from "sonner";
 import {
     useGetStudentDetailsQuery,
@@ -23,11 +24,18 @@ import {
 } from "@/redux/features/studentSlice";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { usePathname } from "next/navigation";
+import { sortGrades } from "@/lib/gradeUtils";
 
 interface GradeOption {
     id: string;
     label: string;
     schoolId: string;
+}
+
+interface BookOption {
+    id: string;
+    label: string;
+    gradeIds?: string[];
 }
 
 interface Mapping {
@@ -44,9 +52,13 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
     const { email } = useSelector((state: RootState) => state.student);
 
     const [mappings, setMappings] = useState<Mapping[]>([{ id: Date.now().toString(), school: null, grade: [] }]);
+    const [selectedBooks, setSelectedBooks] = useState<BookOption[]>([]);
 
     const { data } = useGetStudentDetailsQuery(id);
     const { data: gradesData } = useGetAllGradesQuery({ currentPage: 1, limit: 1000 });
+
+    const selectedSchoolId = mappings[0]?.school?.schoolId;
+    const { data: assignedBooksData } = useAssignedBooksQuery(selectedSchoolId, { skip: !selectedSchoolId });
 
     const [UpdateStudent, { isLoading: isUpdating }] = useUpdateStudentMutation();
 
@@ -68,23 +80,72 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                 schoolId: g.grade.schoolId,
             })) ?? [];
 
-            setMappings((prev) => prev.map((item, idx) => idx === 0 ? { ...item, school: prefilledSchool, grade: prefilledGrades } : item));
+            setMappings((prev) => prev.map((item, idx) => idx === 0 ? { ...item, school: prefilledSchool, grade: sortGrades(prefilledGrades) } : item));
+
+            if (data?.result?.StudentBooks) {
+                const prefilledBooks: BookOption[] = data.result.StudentBooks
+                    .filter((sb: any) => sb.book)
+                    .map((sb: any) => ({
+                        id: sb.book.id,
+                        label: sb.book.bookName || "Untitled Book",
+                    }));
+                setSelectedBooks(prefilledBooks);
+            }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data]);
 
-    const allGrades: GradeOption[] = gradesData?.result?.map((g: any) => ({
-        id: g.id,
-        label: g.grade,
-        schoolId: g.schoolId,
-    })) ?? [];
+    const allGrades: GradeOption[] = useMemo(() => {
+        const raw = gradesData?.result?.map((g: any) => ({
+            id: g.id,
+            label: g.grade,
+            schoolId: g.schoolId,
+        })) ?? [];
+        return sortGrades(raw);
+    }, [gradesData]);
+
+    const availableBooks: BookOption[] = useMemo(() => {
+        if (!assignedBooksData?.result) return [];
+        const studentGradeIds = (mappings[0]?.grade || []).map((g) => g.id);
+        if (studentGradeIds.length === 0) {
+            return assignedBooksData.result.map((b: any) => ({
+                id: b.id,
+                label: b.bookName || "Untitled Book",
+                gradeIds: b.gradeIds,
+            }));
+        }
+        const matching = assignedBooksData.result
+            .filter((b: any) => b.gradeIds?.some((gid: string) => studentGradeIds.includes(gid)))
+            .map((b: any) => ({
+                id: b.id,
+                label: b.bookName || "Untitled Book",
+                gradeIds: b.gradeIds,
+            }));
+        if (matching.length > 0) return matching;
+        return assignedBooksData.result.map((b: any) => ({
+            id: b.id,
+            label: b.bookName || "Untitled Book",
+            gradeIds: b.gradeIds,
+        }));
+    }, [assignedBooksData, mappings]);
+
+    const isAllBooksSelected = availableBooks.length > 0 && selectedBooks.length === availableBooks.length;
+    const handleToggleSelectAllBooks = () => {
+        if (isAllBooksSelected) {
+            setSelectedBooks([]);
+        } else {
+            setSelectedBooks(availableBooks);
+        }
+    };
 
     const handleSchoolChange = (id: string, school: SchoolOption) => {
         setMappings((prev) => prev.map((item) => item.id === id ? { ...item, school, grade: [] } : item));
+        setSelectedBooks([]);
     };
 
     const handleGradeChange = (id: string, selectedGrades: readonly GradeOption[]) => {
-        setMappings((prev) => prev.map((item) => item.id === id ? { ...item, grade: [...selectedGrades] } : item));
+        const sorted = sortGrades([...selectedGrades]);
+        setMappings((prev) => prev.map((item) => item.id === id ? { ...item, grade: sorted } : item));
     };
 
     const handleRemoveClick = (id: string) => {
@@ -99,6 +160,7 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                 deletedGrade: [optionToRemove],
                 newGradeAssign: [],
             },
+            bookIds: selectedBooks.map((b) => b.id),
         };
 
         const formData = new FormData();
@@ -138,6 +200,7 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                 deletedGrade: [],
                 newGradeAssign: grades.map((g) => g.id),
             },
+            bookIds: selectedBooks.map((b) => b.id),
         };
 
         const formData = new FormData();
@@ -174,7 +237,7 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
 
             {mappings?.map((mapping) => {
                 const { school, grade } = mapping;
-                const filteredGradeOptions = school ? allGrades.filter((g) => String(g.schoolId) === String(school.schoolId)) : [];
+                const filteredGradeOptions = school ? sortGrades(allGrades.filter((g) => String(g.schoolId) === String(school.schoolId))) : [];
 
                 return (
                     <div key={mapping.id} className="mb-6 space-y-5">
@@ -200,10 +263,9 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                                 options={filteredGradeOptions}
                                 className="mt-2"
                                 classNamePrefix="select"
-                                // value={grade}
                                 getOptionLabel={(option) => option.label}
                                 getOptionValue={(option) => option.id}
-                                onChange={(selected) => handleGradeChange(mapping.id, selected)}
+                                onChange={(selected) => handleGradeChange(mapping.id, selected || [])}
                                 styles={{
                                     control: (base) => ({
                                         ...base,
@@ -237,15 +299,70 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                         </div>
 
                         {/* Tag */}
-                        <div className="flex gap-2">
-                            {grade?.map((grade) => (
-                                <div key={grade?.id} className="bg-[#F1F5F9] text-sm rounded-md flex items-center gap-1.5 w-fit px-2.5 py-0.5">
-                                    {grade?.label}
-                                    <button type="button" onClick={() => handleRemoveClick(grade?.id)} className="text-gray-700 hover:text-red-600 text-lg cursor-pointer">
+                        <div className="flex gap-2 flex-wrap">
+                            {grade?.map((g) => (
+                                <div key={g?.id} className="bg-[#F1F5F9] text-sm rounded-md flex items-center gap-1.5 w-fit px-2.5 py-0.5">
+                                    {g?.label}
+                                    <button type="button" onClick={() => handleRemoveClick(g?.id)} className="text-gray-700 hover:text-red-600 text-lg cursor-pointer">
                                         ×
                                     </button>
                                 </div>
                             ))}
+                        </div>
+
+                        {/* Assign Books */}
+                        <div className="flex-1 w-full">
+                            <div className="flex items-center justify-between mb-1.5">
+                                <Label>Assign Books</Label>
+                                {availableBooks.length > 0 && (
+                                    <button
+                                        type="button"
+                                        onClick={handleToggleSelectAllBooks}
+                                        className="text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors cursor-pointer"
+                                    >
+                                        {isAllBooksSelected ? "Unselect All" : "Select All"}
+                                    </button>
+                                )}
+                            </div>
+                            <Select<BookOption, true>
+                                isMulti
+                                closeMenuOnSelect={false}
+                                hideSelectedOptions={false}
+                                options={availableBooks}
+                                className="basic-multi-select mt-2"
+                                classNamePrefix="select"
+                                placeholder={grade?.length ? "Select books to assign..." : "Please select a grade first"}
+                                getOptionLabel={(option) => option.label}
+                                getOptionValue={(option) => option.id}
+                                value={selectedBooks}
+                                onChange={(selected) => setSelectedBooks([...(selected || [])])}
+                                styles={{
+                                    control: (base) => ({
+                                        ...base,
+                                        borderColor: "#CBD5E1",
+                                        borderRadius: "0.5rem",
+                                        boxShadow: "none",
+                                        padding: "2px 4px",
+                                    }),
+                                    multiValue: (base) => ({
+                                        ...base,
+                                        backgroundColor: "#E5E7EB",
+                                        borderRadius: "9999px",
+                                        padding: "0 4px",
+                                    }),
+                                    multiValueLabel: (base) => ({
+                                        ...base,
+                                        fontWeight: 500,
+                                        color: "#374151",
+                                        paddingRight: 6,
+                                    }),
+                                }}
+                            />
+                            {grade?.length > 0 && availableBooks.length === 0 && (
+                                <p className="text-xs text-gray-500 mt-1">
+                                    No books currently mapped to this school/grade.
+                                </p>
+                            )}
                         </div>
                     </div>
                 );
