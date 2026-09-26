@@ -32,8 +32,12 @@ export const GetSchools: React.FC<GetSchoolProps> = ({
 
     const schoolOptions: readonly SchoolOption[] = React.useMemo(() => {
         const currentSchoolId = value?.schoolId;
+        const schools =
+            data?.result?.schools ||
+            (Array.isArray(data?.result) ? data?.result : []) ||
+            [];
         return (
-            data?.result?.schools
+            schools
                 ?.map((school: { id: string; name: string; schoolLogo: string }) => ({
                     schoolId: school.id,
                     schoolName: school.name,

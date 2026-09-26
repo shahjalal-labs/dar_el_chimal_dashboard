@@ -174,7 +174,7 @@ const Grade = () => {
                 dispatch(setStudentUserName(""));
                 dispatch(setStudentPassword(""));
                 dispatch(setPreviewStudentPhoto(""));
-                setEmail("");
+                dispatch(setEmail(""));
                 setMappings([{ id: Date.now().toString(), school: null, grade: null }]);
                 setSelectedBooks([]);
                 route.push("/admin/students");
