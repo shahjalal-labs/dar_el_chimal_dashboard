@@ -35,9 +35,32 @@ export function AssignmentDetailView({
 
 
   const assignment = assingmentDetails?.result?.assignment;
-  
   const answer = assingmentDetails?.result?.answer;
   const isGraded = answer?.status === "Graded";
+
+  const attachmentUrl = assignment?.attachment || assignment?.attachament;
+  const isAttachmentImage = Boolean(
+    attachmentUrl && /\.(jpeg|jpg|gif|png|webp|svg)($|\?)/i.test(attachmentUrl)
+  );
+
+  const bookPdf =
+    assignment?.bookData?.file ||
+    assignment?.bookData?.bookPdf ||
+    assignment?.bookFile ||
+    assignment?.bookPdf;
+  const bookId = assignment?.bookData?.id || assignment?.bookId;
+  const hasBook = Boolean(bookPdf || bookId);
+
+  const handleOpenBook = () => {
+    if (bookPdf) {
+      window.open(
+        `/student/books/read?pdfurl=${encodeURIComponent(bookPdf)}`,
+        "_blank"
+      );
+    } else if (bookId) {
+      window.open(`/student/books/bookDetails/${bookId}`, "_blank");
+    }
+  };
 
   return (
     <div className="px-4">
@@ -76,23 +99,47 @@ export function AssignmentDetailView({
             </span>
           </div>
 
-          <div className="flex justify-between">
+          <div className="flex justify-between items-center">
             <span className="font-semibold text-gray-900">Attachments:</span>
-            <a
-              href={assignment?.bookData?.coverImg}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline"
-            >
-              View
-            </a>
+            {attachmentUrl ? (
+              <a
+                href={attachmentUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline font-medium"
+              >
+                View Attachment
+              </a>
+            ) : (
+              <span className="text-gray-600">No attachments</span>
+            )}
           </div>
+
+          {isAttachmentImage && (
+            <div className="pt-1">
+              <a
+                href={attachmentUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block relative max-w-xs rounded-lg overflow-hidden border border-gray-200 bg-white p-1 hover:opacity-90 transition"
+                title="Click to view full image"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={attachmentUrl}
+                  alt="Assignment Attachment"
+                  className="max-h-48 w-auto rounded object-contain"
+                />
+              </a>
+            </div>
+          )}
 
           <div className="flex justify-between">
             <span className="font-semibold text-gray-900">Status:</span>
             <span
-              className={`font-medium ${isGraded ? "text-gray-500" : "text-green-500"
-                }`}
+              className={`font-medium ${
+                isGraded ? "text-gray-500" : "text-green-500"
+              }`}
             >
               {answer?.status || "Submitted"}
             </span>
@@ -116,39 +163,19 @@ export function AssignmentDetailView({
         </div>
 
         {/* Open Books Button */}
-        {(assignment?.bookData?.bookPdf || assignment?.bookData?.coverImg) ? (
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button className="mb-8 w-full rounded-lg border border-gray-300 bg-white py-3 font-medium text-blue-600 hover:bg-gray-50">
-                Open Book
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-5xl h-[85vh] flex flex-col p-6" showCloseButton={true}>
-              <DialogHeader>
-                <DialogTitle>{assignment?.bookData?.bookName || "Book"}</DialogTitle>
-              </DialogHeader>
-              <div className="flex-1 w-full mt-4 overflow-hidden flex items-center justify-center bg-gray-100 rounded-md border">
-                {(assignment?.bookData?.bookPdf || assignment?.bookData?.coverImg)?.toLowerCase().endsWith(".pdf") ? (
-                  <iframe
-                    src={assignment?.bookData?.bookPdf || assignment?.bookData?.coverImg}
-                    className="w-full h-full"
-                    title="Book PDF"
-                  />
-                ) : (
-                  <div className="relative w-full h-full">
-                    <Image
-                      src={assignment?.bookData?.bookPdf || assignment?.bookData?.coverImg}
-                      alt="Book Cover"
-                      fill
-                      className="object-contain"
-                    />
-                  </div>
-                )}
-              </div>
-            </DialogContent>
-          </Dialog>
+        {hasBook ? (
+          <Button
+            type="button"
+            onClick={handleOpenBook}
+            className="mb-8 w-full rounded-lg border border-gray-300 bg-white py-3 font-medium text-blue-600 hover:bg-gray-50 cursor-pointer"
+          >
+            Open Book
+          </Button>
         ) : (
-          <Button disabled className="mb-8 w-full rounded-lg border border-gray-300 bg-white py-3 font-medium text-gray-400">
+          <Button
+            disabled
+            className="mb-8 w-full rounded-lg border border-gray-200 bg-gray-50 py-3 font-medium text-gray-400 cursor-not-allowed"
+          >
             Book Not Available
           </Button>
         )}

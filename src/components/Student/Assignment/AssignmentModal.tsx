@@ -44,6 +44,31 @@ export function AssignmentModal({
   if (!isOpen) return null;
 
   const assignment = assignmentDetails?.result?.assignment ?? assignments;
+  const attachmentUrl = assignment?.attachment || assignment?.attachament;
+  const isAttachmentImage = Boolean(
+    attachmentUrl && /\.(jpeg|jpg|gif|png|webp|svg)($|\?)/i.test(attachmentUrl)
+  );
+
+  const bookPdf =
+    assignment?.bookData?.file ||
+    assignment?.bookData?.bookPdf ||
+    assignment?.bookFile ||
+    assignment?.bookPdf;
+  const bookId = assignment?.bookData?.id || assignment?.bookId;
+  const hasBook = Boolean(bookPdf || bookId);
+
+  const handleOpenBook = () => {
+    if (bookPdf) {
+      window.open(
+        `/student/books/read?pdfurl=${encodeURIComponent(bookPdf)}`,
+        "_blank"
+      );
+    } else if (bookId) {
+      window.open(`/student/books/bookDetails/${bookId}`, "_blank");
+    } else {
+      toast.error("Book not found for this assignment");
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
@@ -145,27 +170,47 @@ export function AssignmentModal({
               </span>
             </div>
 
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
               <span className="font-semibold text-gray-900">Attachments:</span>
-              {assignment?.attachment ? (
+              {attachmentUrl ? (
                 <a
-                  href={assignment.attachment}
+                  href={attachmentUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline"
+                  className="text-blue-600 hover:underline font-medium"
                 >
-                  View
+                  View Attachment
                 </a>
               ) : (
                 <span className="text-gray-600">No attachments</span>
               )}
             </div>
 
+            {isAttachmentImage && (
+              <div className="pt-1">
+                <a
+                  href={attachmentUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block relative max-w-xs rounded-lg overflow-hidden border border-gray-200 bg-white p-1 hover:opacity-90 transition"
+                  title="Click to view full image"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={attachmentUrl}
+                    alt="Assignment attachment"
+                    className="max-h-44 w-auto rounded object-contain mx-auto"
+                  />
+                </a>
+              </div>
+            )}
+
             <div className="flex justify-between">
               <span className="font-semibold text-gray-900">Status:</span>
               <span
-                className={`font-medium ${isPending ? "text-orange-500" : "text-red-500"
-                  }`}
+                className={`font-medium ${
+                  isPending ? "text-orange-500" : "text-red-500"
+                }`}
               >
                 {isPending ? "Pending" : "Missed"}
               </span>
@@ -174,10 +219,16 @@ export function AssignmentModal({
 
           {/* Open Books Button */}
           <Button
-            className="w-full rounded-lg border border-gray-300 bg-white py-3 font-medium text-blue-600 hover:bg-gray-50"
-            disabled={isSubmitting}
+            type="button"
+            onClick={handleOpenBook}
+            disabled={isSubmitting || !hasBook}
+            className={`w-full rounded-lg border py-3 font-medium transition ${
+              hasBook
+                ? "border-gray-300 bg-white text-blue-600 hover:bg-gray-50 cursor-pointer"
+                : "border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed"
+            }`}
           >
-            Open Books
+            {hasBook ? "Open Books" : "Book Not Available"}
           </Button>
 
           {/* Your Answer Section */}

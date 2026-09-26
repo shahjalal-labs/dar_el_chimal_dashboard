@@ -40,6 +40,11 @@ const AssignmentDetails = () => {
 
     const { assignment, students, totalSubmissions } = assignmentData;
     const { title, instruction, bookData, startPage, endPage, dueDate } = assignment;
+    const attachmentUrl = assignment?.attachment || assignment?.attachament;
+    const isAttachmentImage = Boolean(
+        attachmentUrl && /\.(jpeg|jpg|gif|png|webp|svg)($|\?)/i.test(attachmentUrl)
+    );
+    const bookPdf = bookData?.file || bookData?.bookPdf;
 
     return (
         <div className="">
@@ -55,7 +60,20 @@ const AssignmentDetails = () => {
                 <p className="text-[#636F85] mb-6">{instruction}</p>
 
                 {/* Book Info */}
-                <div className="flex items-center gap-4 bg-[#F7F9FF] border border-[#D8D8D8] p-4 rounded-lg cursor-pointer hover:bg-gray-100 transition">
+                <div
+                    onClick={() => {
+                        if (bookPdf) {
+                            window.open(
+                                `/teacher/classes/books/${id}/${bookData?.id}/pdf?pdfurl=${encodeURIComponent(bookPdf)}`,
+                                "_blank"
+                            );
+                        }
+                    }}
+                    className={`flex items-center gap-4 bg-[#F7F9FF] border border-[#D8D8D8] p-4 rounded-lg transition ${
+                        bookPdf ? "cursor-pointer hover:bg-gray-100" : ""
+                    }`}
+                    title={bookPdf ? "Click to open book" : undefined}
+                >
                     <Image
                         src={bookData?.coverImg || "https://res.cloudinary.com/dddrm7ep8/image/upload/v1788255470/n2tfqinlzgwpdkittexh.jpg"}
                         alt={bookData?.bookName || "Book Cover"}
@@ -70,6 +88,41 @@ const AssignmentDetails = () => {
                         </span>
                     </div>
                 </div>
+
+                {/* Attachment Section */}
+                {attachmentUrl && (
+                    <div className="mt-4 pt-4 border-t border-gray-100">
+                        <div className="flex items-center gap-2">
+                            <span className="font-semibold text-gray-900">Attachment:</span>
+                            <a
+                                href={attachmentUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline font-medium"
+                            >
+                                View Attachment
+                            </a>
+                        </div>
+                        {isAttachmentImage && (
+                            <div className="pt-2">
+                                <a
+                                    href={attachmentUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-block relative max-w-xs rounded-lg overflow-hidden border border-gray-200 bg-white p-1 hover:opacity-90 transition"
+                                    title="Click to view full image"
+                                >
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
+                                        src={attachmentUrl}
+                                        alt="Assignment Attachment"
+                                        className="max-h-48 w-auto rounded object-contain"
+                                    />
+                                </a>
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
 
             {/* Students Table */}
