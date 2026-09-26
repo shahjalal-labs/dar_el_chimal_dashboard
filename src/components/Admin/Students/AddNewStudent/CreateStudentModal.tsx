@@ -5,7 +5,6 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { DialogClose, DialogContent } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import GetSchools, { SchoolOption } from "@/components/Common/GetSchools";
-import Image from "next/image";
 import Select from "react-select";
 import { useGetAllGradesQuery } from "@/redux/api/grade";
 import { Input } from "@/components/ui/input";
@@ -19,7 +18,6 @@ import {
   setNumberOfStudent,
   setStudentSchoolName,
 } from "@/redux/features/studentSlice";
-import schoolImg from "@/assets/school.png";
 
 interface GradeOption {
   id: string;
@@ -144,28 +142,15 @@ const CreateStudentModal = () => {
             <div key={mapping.id}>
               <div className="flex flex-col md:flex-row items-start gap-6 mb-6 relative">
                 {/* School Name */}
-                <div className="flex-1 relative w-full">
+                <div className="flex-1 w-full">
                   <Label>School Name</Label>
                   <GetSchools
+                    value={school}
                     onChange={(selectedSchool) =>
                       handleSchoolChange(mapping.id, selectedSchool)
                     }
                     excludeIds={selectedSchoolIds}
                   />
-
-                  {/* Display selected school */}
-                  {school && (
-                    <div className="flex items-center gap-2 mt-2 absolute top-[35%] left-4">
-                      <Image
-                        src={school?.image || schoolImg}
-                        height={32}
-                        width={24}
-                        alt={school.schoolName}
-                        className="rounded-xl"
-                      />
-                      <span>{school.schoolName}</span>
-                    </div>
-                  )}
                 </div>
 
                 {/* Number of Students */}

@@ -180,22 +180,12 @@ const General = ({ id }: { id: string }) => {
             </div>
 
             {/* Category */}
-            <div className="relative">
+            <div>
                 <Label>Book Category</Label>
                 <GetBookCategory
+                    value={categoryId || categoryName ? { categoryId, name: categoryName, image: categoryImage } : null}
                     onChange={(category) => { dispatch(setCategory(category)) }}
                 />
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }} className='absolute z-10 top-[50%] left-[15px]'>
-                    <Image
-                        src={categoryImage}
-                        height={50}
-                        width={50}
-                        alt={categoryName}
-                        style={{ width: 24, height: 24, borderRadius: '50%' }}
-                        priority
-                    />
-                    <span className=''>{categoryName}</span>
-                </div>
             </div>
 
             {/* File Uploads */}

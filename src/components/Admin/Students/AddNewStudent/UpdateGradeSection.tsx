@@ -17,12 +17,10 @@ import {
     useGetStudentDetailsQuery,
     useUpdateStudentMutation,
 } from "@/redux/api/student";
-import defaultImg from "@/assets/school.png";
 import {
     setEmail,
     setStudentSchoolName,
 } from "@/redux/features/studentSlice";
-import Image from "next/image";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { usePathname } from "next/navigation";
 
@@ -182,31 +180,13 @@ const UpdateGradeSection = ({ id }: { id: string }) => {
                     <div key={mapping.id} className="mb-6 space-y-5">
 
                         {/* School Name */}
-                        <div className="flex-1 relative w-full">
+                        <div className="flex-1 w-full">
                             <Label>School Name</Label>
                             <GetSchools
+                                value={school}
                                 onChange={(selectedSchool) => handleSchoolChange(mapping.id, selectedSchool)}
                                 excludeIds={selectedSchoolIds}
                             />
-
-                            {school && (
-                                <div className="flex items-center gap-2 mt-2 absolute top-[35%] left-4">
-                                    <Image
-                                        src={school?.image || defaultImg}
-                                        height={32}
-                                        width={24}
-                                        alt={school?.schoolName}
-                                        style={{
-                                            width: 24,
-                                            height: 24,
-                                            borderRadius: "50%",
-                                            opacity: "50%",
-                                        }}
-                                        priority
-                                    />
-                                    <span className="opacity-[50%]">{school?.schoolName}</span>
-                                </div>
-                            )}
                         </div>
 
                         {/* Grade Section */}

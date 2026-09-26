@@ -5,6 +5,8 @@ import Select from 'react-select';
 import Image from 'next/image';
 import { useGetAllBookCategoriesQuery } from '@/redux/api/bookCategory';
 
+import defaultImg from "@/assets/default.png";
+
 export interface CategoryOption {
     readonly name: string;
     readonly categoryId: string;
@@ -12,27 +14,54 @@ export interface CategoryOption {
 }
 
 interface GetBookCategoryProps {
+    value?: { name?: string; categoryId?: string; image?: string } | null;
     onChange: (category: { name: string; categoryId: string, image: string }) => void;
+    placeholder?: string;
+    className?: string;
 }
 
-export const GetBookCategory: React.FC<GetBookCategoryProps> = ({ onChange }) => {
-    const { data } = useGetAllBookCategoriesQuery({ currentPage: 1, limit: 100 });
+export const GetBookCategory: React.FC<GetBookCategoryProps> = ({
+    value,
+    onChange,
+    placeholder = "Search and select book category...",
+    className,
+}) => {
+    const { data, isLoading } = useGetAllBookCategoriesQuery({ currentPage: 1, limit: 100 });
 
-    const categoryOptions: readonly CategoryOption[] =
-        data?.result?.result?.map((category: {
-            id: string;
-            name: string;
-            image: string;
-        }) => ({
-            name: category.name,
-            categoryId: category.id,
-            image: category.image,
-        })) ?? [];
+    const categoryOptions: readonly CategoryOption[] = React.useMemo(() => {
+        return (
+            data?.result?.result?.map((category: {
+                id: string;
+                name: string;
+                image: string;
+            }) => ({
+                name: category.name,
+                categoryId: category.id,
+                image: category.image,
+            })) ?? []
+        );
+    }, [data]);
+
+    const selectedOption = React.useMemo(() => {
+        if (!value || (!value.categoryId && !value.name)) return null;
+        return (
+            categoryOptions.find(
+                (c) => (value.categoryId && c.categoryId === value.categoryId) || (value.name && c.name === value.name)
+            ) || {
+                name: value.name || '',
+                categoryId: value.categoryId || '',
+                image: value.image || '',
+            }
+        );
+    }, [value, categoryOptions]);
 
     return (
-        <Select
-            placeholder=""
+        <Select<CategoryOption, false>
+            placeholder={placeholder}
+            isSearchable={true}
+            isLoading={isLoading}
             options={categoryOptions}
+            value={selectedOption}
             onChange={(selectedOption) => {
                 if (selectedOption) {
                     onChange({
@@ -43,17 +72,18 @@ export const GetBookCategory: React.FC<GetBookCategoryProps> = ({ onChange }) =>
                 }
             }}
             getOptionLabel={(option) => option.name}
-            formatOptionLabel={(option) => (
+            getOptionValue={(option) => option.categoryId}
+            formatOptionLabel={(option, { context }) => (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <Image
-                        src={option.image}
-                        height={50}
-                        width={50}
-                        alt={option.name}
-                        style={{ width: 24, height: 24, borderRadius: '50%' }}
+                        src={option.image && typeof option.image === 'string' && option.image.trim() !== '' ? option.image : defaultImg}
+                        height={24}
+                        width={24}
+                        alt={option.name || 'category'}
+                        style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover' }}
                         priority
                     />
-                    <span className='text-white'>{option.name}</span>
+                    <span className={context === 'menu' ? 'text-white' : 'text-gray-800'}>{option.name}</span>
                 </div>
             )}
             styles={{
@@ -61,12 +91,16 @@ export const GetBookCategory: React.FC<GetBookCategoryProps> = ({ onChange }) =>
                     ...base,
                     marginTop: '0.5rem',
                 }),
-                control: (base) => ({
+                control: (base, state) => ({
                     ...base,
-                    borderColor: '#CBD5E1',
+                    borderColor: state.isFocused ? '#1E3A8A' : '#CBD5E1',
                     borderRadius: '0.5rem',
                     boxShadow: 'none',
                     padding: '2px 4px',
+                    minHeight: '42px',
+                    '&:hover': {
+                        borderColor: '#94A3B8',
+                    },
                 }),
                 placeholder: (base) => ({
                     ...base,
@@ -80,6 +114,7 @@ export const GetBookCategory: React.FC<GetBookCategoryProps> = ({ onChange }) =>
                 menu: (base) => ({
                     ...base,
                     backgroundColor: '#1E3A8A',
+                    zIndex: 9999,
                 }),
                 option: (base, state) => ({
                     ...base,
@@ -90,6 +125,7 @@ export const GetBookCategory: React.FC<GetBookCategoryProps> = ({ onChange }) =>
                     transition: 'background-color 0.2s ease',
                 }),
             }}
+            className={className}
         />
     );
 };

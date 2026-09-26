@@ -139,6 +139,7 @@ const Grade = () => {
                         <div className="flex-1 w-full">
                             <Label>School Name</Label>
                             <GetSchools
+                                value={school}
                                 onChange={(selectedSchool) => handleSchoolChange(mapping.id, selectedSchool)}
                                 excludeIds={selectedSchoolIds}
                             />

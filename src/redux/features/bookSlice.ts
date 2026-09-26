@@ -72,9 +72,9 @@ const bookSlice = createSlice({
             state.author = action.payload;
         },
         setCategory: (state, action) => {
-            state.categoryName = action.payload.name;
-            state.categoryId = action.payload.categoryId;
-            state.categoryImage = action.payload.image;
+            state.categoryName = action.payload?.name || '';
+            state.categoryId = action.payload?.categoryId || action.payload?.id || '';
+            state.categoryImage = action.payload?.image || '';
         },
         setUploadImage: (state, action: PayloadAction<File | null>) => {
             state.uploadImage = action.payload;

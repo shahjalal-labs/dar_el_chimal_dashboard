@@ -43,8 +43,12 @@ export const GetSchools: React.FC<GetSchoolProps> = ({
     }, [data, excludeIds]);
 
     const selectedOption = React.useMemo(() => {
-        if (!value) return null;
-        return schoolOptions.find((s) => s.schoolId === value.schoolId) || value;
+        if (!value || (!value.schoolId && !value.schoolName)) return null;
+        return (
+            schoolOptions.find(
+                (s) => (value.schoolId && s.schoolId === value.schoolId) || (value.schoolName && s.schoolName === value.schoolName)
+            ) || value
+        );
     }, [value, schoolOptions]);
 
     return (
@@ -59,17 +63,17 @@ export const GetSchools: React.FC<GetSchoolProps> = ({
             }}
             getOptionLabel={(option) => option.schoolName}
             getOptionValue={(option) => option.schoolId}
-            formatOptionLabel={(option) => (
+            formatOptionLabel={(option, { context }) => (
                 <div className="flex items-center gap-2">
                     <Image
-                        src={option.image || schoolImg}
+                        src={option.image && typeof option.image === 'string' && option.image.trim() !== '' ? option.image : schoolImg}
                         height={24}
                         width={24}
-                        alt={option.schoolName}
+                        alt={option.schoolName || "school"}
                         className="w-6 h-6 rounded-full object-cover flex-shrink-0"
                         priority
                     />
-                    <span className="text-sm text-gray-800 truncate">{option.schoolName}</span>
+                    <span className={`text-sm truncate ${context === 'menu' ? '' : 'text-gray-800'}`}>{option.schoolName}</span>
                 </div>
             )}
             styles={{
@@ -83,6 +87,7 @@ export const GetSchools: React.FC<GetSchoolProps> = ({
                     borderRadius: '0.5rem',
                     boxShadow: 'none',
                     padding: '2px 4px',
+                    minHeight: '42px',
                     '&:hover': {
                         borderColor: '#94A3B8',
                     },

@@ -28,7 +28,6 @@ import {
     setUploadPdf,
 } from '@/redux/features/bookSlice';
 import { RootState } from '@/redux/store/store';
-import Image from 'next/image';
 import { toast } from 'sonner';
 import { usePathname, useRouter } from 'next/navigation';
 import { PiSpinner } from 'react-icons/pi';
@@ -44,7 +43,6 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import schoolImg from "@/assets/school.png";
 import { set } from 'date-fns';
 
 interface GradeOption {
@@ -383,27 +381,15 @@ const Grade = ({ id, onClose }: { id: string, onClose?: () => void }) => {
                             }`}
                     >
                         {/* School Name */}
-                        <div className="flex-1 relative w-full">
+                        <div className="flex-1 w-full">
                             <Label>School Name</Label>
                             <GetSchools
+                                value={school}
                                 onChange={(selectedSchool) =>
                                     handleSchoolChange(mapping?.id, selectedSchool)
                                 }
                                 excludeIds={selectedSchoolIds}
                             />
-
-                            {school && (
-                                <div className="flex items-center gap-2 mt-2 absolute top-[35%] left-4">
-                                    <Image
-                                        src={school?.image || schoolImg}
-                                        height={32}
-                                        width={24}
-                                        alt={school?.schoolName}
-                                        className="rounded-xl"
-                                    />
-                                    <span>{school?.schoolName}</span>
-                                </div>
-                            )}
                         </div>
 
                         {/* Grade Section Mapping */}
