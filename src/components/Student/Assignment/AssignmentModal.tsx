@@ -6,9 +6,9 @@ import {
   useGetassignmentDetailsQuery,
   useSubmitAssingmentAnsMutation,
 } from "@/redux/api/student/assignmentApi";
-import { Upload, X } from "lucide-react";
+import { Upload, X, Trash2, FileText } from "lucide-react";
 import type React from "react";
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { toast } from "sonner";
 
 interface AssignmentModalProps {
@@ -39,9 +39,6 @@ export function AssignmentModal({
     skip: !isOpen || !id, // Skip the query if modal is not open or no ID
   });
   const [submitAssignmentAnsFn] = useSubmitAssingmentAnsMutation();
-
-  // Early return after all hooks have been called
-  if (!isOpen) return null;
 
   const assignment = assignmentDetails?.result?.assignment ?? assignments;
   const attachmentUrl = assignment?.attachment || assignment?.attachament;
@@ -76,6 +73,36 @@ export function AssignmentModal({
     }
   };
 
+  const handleRemoveAttachment = () => {
+    setAttachment(null);
+    const fileInput = document.getElementById("file-upload") as HTMLInputElement | null;
+    if (fileInput) {
+      fileInput.value = "";
+    }
+  };
+
+  const attachmentPreviewUrl = useMemo(() => {
+    if (!attachment) return null;
+    if (attachment.type.startsWith("image/")) {
+      return URL.createObjectURL(attachment);
+    }
+    return null;
+  }, [attachment]);
+
+  useEffect(() => {
+    return () => {
+      if (attachmentPreviewUrl) {
+        URL.revokeObjectURL(attachmentPreviewUrl);
+      }
+    };
+  }, [attachmentPreviewUrl]);
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return bytes + " B";
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+    return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+  };
+
   const handleSubmit = async () => {
     if (!answer.trim()) return;
 
@@ -106,7 +133,7 @@ export function AssignmentModal({
         toast.success("Answer submitted successfully");
         refetch();
         setAnswer("");
-        setAttachment(null);
+        handleRemoveAttachment();
         onClose();
       }
     } catch (error) {
@@ -118,7 +145,7 @@ export function AssignmentModal({
     }
   };
 
-  const isPending = assignments.status === "Pending";
+  const isPending = assignments?.status === "Pending";
 
   // ✅ Format due date safely
   const formatDate = (dateString: string | undefined) => {
@@ -130,6 +157,8 @@ export function AssignmentModal({
       year: "numeric",
     });
   };
+
+  if (!isOpen) return null;
 
   return (
     <div
@@ -255,31 +284,113 @@ export function AssignmentModal({
 
           {/* Attachment Section */}
           <div className="space-y-2">
-            <label className="block font-semibold text-gray-900">
-              Attachment (Optional)
-            </label>
-            <div className="rounded-lg border-2 border-dashed border-gray-300 p-6 text-center hover:border-blue-400 transition bg-gray-50/50">
-              <input
-                type="file"
-                onChange={handleFileChange}
-                className="hidden"
-                id="file-upload"
-                disabled={isSubmitting}
-              />
+            <div className="flex items-center justify-between">
+              <label className="block font-semibold text-gray-900">
+                Attachment (Optional)
+              </label>
+              {attachment && (
+                <button
+                  type="button"
+                  onClick={handleRemoveAttachment}
+                  disabled={isSubmitting}
+                  className="text-xs text-red-500 hover:text-red-700 font-medium flex items-center gap-1 cursor-pointer transition disabled:opacity-50"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Remove
+                </button>
+              )}
+            </div>
+
+            <input
+              type="file"
+              onChange={handleFileChange}
+              accept="image/*,application/pdf"
+              className="hidden"
+              id="file-upload"
+              disabled={isSubmitting}
+            />
+
+            {attachment ? (
+              <div className="rounded-xl border border-gray-200 bg-gray-50/80 p-3.5 flex items-center justify-between gap-3 shadow-xs hover:border-gray-300 transition">
+                <div className="flex items-center gap-3 overflow-hidden min-w-0">
+                  {attachmentPreviewUrl ? (
+                    <div className="relative h-14 w-14 rounded-lg overflow-hidden border border-gray-200 bg-white shrink-0 shadow-xs">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={attachmentPreviewUrl}
+                        alt="Selected attachment preview"
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="h-14 w-14 rounded-lg border border-red-200 bg-red-50 text-red-600 flex items-center justify-center shrink-0">
+                      <FileText className="h-7 w-7" />
+                    </div>
+                  )}
+
+                  <div className="flex flex-col min-w-0">
+                    <span
+                      className="font-medium text-sm text-gray-900 truncate"
+                      title={attachment.name}
+                    >
+                      {attachment.name}
+                    </span>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-xs text-gray-500">
+                        {formatFileSize(attachment.size)}
+                      </span>
+                      <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-blue-100 text-blue-700">
+                        {attachment.type.startsWith("image/") ? "Image" : "PDF"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <label
+                    htmlFor="file-upload"
+                    className={`text-xs font-medium text-blue-600 hover:text-blue-800 bg-white hover:bg-blue-50 border border-gray-200 rounded-md px-2.5 py-1.5 transition shadow-xs ${
+                      isSubmitting
+                        ? "pointer-events-none opacity-50"
+                        : "cursor-pointer"
+                    }`}
+                  >
+                    Change
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleRemoveAttachment}
+                    disabled={isSubmitting}
+                    className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition cursor-pointer disabled:opacity-50"
+                    title="Remove attachment"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            ) : (
               <label
                 htmlFor="file-upload"
-                className={`flex flex-col items-center gap-2 ${
+                className={`border-2 border-dashed border-gray-300 hover:border-blue-500 hover:bg-blue-50/20 bg-gray-50/50 rounded-xl p-6 text-center transition flex flex-col items-center justify-center gap-2 group ${
                   isSubmitting
                     ? "cursor-not-allowed opacity-50"
                     : "cursor-pointer"
                 }`}
               >
-                <Upload className="h-7 w-7 text-gray-400" />
-                <span className="text-gray-600 text-sm font-medium">
-                  {attachment ? attachment.name : "Attach Image or PDF"}
+                <div className="h-10 w-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-105 transition">
+                  <Upload className="h-5 w-5" />
+                </div>
+                <div>
+                  <span className="text-sm font-semibold text-gray-800 group-hover:text-blue-600 transition">
+                    Click to upload
+                  </span>
+                  <span className="text-sm text-gray-500"> or drag and drop</span>
+                </div>
+                <span className="text-xs text-gray-400">
+                  PNG, JPG, JPEG, or PDF (Max 10MB)
                 </span>
               </label>
-            </div>
+            )}
           </div>
         </div>
 
