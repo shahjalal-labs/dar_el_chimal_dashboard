@@ -3,13 +3,6 @@ import { Button } from "@/components/ui/button";
 import { useGetassignmentDetailsQuery } from "@/redux/api/student/assignmentApi";
 import { ChevronLeft } from "lucide-react";
 import Image from "next/image";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 
 interface AssignmentDetailViewProps {
   assignments: {

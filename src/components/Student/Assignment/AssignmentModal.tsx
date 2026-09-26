@@ -132,29 +132,36 @@ export function AssignmentModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="relative w-full max-w-3xl rounded-2xl bg-white p-8 shadow-lg">
+    <div
+      onClick={(e) => {
+        if (e.target === e.currentTarget && !isSubmitting) {
+          onClose();
+        }
+      }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 sm:p-6 overflow-y-auto"
+    >
+      <div className="relative w-full max-w-2xl max-h-[92vh] flex flex-col rounded-2xl bg-white shadow-2xl my-auto overflow-hidden">
         {/* Close Button */}
         <Button
           onClick={onClose}
-          className="absolute right-6 top-6 text-gray-400 hover:text-gray-600"
+          className="absolute right-5 top-5 z-10 text-gray-400 hover:text-gray-600 bg-transparent hover:bg-gray-100 p-2 rounded-full h-9 w-9 flex items-center justify-center cursor-pointer shadow-none"
           disabled={isSubmitting}
         >
-          <X className="h-6 w-6" />
+          <X className="h-5 w-5" />
         </Button>
 
-        {/* Modal Content */}
-        <div className="space-y-6">
+        {/* Scrollable Content Body */}
+        <div className="overflow-y-auto p-6 sm:p-8 space-y-6 flex-1">
           {/* Title */}
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 className="text-2xl font-bold text-gray-900 pr-10">
             {assignment.title}
           </h2>
 
           {/* Description */}
-          <p className="text-gray-600">{assignment.instruction}</p>
+          <p className="text-gray-600 leading-relaxed">{assignment.instruction}</p>
 
           {/* Assignment Details */}
-          <div className="space-y-3 rounded-lg bg-gray-50 p-4">
+          <div className="space-y-3 rounded-lg bg-gray-50 p-4 border border-gray-100">
             <div className="flex justify-between">
               <span className="font-semibold text-gray-900">Pages:</span>
               <span className="text-gray-600">
@@ -192,14 +199,14 @@ export function AssignmentModal({
                   href={attachmentUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block relative max-w-xs rounded-lg overflow-hidden border border-gray-200 bg-white p-1 hover:opacity-90 transition"
+                  className="inline-block relative max-w-xs rounded-lg overflow-hidden border border-gray-200 bg-white p-1 hover:opacity-90 transition"
                   title="Click to view full image"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={attachmentUrl}
                     alt="Assignment attachment"
-                    className="max-h-44 w-auto rounded object-contain mx-auto"
+                    className="max-h-40 w-auto rounded object-contain"
                   />
                 </a>
               </div>
@@ -224,7 +231,7 @@ export function AssignmentModal({
             disabled={isSubmitting || !hasBook}
             className={`w-full rounded-lg border py-3 font-medium transition ${
               hasBook
-                ? "border-gray-300 bg-white text-blue-600 hover:bg-gray-50 cursor-pointer"
+                ? "border-gray-300 bg-white text-blue-600 hover:bg-gray-50 cursor-pointer shadow-sm"
                 : "border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed"
             }`}
           >
@@ -241,7 +248,7 @@ export function AssignmentModal({
               onChange={(e) => setAnswer(e.target.value)}
               placeholder="Write your answer here..."
               className="w-full rounded-lg border border-gray-300 p-4 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              rows={6}
+              rows={4}
               disabled={isSubmitting}
             />
           </div>
@@ -251,7 +258,7 @@ export function AssignmentModal({
             <label className="block font-semibold text-gray-900">
               Attachment (Optional)
             </label>
-            <div className="rounded-lg border-2 border-dashed border-gray-300 p-8 text-center">
+            <div className="rounded-lg border-2 border-dashed border-gray-300 p-6 text-center hover:border-blue-400 transition bg-gray-50/50">
               <input
                 type="file"
                 onChange={handleFileChange}
@@ -261,37 +268,38 @@ export function AssignmentModal({
               />
               <label
                 htmlFor="file-upload"
-                className={`flex flex-col items-center gap-2 ${isSubmitting
+                className={`flex flex-col items-center gap-2 ${
+                  isSubmitting
                     ? "cursor-not-allowed opacity-50"
                     : "cursor-pointer"
-                  }`}
+                }`}
               >
-                <Upload className="h-8 w-8 text-gray-400" />
-                <span className="text-gray-600">
+                <Upload className="h-7 w-7 text-gray-400" />
+                <span className="text-gray-600 text-sm font-medium">
                   {attachment ? attachment.name : "Attach Image or PDF"}
                 </span>
               </label>
             </div>
           </div>
+        </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-4 pt-4">
-            <Button
-              variant="outline"
-              onClick={onClose}
-              disabled={isSubmitting}
-              className="flex-1 bg-transparent"
-            >
-              Back
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              disabled={isSubmitting || !answer.trim()}
-              className="flex-1 bg-blue-600 hover:bg-blue-700"
-            >
-              {isSubmitting ? "Submitting..." : "Submit"}
-            </Button>
-          </div>
+        {/* Action Buttons (pinned at bottom so user can always see & click them) */}
+        <div className="flex gap-4 p-4 sm:px-8 border-t border-gray-100 bg-gray-50/80 shrink-0">
+          <Button
+            variant="outline"
+            onClick={onClose}
+            disabled={isSubmitting}
+            className="flex-1 bg-white hover:bg-gray-100 border-gray-300 cursor-pointer"
+          >
+            Back
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={isSubmitting || !answer.trim()}
+            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
+          >
+            {isSubmitting ? "Submitting..." : "Submit"}
+          </Button>
         </div>
       </div>
     </div>
