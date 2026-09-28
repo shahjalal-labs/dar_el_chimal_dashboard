@@ -156,7 +156,7 @@ const Grade = () => {
             email: email?.trim() || undefined,
             schoolId: school.schoolId,
             gradeId: grade.id,
-            bookIds: selectedBooks.map((b) => b.id),
+            bookIds: selectedBooks.length > 0 ? selectedBooks.map((b) => b.id) : undefined,
         };
 
         const formData = new FormData();
@@ -262,7 +262,15 @@ const Grade = () => {
                                 options={availableBooks}
                                 className="basic-multi-select mt-2"
                                 classNamePrefix="select"
-                                placeholder={selectedBooks.length > 0 ? "" : (grade ? "Select books to assign..." : "Please select a grade first")}
+                                placeholder={
+                                    selectedBooks.length > 0
+                                        ? ""
+                                        : grade
+                                        ? (availableBooks.length > 0
+                                            ? "Select books to assign (leave empty to assign all)..."
+                                            : "No books available for this grade")
+                                        : "Please select a grade first"
+                                }
                                 getOptionLabel={(option) => option.label}
                                 getOptionValue={(option) => option.id}
                                 value={selectedBooks}
@@ -293,6 +301,11 @@ const Grade = () => {
                                     }),
                                 }}
                             />
+                            {grade && availableBooks.length > 0 && (
+                                <p className="text-xs text-gray-500 mt-2 flex items-center gap-1.5">
+                                    <span className="font-semibold text-[#1E3A8A]">Note:</span> If left empty, all books available for this grade will automatically be assigned to the student.
+                                </p>
+                            )}
                             {grade && availableBooks.length === 0 && (
                                 <p className="text-xs text-gray-500 mt-1">
                                     No books currently mapped to this school/grade.

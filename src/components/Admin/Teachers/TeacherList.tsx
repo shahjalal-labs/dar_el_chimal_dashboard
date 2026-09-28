@@ -95,8 +95,6 @@ const TeacherList = () => {
     ?.slice((currentPage - 1) * limit, currentPage * limit)
     .map((entry: any) => {
       const schoolName = entry?.Teacher?.[0]?.grade?.school?.name || "N/A";
-      const grades =
-        entry?.Teacher?.map((g: any) => g?.grade?.grade).filter(Boolean).join(" / ") || "N/A";
       return {
         Id: entry.id,
         Picture: (
@@ -111,7 +109,6 @@ const TeacherList = () => {
         ),
         "Full Name": entry?.fullName || "N/A",
         School: schoolName,
-        Grade: grades,
         "User Name": entry?.loginUserName || "N/A",
         Password: entry?.password || "N/A",
         Status: entry?.status,
@@ -139,7 +136,7 @@ const TeacherList = () => {
       return;
     }
 
-    const headers = ["Sl/No", "Teacher Name", "School", "Grade", "User Name", "Password"];
+    const headers = ["Sl/No", "Teacher Name", "School", "User Name", "Password"];
     const escapeCsv = (str: any) => {
       if (str === null || str === undefined) return '""';
       const s = String(str).replace(/"/g, '""');
@@ -150,13 +147,10 @@ const TeacherList = () => {
       headers.join(","),
       ...filteredTeachers.map((t: any, i: number) => {
         const schoolName = t.Teacher?.[0]?.grade?.school?.name || "N/A";
-        const grades =
-          t.Teacher?.map((g: any) => g?.grade?.grade).filter(Boolean).join(" / ") || "N/A";
         return [
           String(i + 1).padStart(2, "0"),
           escapeCsv(t.fullName),
           escapeCsv(schoolName),
-          escapeCsv(grades),
           escapeCsv(t.loginUserName),
           escapeCsv(t.password || ""),
         ].join(",");
