@@ -58,12 +58,6 @@ const ViewStudentDetailsModal = ({ id }: { id: string }) => {
                         <span className="font-medium">Status:</span> {status}
                     </p>
                     <p className="text-sm text-gray-600">
-                        <span className="font-medium">User Name:</span> {loginUserName || "N/A"}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                        <span className="font-medium">Password:</span> {student?.password || "N/A"}
-                    </p>
-                    <p className="text-sm text-gray-600">
                         <span className="font-medium">Joined:</span>{" "}
                         {new Date(joinedAt).toLocaleDateString()}
                     </p>
