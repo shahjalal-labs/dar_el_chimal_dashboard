@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import GetSchools, { SchoolOption } from "@/components/Common/GetSchools";
 import Select from "react-select";
 import { useGetAllGradesQuery } from "@/redux/api/grade";
+import { useAssignedBooksQuery } from "@/redux/api/school";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { PiSpinner } from "react-icons/pi";
@@ -26,6 +27,12 @@ interface GradeOption {
   schoolId: string;
 }
 
+interface BookOption {
+  id: string;
+  label: string;
+  gradeIds?: string[];
+}
+
 interface Mapping {
   id: string;
   school: SchoolOption | null;
@@ -40,6 +47,8 @@ const CreateStudentModal = () => {
   const [mappings, setMappings] = useState<Mapping[]>([
     { id: Date.now().toString(), school: null, grade: null },
   ]);
+  const [selectedBooks, setSelectedBooks] = useState<BookOption[]>([]);
+  const [lastGradeId, setLastGradeId] = useState<string | null>(null);
 
   useEffect(() => {
     dispatch(setNumberOfStudent(0));
@@ -51,6 +60,11 @@ const CreateStudentModal = () => {
   const { data: gradesData } = useGetAllGradesQuery({
     currentPage: 1,
     limit: 1000,
+  });
+
+  const selectedSchoolId = mappings[0]?.school?.schoolId;
+  const { data: assignedBooksData } = useAssignedBooksQuery(selectedSchoolId, {
+    skip: !selectedSchoolId,
   });
 
   const [createStudent, { isLoading: isCreating }] =
@@ -70,6 +84,8 @@ const CreateStudentModal = () => {
         item.id === id ? { ...item, school, grade: null } : item,
       ),
     );
+    setSelectedBooks([]);
+    setLastGradeId(null);
   };
 
   const handleGradeChange = (id: string, selectedGrade: GradeOption | null) => {
@@ -80,10 +96,45 @@ const CreateStudentModal = () => {
     );
   };
 
-  const selectedSchoolIds = useMemo(
-    () => mappings.filter((m) => m.school).map((m) => m.school!.schoolId),
-    [mappings],
-  );
+  const availableBooks: BookOption[] = useMemo(() => {
+    if (!assignedBooksData?.result || !mappings[0]?.grade) return [];
+    const currentGradeId = mappings[0].grade.id;
+    const matching = assignedBooksData.result
+      .filter((b: any) => b.gradeIds?.includes(currentGradeId))
+      .map((b: any) => ({
+        id: b.id,
+        label: b.bookName || "Untitled Book",
+        gradeIds: b.gradeIds,
+      }));
+    if (matching.length > 0) return matching;
+    return assignedBooksData.result.map((b: any) => ({
+      id: b.id,
+      label: b.bookName || "Untitled Book",
+      gradeIds: b.gradeIds,
+    }));
+  }, [assignedBooksData, mappings]);
+
+  useEffect(() => {
+    const currentGradeId = mappings[0]?.grade?.id || null;
+    if (currentGradeId !== lastGradeId) {
+      setLastGradeId(currentGradeId);
+      if (availableBooks.length > 0) {
+        setSelectedBooks(availableBooks);
+      } else {
+        setSelectedBooks([]);
+      }
+    }
+  }, [mappings, lastGradeId, availableBooks]);
+
+  const isAllSelected =
+    availableBooks.length > 0 && selectedBooks.length === availableBooks.length;
+  const handleToggleSelectAll = () => {
+    if (isAllSelected) {
+      setSelectedBooks([]);
+    } else {
+      setSelectedBooks(availableBooks);
+    }
+  };
 
   const handleSave = async () => {
     if (
@@ -100,6 +151,7 @@ const CreateStudentModal = () => {
       schoolId: mappings[0].school.schoolId,
       gradeId: mappings[0].grade.id,
       numberOfStudent: numberOfStudent,
+      bookIds: selectedBooks.length > 0 ? selectedBooks.map((b) => b.id) : undefined,
     };
 
     try {
@@ -110,6 +162,7 @@ const CreateStudentModal = () => {
         );
         dispatch(setNumberOfStudent(0));
         setMappings([{ id: Date.now().toString(), school: null, grade: null }]);
+        setSelectedBooks([]);
         closeRef.current?.click();
       }
     } catch (error) {
@@ -236,6 +289,83 @@ const CreateStudentModal = () => {
                   }}
                 />
               </div>
+
+              {/* Assign Books Section */}
+              <div className="flex-1 w-full mt-4">
+                <div className="flex items-center justify-between mb-1.5">
+                  <Label>Assign Books</Label>
+                  {availableBooks.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleToggleSelectAll}
+                      className="text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors cursor-pointer"
+                    >
+                      {isAllSelected ? "Unselect All" : "Select All"}
+                    </button>
+                  )}
+                </div>
+                <Select<BookOption, true>
+                  isMulti
+                  closeMenuOnSelect={false}
+                  hideSelectedOptions={false}
+                  options={availableBooks}
+                  className="basic-multi-select mt-2"
+                  classNamePrefix="select"
+                  placeholder={
+                    selectedBooks.length > 0
+                      ? ""
+                      : grade
+                      ? (availableBooks.length > 0
+                          ? "Select books to assign (leave empty to assign all)..."
+                          : "No books available for this grade")
+                      : "Please select a grade first"
+                  }
+                  getOptionLabel={(option) => option.label}
+                  getOptionValue={(option) => option.id}
+                  value={selectedBooks}
+                  onChange={(selected) =>
+                    setSelectedBooks([...(selected || [])])
+                  }
+                  styles={{
+                    control: (base) => ({
+                      ...base,
+                      borderColor: "#CBD5E1",
+                      borderRadius: "0.5rem",
+                      boxShadow: "none",
+                      padding: "2px 4px",
+                    }),
+                    placeholder: (base, state) => ({
+                      ...base,
+                      display:
+                        state.hasValue || selectedBooks.length > 0
+                          ? "none"
+                          : "block",
+                    }),
+                    multiValue: (base) => ({
+                      ...base,
+                      backgroundColor: "#E5E7EB",
+                      borderRadius: "9999px",
+                      padding: "0 4px",
+                    }),
+                    multiValueLabel: (base) => ({
+                      ...base,
+                      fontWeight: 500,
+                      color: "#374151",
+                      paddingRight: 6,
+                    }),
+                  }}
+                />
+                {grade && availableBooks.length > 0 && (
+                  <p className="text-xs text-gray-500 mt-2 flex items-center gap-1.5">
+                    <span className="font-semibold text-[#1E3A8A]">Note:</span> If left empty, all books available for this grade will automatically be assigned to the students.
+                  </p>
+                )}
+                {grade && availableBooks.length === 0 && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    No books currently mapped to this school/grade.
+                  </p>
+                )}
+              </div>
             </div>
           );
         })}
@@ -246,6 +376,7 @@ const CreateStudentModal = () => {
             variant="outline"
             onClick={() => {
               setMappings([{ id: Date.now().toString(), school: null, grade: null }]);
+              setSelectedBooks([]);
               closeRef.current?.click();
             }}
             className="px-6 border-[#636F85] text-[#636F85] font-medium"
