@@ -199,7 +199,10 @@ const Grade = () => {
                     <div key={mapping.id} className="mb-6 space-y-5">
                         {/* School Name */}
                         <div className="flex-1 w-full">
-                            <Label>School Name</Label>
+                            <Label className="flex items-center gap-2">
+                                School Name
+                                <span className="text-xs text-[#636F85] font-normal">(Can search schools)</span>
+                            </Label>
                             <GetSchools
                                 value={school}
                                 onChange={(selectedSchool) => handleSchoolChange(mapping.id, selectedSchool)}
