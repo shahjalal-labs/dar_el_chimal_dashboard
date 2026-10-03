@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -155,6 +155,46 @@ const Resource = ({
   const [resourceFile, setLocalResourceFile] = useState<File | null>(null);
   const [resourceLink, setLocalResourceLink] = useState<string>("");
   const [isAutoDetected, setIsAutoDetected] = useState<boolean>(false);
+  const [objectUrl, setObjectUrl] = useState<string>("");
+
+  useEffect(() => {
+    if (resourceFile) {
+      const url = URL.createObjectURL(resourceFile);
+      setObjectUrl(url);
+      return () => {
+        URL.revokeObjectURL(url);
+      };
+    } else {
+      setObjectUrl("");
+    }
+  }, [resourceFile]);
+
+  const previewSource = objectUrl || resourceLink || "";
+
+  const isImage =
+    (resourceFile && resourceFile.type.startsWith("image/")) ||
+    resourceType === "Image" ||
+    Boolean(
+      previewSource &&
+        (previewSource.startsWith("data:image/") ||
+          previewSource.endsWith(".png") ||
+          previewSource.endsWith(".jpg") ||
+          previewSource.endsWith(".jpeg") ||
+          previewSource.endsWith(".webp") ||
+          previewSource.endsWith(".svg") ||
+          previewSource.endsWith(".gif") ||
+          previewSource.endsWith(".avif") ||
+          previewSource.includes("cloudinary") ||
+          previewSource.includes("images"))
+    );
+
+  const isAudio =
+    (resourceFile && resourceFile.type.startsWith("audio/")) ||
+    resourceType === "Audio";
+
+  const isVideo =
+    (resourceFile && resourceFile.type.startsWith("video/")) ||
+    resourceType === "Video";
 
   const [CreateResource, { isLoading: isResourceLoading }] = useCreateResourceMutation();
 
@@ -423,53 +463,96 @@ const Resource = ({
               </div>
             </label>
           ) : (
-            <div className="border-2 border-[#1E3A8A]/30 bg-[#F0F4FF] rounded-xl p-4 flex items-center justify-between shadow-xs">
-              <div className="flex items-center space-x-3 overflow-hidden">
-                <div className="w-10 h-10 rounded-lg bg-[#1E3A8A] text-white flex items-center justify-center shrink-0 shadow-sm">
-                  {resourceType === "Audio" ? (
-                    <Headphones className="w-5 h-5" />
-                  ) : resourceType === "Video" ? (
-                    <Video className="w-5 h-5" />
-                  ) : resourceType === "Image" ? (
-                    <ImageIcon className="w-5 h-5" />
+            <div className="border-2 border-[#1E3A8A]/30 bg-[#F0F4FF] rounded-xl p-4 shadow-xs space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3 overflow-hidden min-w-0">
+                  {isImage && previewSource ? (
+                    <div className="w-12 h-12 rounded-lg overflow-hidden border border-gray-300 bg-white shrink-0 shadow-xs flex items-center justify-center">
+                      <img
+                        src={previewSource}
+                        alt="Thumbnail"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   ) : (
-                    <FileText className="w-5 h-5" />
+                    <div className="w-10 h-10 rounded-lg bg-[#1E3A8A] text-white flex items-center justify-center shrink-0 shadow-sm">
+                      {resourceType === "Audio" ? (
+                        <Headphones className="w-5 h-5" />
+                      ) : resourceType === "Video" ? (
+                        <Video className="w-5 h-5" />
+                      ) : resourceType === "Image" ? (
+                        <ImageIcon className="w-5 h-5" />
+                      ) : (
+                        <FileText className="w-5 h-5" />
+                      )}
+                    </div>
                   )}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center space-x-2">
-                    <p className="text-sm font-semibold text-gray-900 truncate max-w-xs md:max-w-md">
-                      {resourceFile.name}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center space-x-2">
+                      <p className="text-sm font-semibold text-gray-900 truncate max-w-xs md:max-w-md">
+                        {resourceFile.name}
+                      </p>
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-green-100 text-green-800 shrink-0">
+                        Selected
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      {(resourceFile.size / (1024 * 1024)).toFixed(2)} MB
                     </p>
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-green-100 text-green-800 shrink-0">
-                      Selected
-                    </span>
                   </div>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    {(resourceFile.size / (1024 * 1024)).toFixed(2)} MB
-                  </p>
+                </div>
+
+                <div className="flex items-center space-x-2 shrink-0 ml-4">
+                  <label className="cursor-pointer text-xs font-medium text-[#1E3A8A] hover:bg-white bg-white/80 border border-[#1E3A8A]/40 px-3 py-1.5 rounded-lg transition shadow-2xs">
+                    Change
+                    <input
+                      type="file"
+                      accept={acceptAttribute}
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleRemoveFile}
+                    className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition cursor-pointer"
+                    title="Remove file"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
 
-              <div className="flex items-center space-x-2 shrink-0 ml-4">
-                <label className="cursor-pointer text-xs font-medium text-[#1E3A8A] hover:bg-white bg-white/80 border border-[#1E3A8A]/40 px-3 py-1.5 rounded-lg transition shadow-2xs">
-                  Change
-                  <input
-                    type="file"
-                    accept={acceptAttribute}
-                    onChange={handleFileChange}
-                    className="hidden"
+              {/* Visual Preview for Images */}
+              {isImage && previewSource && (
+                <div className="pt-3 border-t border-[#1E3A8A]/15">
+                  <div className="relative rounded-lg overflow-hidden border border-gray-200 bg-white p-2 flex items-center justify-center max-h-72">
+                    <img
+                      src={previewSource}
+                      alt={resourceFile.name || "Image Preview"}
+                      className="max-h-64 max-w-full w-auto object-contain rounded-md"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Visual Preview for Audio */}
+              {isAudio && previewSource && (
+                <div className="pt-3 border-t border-[#1E3A8A]/15">
+                  <audio controls src={previewSource} className="w-full h-10 rounded-md" />
+                </div>
+              )}
+
+              {/* Visual Preview for Video */}
+              {isVideo && previewSource && (
+                <div className="pt-3 border-t border-[#1E3A8A]/15">
+                  <video
+                    controls
+                    src={previewSource}
+                    className="max-h-64 max-w-full w-auto mx-auto rounded-md shadow-xs bg-black"
                   />
-                </label>
-                <button
-                  type="button"
-                  onClick={handleRemoveFile}
-                  className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition cursor-pointer"
-                  title="Remove file"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -497,6 +580,18 @@ const Resource = ({
               className="pl-9 border-[#CBD5E1] focus-visible:ring-[#1E3A8A] focus-visible:border-[#1E3A8A] rounded-lg"
             />
           </div>
+          {!resourceFile && resourceLink && isImage && (
+            <div className="mt-3 p-2 border border-gray-200 rounded-lg bg-gray-50 flex items-center justify-center max-h-64">
+              <img
+                src={resourceLink}
+                alt="Link Preview"
+                className="max-h-60 max-w-full object-contain rounded-md"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = "none";
+                }}
+              />
+            </div>
+          )}
         </div>
       </div>
 
