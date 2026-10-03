@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { FaEdit, FaTrash, FaFilePdf, FaFileAlt } from "react-icons/fa";
@@ -12,10 +12,13 @@ import { useDeleteResourceMutation, useGetSingleResourceQuery } from "@/redux/ap
 import UpdateResource from "../Admin/Books/Resources/UpdateResource";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
 import { TfiAngleLeft } from "react-icons/tfi";
+import ImageZoomModal from "@/components/Common/ImageZoomModal";
+import { ZoomIn } from "lucide-react";
 
 const ResourceDetails: React.FC = () => {
     const route = useRouter();
     const { resourceId } = useParams();
+    const [isZoomOpen, setIsZoomOpen] = useState(false);
     const { data, isLoading, isError } = useGetSingleResourceQuery(resourceId);
     const [DeleteResource, { isLoading: isDeleting }] = useDeleteResourceMutation();
 
@@ -85,13 +88,30 @@ const ResourceDetails: React.FC = () => {
 
                 {/* Media Preview Section */}
                 {Type === "Image" && file && (
-                    <div className="mb-6 flex justify-center bg-gray-50 p-4 rounded-lg border">
-                        <img
+                    <>
+                        <div
+                            onClick={() => setIsZoomOpen(true)}
+                            className="group relative mb-6 flex justify-center bg-gray-50 p-4 rounded-lg border hover:border-blue-400 cursor-zoom-in transition-all"
+                            title="Click to zoom in"
+                        >
+                            <img
+                                src={file}
+                                alt={title || "Resource Image"}
+                                className="max-h-[450px] w-auto object-contain rounded-md shadow-xs group-hover:scale-[1.01] transition-transform"
+                            />
+                            <div className="absolute bottom-3 right-3 bg-black/75 hover:bg-black text-white text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow-md opacity-90 group-hover:opacity-100 transition-opacity">
+                                <ZoomIn className="w-3.5 h-3.5" />
+                                Click to zoom
+                            </div>
+                        </div>
+
+                        <ImageZoomModal
+                            isOpen={isZoomOpen}
+                            onClose={() => setIsZoomOpen(false)}
                             src={file}
                             alt={title || "Resource Image"}
-                            className="max-h-[450px] w-auto object-contain rounded-md shadow-xs"
                         />
-                    </div>
+                    </>
                 )}
 
                 {Type === "Audio" && file && (
