@@ -69,9 +69,17 @@ const ResourceDetails: React.FC = () => {
                             <span className="inline-flex items-center gap-1">
                                 <FaFilePdf className="text-red-500" /> PDF
                             </span>
+                        ) : Type === "Image" ? (
+                            <span className="inline-flex items-center gap-1">
+                                <FaFileAlt className="text-purple-500" /> Image
+                            </span>
+                        ) : Type === "Video" ? (
+                            <span className="inline-flex items-center gap-1">
+                                <FaFileAlt className="text-emerald-500" /> Video
+                            </span>
                         ) : (
                             <span className="inline-flex items-center gap-1">
-                                <FaFileAlt className="text-blue-500" /> <span className="text-[#4C4C4C]">{Type}</span>
+                                <FaFileAlt className="text-amber-500" /> <span className="text-[#4C4C4C]">{Type || "Audio"}</span>
                             </span>
                         )}
                     </p>
@@ -82,6 +90,29 @@ const ResourceDetails: React.FC = () => {
                         <span className="font-semibold">Uploaded by:</span> <span className="text-[#4C4C4C]">{uploderName || "Unknown"}</span>
                     </p>
                 </div>
+
+                {/* Media Preview Section */}
+                {Type === "Image" && file && (
+                    <div className="mb-6 flex justify-center bg-gray-50 p-4 rounded-lg border">
+                        <img
+                            src={file}
+                            alt={title || "Resource Image"}
+                            className="max-h-[450px] w-auto object-contain rounded-md shadow-xs"
+                        />
+                    </div>
+                )}
+
+                {Type === "Audio" && file && (
+                    <div className="mb-6 flex justify-center bg-gray-50 p-6 rounded-lg border">
+                        <audio controls src={file} className="w-full max-w-xl" />
+                    </div>
+                )}
+
+                {Type === "Video" && file && (
+                    <div className="mb-6 flex justify-center bg-gray-50 p-4 rounded-lg border">
+                        <video controls src={file} className="max-h-[450px] w-auto max-w-full rounded-md shadow-xs bg-black" />
+                    </div>
+                )}
 
                 {/* Action Buttons */}
                 <div className="flex flex-wrap justify-center gap-3">
@@ -102,7 +133,7 @@ const ResourceDetails: React.FC = () => {
                         className="flex items-center gap-2 border-gray-300 text-[#1E3A8A] bg-[#F7F9FF] cursor-pointer"
                         onClick={() => window.open(file, "_blank")}
                     >
-                        <FaFilePdf /> Open {Type === "Pdf" ? 'PDF' : Type === "Video" ? 'Video' : 'Audio'}
+                        <FaFilePdf /> Open {Type === "Pdf" ? 'PDF' : Type === "Video" ? 'Video' : Type === "Image" ? 'Image' : Type === "Audio" ? 'Audio' : 'Resource'}
                     </Button>
 
                     <AlertDialog>

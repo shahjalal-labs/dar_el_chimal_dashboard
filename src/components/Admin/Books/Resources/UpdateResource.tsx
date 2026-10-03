@@ -75,7 +75,7 @@ const UpdateResource = ({ resourceId }: { resourceId: string }) => {
                 <div>
                     <Label className="block text-lg font-medium mb-4">Resource Type</Label>
                     <div className="flex gap-6">
-                        {["Audio", "Video", "Pdf"].map((type) => (
+                        {["Audio", "Video", "Pdf", "Image"].map((type) => (
                             <label key={type} className="flex items-center gap-2 cursor-pointer">
                                 <input
                                     type="checkbox"
@@ -172,13 +172,22 @@ const UpdateResource = ({ resourceId }: { resourceId: string }) => {
 
                 <Label>Preview</Label>
                 {
+                    resourceType === 'Image' ?
+                        <div className="w-full flex justify-center bg-gray-50 p-4 rounded-xl border mt-2">
+                            <img
+                                src={resourceFile ? URL.createObjectURL(resourceFile) : resourceLink}
+                                alt="Preview"
+                                className="max-h-[350px] w-auto object-contain rounded-md"
+                            />
+                        </div> :
                     resourceType === 'Video' ?
                         <video
                             controls
+                            key={resourceLink}
                             className="w-full rounded-xl mt-2 shadow-lg"
                             style={{ maxHeight: "400px" }}
                         >
-                            <source src={resourceLink} />
+                            <source src={resourceFile ? URL.createObjectURL(resourceFile) : resourceLink} />
                             Your browser does not support the video tag.
                         </video> :
                         resourceType === 'Pdf' ?
@@ -187,11 +196,9 @@ const UpdateResource = ({ resourceId }: { resourceId: string }) => {
                                 title="PDF Preview"
                                 className="w-full h-[600px] border rounded-xl mt-2 shadow-lg"
                             /> :
-                            <iframe
-                                src={resourceLink}
-                                title="PDF Preview"
-                                className="w-full h-[100px] border rounded-xl shadow-lg"
-                            />
+                            <div className="w-full flex justify-center bg-gray-50 p-4 rounded-xl border mt-2">
+                                <audio controls src={resourceFile ? URL.createObjectURL(resourceFile) : resourceLink} className="w-full max-w-xl" />
+                            </div>
                 }
 
                 {/* Buttons */}

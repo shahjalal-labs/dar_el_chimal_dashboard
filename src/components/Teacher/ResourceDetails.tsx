@@ -83,14 +83,26 @@ const ResourceDetails: React.FC = () => {
                     </p>
                 </div>
 
-                {/* Image Preview if resource is an image */}
+                {/* Media Preview Section */}
                 {Type === "Image" && file && (
                     <div className="mb-6 flex justify-center bg-gray-50 p-4 rounded-lg border">
                         <img
                             src={file}
-                            alt={title}
+                            alt={title || "Resource Image"}
                             className="max-h-[450px] w-auto object-contain rounded-md shadow-xs"
                         />
+                    </div>
+                )}
+
+                {Type === "Audio" && file && (
+                    <div className="mb-6 flex justify-center bg-gray-50 p-6 rounded-lg border">
+                        <audio controls src={file} className="w-full max-w-xl" />
+                    </div>
+                )}
+
+                {Type === "Video" && file && (
+                    <div className="mb-6 flex justify-center bg-gray-50 p-4 rounded-lg border">
+                        <video controls src={file} className="max-h-[450px] w-auto max-w-full rounded-md shadow-xs bg-black" />
                     </div>
                 )}
 
@@ -113,7 +125,7 @@ const ResourceDetails: React.FC = () => {
                         className="flex items-center gap-2 border-gray-300 text-[#1E3A8A] bg-[#F7F9FF] cursor-pointer"
                         onClick={() => window.open(file, "_blank")}
                     >
-                        <FaFilePdf /> Open {Type === "Pdf" ? 'PDF' : Type === "Video" ? 'Video' : Type === "Image" ? 'Image' : 'Resource'}
+                        <FaFilePdf /> Open {Type === "Pdf" ? 'PDF' : Type === "Video" ? 'Video' : Type === "Image" ? 'Image' : Type === "Audio" ? 'Audio' : 'Resource'}
                     </Button>
 
                     <AlertDialog>
