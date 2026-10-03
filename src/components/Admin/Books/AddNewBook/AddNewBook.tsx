@@ -75,13 +75,13 @@ const AddNewBook = () => {
                         </TabsTrigger>
                     </TabsList>
 
-                    <TabsContent value="general">
+                    <TabsContent value="general" forceMount className={tab === "general" ? "block" : "hidden"}>
                         <General id="" />
                     </TabsContent>
-                    <TabsContent value="resources">
+                    <TabsContent value="resources" forceMount className={tab === "resources" ? "block" : "hidden"}>
                         <Resource bookId="" />
                     </TabsContent>
-                    <TabsContent value="grade">
+                    <TabsContent value="grade" forceMount className={tab === "grade" ? "block" : "hidden"}>
                         <Grade id="" />
                     </TabsContent>
                 </Tabs>

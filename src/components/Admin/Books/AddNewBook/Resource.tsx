@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  setBookID,
   setIsAddResource,
   setPreviewResourceFile,
   setResourceDescription,
@@ -166,22 +167,24 @@ const Resource: React.FC<ResourceProps> = ({
 
   const reduxBook = useSelector((state: RootState) => state.book);
 
-  // Local component state
+  // Initialize from Redux state so toggling between tabs never loses entered data
   const [resourceType, setLocalResourceType] = useState<string>(
-    isOverview ? "" : reduxBook.resourceType || ""
+    reduxBook.resourceType || ""
   );
   const [resourceTitle, setLocalResourceTitle] = useState<string>(
-    isOverview ? "" : reduxBook.resourceTitle || ""
+    reduxBook.resourceTitle || ""
   );
   const [resourceDescription, setLocalResourceDescription] = useState<string>(
-    isOverview ? "" : reduxBook.resourceDescription || ""
+    reduxBook.resourceDescription || ""
   );
-  const [resourceFile, setLocalResourceFile] = useState<File | null>(null);
+  const [resourceFile, setLocalResourceFile] = useState<File | null>(
+    reduxBook.resourceFile || null
+  );
   const [previewResourceUrl, setPreviewResourceUrl] = useState<string>(
-    isOverview ? "" : reduxBook.previewResourceFile || ""
+    reduxBook.previewResourceFile || (reduxBook.resourceFile ? reduxBook.resourceFile.name : "")
   );
   const [resourceLink, setLocalResourceLink] = useState<string>(
-    isOverview ? "" : reduxBook.resourceLink || ""
+    reduxBook.resourceLink || ""
   );
   const [isAutoDetected, setIsAutoDetected] = useState<boolean>(false);
   const [isDragging, setIsDragging] = useState<boolean>(false);
@@ -193,26 +196,31 @@ const Resource: React.FC<ResourceProps> = ({
 
   const isResourceLoading = isUploading || isCreating;
 
-  // Clear persisted Redux state when inside book overview
+  // Clear if user switched to an entirely different book
   useEffect(() => {
-    if (isOverview) {
-      dispatch(setResourceType(""));
-      dispatch(setResourceTitle(""));
-      dispatch(setResourceDescription(""));
-      dispatch(setResourceFile(null));
-      dispatch(setPreviewResourceFile(""));
-      dispatch(setResourceLink(""));
-
-      return () => {
-        dispatch(setResourceType(""));
-        dispatch(setResourceTitle(""));
-        dispatch(setResourceDescription(""));
-        dispatch(setResourceFile(null));
-        dispatch(setPreviewResourceFile(""));
-        dispatch(setResourceLink(""));
-      };
+    if (targetBookId && reduxBook.bookId && reduxBook.bookId !== targetBookId) {
+      handleClear();
+      dispatch(setBookID(targetBookId));
+    } else if (targetBookId && !reduxBook.bookId) {
+      dispatch(setBookID(targetBookId));
     }
-  }, [dispatch, isOverview]);
+  }, [targetBookId]);
+
+  const handleTitleChange = (val: string) => {
+    setLocalResourceTitle(val);
+    dispatch(setResourceTitle(val));
+  };
+
+  const handleDescriptionChange = (val: string) => {
+    setLocalResourceDescription(val);
+    dispatch(setResourceDescription(val));
+  };
+
+  const handleTypeSelect = (type: string, auto: boolean = false) => {
+    setLocalResourceType(type);
+    setIsAutoDetected(auto);
+    dispatch(setResourceType(type));
+  };
 
   const handleClear = () => {
     setLocalResourceType("");
@@ -247,9 +255,10 @@ const Resource: React.FC<ResourceProps> = ({
     if (file) {
       setLocalResourceFile(file);
       setPreviewResourceUrl("");
+      dispatch(setResourceFile(file));
+      dispatch(setPreviewResourceFile(file.name));
       const detected = detectResourceType(file, resourceLink);
-      setLocalResourceType(detected);
-      setIsAutoDetected(true);
+      handleTypeSelect(detected, true);
     }
   };
 
@@ -270,19 +279,20 @@ const Resource: React.FC<ResourceProps> = ({
     if (file) {
       setLocalResourceFile(file);
       setPreviewResourceUrl("");
+      dispatch(setResourceFile(file));
+      dispatch(setPreviewResourceFile(file.name));
       const detected = detectResourceType(file, resourceLink);
-      setLocalResourceType(detected);
-      setIsAutoDetected(true);
+      handleTypeSelect(detected, true);
     }
   };
 
   const handleLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setLocalResourceLink(val);
+    dispatch(setResourceLink(val));
     if (!resourceFile && val && !resourceType) {
       const detected = detectResourceType(null, val);
-      setLocalResourceType(detected);
-      setIsAutoDetected(true);
+      handleTypeSelect(detected, true);
     }
   };
 
@@ -298,6 +308,7 @@ const Resource: React.FC<ResourceProps> = ({
     if (isAutoDetected) {
       setLocalResourceType("");
       setIsAutoDetected(false);
+      dispatch(setResourceType(""));
     }
   };
 
@@ -471,10 +482,7 @@ const Resource: React.FC<ResourceProps> = ({
               <button
                 type="button"
                 key={item.type}
-                onClick={() => {
-                  setLocalResourceType(item.type);
-                  setIsAutoDetected(false);
-                }}
+                onClick={() => handleTypeSelect(item.type, false)}
                 className={`flex items-center gap-3.5 p-3.5 rounded-xl border-2 text-left transition cursor-pointer ${
                   isSelected
                     ? "border-[#1E3A8A] bg-[#1E3A8A]/5 shadow-xs"
@@ -534,7 +542,7 @@ const Resource: React.FC<ResourceProps> = ({
           type="text"
           placeholder="e.g., Chapter 1 Summary & Exercises"
           value={resourceTitle}
-          onChange={(e) => setLocalResourceTitle(e.target.value)}
+          onChange={(e) => handleTitleChange(e.target.value)}
           className="border-[#CBD5E1] focus-visible:ring-[#1E3A8A] focus-visible:border-[#1E3A8A] rounded-lg"
           required={isOverview}
         />
@@ -549,7 +557,7 @@ const Resource: React.FC<ResourceProps> = ({
           placeholder="Add optional notes or instructions for students..."
           className="border border-[#CBD5E1] focus:border-[#1E3A8A] focus:ring-1 focus:ring-[#1E3A8A] outline-none rounded-lg p-3 w-full h-24 text-sm resize-y"
           value={resourceDescription}
-          onChange={(e) => setLocalResourceDescription(e.target.value)}
+          onChange={(e) => handleDescriptionChange(e.target.value)}
         />
       </div>
 

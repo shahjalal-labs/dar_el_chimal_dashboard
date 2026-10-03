@@ -100,7 +100,7 @@ const BookOverview = () => {
                     </TabsList>
 
                     {/* General Tab */}
-                    <TabsContent value="general">
+                    <TabsContent value="general" forceMount className={tab === 'general' ? 'block' : 'hidden'}>
                         <div className="space-y-5">
                             {/* Cover Image */}
                             <div className="w-full">
@@ -172,7 +172,7 @@ const BookOverview = () => {
                     </TabsContent>
 
                     {/* Resources Tab */}
-                    <TabsContent value="resources">
+                    <TabsContent value="resources" forceMount className={tab === 'resources' ? 'block' : 'hidden'}>
                         {
                             isAddResource ?
                                 <Resource bookId={bookId} setIsAddResource={setIsAddResource} /> :

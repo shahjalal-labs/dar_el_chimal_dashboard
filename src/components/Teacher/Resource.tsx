@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -158,24 +158,6 @@ const Resource = ({
 
   const [CreateResource, { isLoading: isResourceLoading }] = useCreateResourceMutation();
 
-  // Clear any legacy Redux persisted state on mount and unmount
-  useEffect(() => {
-    dispatch(setResourceType(""));
-    dispatch(setResourceTitle(""));
-    dispatch(setResourceDescription(""));
-    dispatch(setResourceFile(null));
-    dispatch(setPreviewResourceFile(""));
-    dispatch(setResourceLink(""));
-
-    return () => {
-      dispatch(setResourceType(""));
-      dispatch(setResourceTitle(""));
-      dispatch(setResourceDescription(""));
-      dispatch(setResourceFile(null));
-      dispatch(setPreviewResourceFile(""));
-      dispatch(setResourceLink(""));
-    };
-  }, [dispatch]);
 
   const handleClear = () => {
     setLocalResourceType("");
