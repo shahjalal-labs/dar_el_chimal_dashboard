@@ -1,16 +1,79 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { SyncLoader } from "react-spinners";
 import Image from "next/image";
 import { DialogContent } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { useGetStudentDetailsQuery } from "@/redux/api/student";
+import defaultUserImg from "@/assets/User.png";
+import defaultSchoolImg from "@/assets/school.png";
 
-const ViewStudentModal = ({ id }: { id: string }) => {
+interface ViewStudentModalProps {
+    id: string;
+    fallbackPassword?: string;
+}
+
+const StudentSchoolCard = ({ school, grades }: { school: any; grades: string[] }) => {
+    const [logoError, setLogoError] = useState(false);
+    return (
+        <div className="border rounded-md p-4 mb-4 text-sm bg-white">
+            <div className="flex items-center gap-3 mb-2">
+                <Image
+                    src={!logoError && school?.schoolLogo && typeof school.schoolLogo === "string" && school.schoolLogo.trim() !== "" ? school.schoolLogo : defaultSchoolImg}
+                    alt={school?.name || "School"}
+                    width={60}
+                    height={60}
+                    className="w-14 h-14 rounded object-cover border"
+                    onError={() => setLogoError(true)}
+                />
+                <div>
+                    <p className="font-medium text-gray-800">{school?.name}</p>
+                    <p className="text-gray-600 text-sm">
+                        Location: {school?.location || "N/A"}
+                    </p>
+                </div>
+            </div>
+
+            {/* Grades under this school */}
+            <div className="flex flex-wrap gap-2 mt-2">
+                {grades.map((g: string, i: number) => (
+                    <span
+                        key={i}
+                        className="bg-[#EEF2FF] text-[#1E3A8A] text-xs font-medium px-3 py-1 rounded-full"
+                    >
+                        {g}
+                    </span>
+                ))}
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 mt-3 text-sm">
+                <div>
+                    <span className="font-medium">Total Teachers:</span>{" "}
+                    {school?.teacherCount ?? "N/A"}
+                </div>
+                <div>
+                    <span className="font-medium">Total Students:</span>{" "}
+                    {school?.studentsCount ?? "N/A"}
+                </div>
+                <div>
+                    <span className="font-medium">Active Teachers:</span>{" "}
+                    {school?.activeTeachers ?? "N/A"}
+                </div>
+                <div>
+                    <span className="font-medium">Active Students:</span>{" "}
+                    {school?.activeStudents ?? "N/A"}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const ViewStudentModal = ({ id, fallbackPassword }: ViewStudentModalProps) => {
     const { data, isLoading } = useGetStudentDetailsQuery(id);
     const student = data?.result;
+    const [profileImgError, setProfileImgError] = useState(false);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const studentGrades = student?.StudentGrades || [];
@@ -74,17 +137,23 @@ const ViewStudentModal = ({ id }: { id: string }) => {
         joinedAt,
     } = student;
 
+    const studentPassword =
+        student?.password ||
+        (fallbackPassword && fallbackPassword !== "N/A" ? fallbackPassword : null) ||
+        "Not provided";
+
     return (
         <DialogContent className="p-6 max-h-[80vh] overflow-y-auto" showCloseButton>
             {/* ✅ Student Info */}
             <div className="flex items-start gap-4">
                 <Image
-                    src={profileImage || "/default-profile.png"}
-                    alt={loginUserName || "Profile Image"}
+                    src={!profileImgError && profileImage && typeof profileImage === "string" && profileImage.trim() !== "" ? profileImage : defaultUserImg}
+                    alt={loginUserName || "Student Image"}
                     height={500}
                     width={500}
                     className="w-28 h-28 rounded-lg object-cover border"
                     priority
+                    onError={() => setProfileImgError(true)}
                 />
                 <div>
                     <h2 className="text-lg font-semibold">{fullName || loginUserName}</h2>
@@ -103,7 +172,7 @@ const ViewStudentModal = ({ id }: { id: string }) => {
                 </div>
                 <div>
                     <span className="font-medium">Password:</span>{" "}
-                    <span className="font-semibold text-gray-900">{student?.password || "Not provided"}</span>
+                    <span className="font-semibold text-gray-900">{studentPassword}</span>
                 </div>
                 <div>
                     <span className="font-medium">Email:</span> {email || "Not provided"}
@@ -134,57 +203,7 @@ const ViewStudentModal = ({ id }: { id: string }) => {
 
                 {groupedBySchool.length > 0 ? (
                     groupedBySchool.map(({ school, grades }) => (
-                        <div
-                            key={school.id}
-                            className="border rounded-md p-4 mb-4 text-sm bg-white"
-                        >
-                            <div className="flex items-center gap-3 mb-2">
-                                <Image
-                                    src={school.schoolLogo}
-                                    alt={school.name}
-                                    width={60}
-                                    height={60}
-                                    className="w-14 h-14 rounded object-cover border"
-                                />
-                                <div>
-                                    <p className="font-medium text-gray-800">{school.name}</p>
-                                    <p className="text-gray-600 text-sm">
-                                        Location: {school.location || "N/A"}
-                                    </p>
-                                </div>
-                            </div>
-
-                            {/* Grades under this school */}
-                            <div className="flex flex-wrap gap-2 mt-2">
-                                {grades.map((g: string, i: number) => (
-                                    <span
-                                        key={i}
-                                        className="bg-[#EEF2FF] text-[#1E3A8A] text-xs font-medium px-3 py-1 rounded-full"
-                                    >
-                                        {g}
-                                    </span>
-                                ))}
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-2 mt-3 text-sm">
-                                <div>
-                                    <span className="font-medium">Total Teachers:</span>{" "}
-                                    {school.teacherCount ?? "N/A"}
-                                </div>
-                                <div>
-                                    <span className="font-medium">Total Students:</span>{" "}
-                                    {school.studentsCount ?? "N/A"}
-                                </div>
-                                <div>
-                                    <span className="font-medium">Active Teachers:</span>{" "}
-                                    {school.activeTeachers ?? "N/A"}
-                                </div>
-                                <div>
-                                    <span className="font-medium">Active Students:</span>{" "}
-                                    {school.activeStudents ?? "N/A"}
-                                </div>
-                            </div>
-                        </div>
+                        <StudentSchoolCard key={school.id} school={school} grades={grades} />
                     ))
                 ) : (
                     <p className="text-gray-600 text-sm">

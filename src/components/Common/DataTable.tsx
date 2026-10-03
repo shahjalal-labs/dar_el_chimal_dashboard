@@ -579,9 +579,23 @@ const DataTable = ({
                                 ) : pathname === "/admin/schools" ? (
                                   <ViewSchoolModal id={singleData?.Id} />
                                 ) : pathname === "/admin/teachers" ? (
-                                  <ViewTeacherModal id={singleData?.Id} />
+                                  <ViewTeacherModal
+                                    id={singleData?.Id}
+                                    fallbackPassword={
+                                      singleData?.Password && singleData?.Password !== "N/A"
+                                        ? singleData?.Password
+                                        : undefined
+                                    }
+                                  />
                                 ) : pathname === "/admin/students" ? (
-                                  <ViewStudentModal id={singleData?.Id} />
+                                  <ViewStudentModal
+                                    id={singleData?.Id}
+                                    fallbackPassword={
+                                      singleData?.Password && singleData?.Password !== "N/A"
+                                        ? singleData?.Password
+                                        : undefined
+                                    }
+                                  />
                                 ) : pathname ===
                                   `/teacher/classes/${id}/students` ? (
                                   <ViewStudentDetailsModal id={singleData?.Id} />
