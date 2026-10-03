@@ -35,7 +35,14 @@ const ResourceDetails: React.FC = () => {
     }
 
     const resource = data.result;
-    const { title, description, Type, file, uploderName, createdAt } = resource;
+    const { title, description, Type, file, uploderName, uplodedBy, createdAt } = resource;
+
+    const displayUploaderName =
+        uploderName && uploderName.trim() !== "" && uploderName.toLowerCase() !== "unknown"
+            ? uploderName
+            : uplodedBy && uplodedBy.trim() !== "" && uplodedBy.toLowerCase() !== "unknown"
+            ? uplodedBy
+            : "Admin";
 
     const formattedDate = new Date(createdAt).toLocaleDateString("en-US", {
         year: "numeric",
@@ -90,7 +97,7 @@ const ResourceDetails: React.FC = () => {
                         <span className="font-semibold">Uploaded on:</span> <span className="text-[#4C4C4C]">{formattedDate}</span>
                     </p>
                     <p>
-                        <span className="font-semibold">Uploaded by:</span> <span className="text-[#4C4C4C]">{uploderName || "Unknown"}</span>
+                        <span className="font-semibold">Uploaded by:</span> <span className="text-[#4C4C4C]">{displayUploaderName}</span>
                     </p>
                 </div>
 
