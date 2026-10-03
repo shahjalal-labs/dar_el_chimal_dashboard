@@ -21,6 +21,7 @@ import { useGetSingleBookQuery } from "@/redux/api/book";
 import { setIsAddResource } from "@/redux/features/bookSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store/store";
+import { Image as ImageIcon } from "lucide-react";
 
 const BookOverview = () => {
   const { id } = useParams();
@@ -177,7 +178,10 @@ const BookOverview = () => {
           <TabsContent value="resources">
             {isAddResource ? (
               <>
-                <Resource bookId={id} />
+                <Resource
+                  bookId={id}
+                  setIsAddResource={(val) => dispatch(setIsAddResource(val))}
+                />
               </>
             ) : (
               <>
@@ -203,22 +207,34 @@ const BookOverview = () => {
                       >
                         <div className="flex items-center gap-4">
                           <div
-                            className={`px-2 py-2.5 rounded-lg ${res?.Type === "Pdf" ? "bg-[#FF9A3E1A]" : res?.Type === "Video" ? "bg-[#56A5781A]" : "bg-[#FF4A4A1A]"}`}
+                            className={`px-2 py-2.5 rounded-lg flex items-center justify-center w-12 h-12 ${
+                              res?.Type === "Pdf"
+                                ? "bg-[#FF9A3E1A]"
+                                : res?.Type === "Video"
+                                  ? "bg-[#56A5781A]"
+                                  : res?.Type === "Image"
+                                    ? "bg-purple-100 text-purple-600"
+                                    : "bg-[#FF4A4A1A]"
+                            }`}
                           >
-                            <Image
-                              src={
-                                res?.Type === "Pdf"
-                                  ? pdf
-                                  : res?.Type === "Video"
-                                    ? video
-                                    : audio
-                              }
-                              height={100}
-                              width={100}
-                              alt=""
-                              className="w-8 h-8"
-                              priority
-                            />
+                            {res?.Type === "Image" ? (
+                              <ImageIcon className="w-7 h-7 text-purple-600" />
+                            ) : (
+                              <Image
+                                src={
+                                  res?.Type === "Pdf"
+                                    ? pdf
+                                    : res?.Type === "Video"
+                                      ? video
+                                      : audio
+                                }
+                                height={32}
+                                width={32}
+                                alt=""
+                                className="w-8 h-8"
+                                priority
+                              />
+                            )}
                           </div>
                           <div>
                             <h4 className="font-semibold md:text-lg">
